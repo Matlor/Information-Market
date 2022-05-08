@@ -1,0 +1,98 @@
+# Draft of information market canister (main canister)
+
+1. TYPES
+
+type Question
+{
+  Nat id;
+  Principal author;
+  Text text;
+  Time date;
+  Time duration_ms;
+  Nat reward;
+  QuestionStatus status;
+  Invoice invoice;
+  [Invoices] dispute_invoices;
+}
+
+type Answer
+{
+  Nat id;
+  Principal: author;
+  Text test;
+  Time date;
+}
+
+type Question
+{
+  #Created;
+  #Open;
+  #PickAnswer;
+  #Disputable;
+  #Disputed;
+  #Closed;
+}
+
+2. PRIVATE MEMBERS
+
+// The map of questions (key: Id, value: Question)
+questions: HashMap<Nat, Question>
+
+// The map of answers (key: ID, value: Answer)
+answers: HashMap<Nat, Answer>
+
+// The invoice canister
+invoice_canister: actor
+
+// The arbitrage canister
+arbitrage_canister: actor
+
+3. PUBLIC FUNCTIONS
+
+// Create a question, put state to #Created, return Question struct which contains the invoice to pay 
+create_question(text: Text, duration_ns: Int, reward: Nat) : Result<Question>
+
+// Check if the invoice has been paid, if yes put the questions state in #Open
+open_question(question_id: Nat) : Bool
+
+// Add a answer to the question
+answer_question(question_id: Nat, text: Text) : Result<Answer>
+
+// Only callable by the author of the question, when question state is #PickAnswer, update question state to #CanDispute
+select_answer(question_id: Nat, answer_id: Nat) : Bool
+
+// Only callable by users who answered a question, do not change the state of the question (the user requires to pay the invoice first)
+create_dispute(question_id: Nat) : Result<Invoice>
+
+// To open the dispute, succeeds if one the invoices has been paid, put the question state in #Disputed
+open_dispute(question_id: Nat) : Bool
+
+// Only callable by the arbitrage canister: select the winning answer, reward the users, put question to #Closed
+solve_dispute(question_id: Nat, answer_id: Nat) : ()
+
+4. PRIVATE FUNCTIONS
+
+// Called by the hearbeat to update the questions' state to:
+// - pass question from #Open to #PickAnswer or #Closed when question's duration has passed
+// - pass question from #CanDispute to #Closed if enough time (to define) has passed and nobody disputed pick answered
+update_question_state()
+
+5. Public read operations - to discuss
+
+// Easy
+// All questions, probably ordered by ID
+get_questions() : [Questions]
+// Get a single question from its ID
+get_question(question_id: Nat) : Question
+// Get a single answer from its ID
+get_answer(answer_id: Nat) : Answer
+
+// Harder
+// Get all answers to a question
+get_answers(question_id: Nat) : [Answer]
+// Get all the questions from a specific author
+get_questions(author: Principal)
+
+// Advanced CRUD operations, probably requires something like sudograph or other alternative
+get_questions_ordered_by_date(num_questions: Nat, page_index: Nat) : [Question]
+get_questions_ordered_by_reward(num_questions: Nat, page_index: Nat) : [Question]
