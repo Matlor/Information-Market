@@ -109,6 +109,15 @@ shared({ caller = initializer }) actor class Prototype() = this {
         #CallerDidNotAnswer;
     };
 
+    // arbitration
+    public type ArbitrationError = {
+        #QuestionNotFound;
+        #WrongTimeInterval;
+        #DisputeNotTriggered;
+        #CallerIsNotArbitor;
+        #NoAnswerFound;
+    };
+
     // ------------------------- Data -------------------------
     var questionsCounter: Nat = 0;
     var questions: HashMap.HashMap<Nat, Question> = HashMap.HashMap(10, Nat.equal, Hash.hash);
@@ -487,19 +496,58 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     // ------------------------- Arbitration -------------------------
-    public shared ({caller}) func arbitrate(questionId: Nat, winner:Principal): async Bool {
-        // check if question exists
-        // check if question is in right status
-        // check if dispute is in right state
-        // check if caller is the arbitor
-        // pick winner
-        // trigger payout
-        return true;
+
+    // Centralised version: Contract deployer is arbitor
+    public shared ({caller}) func arbitrate(questionId: Nat, answerId:Nat): async Result.Result<Question, ArbitrationError> {
+        let question: ?Question = questions.get(questionId);
+
+        switch(question){
+            case(null){
+                return #err( #QuestionNotFound);
+            };
+            case(? question){
+                // untested!
+                if (Time.now() >= question.deadlines.arbitration or Time.now() < question.deadlines.dispute){
+                    return #err( #WrongTimeInterval);
+                }; 
+                
+                if (question.dispute == null){
+                    return #err(#DisputeNotTriggered);
+                } else if(caller != initializer){
+                    return #err(#CallerIsNotArbitor);
+                } else {
+                    // pick winner
+                    let answer: ?Answer = answers.get(answerId);
+                    switch(answer){
+                        case(null){
+                            return #err(#NoAnswerFound);
+                        };
+                        case(? answer){
+                            let newQuestion: Question = {
+                                id = question.id;
+                                timestamp = question.timestamp;
+                                deadlines = question.deadlines;
+                                content = question.content;
+                                owner = question.owner;
+                                reward = question.reward;
+                                invoiceId = question.invoiceId;
+                                status = question.status;
+                                answerIds = question.answerIds;
+                                winner = question.winner;
+                                dispute = question.dispute;
+                                arbitrationWinner = ?answer.owner;
+                            };
+                            questions.put(questionId, newQuestion);
+                            return #ok(newQuestion);  
+                        };
+                    };
+                };
+            };  
+        };      
     };
 
     // ------------------------- Payout -------------------------
-    // Is called within arbitration
-    public shared ({caller}) func payout(): async Bool {
+    public func payout(): async Bool {
         return true;
     };
 
