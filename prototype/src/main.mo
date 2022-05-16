@@ -42,7 +42,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
         invoiceId: Nat;
         status: QuestionStatus;
         answerIds: [Nat];
-        winner: ?Principal;
+        winner: ?Nat;
         dispute: ?Bool;
         arbitrationWinner: ?Principal;
     };
@@ -91,6 +91,13 @@ shared({ caller = initializer }) actor class Prototype() = this {
         };
     };
 
+    // pickWinner
+    public type PickWinnerError = {
+        #QuestionNotFound;
+        #YouAreNotOwner;
+        #WrongTimeInterval;
+        #AnswerDoesNotExist;
+    };
 
     // ------------------------- Data -------------------------
     var questionsCounter: Nat = 0;
@@ -101,8 +108,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
 
     var answersCounter: Nat = 0;
     var answers: HashMap.HashMap<Nat, Answer> = HashMap.HashMap(10, Nat.equal, Hash.hash);
-
-
 
     // ------------------------- Getter -------------------------
     public func getQuestionsCounter(): async Nat {
@@ -147,7 +152,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
         };
     };
    
-
     // ------------------------- Question -------------------------
 
     let deadlineRestictions :DeadlineBoundariesMinutes = {
@@ -289,7 +293,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
             case(null){
                 return (#err{message = #NotFound});
             };
-           
             case(? question){
                 if(question.owner == caller){
                     return (#err{message = #YouAreOwner});
@@ -351,11 +354,60 @@ shared({ caller = initializer }) actor class Prototype() = this {
         };
     };
 
-
     // ------------------------- Pick Winner -------------------------
+    public shared ({caller}) func pickWinner(questionId: Nat, answerId: Nat): async Result.Result<Question, PickWinnerError> {
 
-    public shared ({caller}) func pickWinner(questionId: Nat, answerId: Nat): async Bool {
-        return true;
+        let question: ?Question = questions.get(questionId);
+
+        switch(question){
+            case(null){
+                return #err( #QuestionNotFound);
+            };
+            case(? question){
+                if(caller != question.owner){
+                    return #err( #YouAreNotOwner);
+                };
+                // untested!
+                if (question.deadlines.pickWinner <= Time.now()){
+                     return #err( #WrongTimeInterval);
+                }; 
+                
+                // check if answerId is among answer ids on the question.
+                // goes through array and returns value if compare function is true. 
+                func compare(id:Nat): Bool {
+                    if(answerId == id ){
+                        return true;
+                    } else {
+                        return false;
+                    };
+                };
+                let found: ?Nat = Array.find(question.answerIds, compare);
+                switch(found){
+                    case(null){
+                        return #err( #AnswerDoesNotExist);
+                    };
+                    // Pick the actual winner
+                    case(? value){
+                        let newQuestion: Question = {
+                            id = question.id;
+                            timestamp = question.timestamp;
+                            deadlines = question.deadlines;
+                            content = question.content;
+                            owner = question.owner;
+                            reward = question.reward;
+                            invoiceId = question.invoiceId;
+                            status = question.status;
+                            answerIds = question.answerIds;
+                            winner = ?answerId;
+                            dispute = question.dispute;
+                            arbitrationWinner= question.arbitrationWinner;
+                        };
+                        questions.put(questionId, newQuestion);
+                        return #ok(newQuestion);
+                    };
+                };
+            };
+        };
     };
 
     // ------------------------- Dispute -------------------------
