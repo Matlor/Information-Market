@@ -16,7 +16,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
     // ------------------------- Types -------------------------
     
     // Question
-    type QuestionStatus = {
+    public type QuestionStatus = {
         #Created;
         #Open;
         #PickAnswer;
@@ -43,11 +43,13 @@ shared({ caller = initializer }) actor class Prototype() = this {
         status: QuestionStatus;
         answerIds: [Nat];
         winner: ?Nat;
-        dispute: ?Bool;
+        dispute: ?Principal;
         arbitrationWinner: ?Principal;
     };
+    
+    public type ObtainInvoiceResult = Result.Result<invoiceCanister.CreateInvoiceResult, Text>;
 
-     public type OpenQuestionError = {
+    public type OpenQuestionError = {
         #IncorrectDeadline;
         #InvoiceError: invoiceCanister.VerifyInvoiceErr;
         #InvoiceAlreadyVerified : {
@@ -75,7 +77,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     // Answer
-    type Answer = {
+    public type Answer = {
         questionId: Nat;
         id: Nat;
         owner: Principal;
@@ -97,6 +99,14 @@ shared({ caller = initializer }) actor class Prototype() = this {
         #YouAreNotOwner;
         #WrongTimeInterval;
         #AnswerDoesNotExist;
+    };
+
+    // dispute
+    public type TriggerDisputeError = {
+        #QuestionNotFound;
+        #WrongTimeInterval;
+        #DisputeAlreadyTriggered;
+        #CallerDidNotAnswer;
     };
 
     // ------------------------- Data -------------------------
@@ -170,8 +180,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     let minReward: Nat = 1250000;
-
-    type ObtainInvoiceResult = Result.Result<invoiceCanister.CreateInvoiceResult, Text>;
 
     // the reward values have to be in a certain range depending on fees. 0.0125 ICP min I would propose. 1250000 e8s.
     public shared ({caller}) func obtain_invoice (reward: Nat) : async ObtainInvoiceResult  {
@@ -355,7 +363,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     // ------------------------- Pick Winner -------------------------
-    public shared ({caller}) func pickWinner(questionId: Nat, answerId: Nat): async Result.Result<Question, PickWinnerError> {
+    public shared ({caller}) func pick_winner(questionId: Nat, answerId: Nat): async Result.Result<Question, PickWinnerError> {
 
         let question: ?Question = questions.get(questionId);
 
@@ -411,15 +419,71 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     // ------------------------- Dispute -------------------------
-    // nothing prevents spam
-    public shared ({caller}) func triggerDispute(questionId: Nat): async Bool {
-        // check if question exists
-        // check if question is in right status
-        // check if dispute is in right state
-        // check if caller is among answers
-        // do something against spam. Pay a deposit.
-        // trigger dispute
-        return true;
+
+    // TO DO: Nothing prevents spam at the moment. In case function would cost, it should be free to call if owner did not pick a winner.
+    public shared ({caller}) func trigger_dispute(questionId: Nat): async Result.Result<Question, TriggerDisputeError> {
+
+        let question: ?Question = questions.get(questionId);
+
+        switch(question){
+            case(null){
+                return #err( #QuestionNotFound);
+            };
+            case(? question){
+                // untested!
+                if (Time.now() >= question.deadlines.dispute or question.deadlines.pickWinner > Time.now()){
+                    return #err( #WrongTimeInterval);
+                }; 
+                if(question.dispute != null){
+                    return #err(#DisputeAlreadyTriggered);
+                };
+
+                // Following mapping would be useful here: question -> answerer principal -> answer 
+                // iterate through answersId to check if caller has given answer
+                func compare(id:Nat): Bool {
+                    let answer: ?Answer = answers.get(id);
+                    switch(answer){
+                        case(null){
+                            return false;
+                        };
+                        case(? answer){
+                            if(answer.owner == caller){
+                                return true;
+                            } else {
+                                return false;
+                            };
+                        };
+                    };
+                };
+                // found is the answerId of the answer for which the caller is the owner
+                let found: ?Nat = Array.find(question.answerIds, compare);
+                switch(found){
+                    case(null){
+                        return #err(#CallerDidNotAnswer);
+                    };
+                    // trigger the dispute 
+                    case(? value){
+                        let newQuestion: Question = {
+                            id = question.id;
+                            timestamp = question.timestamp;
+                            deadlines = question.deadlines;
+                            content = question.content;
+                            owner = question.owner;
+                            reward = question.reward;
+                            invoiceId = question.invoiceId;
+                            status = question.status;
+                            answerIds = question.answerIds;
+                            winner = question.winner;
+                            dispute = ?caller;
+                            arbitrationWinner= question.arbitrationWinner;
+                        };
+                        questions.put(questionId, newQuestion);
+
+                        return #ok(newQuestion);
+                    };
+                };
+            };
+        }
     };
 
     // ------------------------- Arbitration -------------------------
