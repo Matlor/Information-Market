@@ -148,7 +148,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
 
     public shared func get_invoice (invoiceId: Nat) : async invoiceCanister.GetInvoiceResult {
         await invoiceCanister.get_invoice({
-            id=id; 
+            id=invoiceId; 
         });
     }; 
 
@@ -200,7 +200,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
 
     // the reward values have to be in a certain range depending on fees. 0.0125 ICP min I would propose. 1250000 e8s.
     // should check for error messages of the create_invoice function.
-    public shared ({caller}) func obtain_invoice (reward: Nat) : async Result.Result<invoiceCanister.CreateInvoiceResult, Text>;  {
+    public shared ({caller}) func obtain_invoice (reward: Nat) : async Result.Result<invoiceCanister.CreateInvoiceResult, Text>  {
         if(reward > 1250000) {
             return #ok (await invoiceCanister.create_invoice({amount=reward; details=null; permissions=null; token={symbol="ICP"}}));
         } else {
@@ -318,7 +318,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
         let question: ?Question = questions.get(questionId);    
         switch(question){
             case(null){
-                return (#err(#NotFound));
+                return (#err(#QuestionNotFound));
             };
             case(? question){
                 if(question.owner == caller){
