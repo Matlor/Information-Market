@@ -51,8 +51,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
     
     // Invoice
-    public type ObtainInvoiceResult = Result.Result<invoiceCanister.CreateInvoiceResult, Text>;
-
     public type OpenQuestionError = {
         #IncorrectDeadline;
         #InvoiceError: invoiceCanister.VerifyInvoiceErr;
@@ -90,11 +88,9 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     public type AnswerError = {
-        message: {
-            #NotFound;
-            #WrongTimeInterval;
-            #YouAreOwner;
-        };
+        #QuestionNotFound;
+        #WrongTimeInterval;
+        #YouAreOwner;
     };
 
     // pickWinner
@@ -119,7 +115,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
         #WrongTimeInterval;
         #DisputeNotTriggered;
         #CallerIsNotArbitor;
-        #NoAnswerFound;
+        #AnswerNotFound;
     };
 
     // payout
@@ -141,7 +137,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
     var answers: HashMap.HashMap<Nat, Answer> = HashMap.HashMap(10, Nat.equal, Hash.hash);
 
     // ------------------------- Getter -------------------------
-    public func getQuestionsCounter(): async Nat {
+    public func get_questionsCounter(): async Nat {
         return questionsCounter;
     };
 
@@ -150,14 +146,14 @@ shared({ caller = initializer }) actor class Prototype() = this {
         questions.get(questionId);
     }; 
 
-    public shared func get_invoice (id: Nat) : async invoiceCanister.GetInvoiceResult {
+    public shared func get_invoice (invoiceId: Nat) : async invoiceCanister.GetInvoiceResult {
         await invoiceCanister.get_invoice({
             id=id; 
         });
     }; 
 
     // Return type should rather be err/success
-    public shared func getAnswers(questionId: Nat): async ?[Answer] {
+    public shared func get_answers(questionId: Nat): async ?[Answer] {
         let question: ?Question = questions.get(questionId);
 
         switch(question){
@@ -185,7 +181,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
    
     // ------------------------- Question -------------------------
 
-    let deadlineRestictions :DeadlineBoundariesMinutes = {
+    let deadlineRestictions : DeadlineBoundariesMinutes = {
         min = {
             answers = 30;
             pickWinner = 60;
@@ -203,7 +199,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
     let minReward: Nat = 1250000;
 
     // the reward values have to be in a certain range depending on fees. 0.0125 ICP min I would propose. 1250000 e8s.
-    public shared ({caller}) func obtain_invoice (reward: Nat) : async ObtainInvoiceResult  {
+    // should check for error messages of the create_invoice function.
+    public shared ({caller}) func obtain_invoice (reward: Nat) : async Result.Result<invoiceCanister.CreateInvoiceResult, Text>;  {
         if(reward > 1250000) {
             return #ok (await invoiceCanister.create_invoice({amount=reward; details=null; permissions=null; token={symbol="ICP"}}));
         } else {
@@ -321,11 +318,11 @@ shared({ caller = initializer }) actor class Prototype() = this {
         let question: ?Question = questions.get(questionId);    
         switch(question){
             case(null){
-                return (#err{message = #NotFound});
+                return (#err(#NotFound));
             };
             case(? question){
                 if(question.owner == caller){
-                    return (#err{message = #YouAreOwner});
+                    return (#err(#YouAreOwner));
                 } else if (question.deadlines.answers > Time.now()){
                     let answer: Answer = {
                         questionId = questionId;
@@ -345,7 +342,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                     
                     return #ok modifiedQuestion;
                 } else {
-                    return (#err{message = #WrongTimeInterval});
+                    return (#err (#WrongTimeInterval));
                 };
             };
         };
@@ -539,7 +536,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                     let answer: ?Answer = answers.get(answerId);
                     switch(answer){
                         case(null){
-                            return #err(#NoAnswerFound);
+                            return #err(#AnswerNotFound);
                         };
                         case(? answer){
                             let newQuestion: Question = {
@@ -569,7 +566,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
 
     // ------------------------- Payout -------------------------
 
-   
+
     // everyone can call this function.
     // TO DO: payout does not consider that triggering a dispute should cost a fee.
     // TO DO: payout does not consider that a questioner needs incentives to pick a winner.
