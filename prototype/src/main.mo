@@ -16,6 +16,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
     // ------------------------- Types -------------------------
     
     // Question
+
+    // only closed status might be necessary
     public type QuestionStatus = {
         #Created;
         #Open;
@@ -44,9 +46,11 @@ shared({ caller = initializer }) actor class Prototype() = this {
         answerIds: [Nat];
         winner: ?Nat;
         dispute: ?Principal;
-        arbitrationWinner: ?Principal;
+        arbitrationWinner: ?Nat;
+        blockId: ?Nat64;
     };
     
+    // Invoice
     public type ObtainInvoiceResult = Result.Result<invoiceCanister.CreateInvoiceResult, Text>;
 
     public type OpenQuestionError = {
@@ -116,6 +120,14 @@ shared({ caller = initializer }) actor class Prototype() = this {
         #DisputeNotTriggered;
         #CallerIsNotArbitor;
         #NoAnswerFound;
+    };
+
+    // payout
+    public type PayoutError = {
+        #QuestionNotFound;
+        #TransferFailed: invoiceCanister.TransferError;
+        #QuestionIsClosed;
+        #WrongTimeInterval;
     };
 
     // ------------------------- Data -------------------------
@@ -235,6 +247,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                                     winner = null;
                                     dispute = null;
                                     arbitrationWinner = null;
+                                    blockId = null;
                                 };
                                 questionsCounter+=1;
                                 // links invoice id to question id
@@ -351,7 +364,6 @@ shared({ caller = initializer }) actor class Prototype() = this {
             i +=1;
         }; 
         
-        // add the answer to it
         buf.add(answerId);
 
         // buffer to array
@@ -368,6 +380,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
             winner = question.winner;
             dispute = question.dispute;
             arbitrationWinner= question.arbitrationWinner;
+            blockId = question.blockId;
+
         };
     };
 
@@ -418,6 +432,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
                             winner = ?answerId;
                             dispute = question.dispute;
                             arbitrationWinner= question.arbitrationWinner;
+                            blockId = question.blockId;
+
                         };
                         questions.put(questionId, newQuestion);
                         return #ok(newQuestion);
@@ -442,12 +458,12 @@ shared({ caller = initializer }) actor class Prototype() = this {
                 // untested!
                 if (Time.now() >= question.deadlines.dispute or question.deadlines.pickWinner > Time.now()){
                     return #err( #WrongTimeInterval);
-                }; 
+                };  
                 if(question.dispute != null){
                     return #err(#DisputeAlreadyTriggered);
                 };
 
-                // Following mapping would be useful here: question -> answerer principal -> answer 
+                // following mapping would be useful here: question -> answerer principal -> answer 
                 // iterate through answersId to check if caller has given answer
                 func compare(id:Nat): Bool {
                     let answer: ?Answer = answers.get(id);
@@ -485,6 +501,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
                             winner = question.winner;
                             dispute = ?caller;
                             arbitrationWinner= question.arbitrationWinner;
+                            blockId = question.blockId;
+
                         };
                         questions.put(questionId, newQuestion);
 
@@ -497,7 +515,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
 
     // ------------------------- Arbitration -------------------------
 
-    // Centralised version: Contract deployer is arbitor
+    // centralised version: contract deployer is arbitor
+    // TO DO: case is not handled where no arbitration occurs.
     public shared ({caller}) func arbitrate(questionId: Nat, answerId:Nat): async Result.Result<Question, ArbitrationError> {
         let question: ?Question = questions.get(questionId);
 
@@ -535,21 +554,96 @@ shared({ caller = initializer }) actor class Prototype() = this {
                                 answerIds = question.answerIds;
                                 winner = question.winner;
                                 dispute = question.dispute;
-                                arbitrationWinner = ?answer.owner;
+                                arbitrationWinner = ?answerId;
+                                blockId = question.blockId;
+
                             };
                             questions.put(questionId, newQuestion);
                             return #ok(newQuestion);  
                         };
-                    };
+                    }; 
                 };
             };  
         };      
     };
 
     // ------------------------- Payout -------------------------
-    public func payout(): async Bool {
-        return true;
+
+   
+    // everyone can call this function.
+    // TO DO: payout does not consider that triggering a dispute should cost a fee.
+    // TO DO: payout does not consider that a questioner needs incentives to pick a winner.
+    // TO DO: the case is not handled that the arbitor never does it's job.
+    public func payout(questionId: Nat): async Result.Result<Question, PayoutError> {
+        let question: ?Question = questions.get(questionId);
+        switch(question){
+            case(null){
+                return #err( #QuestionNotFound);
+            };
+            case(? question){
+
+                if(question.status == #Closed){
+                    return #err(#QuestionIsClosed);
+                };
+                // simplification: we are always waiting for arbitration phase to pass by.
+                // untested!
+                if(Time.now() < question.deadlines.arbitration){
+                    return #err(#WrongTimeInterval);
+                }; 
+                
+                let finalWinner: ?Principal = do ?{
+                    let finalWinnerId: ?Nat = 
+                    if(question.arbitrationWinner != null){
+                        question.arbitrationWinner;
+                        // it might be unnecessary to check for question.pick_winner != null
+                    } else if(question.dispute == null and question.winner != null){
+                        question.winner;
+                    } else {
+                        null;
+                    };
+                    let answer: ?Answer = answers.get(finalWinnerId!);
+                    answer!.owner;
+                };
+                // if no winner and no arbitrationWinner can be found or if the principal can't be found we should trap.
+                switch(finalWinner){
+                    case(null){
+                        Debug.trap("trapped: no winner could be determined");
+                    };
+                    case(? finalWinner){
+                        let result: invoiceCanister.TransferResult = await invoiceCanister.transfer({
+                            amount = question.reward;
+                            token = {symbol = "ICP"};
+                            destination = #principal(finalWinner);
+                        });
+
+                        switch(result){
+                            case(#err err){
+                                return #err(#TransferFailed(err));
+                            };
+                            case(#ok result){
+                                // replace status and blockId
+                                let newQuestion: Question = {
+                                    id = question.id;
+                                    timestamp = question.timestamp;
+                                    deadlines = question.deadlines;
+                                    content = question.content;
+                                    owner = question.owner;
+                                    reward = question.reward;
+                                    invoiceId = question.invoiceId;
+                                    status = #Closed;
+                                    answerIds = question.answerIds;
+                                    winner = question.winner;
+                                    dispute = question.dispute;
+                                    arbitrationWinner = question.arbitrationWinner;
+                                    blockId = ?result.blockHeight;
+                                };
+                                questions.put(questionId, newQuestion);
+                                return #ok(newQuestion); 
+                            };
+                        };
+                    };
+                };
+            };
+        };    
     };
-
 };
-
