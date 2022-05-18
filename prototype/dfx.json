@@ -1,8 +1,21 @@
 {
 	"canisters": {
 		"Prototype": {
-			"main": "src/main.mo",
-			"type": "motoko"
+			"main": "backend/src/main.mo",
+			"type": "motoko",
+			"declarations": {
+				"output": "declarations/Prototype"
+			}
+		},
+		"Frontend": {
+			"frontend": {
+				"entrypoint": "index.html"
+			},
+			"source": ["frontend/dist/"],
+			"type": "assets",
+			"declarations": {
+				"output": "declarations/Frontend"
+			}
 		}
 	},
 	"version": 1
