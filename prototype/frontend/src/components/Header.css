@@ -1,0 +1,36 @@
+.header {
+	height: 100px;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	background-color: #ff6f61;
+
+	display: flex;
+
+	align-items: center;
+	justify-content: center;
+}
+
+.header > div {
+	width: calc(100% / 2);
+
+	margin: 0px 50px 0px 50px;
+	display: flex;
+	align-items: center;
+}
+
+.right-align {
+	justify-content: right;
+}
+
+.left-align {
+	justify-content: left;
+}
+
+a,
+a:hover,
+a:focus,
+a:active {
+	text-decoration: none;
+	color: inherit;
+}
