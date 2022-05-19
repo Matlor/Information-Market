@@ -1,12 +1,42 @@
-type User {
-    id: ID!
-    username: String!
-    blogPosts: [BlogPost!]! @relation(name: "User:blogPosts::BlogPost:author")
+enum QuestionStatus {
+    CREATED
+    OPEN
+    PICKANSWER
+    DISPUTABLE
+    DISPUTED
+    CLOSED
 }
 
-type BlogPost {
+type Invoice {
+    id: ID! # The invoice ID
+    buyer: String!
+}
+
+type Question {
     id: ID!
-    publishedAt: Date
-    title: String!
-    author: User! @relation(name: "User:blogPosts::BlogPost:author")
+    author: String!
+    creationDate: Int!
+    creationInvoice: Invoice!
+    status: QuestionStatus! #@todo: check if works with !
+    statusUpdateDate: Int!
+    content: String!
+    reward: Int!
+    answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
+    dispute: Dispute @relation(name: "Question:dispute::Dispute::question")
+    winner: Answer
+    solutionInvoice: Invoice
+}
+
+type Answer {
+    id: ID!
+    author: String!
+    creationDate: Int!
+    content: String!
+    question: Question! @relation(name: "Question:answers::Answer:question")
+}
+
+type Dispute {
+    id: ID!
+    creationDate: Int!
+    question: Question! @relation(name: "Question:dispute::Dispute::question")
 }
