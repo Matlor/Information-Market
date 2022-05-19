@@ -15,15 +15,15 @@ type Invoice = record {
 type Question = record {
     id: text;
     author: text;
+    author_invoice: Invoice;
     creation_date: int32;
-    creation_invoice: Invoice;
     status: QuestionStatus;
     status_update_date: int32;
     content: text;
     reward: int32;
     dispute: opt Dispute;
     winner: opt Answer;
-    solution_invoice: opt Invoice;
+    winner_invoice: opt Invoice;
 };
 
 type Answer = record {

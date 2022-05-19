@@ -27,15 +27,15 @@ struct Invoice {
 struct Question {
     id: String,
     author: String,
+    author_invoice: Invoice,
     creation_date: i32,
-    creation_invoice: Invoice,
     status: QuestionStatus,
     status_update_date: i32,
     content: String,
     reward: i32,
     dispute: Option<Dispute>,
     winner: Option<Answer>,
-    solution_invoice: Option<Invoice>
+    winner_invoice: Option<Invoice>
 }
 
 #[derive(Debug, serde::Deserialize, ic_cdk::export::candid::CandidType, Clone)]

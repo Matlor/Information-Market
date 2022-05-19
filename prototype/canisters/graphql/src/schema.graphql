@@ -8,15 +8,15 @@ enum QuestionStatus {
 }
 
 type Invoice {
-    id: ID!
+    id: ID! # The invoice ID
     buyer: String!
 }
 
 type Question {
     id: ID!
     author: String!
+    author_invoice: Invoice!
     creation_date: Int!
-    creation_invoice: Invoice!
     status: QuestionStatus!
     status_update_date: Int!
     content: String!
@@ -24,7 +24,7 @@ type Question {
     answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
     dispute: Dispute @relation(name: "Question:dispute::Dispute::question")
     winner: Answer
-    solution_invoice: Invoice
+    winner_invoice: Invoice
 }
 
 type Answer {
