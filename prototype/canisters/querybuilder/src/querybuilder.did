@@ -39,5 +39,5 @@ type Dispute = record {
 };
 
 service : {
-    "get_invoices": () -> (vec Invoice) query;
+    "get_invoices": () -> (vec Invoice);
 }

@@ -1,3 +1,5 @@
+import QueryBuilder "canister:querybuilder";
+
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
 import Hash "mo:base/Hash";
@@ -151,6 +153,11 @@ shared({ caller = initializer }) actor class Prototype() = this {
             id=invoiceId; 
         });
     }; 
+
+    // @todo: temp to test query builder
+    public shared func get_invoices() : async [QueryBuilder.Invoice] {
+        return await QueryBuilder.get_invoices();
+    };
 
     // Return type should rather be err/success
     public shared func get_answers(questionId: Nat): async ?[Answer] {

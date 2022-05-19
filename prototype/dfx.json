@@ -1,10 +1,10 @@
 {
-	"canisters": {
+    "canisters": {
         "playground": {
             "type": "assets",
             "source": ["canisters/playground/build"]
         },
-		"graphql": {
+        "graphql": {
             "type": "custom",
             "build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
             "candid": "canisters/graphql/src/graphql.did",
@@ -16,12 +16,17 @@
             "candid": "canisters/querybuilder/src/querybuilder.did",
             "wasm": "target/wasm32-unknown-unknown/release/querybuilder.wasm",
             "dependencies": ["graphql"]
+        },
+        "market": {
+            "main": "canisters/market/main.mo",
+            "type": "motoko",
+            "dependencies": ["querybuilder"]
         }
-	},
+    },
     "defaults": {
         "replica": {
             "subnet_type": "system"
         }
     },
-	"version": 1
+    "version": 1
 }

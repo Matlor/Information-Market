@@ -54,7 +54,12 @@ struct Dispute {
 
 /// Getter for the invoices
 /// \return The list of invoices
-#[ic_cdk_macros::query]
+// @todo: replace #[update] by #[query] attribute when nested queries are implemented in IC
+// For now it requires the #[update] attribute, otherwise when calling this method in the
+// market canister the error 'IC0504 "ic0_call_new" cannot be executed in replicated query
+// mode' is returned.
+// See https://forum.dfinity.org/t/call-rust-canister-error-ic0-call-new-cannot-be-executed-in-replicated-query-mode/4414
+#[ic_cdk_macros::update]
 async fn get_invoices() -> Vec<Invoice> {
    let query = r#"query{
         readInvoice {

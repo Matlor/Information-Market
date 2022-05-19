@@ -8,7 +8,7 @@ enum QuestionStatus {
 }
 
 type Invoice {
-    id: ID! # The invoice ID
+    id: ID!
     buyer: String!
 }
 
