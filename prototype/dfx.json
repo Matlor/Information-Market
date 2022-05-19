@@ -1,9 +1,20 @@
 {
 	"canisters": {
-		"Prototype": {
-			"main": "src/main.mo",
-			"type": "motoko"
-		}
+        "playground": {
+            "type": "assets",
+            "source": ["canisters/playground/build"]
+        },
+		"graphql": {
+            "type": "custom",
+            "build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
+            "candid": "canisters/graphql/src/graphql.did",
+            "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm"
+        }
 	},
+    "defaults": {
+        "replica": {
+            "subnet_type": "system"
+        }
+    },
 	"version": 1
 }
