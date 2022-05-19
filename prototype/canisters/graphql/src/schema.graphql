@@ -15,28 +15,28 @@ type Invoice {
 type Question {
     id: ID!
     author: String!
-    creationDate: Int!
-    creationInvoice: Invoice!
-    status: QuestionStatus! #@todo: check if works with !
-    statusUpdateDate: Int!
+    creation_date: Int!
+    creation_invoice: Invoice!
+    status: QuestionStatus!
+    status_update_date: Int!
     content: String!
     reward: Int!
     answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
     dispute: Dispute @relation(name: "Question:dispute::Dispute::question")
     winner: Answer
-    solutionInvoice: Invoice
+    solution_invoice: Invoice
 }
 
 type Answer {
     id: ID!
     author: String!
-    creationDate: Int!
+    creation_date: Int!
     content: String!
     question: Question! @relation(name: "Question:answers::Answer:question")
 }
 
 type Dispute {
     id: ID!
-    creationDate: Int!
+    creation_date: Int!
     question: Question! @relation(name: "Question:dispute::Dispute::question")
 }

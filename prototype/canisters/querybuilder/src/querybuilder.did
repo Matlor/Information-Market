@@ -1,0 +1,43 @@
+type QuestionStatus = variant {
+    CREATED;
+    OPEN;
+    PICKANSWER;
+    DISPUTABLE;
+    DISPUTED;
+    CLOSED;
+};
+
+type Invoice = record {
+    id: text;
+    buyer: text;
+};
+
+type Question = record {
+    id: text;
+    author: text;
+    creation_date: int32;
+    creation_invoice: Invoice;
+    status: QuestionStatus;
+    status_update_date: int32;
+    content: text;
+    reward: int32;
+    dispute: opt Dispute;
+    winner: opt Answer;
+    solution_invoice: opt Invoice;
+};
+
+type Answer = record {
+    id: text;
+    author: text;
+    creation_date: int32;
+    content: text;
+};
+
+type Dispute = record {
+    id: text;
+    creation_date: int32;
+};
+
+service : {
+    "get_invoices": () -> (vec Invoice) query;
+}

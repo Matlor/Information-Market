@@ -1035,6 +1035,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "querybuilder"
+version = "0.0.0"
+dependencies = [
+ "ic-cdk 0.3.0",
+ "ic-cdk-macros",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
