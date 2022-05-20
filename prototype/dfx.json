@@ -6,6 +6,16 @@
 			"declarations": {
 				"output": "declarations/Prototype"
 			}
+		},
+		"Frontend": {
+			"frontend": {
+				"entrypoint": "index.html"
+			},
+			"source": ["frontend/dist/"],
+			"type": "assets",
+			"declarations": {
+				"output": "declarations/Frontend"
+			}
 		}
 	},
 	"networks": {
