@@ -136,6 +136,10 @@ shared({ caller = initializer }) actor class Prototype() = this {
     var answersCounter: Nat = 0;
     var answers: HashMap.HashMap<Nat, Answer> = HashMap.HashMap(10, Nat.equal, Hash.hash);
 
+    public shared func version () : async Text {
+       return "1";
+    }; 
+
     // ------------------------- Getter -------------------------
     public func get_questionsCounter(): async Nat {
         return questionsCounter;
