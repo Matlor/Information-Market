@@ -1,4 +1,54 @@
+type QuestionStatusEnum = variant {
+    CREATED;
+    OPEN;
+    PICKANSWER;
+    DISPUTABLE;
+    DISPUTED;
+    CLOSED;
+};
+
+type InvoiceType = record {
+    id: text;
+    buyer: text;
+};
+
+type QuestionType = record {
+    id: text;
+    author: text;
+    author_invoice: InvoiceType;
+    creation_date: int32;
+    status: QuestionStatusEnum;
+    status_update_date: int32;
+    content: text;
+    reward: int32;
+    dispute: opt DisputeType;
+    winner: opt AnswerType;
+    winner_invoice: opt InvoiceType;
+};
+
+type AnswerType = record {
+    id: text;
+    author: text;
+    creation_date: int32;
+    content: text;
+};
+
+type DisputeType = record {
+    id: text;
+    creation_date: int32;
+};
+
 service : {
     "graphql_query": (text, text) -> (text) query;
     "graphql_mutation": (text, text) -> (text);
+    "create_invoice": (text, text) -> (InvoiceType);
+    "create_question": (text, text, int32, QuestionStatusEnum, int32, text, int32) -> (QuestionType);
+    "create_answer": (text, text, int32, text) -> (AnswerType);
+    "create_dispute": (text, int32) -> (DisputeType);
+    "set_winner": (text, text) -> (QuestionType);
+    "set_winner_invoice": (text, text) -> (QuestionType);
+    "get_invoice": (text) -> (InvoiceType) query;
+    "get_question": (text) -> (QuestionType) query;
+    "get_answer": (text) -> (AnswerType) query;
+    "get_answers": () -> (vec AnswerType) query;
 }

@@ -10,17 +10,10 @@
             "candid": "canisters/graphql/src/graphql.did",
             "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm"
         },
-        "querybuilder": {
-            "type": "custom",
-            "build": "cargo build --target wasm32-unknown-unknown --package querybuilder --release",
-            "candid": "canisters/querybuilder/src/querybuilder.did",
-            "wasm": "target/wasm32-unknown-unknown/release/querybuilder.wasm",
-            "dependencies": ["graphql"]
-        },
         "market": {
             "main": "canisters/market/main.mo",
             "type": "motoko",
-            "dependencies": ["querybuilder"]
+            "dependencies": ["graphql"]
         }
     },
     "defaults": {

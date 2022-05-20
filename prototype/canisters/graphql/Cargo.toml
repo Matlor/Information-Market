@@ -9,4 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 sudograph = "0.4.3"
-ic-cdk = "0.3.0" # TODO this will go away once https://github.com/dfinity/candid/pull/249 is released
+serde_json = "1.0.64"
+serde = "1.0.126"
+ic-cdk = "0.3.0"
+ic-cdk-macros = "0.3"

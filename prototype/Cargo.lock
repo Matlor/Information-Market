@@ -566,6 +566,9 @@ name = "graphql"
 version = "0.0.0"
 dependencies = [
  "ic-cdk 0.3.0",
+ "ic-cdk-macros",
+ "serde",
+ "serde_json",
  "sudograph",
 ]
 
@@ -1032,16 +1035,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0d8caf72986c1a598726adc988bb5984792ef84f5ee5aa50209145ee8077038"
 dependencies = [
  "unicode-xid",
-]
-
-[[package]]
-name = "querybuilder"
-version = "0.0.0"
-dependencies = [
- "ic-cdk 0.3.0",
- "ic-cdk-macros",
- "serde",
- "serde_json",
 ]
 
 [[package]]

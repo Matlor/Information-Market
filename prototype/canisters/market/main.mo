@@ -1,4 +1,4 @@
-import QueryBuilder "canister:querybuilder";
+import GraphQL "canister:graphql";
 
 import Nat "mo:base/Nat";
 import HashMap "mo:base/HashMap";
@@ -148,15 +148,9 @@ shared({ caller = initializer }) actor class Prototype() = this {
         questions.get(questionId);
     }; 
 
-    public shared func get_invoice (invoiceId: Nat) : async invoiceCanister.GetInvoiceResult {
-        await invoiceCanister.get_invoice({
-            id=invoiceId; 
-        });
-    }; 
-
     // @todo: temp to test query builder
-    public shared func get_invoices() : async [QueryBuilder.Invoice] {
-        return await QueryBuilder.get_invoices();
+    public shared func get_invoice(invoice_id: Text) : async GraphQL.InvoiceType {
+        return await GraphQL.get_invoice(invoice_id);
     };
 
     // Return type should rather be err/success
