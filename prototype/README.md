@@ -15,3 +15,7 @@ https://github.com/dfinity/invoice-canister
 8. Run `dfx generate`
 9. Run `dfx deploy`
 
+## Testing
+
+run `npm run test-script`
+run `npm run test`
