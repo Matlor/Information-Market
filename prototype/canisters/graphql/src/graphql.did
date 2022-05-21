@@ -49,6 +49,7 @@ service : {
     "set_winner_invoice": (text, text) -> (bool);
     "get_invoice": (text) -> (opt InvoiceType) query;
     "get_question": (text) -> (opt QuestionType) query;
+    "get_question_by_invoice": (text) -> (opt QuestionType) query;
     "get_answer": (text) -> (opt AnswerType) query;
     "has_answered": (text, text) -> (bool) query;
 }

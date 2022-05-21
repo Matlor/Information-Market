@@ -6,6 +6,7 @@ mod queries {
     pub mod get_answer;
     pub mod get_invoice;
     pub mod get_question_answers;
+    pub mod get_question_by_invoice;
     pub mod get_question;
     pub mod set_winner;
     pub mod set_winner_invoice;
@@ -181,7 +182,6 @@ async fn set_winner(question_id: String, answer_id: String) -> bool {
             question_id,
             answer_id)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
-    return serde_json::from_value(json_data["data"][queries::set_winner::macros::response!()][0].clone()).unwrap();
     let json_response = json_data["data"][queries::set_winner::macros::response!()].as_array();
     if json_response != None {
         let vec_values = json_response.unwrap();
@@ -242,6 +242,22 @@ async fn get_question(question_id: String) -> Option<QuestionType> {
         format!(queries::get_question::macros::args!(), question_id)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::get_question::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+        }
+    }
+    return None;
+}
+
+#[query]
+async fn get_question_by_invoice(invoice_id: String) -> Option<QuestionType> {
+    let json_str = graphql_query(
+        queries::get_question_by_invoice::macros::query!().to_string(),
+        format!(queries::get_question_by_invoice::macros::args!(), invoice_id)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::get_question_by_invoice::macros::response!()].as_array();
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
