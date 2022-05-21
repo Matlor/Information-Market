@@ -41,14 +41,14 @@ type DisputeType = record {
 service : {
     "graphql_query": (text, text) -> (text) query;
     "graphql_mutation": (text, text) -> (text);
-    "create_invoice": (text, text) -> (InvoiceType);
-    "create_question": (text, text, int32, QuestionStatusEnum, int32, text, int32) -> (QuestionType);
-    "create_answer": (text, text, int32, text) -> (AnswerType);
-    "create_dispute": (text, int32) -> (DisputeType);
-    "set_winner": (text, text) -> (QuestionType);
-    "set_winner_invoice": (text, text) -> (QuestionType);
-    "get_invoice": (text) -> (InvoiceType) query;
-    "get_question": (text) -> (QuestionType) query;
-    "get_answer": (text) -> (AnswerType) query;
-    "get_answers": () -> (vec AnswerType) query;
+    "create_invoice": (text, text) -> (opt InvoiceType);
+    "create_question": (text, text, int32, QuestionStatusEnum, int32, text, int32) -> (opt QuestionType);
+    "create_answer": (text, text, int32, text) -> (opt AnswerType);
+    "create_dispute": (text, int32) -> (opt DisputeType);
+    "set_winner": (text, text) -> (bool);
+    "set_winner_invoice": (text, text) -> (bool);
+    "get_invoice": (text) -> (opt InvoiceType) query;
+    "get_question": (text) -> (opt QuestionType) query;
+    "get_answer": (text) -> (opt AnswerType) query;
+    "has_answered": (text, text) -> (bool) query;
 }

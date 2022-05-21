@@ -2,8 +2,8 @@
 pub mod macros{
     macro_rules! query{
         () => {
-            r#"query ($answer_id:ID!){
-              readAnswer (search: {id: {eq: $answer_id} } ) {
+            r#"query ($question_id: ID!) {
+              readAnswer(search: {question: {id: {eq: $question_id}}}) {
                 id
                 author
                 creation_date
@@ -15,7 +15,7 @@ pub mod macros{
     macro_rules! args{
         () => {
             r#"{{
-              "answer_id": "{}"
+              "question_id": "{}"
             }}"#
         }
     }
