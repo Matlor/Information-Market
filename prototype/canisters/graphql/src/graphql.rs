@@ -8,6 +8,8 @@ mod queries {
     pub mod get_question_answers;
     pub mod get_question_by_invoice;
     pub mod get_question;
+    pub mod get_questions;
+    pub mod set_status;
     pub mod set_winner;
     pub mod set_winner_invoice;
 }
@@ -22,7 +24,6 @@ graphql_database!("canisters/graphql/src/schema.graphql");
 
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 enum QuestionStatusEnum {
-    CREATED,
     OPEN,
     PICKANSWER,
     DISPUTABLE,
@@ -68,7 +69,6 @@ struct DisputeType {
 impl std::fmt::Display for QuestionStatusEnum {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
        match *self {
-            QuestionStatusEnum::CREATED => write!(f, "CREATED"),
             QuestionStatusEnum::OPEN => write!(f, "OPEN"),
             QuestionStatusEnum::PICKANSWER => write!(f, "PICKANSWER"),
             QuestionStatusEnum::DISPUTABLE => write!(f, "DISPUTABLE"),
@@ -219,6 +219,28 @@ async fn set_winner_invoice(question_id: String, invoice_id: String) -> bool {
     return false;
 }
 
+#[update]
+async fn set_status(question_id: String, status: QuestionStatusEnum, status_update_date: i32) -> bool {
+    let json_str = graphql_query(
+        queries::set_status::macros::mutation!().to_string(),
+        format!(
+            queries::set_status::macros::args!(),
+            question_id,
+            status,
+            status_update_date)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::set_status::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            // TO DO: implement QuestionStatusEnum operator== to be able to check the status too
+            return question.status_update_date == status_update_date;
+        }
+    }
+    return false;
+}
+
 #[query]
 async fn get_invoice(invoice_id: String) -> Option<InvoiceType> {
     let json_str = graphql_query(
@@ -265,6 +287,19 @@ async fn get_question_by_invoice(invoice_id: String) -> Option<QuestionType> {
         }
     }
     return None;
+}
+
+#[query]
+async fn get_questions() -> Vec<QuestionType> {
+    let json_str = graphql_query(
+        queries::get_questions::macros::query!().to_string(),
+        format!(queries::get_questions::macros::args!())).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::get_questions::macros::response!()].as_array();
+    if json_response != None {
+        return serde_json::from_value(serde_json::Value::Array(json_response.unwrap().clone())).unwrap();
+    }
+    return Vec::<QuestionType>::new();
 }
 
 #[query]

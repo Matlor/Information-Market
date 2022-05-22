@@ -2,6 +2,7 @@ import Types "types";
 
 import Int "mo:base/Int";
 import Int32 "mo:base/Int32";
+import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Principal "mo:base/Principal";
@@ -12,14 +13,25 @@ import GraphQL "canister:graphql";
 import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 
 
-shared({ caller = initializer }) actor class Prototype() = this {
+shared({ caller = initializer }) actor class Market(
+    coin_symbol: Text,
+    min_reward: Nat,
+    duration_open: Nat,
+    duration_pick_answer: Nat,
+    duration_disputable: Nat
+) = this {
  
-    let minReward: Nat = 1250000; // @todo: arg in cstor
+    // Members
+    private let coin_symbol_ : Text = coin_symbol;
+    private let min_reward_ : Nat = min_reward;
+    private let duration_open_ : Int = duration_open;
+    private let duration_pick_answer_ : Int = duration_pick_answer;
+    private let duration_disputable_ : Int = duration_disputable;
 
     // the reward values have to be in a certain range depending on fees. 0.0125 ICP min I would propose. 1250000 e8s.
     // should check for error messages of the create_invoice function.
     public shared ({caller}) func create_invoice (reward: Nat) : async Invoice.CreateInvoiceResult  {
-        if(reward < minReward) {
+        if(reward < min_reward_) {
             let invoice_error : Invoice.CreateInvoiceErr = {
                 kind = #Other;
                 message = ?"Set reward is below minimum";
@@ -31,7 +43,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                 details = null;
                 permissions = null;
                 token = { 
-                    symbol = "ICP";
+                    symbol = coin_symbol_;
                 };
             };
             switch (await Invoice.create_invoice(create_invoice_args)){
@@ -163,7 +175,8 @@ shared({ caller = initializer }) actor class Prototype() = this {
                 } else if (question.status != #PICKANSWER) {
                     return (#err (#WrongTimeInterval));
                 } else {
-                    if (await GraphQL.set_winner(question_id, answer_id)){ // @todo: shall choose a winner
+                    // @todo: rename method into pick_answer, add modification of status and add time as parameter
+                    if (await GraphQL.set_winner(question_id, answer_id)){
                         return #ok();
                     } else {
                         return #err(#AnswerDoesNotExist);
@@ -251,7 +264,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                     case (?answer){
                         switch(await Invoice.transfer({
                             amount = Int.abs(Int32.toInt(question.reward));
-                            token = {symbol = "ICP"};
+                            token = {symbol = coin_symbol_};
                             destination = #principal(Principal.fromText(answer.author));
                         })){
                             case(#err err){
@@ -267,4 +280,43 @@ shared({ caller = initializer }) actor class Prototype() = this {
         };
     };
 
+    /// Update the questions' status
+    /// TODO: investigate if hearbeat is good for that, or if this function could be 
+    /// somehow triggered from the UI
+    system func heartbeat() : async () {
+        let now = Int32.fromInt(Time.now());
+        let questions : [GraphQL.QuestionType] = await GraphQL.get_questions();
+        for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
+        {
+            switch(question.status){
+                case(#OPEN){
+                    if (question.status_update_date + Int32.fromInt(duration_open_) > now) {
+                        // @todo: what to do if the status ever failed to be updated?
+                        ignore await GraphQL.set_status(question.id, #PICKANSWER, now);
+                    };
+                };
+                case(#PICKANSWER){
+                    if (question.status_update_date + Int32.fromInt(duration_pick_answer_) > now) {
+                        // Automatically trigger a dispute if the question's author did 
+                        // not pick a winner
+                        ignore await GraphQL.create_dispute(question.id, now);
+                    };
+                };
+                case(#DISPUTABLE){
+                    if (question.status_update_date + Int32.fromInt(duration_disputable_) > now) {
+                        // If nobody disputed the picked answer, payout the answer's author
+                        // and close the question
+                        // @todo: what to do if the payout ever fails ? Probably requires an
+                        // intermediate state to loop on
+                        // @todo: add the block height of the payout in the question
+                        ignore await payout(question.id);
+                        // @todo: what to do if the status ever failed to be updated?
+                        ignore await GraphQL.set_status(question.id, #CLOSED, now);
+                    };
+                };
+                case(_){
+                };
+            };
+        };
+    };
 };

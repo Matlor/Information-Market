@@ -1,6 +1,7 @@
 import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 
 module {
+
     // Invoice
     public type OpenQuestionError = {
         #IncorrectDeadline;

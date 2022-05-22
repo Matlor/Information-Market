@@ -1,5 +1,4 @@
 enum QuestionStatus {
-    CREATED
     OPEN
     PICKANSWER
     DISPUTABLE
