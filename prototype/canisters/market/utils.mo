@@ -1,4 +1,19 @@
+import Int32 "mo:base/Int32";
+import Time "mo:base/Time";
+
 module {
+
+    public func time_minutes_now() : Int32 {
+        Int32.fromInt(Time.now() / 60000000000);
+    };
+
+    // ------------------------- Unused for now -------------------------
+
+    public type Deadlines = {
+        answers: Time.Time;
+        pickWinner: Time.Time;
+        dispute: Time.Time;
+    };
 
     // deadline restrictions
     public type DeadlineBoundariesMinutes = {

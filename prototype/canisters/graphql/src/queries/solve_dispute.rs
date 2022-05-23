@@ -2,8 +2,8 @@
 pub mod macros{
     macro_rules! mutation{
         () => {
-            r#"mutation ($question_id: ID!, $invoice_id: ID!) {
-              updateQuestion(input: {id: $question_id, winner_invoice: {connect: $invoice_id}}) {
+            r#"mutation ($question_id: ID!, $answer_id: ID!, $close_transaction_block_height: String!, $status_update_date: Int!) {
+              updateQuestion(input: {id: $question_id, winner: {connect: $answer_id}, close_transaction_block_height: $close_transaction_block_height, status_update_date: $status_update_date, status: CLOSED}) {
                 id
                 author
                 author_invoice {
@@ -15,29 +15,24 @@ pub mod macros{
                 status_update_date
                 content
                 reward
-                dispute {
-                  id
-                  creation_date
-                }
                 winner {
                   id
                   author
                   creation_date
                   content
                 }
-                winner_invoice {
-                  id
-                  buyer
-                }
+                close_transaction_block_height
               }
             }"#
         }
-    } 
+    }
     macro_rules! args{
         () => {
             r#"{{
               "question_id": "{}",
-              "invoice_id": "{}"
+              "answer_id": "{}",
+              "close_transaction_block_height": "{}",
+              "status_update_date": "{}"
             }}"#
         }
     }

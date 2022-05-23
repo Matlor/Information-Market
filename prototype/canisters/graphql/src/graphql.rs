@@ -1,17 +1,19 @@
 mod queries {
+    pub mod close_question;
+    pub mod create_answer;
     pub mod create_invoice;
     pub mod create_question;
-    pub mod create_answer;
-    pub mod create_dispute;
     pub mod get_answer;
     pub mod get_invoice;
     pub mod get_question_answers;
+    pub mod get_question_answers_from_author;
     pub mod get_question_by_invoice;
     pub mod get_question;
     pub mod get_questions;
-    pub mod set_status;
-    pub mod set_winner;
-    pub mod set_winner_invoice;
+    pub mod must_pick_answer;
+    pub mod open_dispute;
+    pub mod pick_winner;
+    pub mod solve_dispute;
 }
 
 use sudograph::graphql_database;
@@ -47,9 +49,8 @@ struct QuestionType {
     status_update_date: i32,
     content: String,
     reward: i32,
-    dispute: Option<DisputeType>,
     winner: Option<AnswerType>,
-    winner_invoice: Option<InvoiceType>
+    close_transaction_block_height: Option<String>
 }
 
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
@@ -58,12 +59,6 @@ struct AnswerType {
     author: String,
     creation_date: i32,
     content: String
-}
-
-#[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
-struct DisputeType {
-    id: String,
-    creation_date: i32
 }
 
 impl std::fmt::Display for QuestionStatusEnum {
@@ -103,7 +98,6 @@ async fn create_question(
     author: String, 
     invoice_id: String, 
     creation_date: i32,
-    status: QuestionStatusEnum, 
     status_update_date: i32, 
     content: String, 
     reward: i32) -> Option<QuestionType> {
@@ -114,7 +108,6 @@ async fn create_question(
             author,
             invoice_id,
             creation_date,
-            status,
             status_update_date,
             content,
             reward)).await;
@@ -155,86 +148,110 @@ async fn create_answer(
 }
 
 #[update]
-async fn create_dispute(question_id: String, creation_date: i32) -> Option<DisputeType> {
+async fn must_pick_answer(question_id: String, status_update_date: i32) -> bool {
     let json_str = graphql_query(
-        queries::create_dispute::macros::mutation!().to_string(),
+        queries::must_pick_answer::macros::mutation!().to_string(),
         format!(
-            queries::create_dispute::macros::args!(),
+            queries::must_pick_answer::macros::args!(),
             question_id,
-            creation_date)).await;
-    let json_data : Value = serde_json::from_str(&json_str).unwrap();
-    let json_response = json_data["data"][queries::create_dispute::macros::response!()].as_array();
-    if json_response != None {
-        let vec_values = json_response.unwrap();
-        if vec_values.len() == 1 {
-            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
-        }
-    }
-    return None;
-}
-
-#[update]
-async fn set_winner(question_id: String, answer_id: String) -> bool {
-    let json_str = graphql_query(
-        queries::set_winner::macros::mutation!().to_string(),
-        format!(
-            queries::set_winner::macros::args!(),
-            question_id,
-            answer_id)).await;
-    let json_data : Value = serde_json::from_str(&json_str).unwrap();
-    let json_response = json_data["data"][queries::set_winner::macros::response!()].as_array();
-    if json_response != None {
-        let vec_values = json_response.unwrap();
-        if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
-            match question.winner {
-                Some(answer) => return answer.id == answer_id,
-                None         => return false,
-            }
-        }
-    }
-    return false;
-}
-
-#[update]
-async fn set_winner_invoice(question_id: String, invoice_id: String) -> bool {
-    let json_str = graphql_query(
-        queries::set_winner_invoice::macros::mutation!().to_string(),
-        format!(
-            queries::set_winner_invoice::macros::args!(),
-            question_id,
-            invoice_id)).await;
-    let json_data : Value = serde_json::from_str(&json_str).unwrap();
-    let json_response = json_data["data"][queries::set_winner_invoice::macros::response!()].as_array();
-    if json_response != None {
-        let vec_values = json_response.unwrap();
-        if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
-            match question.winner_invoice {
-                Some(invoice) => return invoice.id == invoice_id,
-                None          => return false,
-            }
-        }
-    }
-    return false;
-}
-
-#[update]
-async fn set_status(question_id: String, status: QuestionStatusEnum, status_update_date: i32) -> bool {
-    let json_str = graphql_query(
-        queries::set_status::macros::mutation!().to_string(),
-        format!(
-            queries::set_status::macros::args!(),
-            question_id,
-            status,
             status_update_date)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
-    let json_response = json_data["data"][queries::set_status::macros::response!()].as_array();
+    let json_response = json_data["data"][queries::must_pick_answer::macros::response!()].as_array();
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
             let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
-            // TO DO: implement QuestionStatusEnum operator== to be able to check the status too
+            return question.status_update_date == status_update_date;
+        }
+    }
+    return false;
+}
+
+#[update]
+async fn open_dispute(question_id: String, status_update_date: i32) -> bool {
+    let json_str = graphql_query(
+        queries::open_dispute::macros::mutation!().to_string(),
+        format!(
+            queries::open_dispute::macros::args!(),
+            question_id,
+            status_update_date)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::open_dispute::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            return question.status_update_date == status_update_date;
+        }
+    }
+    return false;
+}
+
+#[update]
+async fn solve_dispute(
+    question_id: String,
+    answer_id: String,
+    close_transaction_block_height: String,
+    status_update_date: i32) -> bool {
+    let json_str = graphql_query(
+        queries::solve_dispute::macros::mutation!().to_string(),
+        format!(
+            queries::solve_dispute::macros::args!(),
+            question_id,
+            answer_id,
+            close_transaction_block_height,
+            status_update_date)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::solve_dispute::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            return question.status_update_date == status_update_date;
+        }
+    }
+    return false;
+}
+
+#[update]
+async fn pick_winner(question_id: String, answer_id: String, status_update_date: i32) -> bool {
+    let json_str = graphql_query(
+        queries::pick_winner::macros::mutation!().to_string(),
+        format!(
+            queries::pick_winner::macros::args!(),
+            question_id,
+            answer_id,
+            status_update_date)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::pick_winner::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            return question.status_update_date == status_update_date;
+        }
+    }
+    return false;
+}
+
+#[update]
+async fn close_question(
+    question_id: String,
+    close_transaction_block_height: String,
+    status_update_date: i32) -> bool {
+    let json_str = graphql_query(
+        queries::close_question::macros::mutation!().to_string(),
+        format!(
+            queries::close_question::macros::args!(),
+            question_id,
+            close_transaction_block_height,
+            status_update_date)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::close_question::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -303,10 +320,10 @@ async fn get_questions() -> Vec<QuestionType> {
 }
 
 #[query]
-async fn get_answer(answer_id: String) -> Option<AnswerType> {
+async fn get_answer(question_id: String, answer_id: String) -> Option<AnswerType> {
     let json_str = graphql_query(
         queries::get_answer::macros::query!().to_string(),
-        format!(queries::get_answer::macros::args!(), answer_id)).await;
+        format!(queries::get_answer::macros::args!(), question_id, answer_id)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::get_answer::macros::response!()].as_array();
     if json_response != None {
@@ -321,8 +338,18 @@ async fn get_answer(answer_id: String) -> Option<AnswerType> {
 #[query]
 async fn has_answered(question_id: String, author: String) -> bool {
     let json_str = graphql_query(
+        queries::get_question_answers_from_author::macros::query!().to_string(),
+        format!(queries::get_question_answers_from_author::macros::args!(), question_id, author)).await;
+    let json_data : Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::get_question_answers_from_author::macros::response!()].as_array();
+    return json_response != None && json_response.unwrap().len() != 0;
+}
+
+#[query]
+async fn has_answers(question_id: String) -> bool {
+    let json_str = graphql_query(
         queries::get_question_answers::macros::query!().to_string(),
-        format!(queries::get_question_answers::macros::args!(), question_id, author)).await;
+        format!(queries::get_question_answers::macros::args!(), question_id)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::get_question_answers::macros::response!()].as_array();
     return json_response != None && json_response.unwrap().len() != 0;

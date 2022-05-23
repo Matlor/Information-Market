@@ -1,49 +1,16 @@
 import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 
+// TO DO: paste directly the types used from the invoice canister here
+// TO DO: check if it makes more sense to have more detailed errors, or one
+// type of error per function
 module {
 
-    // Invoice
-    public type OpenQuestionError = {
-        #IncorrectDeadline;
-        #InvoiceError: Invoice.VerifyInvoiceErr;
-    };
-
-    public type AnswerError = {
-        #QuestionNotFound;
-        #WrongTimeInterval;
-        #YouAreOwner;
-    };
-
-    // pickWinner
-    public type PickWinnerError = {
-        #QuestionNotFound;
-        #YouAreNotOwner;
-        #WrongTimeInterval;
-        #AnswerDoesNotExist;
-    };
-
-    // dispute
-    public type TriggerDisputeError = {
-        #QuestionNotFound;
-        #WrongTimeInterval;
-        #DisputeAlreadyTriggered;
-        #CallerDidNotAnswer;
-    };
-
-    // arbitration
-    public type ArbitrationError = {
-        #QuestionNotFound;
-        #WrongTimeInterval;
-        #DisputeNotTriggered;
-        #CallerIsNotArbitor;
-        #AnswerNotFound;
-    };
-
-    // payout
-    public type PayoutError = {
-        #QuestionNotFound;
-        #TransferFailed: Invoice.TransferError;
-        #QuestionIsClosed;
-        #WrongTimeInterval;
+    public type Error = {
+        #NotFound;
+        #NotAllowed;
+        #WrongStatus;
+        #GraphQLError;
+        #VerifyInvoiceError: Invoice.VerifyInvoiceErr;
+        #TransferError: Invoice.TransferError;
     };
 }

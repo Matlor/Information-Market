@@ -1,9 +1,9 @@
 #[macro_use]
 pub mod macros{
-    macro_rules! query{
+    macro_rules! mutation{
         () => {
-            r#"query ($question_id:ID!){
-              readQuestion (search: {id: {eq: $question_id} } ) {
+            r#"mutation ($question_id: ID!, $status_update_date: Int!) {
+              updateQuestion(input: {id: $question_id, status_update_date: $status_update_date, status: DISPUTED}) {
                 id
                 author
                 author_invoice {
@@ -29,16 +29,17 @@ pub mod macros{
     macro_rules! args{
         () => {
             r#"{{
-              "question_id": "{}"
+              "question_id": "{}",
+              "status_update_date": "{}"
             }}"#
         }
     }
     macro_rules! response{
         () => {
-            "readQuestion"
+            "updateQuestion"
         }
     }
-    pub(crate) use query;
+    pub(crate) use mutation;
     pub(crate) use args;
     pub(crate) use response;
 }

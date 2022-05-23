@@ -21,9 +21,8 @@ type Question {
     content: String!
     reward: Int!
     answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
-    dispute: Dispute @relation(name: "Question:dispute::Dispute::question")
     winner: Answer
-    winner_invoice: Invoice
+    close_transaction_block_height: String
 }
 
 type Answer {
@@ -32,10 +31,4 @@ type Answer {
     creation_date: Int!
     content: String!
     question: Question! @relation(name: "Question:answers::Answer:question")
-}
-
-type Dispute {
-    id: ID!
-    creation_date: Int!
-    question: Question! @relation(name: "Question:dispute::Dispute::question")
 }

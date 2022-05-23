@@ -15,20 +15,13 @@ pub mod macros{
                 status_update_date
                 content
                 reward
-                dispute {
-                  id
-                  creation_date
-                }
                 winner {
                   id
                   author
                   creation_date
                   content
                 }
-                winner_invoice {
-                  id
-                  buyer
-                }
+                close_transaction_block_height
               }
             }"#
         }
