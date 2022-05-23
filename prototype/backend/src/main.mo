@@ -136,9 +136,46 @@ shared({ caller = initializer }) actor class Prototype() = this {
     var answersCounter: Nat = 0;
     var answers: HashMap.HashMap<Nat, Answer> = HashMap.HashMap(10, Nat.equal, Hash.hash);
 
-    public shared func version () : async Text {
-       return "1";
-    }; 
+
+    // ------------------------- Dummy -------------------------
+
+    public shared({caller}) func create_dummyData(): async Bool {
+
+        let deadlines: ?Deadlines = set_deadlines(31);
+
+        switch(deadlines){
+            case(null){
+                return false
+            };
+            case(? deadlines){
+                // loop
+                for(i in Iter.range(0, 10)){
+                    let question: Question = {
+                        id = questionsCounter;
+                        timestamp= Time.now();
+                        deadlines= deadlines;
+                        content= "test question";
+                        owner= caller;
+                        reward= 1250001;
+                        invoiceId= 0;
+                        status= #Open;
+                        answerIds= [0, 1, 2, 3];
+                        winner= ?1;
+                        dispute= null;
+                        arbitrationWinner= null;
+                        blockId= ?4;
+                    };
+
+                    questions.put(questionsCounter, question);
+                    questionsCounter+=1;
+                };
+
+                return true;
+            };
+        };
+
+      
+    };
 
     // ------------------------- Getter -------------------------
     public func get_questionsCounter(): async Nat {
@@ -146,9 +183,18 @@ shared({ caller = initializer }) actor class Prototype() = this {
     };
 
     // answers not included only ids
-    public shared func get_question (questionId: Nat) : async ?Question {
+    public func get_question (questionId: Nat) : async ?Question {
         questions.get(questionId);
     }; 
+
+    public func get_questions() : async ?[Question] {
+        if(questionsCounter < 1){
+            return null;
+        };
+        let entries = Iter.toArray(questions.vals());
+
+        return ?entries;
+    };
 
     public shared func get_invoice (invoiceId: Nat) : async invoiceCanister.GetInvoiceResult {
         await invoiceCanister.get_invoice({
@@ -326,7 +372,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
             };
             case(? question){
                 if(question.owner == caller){
-                    return (#err(#YouAreOwner));
+                    return (#err(#YouAreOwner));    
                 } else if (question.deadlines.answers > Time.now()){
                     let answer: Answer = {
                         questionId = questionId;
@@ -529,7 +575,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                 // untested!
                 if (Time.now() >= question.deadlines.arbitration or Time.now() < question.deadlines.dispute){
                     return #err( #WrongTimeInterval);
-                }; 
+                };  
                 
                 if (question.dispute == null){
                     return #err(#DisputeNotTriggered);
@@ -590,7 +636,7 @@ shared({ caller = initializer }) actor class Prototype() = this {
                 // untested!
                 if(Time.now() < question.deadlines.arbitration){
                     return #err(#WrongTimeInterval);
-                }; 
+                };  
                 
                 let finalWinner: ?Principal = do ?{
                     let finalWinnerId: ?Nat = 

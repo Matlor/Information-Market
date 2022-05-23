@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-
 import * as fs from "fs";
 
 const isDev = process.env["DFX_NETWORK"] !== "ic";
@@ -55,14 +54,17 @@ export default defineConfig({
 		fs: {
 			// allow: ["."],
 		},
+
 		proxy: {
 			"/api": {
 				target: `http://localhost:${DFX_PORT}`,
 				changeOrigin: true,
-				rewrite: (path) => path.replace(/^\/api/, "/api"),
+				secure: false,
+				//rewrite: (path) => path.replace(/^\/api/, "/api"),
 			},
 		},
 	},
+
 	// add build version
 });
 
