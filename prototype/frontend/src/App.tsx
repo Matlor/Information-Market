@@ -1,33 +1,70 @@
 import Header from "./components/Header";
 import QuestionsList from "./components/QuestionsList";
-
 import { useState, useEffect } from "react";
-import { Prototype } from "../../declarations/Prototype/index.js";
-
-// ----------------------------------------------------------------
-/*  
-Plan:
-Component renders by showing a loading sign if nothing is aorund.
-Then it runs useEffect in which it updates state once. 
-
-
-
-
-*/
-// ----------------------------------------------------------------
+import { Prototype, idlFactory } from "../../declarations/Prototype/index.js";
 
 function App() {
+	// -------------------------- Plug ---------------------------------
+	const host = "http://localhost:3000";
+	const whitelist = [`${process.env.PROTOTYPE_CANISTER_ID}`];
+
+	const [plug, setPlug] = useState<any>({
+		isConnected: false,
+		plug: {},
+		actor: {},
+	});
+
+	const login = async () => {
+		try {
+			await window.ic.plug.requestConnect({
+				whitelist,
+				host,
+			});
+			var actor = await window.ic.plug.createActor({
+				canisterId: "rno2w-sqaaa-aaaaa-aaacq-cai",
+				interfaceFactory: idlFactory,
+			});
+
+			setPlug({ isConnected: true, plug: await window.ic.plug, actor: actor });
+		} catch (e) {
+			console.log(e);
+			setPlug({ isConnected: false, plug: {}, actor: {} });
+		}
+	};
+
+	const logout = async () => {
+		setPlug({ isConnected: false, plug: {}, actor: {} });
+	};
+
+	// called before using the actor to communicate with backend
+	const verifyConnection = async () => {
+		try {
+			const connected = await window.ic.plug.isConnected();
+			if (!connected) await window.ic.plug.requestConnect({ whitelist, host });
+			if (connected && !window.ic.plug.agent) {
+				await window.ic.plug.createAgent({ whitelist, host });
+			}
+			return true;
+		} catch (e) {
+			console.log(e);
+			return false;
+		}
+	};
+
+	// -------------------------- Questions --------------------------------------
+	const [questions, setQuestions] = useState<any>([]);
+
 	useEffect(() => {
 		Prototype.get_questions().then((res) => {
-			setQuestions(res);
+			if (res.length > 0) {
+				setQuestions(res[0]);
+			}
 		});
 	}, []);
 
-	const [questions, setQuestions] = useState<any>([[{}]]);
-
 	return (
 		<div>
-			<Header />
+			<Header login={login} logout={logout} plug={plug} />
 			<QuestionsList questions={questions} />
 		</div>
 	);

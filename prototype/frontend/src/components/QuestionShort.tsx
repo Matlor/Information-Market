@@ -3,7 +3,6 @@ import { AttachMoney } from "@mui/icons-material";
 
 const QuestionShort = ({ question }: any) => {
 	const showQuestion = (question: any) => {
-		console.log(question);
 		if (Object.keys(question).length !== 0) {
 			const date = new Date(Number(question.deadlines.answers) / 1000);
 			return (
