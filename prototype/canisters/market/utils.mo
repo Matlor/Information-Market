@@ -38,7 +38,7 @@ module {
             pickWinner = 1440;
             dispute = 1440;
         };
-    }; // @todo: in cstor
+    };
 
     // Computes all the deadlines based on global restrictions
     func set_deadlines(proposedDuration: Nat): ?Deadlines {

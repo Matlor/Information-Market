@@ -1,6 +1,8 @@
 import Types "types";
 import Utils "utils";
 
+import Debug "mo:base/Debug";
+import Text "mo:base/Text";
 import Int "mo:base/Int";
 import Int32 "mo:base/Int32";
 import Iter "mo:base/Iter";
@@ -18,6 +20,7 @@ import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 shared({ caller = initializer }) actor class Market(
     coin_symbol: Text,
     min_reward: Nat, // in e8s
+    fee: Nat, // in e8s, shall be 10000
     duration_open: Nat, // in minutes
     duration_pick_answer: Nat, // in minutes
     duration_disputable: Nat // in minutes
@@ -26,6 +29,7 @@ shared({ caller = initializer }) actor class Market(
     // Members
     private let coin_symbol_ : Text = coin_symbol;
     private let min_reward_ : Nat = min_reward;
+    private let fee_ : Nat = fee;
     private let duration_open_ : Int = duration_open;
     private let duration_pick_answer_ : Int = duration_pick_answer;
     private let duration_disputable_ : Int = duration_disputable;
@@ -41,7 +45,7 @@ shared({ caller = initializer }) actor class Market(
             return #err(invoice_error);
         } else {
             let create_invoice_args : Invoice.CreateInvoiceArgs = {
-                amount = reward;
+                amount = reward + fee_;
                 details = null;
                 permissions = null;
                 token = { 
@@ -121,7 +125,7 @@ shared({ caller = initializer }) actor class Market(
                                 Utils.time_minutes_now(),
                                 Utils.time_minutes_now(),
                                 content,
-                                Int32.fromInt(invoice_amount)
+                                Int32.fromInt(invoice_amount - fee_)
                             )){
                                 case(null) {
                                     return #err(#GraphQLError);
@@ -273,6 +277,7 @@ shared({ caller = initializer }) actor class Market(
                                     )){
                                         return #ok();
                                     } else {
+                                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
                                         return #err(#GraphQLError);
                                     };
                                 };
@@ -284,21 +289,19 @@ shared({ caller = initializer }) actor class Market(
         };
     };
 
+    // ------------------------- Update status -------------------------
 
-    // ------------------------- Heartbeat -------------------------
-
-    /// TO DO: investigate if the hearbeat function makes sense to update
-    /// questions' status or if it should be triggered by something else
-    system func heartbeat() : async () {
+    public func update_status() : async () {
         let now = Utils.time_minutes_now();
         let questions : [GraphQL.QuestionType] = await GraphQL.get_questions();
         for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
         {
             switch(question.status){
                 case(#OPEN){
-                    if (question.status_update_date + Int32.fromInt(duration_open_) > now) {
+                    if (question.status_update_date + Int32.fromInt(duration_open_) < now) {
                         if (await GraphQL.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
+                            Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
                             ignore await GraphQL.must_pick_answer(question.id, now);
                         } else {
                             // Refund the author if no answer has been given
@@ -313,22 +316,25 @@ shared({ caller = initializer }) actor class Market(
                                     // multiple transfers for the same question
                                     // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                     // in motoko, to be able to ensure that the question has not already been paid
+                                    Debug.print("Update question \"" # question.id # "\" status to CLOSE");
                                     ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), now);
                                 };
                                 case(_){
+                                    Debug.print("Failed to reward the author for question \"" # question.id # "\"");
                                 };
                             };
                         };
                     };
                 };
                 case(#PICKANSWER){
-                    if (question.status_update_date + Int32.fromInt(duration_pick_answer_) > now) {
+                    if (question.status_update_date + Int32.fromInt(duration_pick_answer_) < now) {
+                        Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
                         ignore await GraphQL.open_dispute(question.id, now);
                     };
                 };
                 case(#DISPUTABLE){
-                    if (question.status_update_date + Int32.fromInt(duration_disputable_) > now) {
+                    if (question.status_update_date + Int32.fromInt(duration_disputable_) < now) {
                         // If nobody disputed the picked answer, payout the answer's author
                         // and close the question
                         switch (question.winner) {
@@ -349,9 +355,11 @@ shared({ caller = initializer }) actor class Market(
                                         // multiple transfers for the same question
                                         // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                         // in motoko, to be able to ensure that the question has not already been paid
+                                        Debug.print("Update question \"" # question.id # "\" status to CLOSED");
                                         ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), now);
                                     };
                                     case(_){
+                                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
                                     };
                                 };
                             };
@@ -362,5 +370,14 @@ shared({ caller = initializer }) actor class Market(
                 };
             };
         };
+    };
+
+    
+    // ------------------------- Heartbeat -------------------------
+
+    /// TO DO: investigate if the hearbeat function makes sense to update
+    /// questions' status or if it should be triggered by something else
+    system func heartbeat() : async () {
+        await update_status();
     };
 };

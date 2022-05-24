@@ -32,7 +32,7 @@ pub mod macros{
               "question_id": "{}",
               "answer_id": "{}",
               "close_transaction_block_height": "{}",
-              "status_update_date": "{}"
+              "status_update_date": {}
             }}"#
         }
     }

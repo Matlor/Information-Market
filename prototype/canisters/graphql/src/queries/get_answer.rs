@@ -18,7 +18,7 @@ pub mod macros{
     macro_rules! args{
         () => {
             r#"{{
-              "question_id": "{}"
+              "question_id": "{}",
               "answer_id": "{}"
             }}"#
         }

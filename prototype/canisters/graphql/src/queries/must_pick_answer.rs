@@ -30,7 +30,7 @@ pub mod macros{
         () => {
             r#"{{
               "question_id": "{}",
-              "status_update_date": "{}"
+              "status_update_date": {}
             }}"#
         }
     }

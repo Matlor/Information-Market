@@ -75,7 +75,6 @@ impl std::fmt::Display for QuestionStatusEnum {
 
 #[update]
 async fn create_invoice(id: String, buyer: String) -> Option<InvoiceType> {
-    // @todo: seems to have a bug, test in motoko
     let json_str = graphql_query(
         queries::create_invoice::macros::mutation!().to_string(),
         format!(

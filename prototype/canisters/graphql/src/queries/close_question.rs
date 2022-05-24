@@ -31,7 +31,7 @@ pub mod macros{
             r#"{{
               "question_id": "{}",
               "close_transaction_block_height": "{}",
-              "status_update_date": "{}"
+              "status_update_date": {}
             }}"#
         }
     }

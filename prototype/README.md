@@ -14,6 +14,7 @@ Continue with dfx deploy.
 ## TO DO
 
 Complete on how to deploy graphql canister!
+First mutation shall be a "graphql_mutation": (text, text)
 Need to add documentation on graphql queries
 Watchout overflow of certain types (cast amount in nat to int, maybe use string instead to store in graphql?)
 Need to discuss what happens if ever graphql queries fail (think about scenarios, especially important for payments)
