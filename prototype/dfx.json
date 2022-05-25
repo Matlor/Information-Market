@@ -14,6 +14,26 @@
             "main": "canisters/market/main.mo",
             "type": "motoko",
             "dependencies": ["graphql"]
+        },
+        "frontend": {
+            "frontend" : {
+                "entrypoint": "index.html"
+            },
+            "source": ["canisters/frontend/dist/"],
+            "type": "assets",
+            "declarations": {
+                "output": "declarations/frontend"
+            }
+        }
+    },
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:8000",
+            "type": "ephemeral"
+        },
+        "ic": {
+            "providers": ["https://mainnet.dfinity.network"],
+            "type": "persistent"
         }
     },
     "defaults": {

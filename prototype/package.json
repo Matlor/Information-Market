@@ -1,5 +1,5 @@
 {
     "scripts": {
-        "build": "cd canisters/playground && npm install && npm run build"
+        "build": "cd canisters/playground && npm install && npm run build && cd ../../canisters/frontend && npm install && npm run build"
     }
 }
