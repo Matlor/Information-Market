@@ -44,7 +44,7 @@ export default defineConfig({
 		exclude: [],
 	},
 	plugins: [react()],
-	root: "frontend",
+	root: "",
 
 	resolve: {
 		alias: {},

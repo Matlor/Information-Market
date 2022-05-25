@@ -1,12 +1,12 @@
 import Header from "./components/Header";
 import QuestionsList from "./components/QuestionsList";
 import { useState, useEffect } from "react";
-import { Prototype, idlFactory } from "../../declarations/Prototype/index.js";
+import { market, idlFactory } from "../declarations/market/index.js";
 
 function App() {
 	// -------------------------- Plug ---------------------------------
 	const host = "http://localhost:3000";
-	const whitelist = [`${process.env.PROTOTYPE_CANISTER_ID}`];
+	const whitelist = [`${process.env.MARKET_CANISTER_ID}`];
 
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
@@ -55,7 +55,7 @@ function App() {
 	const [questions, setQuestions] = useState<any>([]);
 
 	useEffect(() => {
-		Prototype.get_questions().then((res) => {
+		market.get_questions().then((res) => {
 			if (res.length > 0) {
 				setQuestions(res[0]);
 			}

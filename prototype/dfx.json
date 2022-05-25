@@ -2,23 +2,31 @@
     "canisters": {
         "playground": {
             "type": "assets",
+            "build": "cd canisters/playground && npm run build",
             "source": ["canisters/playground/build"]
         },
         "graphql": {
             "type": "custom",
             "build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
             "candid": "canisters/graphql/src/graphql.did",
-            "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm"
+            "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm",
+            "declarations": {
+                "output" : "canisters/frontend/declarations/graphql"
+            }
         },
         "market": {
             "main": "canisters/market/main.mo",
             "type": "motoko",
-            "dependencies": ["graphql"]
+            "dependencies": ["graphql"],
+            "declarations": {
+                "output" : "canisters/frontend/declarations/market"
+            }
         },
         "frontend": {
             "frontend" : {
                 "entrypoint": "index.html"
             },
+            "dependencies": ["market"],
             "source": ["canisters/frontend/dist/"],
             "type": "assets",
             "declarations": {
