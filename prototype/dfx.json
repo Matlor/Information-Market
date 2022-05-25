@@ -2,7 +2,6 @@
     "canisters": {
         "playground": {
             "type": "assets",
-            "build": "cd canisters/playground && npm run build",
             "source": ["canisters/playground/build"]
         },
         "graphql": {
