@@ -10,7 +10,7 @@ try {
 	canisterIds = JSON.parse(
 		fs
 			.readFileSync(
-				isDev ? ".dfx/local/canister_ids.json" : "./canister_ids.json"
+				isDev ? "../../.dfx/local/canister_ids.json" : "../../canister_ids.json"
 			)
 			.toString()
 	);
@@ -44,7 +44,7 @@ export default defineConfig({
 		exclude: [],
 	},
 	plugins: [react()],
-	root: "frontend",
+	root: "",
 
 	resolve: {
 		alias: {},

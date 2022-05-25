@@ -1,0 +1,34 @@
+enum QuestionStatus {
+    OPEN
+    PICKANSWER
+    DISPUTABLE
+    DISPUTED
+    CLOSED
+}
+
+type Invoice {
+    id: ID! # The invoice ID
+    buyer: String!
+}
+
+type Question {
+    id: ID!
+    author: String!
+    author_invoice: Invoice!
+    creation_date: Int!
+    status: QuestionStatus!
+    status_update_date: Int!
+    content: String!
+    reward: Int!
+    answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
+    winner: Answer
+    close_transaction_block_height: String
+}
+
+type Answer {
+    id: ID!
+    author: String!
+    creation_date: Int!
+    content: String!
+    question: Question! @relation(name: "Question:answers::Answer:question")
+}

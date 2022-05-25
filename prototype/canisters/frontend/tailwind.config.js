@@ -1,5 +1,5 @@
 module.exports = {
-	content: ["./frontend/index.html", "./frontend/src/**/*.{vue,js,ts,jsx,tsx}"],
+	content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
 	theme: {
 		fontFamily: {
 			inter: "'Inter', sans-serif",

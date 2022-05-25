@@ -1,4 +1,6 @@
 .dfx
+target
 node_modules/
 dist/
+build/
 declarations/
