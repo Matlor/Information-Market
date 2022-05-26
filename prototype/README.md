@@ -17,5 +17,14 @@ https://github.com/dfinity/invoice-canister
 
 ## Testing
 
-run `npm run test-script`
-run `npm run test`
+## TO DO
+
+Complete on how to deploy graphql canister!
+First mutation shall be a "graphql_mutation": (text, text)
+Need to add documentation on graphql queries
+Watchout overflow of certain types (cast amount in nat to int, maybe use string instead to store in graphql?)
+Need to discuss what happens if ever graphql queries fail (think about scenarios, especially important for payments)
+
+## Notes
+
+Time is in minutes, because int32 in database, it shall be enough for our usage (max int32 is 2billion, current time in minutes from 1970 is 27millions)

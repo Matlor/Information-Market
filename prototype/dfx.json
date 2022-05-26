@@ -1,32 +1,52 @@
 {
-	"canisters": {
-		"Prototype": {
-			"main": "backend/src/main.mo",
-			"type": "motoko",
-			"declarations": {
-				"output": "declarations/Prototype"
-			}
-		},
-		"Frontend": {
-			"frontend": {
-				"entrypoint": "index.html"
-			},
-			"source": ["frontend/dist/"],
-			"type": "assets",
-			"declarations": {
-				"output": "declarations/Frontend"
-			}
-		}
-	},
-	"networks": {
-		"local": {
-			"bind": "127.0.0.1:8000",
-			"type": "ephemeral"
-		},
-		"ic": {
-			"providers": ["https://mainnet.dfinity.network"],
-			"type": "persistent"
-		}
-	},
-	"version": 1
+    "canisters": {
+        "playground": {
+            "type": "assets",
+            "source": ["canisters/playground/build"]
+        },
+        "graphql": {
+            "type": "custom",
+            "build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
+            "candid": "canisters/graphql/src/graphql.did",
+            "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm",
+            "declarations": {
+                "output" : "canisters/frontend/declarations/graphql"
+            }
+        },
+        "market": {
+            "main": "canisters/market/main.mo",
+            "type": "motoko",
+            "dependencies": ["graphql"],
+            "declarations": {
+                "output" : "canisters/frontend/declarations/market"
+            }
+        },
+        "frontend": {
+            "frontend" : {
+                "entrypoint": "index.html"
+            },
+            "dependencies": ["market"],
+            "source": ["canisters/frontend/dist/"],
+            "type": "assets",
+            "declarations": {
+                "output": "declarations/frontend"
+            }
+        }
+    },
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:8000",
+            "type": "ephemeral"
+        },
+        "ic": {
+            "providers": ["https://mainnet.dfinity.network"],
+            "type": "persistent"
+        }
+    },
+    "defaults": {
+        "replica": {
+            "subnet_type": "system"
+        }
+    },
+    "version": 1
 }

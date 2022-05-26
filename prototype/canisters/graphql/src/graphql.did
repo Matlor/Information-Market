@@ -1,0 +1,52 @@
+type QuestionStatusEnum = variant {
+    OPEN;
+    PICKANSWER;
+    DISPUTABLE;
+    DISPUTED;
+    CLOSED;
+};
+
+type InvoiceType = record {
+    id: text;
+    buyer: text;
+};
+
+type QuestionType = record {
+    id: text;
+    author: text;
+    author_invoice: InvoiceType;
+    creation_date: int32;
+    status: QuestionStatusEnum;
+    status_update_date: int32;
+    content: text;
+    reward: int32;
+    winner: opt AnswerType;
+    close_transaction_block_height: opt text;
+};
+
+type AnswerType = record {
+    id: text;
+    author: text;
+    creation_date: int32;
+    content: text;
+};
+
+service : {
+    "graphql_query": (text, text) -> (text) query;
+    "graphql_mutation": (text, text) -> (text);
+    "close_question": (text, text, int32) -> (bool);
+    "create_answer": (text, text, int32, text) -> (opt AnswerType);
+    "create_invoice": (text, text) -> (opt InvoiceType);
+    "create_question": (text, text, int32, int32, text, int32) -> (opt QuestionType);
+    "get_answer": (text, text) -> (opt AnswerType) query;
+    "get_invoice": (text) -> (opt InvoiceType) query;
+    "get_question_by_invoice": (text) -> (opt QuestionType) query;
+    "get_question": (text) -> (opt QuestionType) query;
+    "get_questions": () -> (vec QuestionType) query;
+    "has_answered": (text, text) -> (bool) query;
+    "has_answers": (text) -> (bool) query;
+    "must_pick_answer": (text, int32) -> (bool);
+    "open_dispute": (text, int32) -> (bool);
+    "pick_winner": (text, text, int32) -> (bool);
+    "solve_dispute": (text, text, text, int32) -> (bool);
+}
