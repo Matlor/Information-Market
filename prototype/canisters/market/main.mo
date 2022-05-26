@@ -48,8 +48,9 @@ shared({ caller = initializer }) actor class Market(
             return Text.startsWith(
                 await GraphQL.graphql_mutation("mutation{createInitialization{id}}", "{}"),
                 #text("{\"data\":{\"createInitialization\":[{\"id\""));
+        } else {
+            return true;
         }
-        return true;
     };
 
     // Check if there is an "Initialization" table inside the GraphQL database. This is
