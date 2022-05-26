@@ -16,7 +16,6 @@ import Time "mo:base/Time";
 import GraphQL "canister:graphql";
 import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 
-
 shared({ caller = initializer }) actor class Market(
     coin_symbol: Text,
     min_reward: Nat, // in e8s
@@ -33,6 +32,10 @@ shared({ caller = initializer }) actor class Market(
     private let duration_open_ : Int = duration_open;
     private let duration_pick_answer_ : Int = duration_pick_answer;
     private let duration_disputable_ : Int = duration_disputable;
+
+    public query func version() : async Text {
+        return "4";
+    };
 
     // ------------------------- Create Invoice -------------------------
 
@@ -57,6 +60,7 @@ shared({ caller = initializer }) actor class Market(
                     return #err(create_invoice_err);
                 };
                 case (#ok create_invoice_success) {
+                    Debug.print("create_invoice_success");
                     switch (await GraphQL.create_invoice(
                         Nat.toText(create_invoice_success.invoice.id),
                         Principal.toText(caller)
@@ -101,6 +105,8 @@ shared({ caller = initializer }) actor class Market(
                         };
                         case(#ok verify_invoice_success){
                             var invoice_amount : Int = 0;
+
+                            // Do we want to create the question only when verfied/paid?
                             switch(verify_invoice_success){
                                 case(#AlreadyVerified verified){
                                     // If it has already been verified, check that no
