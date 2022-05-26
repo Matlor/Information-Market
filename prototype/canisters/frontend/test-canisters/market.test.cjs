@@ -16,13 +16,8 @@ const canisterId = canisterIds.market.local;
 
 let market = null;
 
-test("market: version()", async function (t) {
+test("market: assign actor()", async function (t) {
   market = await getActor(canisterId, idlFactory, Jane);
-
-  const response = await market.version();
-
-  console.log("version: ", response);
-  t.equal(typeof response, "string");
 });
 
 test("market: create_invoice(10) :: should return err - reward below minimum", async function (t) {
