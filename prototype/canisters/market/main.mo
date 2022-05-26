@@ -36,6 +36,19 @@ shared({ caller = initializer }) actor class Market(
     private let duration_pick_answer_ : Int = duration_pick_answer;
     private let duration_disputable_ : Int = duration_disputable;
 
+    // ------------------------- Initialization -------------------------
+
+    public shared func initialize() : async Bool {
+        return Text.startsWith(
+            await GraphQL.graphql_mutation("mutation{createInitialization{id}}", "{}"),
+            #text("{\"data\":{\"createInitialization\":[{\"id\""));
+    };
+    public shared func is_initialized() : async Bool {
+        return Text.startsWith(
+            await GraphQL.graphql_query("query{readInitialization{id}}", "{}"),
+            #text("{\"data\":{\"readInitialization\":[{\"id\""));
+    };
+
     // ------------------------- Create Invoice -------------------------
 
     public shared ({caller}) func create_invoice (reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {

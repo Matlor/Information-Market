@@ -1,3 +1,7 @@
+type Initialization {
+    id: ID!
+}
+
 enum QuestionStatus {
     OPEN
     PICKANSWER
