@@ -1,5 +1,6 @@
-import Types "types";
-import Utils "utils";
+import InvoiceTypes "../invoice/types";
+import Types        "types";
+import Utils        "utils";
 
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
@@ -14,10 +15,10 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 
 import GraphQL "canister:graphql";
-import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
 
 
 shared({ caller = initializer }) actor class Market(
+    invoice_canister: Text,
     coin_symbol: Text,
     min_reward: Nat, // in e8s
     fee: Nat, // in e8s, shall be 10000
@@ -27,6 +28,7 @@ shared({ caller = initializer }) actor class Market(
 ) = this {
 
     // Members
+    private let invoice_canister_ : InvoiceTypes.Interface = actor (invoice_canister);
     private let coin_symbol_ : Text = coin_symbol;
     private let min_reward_ : Nat = min_reward;
     private let fee_ : Nat = fee;
@@ -36,15 +38,15 @@ shared({ caller = initializer }) actor class Market(
 
     // ------------------------- Create Invoice -------------------------
 
-    public shared ({caller}) func create_invoice (reward: Nat) : async Invoice.CreateInvoiceResult  {
+    public shared ({caller}) func create_invoice (reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
         if(reward < min_reward_) {
-            let invoice_error : Invoice.CreateInvoiceErr = {
+            let invoice_error : InvoiceTypes.CreateInvoiceErr = {
                 kind = #Other;
                 message = ?"Set reward is below minimum";
             };
             return #err(invoice_error);
         } else {
-            let create_invoice_args : Invoice.CreateInvoiceArgs = {
+            let create_invoice_args : InvoiceTypes.CreateInvoiceArgs = {
                 amount = reward + fee_;
                 details = null;
                 permissions = null;
@@ -52,7 +54,7 @@ shared({ caller = initializer }) actor class Market(
                     symbol = coin_symbol_;
                 };
             };
-            switch (await Invoice.create_invoice(create_invoice_args)){
+            switch (await invoice_canister_.create_invoice(create_invoice_args)){
                 case (#err create_invoice_err) {
                     return #err(create_invoice_err);
                 };
@@ -62,7 +64,7 @@ shared({ caller = initializer }) actor class Market(
                         Principal.toText(caller)
                     )){
                         case (null) {
-                            let invoice_error : Invoice.CreateInvoiceErr = {
+                            let invoice_error : InvoiceTypes.CreateInvoiceErr = {
                                 kind = #Other;
                                 message = ?"GraphQL error";
                             };
@@ -95,9 +97,9 @@ shared({ caller = initializer }) actor class Market(
                     return #err(#NotAllowed);
                 } else {
                     // Verify the invoice has been paid
-                    switch (await Invoice.verify_invoice({id = invoice_id})) {
+                    switch (await invoice_canister_.verify_invoice({id = invoice_id})) {
                          case(#err err) {  
-                            return #err(#VerifyInvoiceError(err));
+                            return #err(#VerifyInvoiceError);
                         };
                         case(#ok verify_invoice_success){
                             var invoice_amount : Int = 0;
@@ -255,7 +257,7 @@ shared({ caller = initializer }) actor class Market(
                             return #err(#NotFound);
                         };
                         case (?answer) {
-                            switch(await Invoice.transfer({
+                            switch(await invoice_canister_.transfer({
                                 amount = Int.abs(Int32.toInt(question.reward));
                                 token = {symbol = coin_symbol_};
                                 destination = #principal(Principal.fromText(answer.author));
@@ -305,7 +307,7 @@ shared({ caller = initializer }) actor class Market(
                             ignore await GraphQL.must_pick_answer(question.id, now);
                         } else {
                             // Refund the author if no answer has been given
-                            switch(await Invoice.transfer({
+                            switch(await invoice_canister_.transfer({
                                 amount = Int.abs(Int32.toInt(question.reward));
                                 token = {symbol = coin_symbol_};
                                 destination = #principal(Principal.fromText(question.author));
@@ -344,7 +346,7 @@ shared({ caller = initializer }) actor class Market(
                             };
                             case (?answer){
                                 // Pay the winner
-                                switch(await Invoice.transfer({
+                                switch(await invoice_canister_.transfer({
                                     amount = Int.abs(Int32.toInt(question.reward));
                                     token = {symbol = coin_symbol_};
                                     destination = #principal(Principal.fromText(answer.author));

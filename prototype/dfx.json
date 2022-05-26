@@ -1,8 +1,15 @@
 {
     "canisters": {
-        "playground": {
-            "type": "assets",
-            "source": ["canisters/playground/build"]
+        "ledger": {
+            "type": "custom",
+            "candid": "canisters/ledger/ledger.did",
+            "wasm": "canisters/ledger/ledger.wasm"
+        },
+        "invoice": {
+            "dependencies": ["ledger"],
+            "type": "custom",
+            "candid": "canisters/invoice/invoice.did",
+            "wasm": "canisters/invoice/invoice.wasm"
         },
         "graphql": {
             "type": "custom",
@@ -25,12 +32,15 @@
             "frontend" : {
                 "entrypoint": "index.html"
             },
-            "dependencies": ["market"],
             "source": ["canisters/frontend/dist/"],
             "type": "assets",
             "declarations": {
                 "output": "declarations/frontend"
             }
+        },
+        "playground": {
+            "type": "assets",
+            "source": ["canisters/playground/build"]
         }
     },
     "networks": {
