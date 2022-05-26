@@ -14,7 +14,7 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 
 import GraphQL "canister:graphql";
-import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
+import Invoice "canister:invoice";
 
 shared({ caller = initializer }) actor class Market(
     coin_symbol: Text,

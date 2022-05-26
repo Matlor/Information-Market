@@ -1,4 +1,4 @@
-import Invoice "ic:r7inp-6aaaa-aaaaa-aaabq-cai";
+import Invoice "canister:invoice";
 
 // TO DO: paste directly the types used from the invoice canister here
 // TO DO: check if it makes more sense to have more detailed errors, or one

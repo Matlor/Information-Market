@@ -13,10 +13,20 @@
                 "output" : "canisters/frontend/declarations/graphql"
             }
         },
+        "invoice": {
+            "main": "canisters/invoice/src/invoice/main.mo",
+            "type": "motoko",
+            "dependencies": ["ledger"]
+        },
+        "ledger": {
+            "type": "custom",
+            "candid": "canisters/invoice/src/ledger/ledger.did",
+            "wasm": "canisters/invoice/src/ledger/ledger.wasm"
+        },
         "market": {
             "main": "canisters/market/main.mo",
             "type": "motoko",
-            "dependencies": ["graphql"],
+            "dependencies": ["graphql", "invoice"],
             "declarations": {
                 "output" : "canisters/frontend/declarations/market"
             }
