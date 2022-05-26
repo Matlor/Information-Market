@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "cd canisters/playground && npm run build && cd ../../canisters/frontend && npm run build"
+    "build": "cd canisters/playground && npm run build && cd ../../canisters/frontend && npm run build",
     "test-script": "bash ./scripts/test.sh",
     "test": "tape tests-canister/**.test.cjs",
     "preview": "vite preview"
