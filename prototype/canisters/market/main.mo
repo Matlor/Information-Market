@@ -53,8 +53,8 @@ shared({ caller = initializer }) actor class Market(
     };
 
     // Check if there is an "Initialization" table inside the GraphQL database. This is
-    // required because it can happen in development that the graphql canister is deployed 
-    // alone, making the bug on the first mutation appear again.
+    // required because it can happen in development that the graphql canister is re-deployed 
+    // alone, so one need to call the initialize_graphql function once again.
     public shared func is_graphql_initialized() : async Bool {
         return Text.startsWith(
             await GraphQL.graphql_query("query{readInitialization{id}}", "{}"),
