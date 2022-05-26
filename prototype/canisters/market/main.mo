@@ -38,12 +38,24 @@ shared({ caller = initializer }) actor class Market(
 
     // ------------------------- Initialization -------------------------
 
-    public shared func initialize() : async Bool {
-        return Text.startsWith(
-            await GraphQL.graphql_mutation("mutation{createInitialization{id}}", "{}"),
-            #text("{\"data\":{\"createInitialization\":[{\"id\""));
+    // There seems to be a bug in graphql, if the first mutation called on the graphql
+    // canister is a custom mutation (not the graphql_mutation(text, text) -> text), then
+    // the graphql mutations traps. Here we do a dummy mutation to create an "Initialization"
+    // table inside the graphql database so the next mutations performed by this canister work.
+    public shared func initialize_graphql() : async Bool {
+        if (not (await is_graphql_initialized()))
+        {
+            return Text.startsWith(
+                await GraphQL.graphql_mutation("mutation{createInitialization{id}}", "{}"),
+                #text("{\"data\":{\"createInitialization\":[{\"id\""));
+        }
+        return true;
     };
-    public shared func is_initialized() : async Bool {
+
+    // Check if there is an "Initialization" table inside the GraphQL database. This is
+    // required because it can happen in development that the graphql canister is deployed 
+    // alone, making the bug on the first mutation appear again.
+    public shared func is_graphql_initialized() : async Bool {
         return Text.startsWith(
             await GraphQL.graphql_query("query{readInitialization{id}}", "{}"),
             #text("{\"data\":{\"readInitialization\":[{\"id\""));
