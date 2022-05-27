@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import "./index.css";
+import App from "./App";
 
 // to fix decoder of agent-js
 window.global = window;
@@ -11,7 +11,8 @@ declare global {
 		ic: any;
 	}
 }
-
 let ic = window.ic;
+
+console.log(process);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(<App />);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Header = ({ plug, login, logout }: any) => {
 	return (
@@ -6,12 +6,18 @@ const Header = ({ plug, login, logout }: any) => {
 			<div className="px-2 flex justify-between items-center w-full h-full">
 				<div className="flex items-center">
 					{" "}
-					<h1 className="text-3xl font-bold mr-4 text-slate-700"> Home</h1>
+					<Link to="/">
+						<h1 className="text-3xl font-bold mr-4 text-slate-700"> Home</h1>
+					</Link>
 				</div>
 				<div className="flex pr-4 items-center ">
 					<ul className="flex ">
-						<li className="p-4">Add Question</li>
-						<li className="p-4">Browse Questions</li>
+						<Link to="/">
+							<li className="p-4">Add Question</li>
+						</Link>
+						<Link to="/questions">
+							<li className="p-4">Browse Questions</li>
+						</Link>
 					</ul>
 					{plug.isConnected ? (
 						<button
