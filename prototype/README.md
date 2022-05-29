@@ -20,7 +20,6 @@ Watchout overflow of certain types (cast amount in nat to int, maybe use string 
 Need to discuss what happens if ever graphql queries fail (think about scenarios, especially important for payments)
 
 ## Testing
-` npm run test-script`
 ` npm run test`
 
 ## Notes
