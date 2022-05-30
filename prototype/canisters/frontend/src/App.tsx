@@ -1,4 +1,4 @@
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, HashRouter } from "react-router-dom";
 import { useState } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
@@ -34,13 +34,13 @@ function App() {
 	};
 
 	return (
-		<BrowserRouter>
+		<HashRouter>
 			<Header plug={plug} login={login} logout={logout} />
 			<Routes>
 				<Route path="/" element={<Landing plug={plug} />} />
 				<Route path="/questions" element={<Questions />} />
 			</Routes>
-		</BrowserRouter>
+		</HashRouter>
 	);
 }
 

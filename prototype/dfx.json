@@ -1,62 +1,68 @@
 {
-    "canisters": {
-        "ledger": {
-            "type": "custom",
-            "candid": "canisters/ledger/ledger.did",
-            "wasm": "canisters/ledger/ledger.wasm"
-        },
-        "invoice": {
-            "dependencies": ["ledger"],
-            "type": "custom",
-            "candid": "canisters/invoice/invoice.did",
-            "wasm": "canisters/invoice/invoice.wasm"
-        },
-        "graphql": {
-            "type": "custom",
-            "build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
-            "candid": "canisters/graphql/src/graphql.did",
-            "wasm": "target/wasm32-unknown-unknown/release/graphql.wasm",
-            "declarations": {
-                "output" : "canisters/frontend/declarations/graphql"
-            }
-        },
-        "market": {
-            "main": "canisters/market/main.mo",
-            "type": "motoko",
-            "dependencies": ["graphql"],
-            "declarations": {
-                "output" : "canisters/frontend/declarations/market"
-            }
-        },
-        "frontend": {
-            "frontend" : {
-                "entrypoint": "index.html"
-            },
-            "source": ["canisters/frontend/dist/"],
-            "type": "assets",
-            "declarations": {
-                "output": "declarations/frontend"
-            }
-        },
-        "playground": {
-            "type": "assets",
-            "source": ["canisters/playground/build"]
-        }
-    },
-    "networks": {
-        "local": {
-            "bind": "127.0.0.1:8000",
-            "type": "ephemeral"
-        },
-        "ic": {
-            "providers": ["https://mainnet.dfinity.network"],
-            "type": "persistent"
-        }
-    },
-    "defaults": {
-        "replica": {
-            "subnet_type": "system"
-        }
-    },
-    "version": 1
+	"canisters": {
+		"ledger": {
+			"type": "custom",
+			"candid": "canisters/ledger/ledger.did",
+			"wasm": "canisters/ledger/ledger.wasm",
+			"declarations": {
+				"output": "canisters/frontend/declarations/ledger"
+			}
+		},
+		"invoice": {
+			"dependencies": ["ledger"],
+			"type": "custom",
+			"candid": "canisters/invoice/invoice.did",
+			"wasm": "canisters/invoice/invoice.wasm",
+			"declarations": {
+				"output": "canisters/frontend/declarations/invoice"
+			}
+		},
+		"graphql": {
+			"type": "custom",
+			"build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
+			"candid": "canisters/graphql/src/graphql.did",
+			"wasm": "target/wasm32-unknown-unknown/release/graphql.wasm",
+			"declarations": {
+				"output": "canisters/frontend/declarations/graphql"
+			}
+		},
+		"market": {
+			"main": "canisters/market/main.mo",
+			"type": "motoko",
+			"dependencies": ["graphql"],
+			"declarations": {
+				"output": "canisters/frontend/declarations/market"
+			}
+		},
+		"frontend": {
+			"frontend": {
+				"entrypoint": "index.html"
+			},
+			"source": ["canisters/frontend/dist/"],
+			"type": "assets",
+			"declarations": {
+				"output": "declarations/frontend"
+			}
+		},
+		"playground": {
+			"type": "assets",
+			"source": ["canisters/playground/build"]
+		}
+	},
+	"networks": {
+		"local": {
+			"bind": "127.0.0.1:8000",
+			"type": "ephemeral"
+		},
+		"ic": {
+			"providers": ["https://mainnet.dfinity.network"],
+			"type": "persistent"
+		}
+	},
+	"defaults": {
+		"replica": {
+			"subnet_type": "system"
+		}
+	},
+	"version": 1
 }

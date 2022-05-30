@@ -13,6 +13,4 @@ declare global {
 }
 let ic = window.ic;
 
-console.log(process);
-
 ReactDOM.createRoot(document.getElementById("root")!).render(<App />);

@@ -1,13 +1,12 @@
-import { idlFactory } from "../../declarations/market/index";
+import { idlFactory as idlMarket } from "../../declarations/market";
+import { idlFactory as idlledger } from "../../declarations/ledger";
 
-// ledger should be in same folder
-import { idlFactory as idlledger } from "../../../../../../invoice-canister/.dfx/local/canisters/ledger/index";
+const host = window.location.origin;
 
-// only temporary, ids should all come from process.env
-const host = "http://localhost:3000";
 const marketCanisterId = process.env.MARKET_CANISTER_ID;
-const ledgerCanisterId = "rrkah-fqaaa-aaaaa-aaaaq-cai";
-const invoiceCanisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
+const ledgerCanisterId = process.env.LEDGER_CANISTER_ID;
+const invoiceCanisterId = process.env.INVOICE_CANISTER_ID;
+
 const whitelist = [marketCanisterId, ledgerCanisterId, invoiceCanisterId];
 
 const establishConnection = async () => {
@@ -19,11 +18,11 @@ const establishConnection = async () => {
 
 		var marketActor = await window.ic.plug.createActor({
 			canisterId: marketCanisterId,
-			interfaceFactory: idlFactory,
+			interfaceFactory: idlMarket,
 		});
 
 		var ledgerActor = await window.ic.plug.createActor({
-			canisterId: "rrkah-fqaaa-aaaaa-aaaaq-cai",
+			canisterId: ledgerCanisterId,
 			interfaceFactory: idlledger,
 		});
 
