@@ -1,4 +1,5 @@
 import { AttachMoney } from "@mui/icons-material";
+import { Link } from "react-router-dom";
 
 const QuestionPreview = ({ question }: any) => {
 	const showQuestion = (question: any) => {
@@ -53,7 +54,7 @@ const QuestionPreview = ({ question }: any) => {
 
 	return (
 		<div className="p-2 border-b mb-10 cursor-pointer">
-			{showQuestion(question)}
+			<Link to={`/question/${question.id}`}>{showQuestion(question)}</Link>
 		</div>
 	);
 };

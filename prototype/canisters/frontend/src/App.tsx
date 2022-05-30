@@ -1,9 +1,10 @@
 import { Route, Routes, HashRouter } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
 import Landing from "./components/Landing";
 import Questions from "./components/Questions";
+import Question from "./components/Question";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -39,6 +40,7 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Landing plug={plug} />} />
 				<Route path="/questions" element={<Questions />} />
+				<Route path="/question/:id" element={<Question />} />
 			</Routes>
 		</HashRouter>
 	);
