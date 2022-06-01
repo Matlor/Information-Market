@@ -2,6 +2,6 @@
     "scripts": {
         "build": "cd canisters/playground && npm run build && cd ../../canisters/frontend && npm run build",
         "test-script": "bash ./scripts/test.sh",
-        "test": "tape ./canisters/frontend/test-canisters/**test.cjs"
+        "test": "npm rum test-script && tape ./canisters/frontend/test-canisters/**test.cjs"
     }
 }

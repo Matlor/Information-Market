@@ -12,7 +12,18 @@ export LEDGER_ACC=$(dfx ledger account-id)
 rm canisters/ledger/ledger.did
 cp canisters/ledger/ledger.private.did canisters/ledger/ledger.did
 
-dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initial_values = vec { record { "'${LEDGER_ACC}'"; record { e8s=100_000_000_000 } } }; send_whitelist = vec {}})'
+dfx deploy ledger --argument '(record {
+    minting_account = "'${MINT_ACC}'"; 
+    initial_values = vec {
+        record {
+            "'${LEDGER_ACC}'"; record { e8s=100_000_000_000 } 
+            };
+        record {
+            "'${TEST_ACC}'"; record { e8s=100_000_000_000 } 
+            };
+    }; 
+    send_whitelist = vec {}
+})'
 
 # Replace with public api
 rm canisters/ledger/ledger.did
