@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import sudograph from "../api/sudograph";
-import SubmitAnswer from "./question/SubmitAnswer";
+
 import Body from "./question/Body";
-import AnswerList from "./question/AnswerList";
+import Status from "./question/Status";
 
 const Question = ({ plug, login }: any) => {
 	// Whatever component receives as a URL parameter it will fetch
@@ -56,42 +56,16 @@ const Question = ({ plug, login }: any) => {
 		fetch_data();
 	}, []);
 
-	const statusRlatedComponent = () => {
-		// work in progress
-		switch (questionState.question.status) {
-			case "OPEN":
-				return (
-					<SubmitAnswer
-						plug={plug}
-						fetch_data={fetch_data}
-						login={login}
-						id={id}
-					/>
-				);
-			case "PICKANSWER":
-				return <></>;
-			case "DISPUTABLE":
-				return <></>;
-			case "DISPUTED":
-				return <></>;
-			case "CLOSED":
-				return <></>;
-			default:
-				return <></>;
-		}
-	};
-
 	return (
 		<>
 			{questionState.hasData ? (
 				<div className="m-20 p-2 border ">
 					<Body questionState={questionState} deadline={deadline} />
-					{statusRlatedComponent()}
-					<AnswerList
+					<Status
 						questionState={questionState}
-						fetch_data={fetch_data}
-						id={id}
 						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
 					/>
 				</div>
 			) : (
@@ -102,43 +76,3 @@ const Question = ({ plug, login }: any) => {
 };
 
 export default Question;
-
-// if call fails it should render an error message
-// should not render anything until call fails or loading.
-
-/* const [hidden, setHidden] = useState<any>("hidden");
-
-	const handleMouseEnter = () => {
-		setHidden("");
-	};
-	const handleMouseLeave = () => {
-		setHidden("hidden");
-	}; */
-
-// take beginning value
-// add 1 hour to it
-// transform deadline to seconds
-// regularly check time to seconds, take difference and set state
-
-// creation_date seems to be in hour/1000
-
-/* 
-		onMouseEnter={handleMouseEnter}
-		onMouseLeave={handleMouseLeave}
-
-			<div className="peer-test font-light text-xs">
-				{answer.id}
-			</div>
-
-       for user: {questionState.question.author.slice(0, 5)}
-
-	   Deadline:
-		{new Date(
-			questionState.question.creation_date * 60 * 1000 * 1000
-		).toLocaleString(undefined, {
-			hour: "numeric",
-			minute: "numeric",
-			month: "short",
-			day: "numeric",
-		})}
-	*/

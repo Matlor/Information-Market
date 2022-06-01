@@ -1,18 +1,32 @@
 import { useState } from "react";
+import Answer from "./Answer";
 
-const SubmitAnswer = ({ plug, fetch_data, login, id }: any) => {
+/* 
+    Open:
+    - Contains the answer form
+    - Contains a mapping
+    - In each mapping there is the answer component
+    - Contains state that is used for field and for mapping
+*/
+
+const Open = ({ questionState, plug, fetch_data, login }: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
 	const submitAnswer = async (e: any) => {
+		console.log(questionState.question.id, "id");
 		e.preventDefault();
 		// has to be logged in
-		console.log(await plug.actors.marketActor.answer_question(id, answerInput));
-
+		console.log(
+			await plug.actors.marketActor.answer_question(
+				questionState.question.id,
+				answerInput
+			)
+		);
 		// fetching entire question again, could be optimised
 		console.log(await fetch_data());
 	};
 
-	const loginHanlder = async (e: any) => {
+	const loginHandler = async (e: any) => {
 		e.preventDefault();
 		login();
 	};
@@ -41,7 +55,7 @@ const SubmitAnswer = ({ plug, fetch_data, login, id }: any) => {
 						<div> You have to be logged in to answer </div>
 
 						<button
-							onClick={loginHanlder}
+							onClick={loginHandler}
 							className="px-6 py-2  cursor-pointer bg-slate-50 rounded-full"
 						>
 							log in
@@ -49,8 +63,13 @@ const SubmitAnswer = ({ plug, fetch_data, login, id }: any) => {
 					</div>
 				)}
 			</form>
+			<div className=" p-2">
+				{questionState.answers.map((answer: any, index: number) => {
+					return <Answer answer={answer} key={answer.id} />;
+				})}
+			</div>
 		</>
 	);
 };
 
-export default SubmitAnswer;
+export default Open;
