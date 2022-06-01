@@ -47,6 +47,8 @@ struct QuestionType {
     creation_date: i32,
     status: QuestionStatusEnum,
     status_update_date: i32,
+    open_duration: i32,
+    title: String,
     content: String,
     reward: i32,
     winner: Option<AnswerType>,
@@ -98,6 +100,8 @@ async fn create_question(
     invoice_id: String, 
     creation_date: i32,
     status_update_date: i32, 
+    open_duration: i32,
+    title: String,
     content: String, 
     reward: i32) -> Option<QuestionType> {
     let json_str = graphql_query(
@@ -108,6 +112,8 @@ async fn create_question(
             invoice_id,
             creation_date,
             status_update_date,
+            open_duration,
+            title,
             content,
             reward)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();

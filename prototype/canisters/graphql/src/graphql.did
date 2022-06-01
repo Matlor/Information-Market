@@ -18,6 +18,8 @@ type QuestionType = record {
     creation_date: int32;
     status: QuestionStatusEnum;
     status_update_date: int32;
+    open_duration: int32;
+    title: text;
     content: text;
     reward: int32;
     winner: opt AnswerType;
@@ -37,7 +39,7 @@ service : {
     "close_question": (text, text, int32) -> (bool);
     "create_answer": (text, text, int32, text) -> (opt AnswerType);
     "create_invoice": (text, text) -> (opt InvoiceType);
-    "create_question": (text, text, int32, int32, text, int32) -> (opt QuestionType);
+    "create_question": (text, text, int32, int32, int32, text, text, int32) -> (opt QuestionType);
     "get_answer": (text, text) -> (opt AnswerType) query;
     "get_invoice": (text) -> (opt InvoiceType) query;
     "get_question_by_invoice": (text) -> (opt QuestionType) query;

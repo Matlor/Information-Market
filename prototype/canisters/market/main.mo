@@ -22,7 +22,6 @@ shared({ caller = initializer }) actor class Market(
     coin_symbol: Text,
     min_reward: Nat, // in e8s
     fee: Nat, // in e8s, shall be 10000
-    duration_open: Nat, // in minutes
     duration_pick_answer: Nat, // in minutes
     duration_disputable: Nat, // in minutes
     update_status_on_heartbeat: Bool
@@ -33,10 +32,34 @@ shared({ caller = initializer }) actor class Market(
     private let coin_symbol_ : Text = coin_symbol;
     private let min_reward_ : Nat = min_reward;
     private let fee_ : Nat = fee;
-    private let duration_open_ : Int = duration_open;
     private let duration_pick_answer_ : Int = duration_pick_answer;
     private let duration_disputable_ : Int = duration_disputable;
     private let update_status_on_heartbeat_: Bool = update_status_on_heartbeat;
+
+    public shared func get_coin_symbol() : async Text {
+        return coin_symbol_;
+    };
+
+    public shared func get_min_reward() : async Nat {
+        return min_reward_;
+    };
+
+    public shared func get_fee() : async Nat {
+        return fee_;
+    };
+
+    public shared func get_duration_pick_answer() : async Int {
+        return duration_pick_answer_;
+    };
+
+    public shared func get_duration_disputable() : async Int {
+        return duration_disputable_;
+    };
+
+    public shared func get_update_status_on_heartbeat() : async Bool {
+        return update_status_on_heartbeat_;
+    };
+
 
     // ------------------------- Initialization -------------------------
 
@@ -111,6 +134,8 @@ shared({ caller = initializer }) actor class Market(
 
     public shared ({caller}) func ask_question (
         invoice_id: Nat,
+        duration_minutes: Nat,
+        title: Text,
         content: Text
     ) : async Result.Result<GraphQL.QuestionType, Types.Error> {
         let author = Principal.toText(caller);
@@ -154,6 +179,8 @@ shared({ caller = initializer }) actor class Market(
                                 Nat.toText(invoice_id),
                                 Utils.time_minutes_now(),
                                 Utils.time_minutes_now(),
+                                Int32.fromInt(duration_minutes),
+                                title,
                                 content,
                                 Int32.fromInt(invoice_amount - fee_)
                             )){
@@ -205,18 +232,6 @@ shared({ caller = initializer }) actor class Market(
                         };
                     };
                 };
-            };
-        }; 
-    };
-
-    // ------------------------- Get Questions -------------------------
-    public shared ({caller}) func get_questions(): async Result.Result<[GraphQL.QuestionType], Types.Error> {
-        switch(await GraphQL.get_questions()){
-            case(questions) {
-                return #ok(questions);
-            };
-            case(_){
-                return #err(#NotFound);
             };
         }; 
     };
@@ -340,7 +355,7 @@ shared({ caller = initializer }) actor class Market(
         {
             switch(question.status){
                 case(#OPEN){
-                    if (question.status_update_date + Int32.fromInt(duration_open_) < now) {
+                    if (question.status_update_date + question.open_duration < now) {
                         if (await GraphQL.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");

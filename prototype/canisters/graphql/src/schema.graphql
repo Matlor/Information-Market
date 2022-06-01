@@ -22,6 +22,8 @@ type Question {
     creation_date: Int!
     status: QuestionStatus!
     status_update_date: Int!
+    open_duration: Int!
+    title: String!
     content: String!
     reward: Int!
     answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
