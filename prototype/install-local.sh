@@ -7,7 +7,6 @@ export MINT_ACC=$(dfx ledger account-id)
 
 dfx identity use default
 export LEDGER_ACC=$(dfx ledger account-id)
-export TEST_ACC="cd60093cef12e11d7b8e791448023348103855f682041e93f7d0be451f48118b"
 
 # Use private api for install
 rm canisters/ledger/ledger.did
@@ -35,7 +34,7 @@ export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 
 dfx deploy graphql
 
-dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 4320, 1440, 2880)'
+dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 4320, 1440, 2880, true)'
 
 # For some reason, even if the build stage seems to do the same thing if you call 'dfx build frontend'
 # or 'dfx build playground' (see package.json), creating both canister, calling build once, and then

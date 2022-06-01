@@ -24,7 +24,8 @@ shared({ caller = initializer }) actor class Market(
     fee: Nat, // in e8s, shall be 10000
     duration_open: Nat, // in minutes
     duration_pick_answer: Nat, // in minutes
-    duration_disputable: Nat // in minutes
+    duration_disputable: Nat, // in minutes
+    update_status_on_heartbeat: Bool
 ) = this {
 
     // Members
@@ -35,6 +36,7 @@ shared({ caller = initializer }) actor class Market(
     private let duration_open_ : Int = duration_open;
     private let duration_pick_answer_ : Int = duration_pick_answer;
     private let duration_disputable_ : Int = duration_disputable;
+    private let update_status_on_heartbeat_: Bool = update_status_on_heartbeat;
 
     // ------------------------- Initialization -------------------------
 
@@ -406,6 +408,8 @@ shared({ caller = initializer }) actor class Market(
     /// TO DO: investigate if the hearbeat function makes sense to update
     /// questions' status or if it should be triggered by something else
     system func heartbeat() : async () {
-        await update_status();
+        if (update_status_on_heartbeat_){
+            await update_status();
+        };
     };
 };
