@@ -209,6 +209,18 @@ shared({ caller = initializer }) actor class Market(
         }; 
     };
 
+    // ------------------------- Get Questions -------------------------
+    public shared ({caller}) func get_questions(): async Result.Result<[GraphQL.QuestionType], Types.Error> {
+        switch(await GraphQL.get_questions()){
+            case(questions) {
+                return #ok(questions);
+            };
+            case(_){
+                return #err(#NotFound);
+            };
+        }; 
+    };
+
     // ------------------------- Pick Winner -------------------------
 
     // TO DO: (optimisation) ideally one could have spare the call to GraphQL.get_question if a variable
