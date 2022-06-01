@@ -37,3 +37,9 @@ dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 
 dfx deploy frontend
 
 dfx deploy playground
+
+# Generate the declarations
+dfx generate ledger
+dfx generate invoice
+dfx generate graphql
+dfx generate market
