@@ -1,5 +1,6 @@
 import { AttachMoney } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import { statusMessageTransformer } from "../utils";
 
 const QuestionPreview = ({ question }: any) => {
 	const showQuestion = (question: any) => {
@@ -7,29 +8,36 @@ const QuestionPreview = ({ question }: any) => {
 			return (
 				<>
 					<div className="mb-8 ">
-						<div className="font-light text-xs mb-1">
-							Created at:{" "}
-							{new Date(
-								Number(question.creation_date) / 1000000
-							).toLocaleString(undefined, {
-								hour: "numeric",
-								minute: "numeric",
-								month: "short",
-								day: "numeric",
-							})}
+						<div className="flex justify-between">
+							{/*   OWNER + CREATED_AT  DIV */}
+							<div className="font-light text-xs mb-1">
+								Submitted by{" "}
+								<p className="no-underline hover:underline inline-block">
+									user{" "}
+								</p>{" "}
+								at{" "}
+								{new Date(
+									question.creation_date * 60 * 1000 * 1000
+								).toLocaleString(undefined, {
+									hour: "numeric",
+									minute: "numeric",
+									month: "short",
+									day: "numeric",
+								})}
+							</div>
+							{/*   STATUS DIV   */}
+							<div className="font-light text-xs mb-1">
+								{" "}
+								Status: {statusMessageTransformer(question.status)}
+							</div>
 						</div>
+
 						<div className="font-light text-2xl mb-2 ">
-							Lorem Ipsum is simply dummy text of the printing and type setting
-							industry. Lorem Ipsum has been the {question.content}
+							{/* Lorem Ipsum is simply dummy text of the printing and type setting
+							industry. Lorem Ipsum has been the */}{" "}
+							{question.content}
 						</div>
-						<p className="text-justify font-light">
-							Created in component! Lorem Ipsum is simply dummy text of the
-							printing and typesetting industry. Lorem Ipsum has been the
-							industry's standard dummy text ever since the 1500s, when an
-							unknown printer took a galley of type and scrambled it to make a
-							type specimen book. It has survived not only five centuries, but
-							also the leap into electronic typesetting, remaining essentially
-						</p>
+						<p className="text-justify font-light">fvofdhvofih</p>
 					</div>
 
 					<div className="flex  items-center">
@@ -60,19 +68,3 @@ const QuestionPreview = ({ question }: any) => {
 };
 
 export default QuestionPreview;
-
-/* 
-	<div className="flex font-light">
-		<div>
-			Deadline:{" "}
-			{new Date(
-				Number(question.deadlines.answers) / 1000000
-			).toLocaleString(undefined, {
-				hour: "numeric",
-				minute: "numeric",
-				month: "short",
-				day: "numeric",
-			})}
-		</div>
-	</div>
-*/

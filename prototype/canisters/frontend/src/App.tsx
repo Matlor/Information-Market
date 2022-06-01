@@ -10,6 +10,7 @@ import Scenario from "./utils/scenario";
 function App() {
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
+		// might not be necessary
 		plug: {},
 		actors: { marketActor: {}, ledgerActor: {} },
 	});
@@ -43,7 +44,10 @@ function App() {
 			<Routes>
 				<Route path="/" element={<Landing plug={plug} />} />
 				<Route path="/questions" element={<Questions />} />
-				<Route path="/question/:id" element={<Question />} />
+				<Route
+					path="/question/:id"
+					element={<Question plug={plug} login={login} />}
+				/>
 			</Routes>
 		</HashRouter>
 	);
