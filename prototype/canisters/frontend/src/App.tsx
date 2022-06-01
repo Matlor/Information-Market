@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Landing from "./components/Landing";
 import Questions from "./components/Questions";
 import Question from "./components/Question";
+import Scenario from "./utils/scenario";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -33,6 +34,8 @@ function App() {
 	const logout = async () => {
 		setPlug({ isConnected: false, plug: {}, actor: {} });
 	};
+
+	Scenario.loadScenario(["Alice", "Bob", "Charlie", "Dan"], 10);
 
 	return (
 		<HashRouter>
