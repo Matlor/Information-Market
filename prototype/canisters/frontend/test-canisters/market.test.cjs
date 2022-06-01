@@ -26,13 +26,13 @@ test("market: assign actor()", async function (t) {
   t.equal(is_graphql_initialized_, true);
 });
 
-test("market: create_invoice(10) :: should return err - reward below minimum", async function (t) {
+test("Market.create_invoice() : with below min reward => err - reward below minimum", async function (t) {
   const response = await market.create_invoice(10);
   t.deepEqual(response.err, { kind: { Other: null }, message: [ 'Set reward is below minimum' ] });
   t.equal(typeof response.err, "object");
 });
 
-test("market: create_invoice(1250001) :: should return ok - invoice", async function (t) {
+test("Market.create_invoice() : with min reward => ok - invoice", async function (t) {
   const expected = {
     ok: {
       invoice: {
@@ -48,7 +48,7 @@ test("market: create_invoice(1250001) :: should return ok - invoice", async func
   t.equal(typeof response.ok, "object");
 });
 
-test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: should return err - not found", async function (t) {
+test("Market.ask_question() : with invalid invoice id => err - not found", async function (t) {
   let invoice_id = 100
 
   const response = await market.ask_question(invoice_id, "How do you unit test in Motoko?");
@@ -56,7 +56,7 @@ test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: sho
   t.deepEqual(response, { err: { NotFound: null } });
 });
 
-test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: should return err - not allowed", async function (t) {
+test("Market.ask_question() : with identity diff from invoice creation => err - not allowed", async function (t) {
   const invoice_ = await market.create_invoice(1250001);
   let invoice_id = invoice_.ok.invoice.id;
 
@@ -67,7 +67,7 @@ test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: sho
   t.deepEqual(response, { err: { NotAllowed: null } });
 });
 
-test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: should return err - verify invoice", async function (t) {
+test("Market.ask_question() : with invoice NOT paid => err - verify invoice", async function (t) {
   const invoice_ = await market.create_invoice(1250001);
   let invoice_id = invoice_.ok.invoice.id;
 
@@ -76,3 +76,14 @@ test("market: ask_question(invoice_id, 'How do you unit test in Motoko?') :: sho
   t.deepEqual(response, { err: { VerifyInvoiceError: null } });
 });
 
+test("Market.answer_question() : with invalid question_id => err - verify invoice", async function (t) {
+  const response = await market.answer_question("007", "Using motoko-matchers.");
+
+  t.deepEqual(response, { err: { NotFound: null } });
+});
+
+test("Market.get_questions", async function (t) {
+  const response = await market.get_questions();
+
+  console.log("get_questions: ", response);
+});

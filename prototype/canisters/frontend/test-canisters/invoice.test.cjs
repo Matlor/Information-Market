@@ -20,7 +20,7 @@ test("invoice: assign actor()", async function (t) {
   invoice = await getActor(canisterId, idlFactory, Jane);
 });
 
-test("invoice: create_invoice(10000) :: should return ok - amount 10000", async function (t) {
+test("Invoice.create_invoice() : with correct args => ok - invoice", async function (t) {
   let args = { amount: 10000, token: { symbol: "ICP" }, permissions: [], details: [] };
   const response = await invoice.create_invoice(args);
 
@@ -30,19 +30,19 @@ test("invoice: create_invoice(10000) :: should return ok - amount 10000", async 
   t.equal(response.ok.invoice.paid, false);
 });
 
-test("invoice: get_account_identifier(GetAccountIdentifierArgs) :: should return ok - account_identifier", async function (t) {
+test("Invoice.get_account_identifier() : with previous invoice creator => ok - account_identifier", async function (t) {
   const response = await invoice.get_account_identifier({ principal: creator, token: { symbol: "ICP" } });
 
   t.equals(response.ok.accountIdentifier.text.length, 64);
 });
 
-test("invoice: get_balance() :: should return ok - balance 0", async function (t) {
+test("Invoice.get_balance() : with ICP token => ok - balance 0", async function (t) {
   const response = await invoice.get_balance({ token: { symbol: "ICP" } });
 
   t.deepEqual(response.ok, { balance: 0n });
 });
 
-test("invoice: get_invoice() :: should return err - invalid permission", async function (t) {
+test("Invoice.get_invoice() : with invalid identity => err - invalid permission", async function (t) {
   const response = await invoice.get_invoice({ id: 0 });
   t.deepEqual(response.err, {
     kind: { NotAuthorized: null },
