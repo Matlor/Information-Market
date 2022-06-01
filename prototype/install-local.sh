@@ -23,7 +23,7 @@ export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 
 dfx deploy graphql
 
-dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 4320, 1440, 2880, true)'
+dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 1440, 2880, false)'
 
 # For some reason, even if the build stage seems to do the same thing if you call 'dfx build frontend'
 # or 'dfx build playground' (see package.json), creating both canister, calling build once, and then

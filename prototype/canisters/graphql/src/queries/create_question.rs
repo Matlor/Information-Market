@@ -2,9 +2,9 @@
 pub mod macros {
     macro_rules! mutation{
         () => {
-            r#"mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $status_update_date: Int!, $content: String!, $reward: Int!) {
+            r#"mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $open_duration: Int!, $title: String!, $content: String!, $reward: Int!) {
               createQuestion(
-                input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $status_update_date, content: $content, reward: $reward}
+                input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $creation_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
               ) {
                 id
                 author
@@ -15,6 +15,8 @@ pub mod macros {
                 creation_date
                 status
                 status_update_date
+                open_duration
+                title
                 content
                 reward
                 winner {
@@ -35,6 +37,8 @@ pub mod macros {
               "invoice_id": "{}",
               "creation_date": {},
               "status_update_date": {},
+              "open_duration": {},
+              "title": "{}",
               "content": "{}",
               "reward": {}
             }}"#

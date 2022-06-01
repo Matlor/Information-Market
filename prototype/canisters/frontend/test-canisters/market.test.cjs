@@ -81,9 +81,3 @@ test("Market.answer_question() : with invalid question_id => err - verify invoic
 
   t.deepEqual(response, { err: { NotFound: null } });
 });
-
-test("Market.get_questions", async function (t) {
-  const response = await market.get_questions();
-
-  console.log("get_questions: ", response);
-});

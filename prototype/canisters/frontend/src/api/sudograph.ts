@@ -56,6 +56,8 @@ export const get_question_by_invoice = async (invoiceId) => {
           creation_date
           status
           status_update_date
+          open_duration
+          title
           content
           reward
           winner {
@@ -86,6 +88,8 @@ export const get_question = async (questionId) => {
               creation_date
               status
               status_update_date
+              open_duration
+              title
               content
               reward
               winner {
@@ -118,6 +122,8 @@ export const get_questions = async () => {
           creation_date
           status
           status_update_date
+          open_duration
+          title
           content
           reward
           winner {
@@ -202,9 +208,9 @@ export const get_question_answers = async (questionId) => {
 }; */
 const create_question = async (questionConfig) => {
 	var res: any = await actor.graphql_mutation(
-		`mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $status_update_date: Int!, $content: String!, $reward: Int!) {
+		`mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $open_duration: Int!, $title: String!, $content: String!, $reward: Int!) {
     createQuestion(
-      input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $status_update_date, content: $content, reward: $reward}
+      input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $creation_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
     ) {
       id
       author
@@ -215,6 +221,8 @@ const create_question = async (questionConfig) => {
       creation_date
       status
       status_update_date
+      open_duration
+      title
       content
       reward
       winner {
@@ -230,7 +238,8 @@ const create_question = async (questionConfig) => {
 			author: "author",
 			invoice_id: "2",
 			creation_date: 4,
-			status_update_date: 4,
+      open_duration: 4320,
+      title: "title",
 			content: "content",
 			reward: 7,
 		})
