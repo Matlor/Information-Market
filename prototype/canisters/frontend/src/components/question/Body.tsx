@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { statusMessageTransformer } from "../../utils";
+import { questionStatusToString, graphQlToJsDate, toHHMMSS } from "../../utils/conversions";
 
 const Body = ({ questionState, deadline }: any) => {
 	const [countdown, setCountdown] = useState<any>("");
 
 	setTimeout(() => {
-		const date = new Date(null);
-		var time = Math.round(Date.now() / 1000);
-		var delta = deadline - time;
-		date.setSeconds(delta);
-		if (delta > -1) {
-			setCountdown(date.toISOString().substr(11, 8));
+		let secondsRemaing = (deadline - Date.now()) / 1000;
+		if (secondsRemaing > 0) {
+			setCountdown(toHHMMSS(secondsRemaing));
+		} else {
+			setCountdown(null);
 		}
 	}, 1000);
 
@@ -23,9 +22,7 @@ const Body = ({ questionState, deadline }: any) => {
 						Submitted by{" "}
 						<p className="no-underline hover:underline inline-block">user </p>{" "}
 						at{" "}
-						{new Date(
-							questionState.question.creation_date * 60 * 1000 * 1000
-						).toLocaleString(undefined, {
+						{graphQlToJsDate(questionState.question.creation_date).toLocaleString(undefined, {
 							hour: "numeric",
 							minute: "numeric",
 							month: "short",
@@ -37,7 +34,7 @@ const Body = ({ questionState, deadline }: any) => {
 					{/*   STATUS DIV   */}
 					<div className="border font-light text-xs mb-1">
 						{" "}
-						Status: {statusMessageTransformer(questionState.question.status)}
+						Status: {questionStatusToString(questionState.question.status)}
 					</div>
 				</div>
 			</div>
@@ -45,16 +42,10 @@ const Body = ({ questionState, deadline }: any) => {
 			{/*   CONTENT DIV   */}
 			<div className="mb-8 border">
 				<div className="font-light text-2xl mb-2 ">
-					Lorem Ipsum is simply dummy text of the printing and type setting
-					industry. Lorem Ipsum has been the {questionState.question.content}
+					{questionState.question.title}
 				</div>
 				<p className="text-justify font-light">
-					Created in component! Lorem Ipsum is simply dummy text of the printing
-					and typesetting industry. Lorem Ipsum has been the industry's standard
-					dummy text ever since the 1500s, when an unknown printer took a galley
-					of type and scrambled it to make a type specimen book. It has survived
-					not only five centuries, but also the leap into electronic
-					typesetting, remaining essentially
+					{questionState.question.content}
 				</p>
 			</div>
 			<div className="flex justify-between">
@@ -70,7 +61,7 @@ const Body = ({ questionState, deadline }: any) => {
 				{/*   DEADLINE DIV   */}
 				<div className="mb-2 ">
 					{" "}
-					{questionState.question.status === "PICKANSWER" ? (
+					{ countdown !== null ? (
 						<div className="text-justify font-light">
 							{" "}
 							Deadline: {countdown}

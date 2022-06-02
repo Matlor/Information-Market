@@ -41,7 +41,7 @@ const Question = ({ plug, login }: any) => {
 					hasData: true,
 					answers: sortedAnswers,
 				});
-				const newDeadline = readQuestion[0].creation_date * 60 * 1000 + 120000;
+				const newDeadline = (readQuestion[0].creation_date + readQuestion[0].open_duration) * 60 * 1000;
 				("deadline creation");
 
 				setDeadline(newDeadline);

@@ -18,12 +18,17 @@ dfx deploy ledger --argument '(record {minting_account = "'${MINT_ACC}'"; initia
 rm canisters/ledger/ledger.did
 cp canisters/ledger/ledger.public.did canisters/ledger/ledger.did
 
+dfx generate ledger
+
 dfx deploy invoice
+dfx generate invoice
 export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 
 dfx deploy graphql
+dfx generate graphql
 
 dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 1440, 2880, false)'
+dfx generate market
 
 # For some reason, even if the build stage seems to do the same thing if you call 'dfx build frontend'
 # or 'dfx build playground' (see package.json), creating both canister, calling build once, and then
@@ -37,9 +42,3 @@ dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 
 dfx deploy frontend
 
 dfx deploy playground
-
-# Generate the declarations
-dfx generate ledger
-dfx generate invoice
-dfx generate graphql
-dfx generate market

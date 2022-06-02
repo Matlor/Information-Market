@@ -1,6 +1,7 @@
 import { gql, sudograph } from 'sudograph';
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { LoremIpsum } from "lorem-ipsum";
+import { graphQlToJsDate, jsToGraphQlDate } from "./conversions";
 
 var sudographActor = sudograph({
   canisterId: `${process.env.GRAPHQL_CANISTER_ID}`
@@ -82,26 +83,39 @@ function generateUsers(names: Array<String>) {
   return array;
 };
 
-const loadScenario = async (names: Array<String>, questionNumber: number) => {
+function getRandomPastDate(minutesFromNow: number) {
+  return jsToGraphQlDate(Date.now() - (Math.floor(Math.random() * minutesFromNow * 60000) + 1));
+}
+
+function getRandomDuration(maxDuration: number) {
+  return Math.floor(Math.random() * maxDuration) + 1;
+}
+
+function getRandomReward(minReward: number, maxReward: number) {
+  return Math.floor(Math.random() * (maxReward - minReward) + minReward + 1);
+}
+
+const loadScenario = async (
+  names: Array<String>,
+  questionNumber: number,
+  minutesInPast: number,
+  minutesToGo: number,
+  minReward: number,
+  maxReward: number) => {
 
   const lorem = new LoremIpsum({
     sentencesPerParagraph: {
-      max: 8,
-      min: 4
+      max: 4,
+      min: 2
     },
     wordsPerSentence: {
-      max: 16,
+      max: 12,
       min: 4
     }
   });
 
-  // TO DO: need to add some randomness to these parameters
-  // @{
-  const nowMinutes : number = Math.floor(Date.now() / 60000); // Date now is in milliseconds, convert to minutes
-  const reward = 1250000;
-  const durationOpen = 4320; // 3 days
-  // @}
-
+  let now = jsToGraphQlDate(Date());
+  
   console.debug("Start loading scenario...");
 
   let numToCreate = Math.max(questionNumber - await getNumberQuestions(), 0);
@@ -111,8 +125,17 @@ const loadScenario = async (names: Array<String>, questionNumber: number) => {
 
   for (let i = 0; i < numToCreate; i++){
     var users = generateUsers(names);
+    let creationDate = getRandomPastDate(minutesInPast);
     let questionAuthor = users.splice(Math.floor(Math.random() * users.length), 1)[0];
-    let question = await createQuestion(questionAuthor.name, await createInvoice(questionAuthor.identity), nowMinutes, durationOpen, lorem.generateWords(), lorem.generateWords(), reward);
+    let question = await createQuestion(
+      questionAuthor.name,
+      await createInvoice(questionAuthor.identity),
+      creationDate,
+      (now - creationDate) + getRandomDuration(minutesToGo),
+      lorem.generateWords(),
+      lorem.generateSentences(),
+      getRandomReward(minReward, maxReward)
+    );
     console.debug("Question from: " + questionAuthor.name);
 
     let answerSet = new Set<String>();
@@ -123,7 +146,7 @@ const loadScenario = async (names: Array<String>, questionNumber: number) => {
       // Half pourcentage of chance to give an answer
       if (Math.floor(Math.random() * 2))
       {
-        answerSet.add(await createAnswer(question, author.name, nowMinutes, lorem.generateWords()));
+        answerSet.add(await createAnswer(question, author.name, getRandomPastDate(now - creationDate), lorem.generateSentences()));
         console.debug("Answer from: " + author.name);
       }
     }
@@ -131,27 +154,28 @@ const loadScenario = async (names: Array<String>, questionNumber: number) => {
     questionMap.set(question, answerSet);
   }
 
+  // TODO: right now, the status update date might be before the question's creation date or answers' dates
   for (let [question, answers] of questionMap) {
 
     let rand = Math.floor(Math.random() * 100) + 1;
     
     if (rand < 40){ // 40% of questions will be OPEN
-      await setStatus(question, "OPEN", nowMinutes);
+      continue;
     }
     else if (rand < 55){ // 15% of questions will be PICKANSWER
-      await setStatus(question, "PICKANSWER", nowMinutes);
+      await setStatus(question, "PICKANSWER", getRandomPastDate(minutesInPast));
     }
     else if (rand < 75){ // 20% (max) of questions will be DISPUTABLE
       if (answers.size == 0){
-        await setStatus(question, "CLOSED", nowMinutes);
+        await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
       } else {
         await setWinner(question, [...answers][0]);
-        await setStatus(question, "DISPUTABLE", nowMinutes);
+        await setStatus(question, "DISPUTABLE", getRandomPastDate(minutesInPast));
       }
     }
     else if (rand < 90){ // 15% (max) of questions will be DISPUTED
       if (answers.size == 0){
-        await setStatus(question, "CLOSED", nowMinutes);
+        await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
       } else {
         // Half of the disputed questions won't have a picked winner,
         // to simulate when the question's author didn't pick any winner
@@ -159,11 +183,11 @@ const loadScenario = async (names: Array<String>, questionNumber: number) => {
           // This will pick a winning answer randomly, since it's based on the answer identifier
           await setWinner(question, [...answers][0]);
         }
-        await setStatus(question, "DISPUTED", nowMinutes);
+        await setStatus(question, "DISPUTED", getRandomPastDate(minutesInPast));
       }
     }
     else{ // 10% (min) of questions will be CLOSED
-      await setStatus(question, "CLOSED", nowMinutes);
+      await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
     }
   };
 

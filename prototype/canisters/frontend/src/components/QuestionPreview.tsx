@@ -1,6 +1,6 @@
 import { AttachMoney } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import { statusMessageTransformer } from "../utils";
+import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
 
 const QuestionPreview = ({ question }: any) => {
 	const showQuestion = (question: any) => {
@@ -16,28 +16,26 @@ const QuestionPreview = ({ question }: any) => {
 									user{" "}
 								</p>{" "}
 								at{" "}
-								{new Date(
-									question.creation_date * 60 * 1000 * 1000
-								).toLocaleString(undefined, {
+								{graphQlToJsDate(question.creation_date).toLocaleString(undefined, {
 									hour: "numeric",
 									minute: "numeric",
-									month: "short",
+									month: "long",
 									day: "numeric",
 								})}
 							</div>
 							{/*   STATUS DIV   */}
 							<div className="font-light text-xs mb-1">
 								{" "}
-								Status: {statusMessageTransformer(question.status)}
+								Status: {questionStatusToString(question.status)}
 							</div>
 						</div>
 
 						<div className="font-light text-2xl mb-2 ">
-							{/* Lorem Ipsum is simply dummy text of the printing and type setting
-							industry. Lorem Ipsum has been the */}{" "}
-							{question.content}
+							{question.title}
 						</div>
-						<p className="text-justify font-light">fvofdhvofih</p>
+						<p className="text-justify font-light">
+							{question.content}
+						</p>
 					</div>
 
 					<div className="flex  items-center">

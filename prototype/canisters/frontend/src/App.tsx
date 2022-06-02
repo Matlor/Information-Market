@@ -36,7 +36,7 @@ function App() {
 		setPlug({ isConnected: false, plug: {}, actor: {} });
 	};
 
-	Scenario.loadScenario(["Alice", "Bob", "Charlie", "Dan"], 10);
+	Scenario.loadScenario(["Alice", "Bob", "Charlie", "Dan"], 20, 60, 60, 1250000, 100000000);
 
 	return (
 		<HashRouter>
