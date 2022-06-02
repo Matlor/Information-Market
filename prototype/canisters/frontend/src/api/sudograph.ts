@@ -195,6 +195,39 @@ export const get_question_answers = async (questionId) => {
 
 	return JSON.parse(res);
 };
+
+export const get_questions_interactions = async (author) => {
+	var res: any = await actor.graphql_query(
+		`query ($author: String!) {
+      readQuestion(search: {or:[ {answers: {author: {eq: $author}}}, {author:{eq: $author}}]}) {
+        id
+        author
+        author_invoice {
+          id
+          buyer
+        }
+        creation_date
+        status
+        status_update_date
+        content
+        title
+        reward
+        winner {
+          id
+          author
+          creation_date
+          content
+        }
+        close_transaction_block_height        
+      }
+    }
+    `,
+		JSON.stringify({ author: `${author}` })
+	);
+
+	return JSON.parse(res);
+};
+
 // ------------------------------------ Update ------------------------------------
 
 // Example:
@@ -238,8 +271,8 @@ const create_question = async (questionConfig) => {
 			author: "author",
 			invoice_id: "2",
 			creation_date: 4,
-      open_duration: 4320,
-      title: "title",
+			open_duration: 4320,
+			title: "title",
 			content: "content",
 			reward: 7,
 		})
@@ -256,5 +289,6 @@ export default {
 	get_answer,
 	get_question_answers_from_author,
 	get_question_answers,
+	get_questions_interactions,
 	create_question,
 };

@@ -12,6 +12,14 @@ const Header = ({ plug, login, logout }: any) => {
 				</div>
 				<div className="flex pr-4 items-center ">
 					<ul className="flex ">
+						{plug.isConnected ? (
+							<Link to="/interactions">
+								<li className="p-4">My Interactions</li>
+							</Link>
+						) : (
+							<></>
+						)}
+
 						<Link to="/">
 							<li className="p-4">Add Question</li>
 						</Link>

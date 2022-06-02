@@ -18,15 +18,13 @@ const Questions = ({}: any) => {
 
 	const [questions, setQuestions] = useState<any>([]);
 
-	console.log(questions);
-
 	return (
 		<div className="ml-72 mr-72 mt-14 mb-5">
 			{questions.length > 0 ? (
 				questions.map((question: any, index: number) => {
 					return (
 						<div key={index}>
-							<QuestionPreview question={question} key={Number(question.id)} />
+							<QuestionPreview question={question} />
 						</div>
 					);
 				})
