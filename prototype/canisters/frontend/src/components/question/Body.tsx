@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { questionStatusToString, graphQlToJsDate, toHHMMSS } from "../../utils/conversions";
+import {
+	questionStatusToString,
+	graphQlToJsDate,
+	toHHMMSS,
+} from "../../utils/conversions";
 
 const Body = ({ questionState, deadline }: any) => {
 	const [countdown, setCountdown] = useState<any>("");
@@ -22,7 +26,9 @@ const Body = ({ questionState, deadline }: any) => {
 						Submitted by{" "}
 						<p className="no-underline hover:underline inline-block">user </p>{" "}
 						at{" "}
-						{graphQlToJsDate(questionState.question.creation_date).toLocaleString(undefined, {
+						{graphQlToJsDate(
+							questionState.question.creation_date
+						).toLocaleString(undefined, {
 							hour: "numeric",
 							minute: "numeric",
 							month: "short",
@@ -61,7 +67,7 @@ const Body = ({ questionState, deadline }: any) => {
 				{/*   DEADLINE DIV   */}
 				<div className="mb-2 ">
 					{" "}
-					{ countdown !== null ? (
+					{countdown !== null ? (
 						<div className="text-justify font-light">
 							{" "}
 							Deadline: {countdown}

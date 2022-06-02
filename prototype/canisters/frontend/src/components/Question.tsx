@@ -3,12 +3,14 @@ import { useParams } from "react-router";
 import sudograph from "../api/sudograph";
 
 import Body from "./question/Body";
-import Status from "./question/Status";
+import Open from "./question/Open";
+import PickAnswer from "./question/PickAnswer";
+import Disputable from "./question/Disputable";
+import Arbitration from "./question/Arbitration";
+import Closed from "./question/Closed";
 
+// TODO: Fix deadline issues
 const Question = ({ plug, login }: any) => {
-	// Whatever component receives as a URL parameter it will fetch
-	// What if I pass invalid id? Maybe it should check for the right format.
-
 	let { id } = useParams();
 
 	const [questionState, setQuestionState] = useState<any>({
@@ -41,8 +43,10 @@ const Question = ({ plug, login }: any) => {
 					hasData: true,
 					answers: sortedAnswers,
 				});
-				const newDeadline = (readQuestion[0].creation_date + readQuestion[0].open_duration) * 60 * 1000;
-				("deadline creation");
+				const newDeadline =
+					(readQuestion[0].creation_date + readQuestion[0].open_duration) *
+					60 *
+					1000;
 
 				setDeadline(newDeadline);
 			}
@@ -56,17 +60,75 @@ const Question = ({ plug, login }: any) => {
 		fetch_data();
 	}, []);
 
+	const showStatusComponents = () => {
+		switch (questionState.question.status) {
+			case "OPEN":
+				return (
+					<>
+						<Open
+							questionState={questionState}
+							plug={plug}
+							fetch_data={fetch_data}
+							login={login}
+						/>
+					</>
+				);
+			case "PICKANSWER":
+				return (
+					<>
+						<PickAnswer
+							questionState={questionState}
+							plug={plug}
+							fetch_data={fetch_data}
+							login={login}
+						/>
+					</>
+				);
+			case "DISPUTABLE":
+				return (
+					<>
+						<Disputable
+							questionState={questionState}
+							plug={plug}
+							fetch_data={fetch_data}
+							login={login}
+						/>
+					</>
+				);
+			case "ARBITRATION":
+				return (
+					<>
+						<Arbitration
+							questionState={questionState}
+							plug={plug}
+							fetch_data={fetch_data}
+							login={login}
+						/>
+					</>
+				);
+			case "CLOSED":
+				return (
+					<>
+						{" "}
+						<Closed
+							questionState={questionState}
+							plug={plug}
+							fetch_data={fetch_data}
+							login={login}
+						/>
+					</>
+				);
+			default:
+				return <></>;
+		}
+	};
+
 	return (
 		<>
 			{questionState.hasData ? (
 				<div className="m-20 p-2 border ">
 					<Body questionState={questionState} deadline={deadline} />
-					<Status
-						questionState={questionState}
-						plug={plug}
-						fetch_data={fetch_data}
-						login={login}
-					/>
+					{showStatusComponents()}
 				</div>
 			) : (
 				<></>

@@ -6,6 +6,7 @@ const Questions = ({}: any) => {
 	console.log(sudograph, "sudograph");
 
 	useEffect(() => {
+		// not checking for error
 		const fetchQuestions = async () => {
 			const res = await sudograph.get_questions();
 			console.log(res.data.readQuestion);

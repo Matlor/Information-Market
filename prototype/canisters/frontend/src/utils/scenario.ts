@@ -114,7 +114,7 @@ const loadScenario = async (
     }
   });
 
-  let now = jsToGraphQlDate(Date());
+  let now = jsToGraphQlDate(Date.now());
   
   console.debug("Start loading scenario...");
 

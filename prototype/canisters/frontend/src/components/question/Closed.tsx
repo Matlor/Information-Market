@@ -1,19 +1,21 @@
-import { useState } from "react";
 import Answer from "./Answer";
 
-/* 
-    Payout
-    - field shows winner
-    - mapping shows visual indication of who won
-*/
-
-const Closed = ({ questionState }: any) => {
+const Closed = ({ questionState, plug }: any) => {
 	return (
 		<>
-			<div>Closed</div>
+			<div className="font-light border mt-2 mb-2 ">
+				Question is closed. Winner is: {questionState.question.winner.id}
+			</div>
 			<div className=" p-2">
 				{questionState.answers.map((answer: any) => {
-					return <Answer answer={answer} key={answer.id} />;
+					return (
+						<Answer
+							plug={plug}
+							answer={answer}
+							key={answer.id}
+							questionState={questionState}
+						/>
+					);
 				})}
 			</div>
 		</>
