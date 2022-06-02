@@ -13,13 +13,10 @@ function Landing({ plug }: any) {
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
-		// press submit
-		// verifies connection
 		if (!(await plugApi.verifyConnection())) {
 			return;
 		}
 
-		// calls get invoice
 		const invoiceResponse = await plug.actors.marketActor.create_invoice(
 			BigInt(parseInt(reward))
 		);
