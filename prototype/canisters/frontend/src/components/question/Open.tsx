@@ -1,14 +1,6 @@
 import { useState } from "react";
 import Answer from "./Answer";
 
-/* 
-    Open:
-    - Contains the answer form
-    - Contains a mapping
-    - In each mapping there is the answer component
-    - Contains state that is used for field and for mapping
-*/
-
 const Open = ({ questionState, plug, fetch_data, login }: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
@@ -22,8 +14,7 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 				answerInput
 			)
 		);
-		// fetching entire question again, could be optimised
-		console.log(await fetch_data());
+		await fetch_data();
 	};
 
 	const loginHandler = async (e: any) => {
@@ -65,7 +56,14 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 			</form>
 			<div className=" p-2">
 				{questionState.answers.map((answer: any, index: number) => {
-					return <Answer answer={answer} key={answer.id} />;
+					return (
+						<Answer
+							plug={plug}
+							answer={answer}
+							key={answer.id}
+							questionState={questionState}
+						/>
+					);
 				})}
 			</div>
 		</>

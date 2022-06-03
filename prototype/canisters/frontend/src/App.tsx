@@ -1,4 +1,4 @@
-import { Route, Routes, HashRouter } from "react-router-dom";
+import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
@@ -6,6 +6,8 @@ import Landing from "./components/Landing";
 import Questions from "./components/Questions";
 import Question from "./components/Question";
 import Scenario from "./utils/scenario";
+
+import Interactions from "./components/Interactions";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -36,13 +38,21 @@ function App() {
 		setPlug({ isConnected: false, plug: {}, actor: {} });
 	};
 
-	Scenario.loadScenario(["Alice", "Bob", "Charlie", "Dan"], 20, 60, 60, 1250000, 100000000);
+	Scenario.loadScenario(
+		["Alice", "Bob", "Charlie", "Dan"],
+		20,
+		60,
+		60,
+		1250000,
+		100000000
+	);
 
 	return (
 		<HashRouter>
 			<Header plug={plug} login={login} logout={logout} />
 			<Routes>
 				<Route path="/" element={<Landing plug={plug} />} />
+				<Route path="/interactions" element={<Interactions plug={plug} />} />
 				<Route path="/questions" element={<Questions />} />
 				<Route
 					path="/question/:id"
