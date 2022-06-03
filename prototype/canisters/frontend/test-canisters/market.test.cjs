@@ -6,6 +6,7 @@ const { getActor } = require("./actor.cjs");
 const canisterIds = require("../../../.dfx/local/canister_ids.json");
 const { idlFactory: marketIdlFactory } = require("../../../.dfx/local/canisters/market/market.did.test.cjs");
 const { idlFactory: graphqlIdlFactory } = require("../../../.dfx/local/canisters/graphql/graphql.did.test.cjs");
+const { idlFactory: invoiceIdlFactory } = require("../../../.dfx/local/canisters/invoice/invoice.did.test.cjs");
 
 // identities
 const { defaultIdentity, keeperOfCoinIdentity } = require("./identity.cjs");
@@ -15,10 +16,14 @@ global.fetch = fetch;
 
 const market_canister_id = canisterIds.market.local;
 const graphql_canister_id = canisterIds.graphql.local;
+const invoice_canister_id = canisterIds.invoice.local;
+
+const transfer_fee = 10000n;
 
 let janeMarketActor = null;
 let defaultMarketActor = null;
 let keeperOfCoinMarketActor = null;
+let keeperOfCoinInvoiceActor = null;
 let janeGraphqlActor = null;
 
 let invoice_jane = null;
@@ -29,6 +34,7 @@ test("Market: assign actors()", async function (t) {
   janeMarketActor = await getActor(market_canister_id, marketIdlFactory, janeIdentity);
   defaultMarketActor = await getActor(market_canister_id, marketIdlFactory, defaultIdentity);
   keeperOfCoinMarketActor = await getActor(market_canister_id, marketIdlFactory, keeperOfCoinIdentity);
+  keeperOfCoinInvoiceActor = await getActor(invoice_canister_id, invoiceIdlFactory, keeperOfCoinIdentity);
   janeGraphqlActor = await getActor(graphql_canister_id, graphqlIdlFactory, janeIdentity);
 
   console.log("=========== Market ===========");
@@ -100,7 +106,7 @@ test("Market.ask_question():[defaultMarketActor]: with identity diff from invoic
   t.deepEqual(response, { err: { NotAllowed: null } });
 });
 
-test("Market.ask_question():[defaultMarketActor]: with invoice NOT paid => err - verify invoice", async function (t) {
+test("Market.ask_question():[defaultMarketActor]: with invoice NOT paid => #err(verify invoice)", async function (t) {
   let duration_minutes =  10;
   let title = "Motoko";
 
@@ -109,8 +115,35 @@ test("Market.ask_question():[defaultMarketActor]: with invoice NOT paid => err -
   t.deepEqual(response, { err: { VerifyInvoiceError: null } });
 });
 
+// transfer - pay invoice
+test("Invoice.transfer():[keeperOfCoinActor]: for invoice_keeper_of_coin => #ok(blockHeight)", async function (t) {
+  const response = await keeperOfCoinInvoiceActor.transfer({
+    amount: invoice_keeper_of_coin.amount + transfer_fee,
+    token: {
+      symbol: "ICP",
+    },
+    destination: invoice_keeper_of_coin.destination
+  });
+
+  const hasBlockHeight = response.ok.blockHeight > 1;
+
+  t.equal(hasBlockHeight, true);
+});
+
+test("Market.ask_question():[keeperOfCoinActor]: after invoice is paid => #ok(question)", async function (t) {
+  let duration_minutes =  10;
+  let title = "Motoko";
+
+  const response = await keeperOfCoinMarketActor.ask_question(invoice_keeper_of_coin.id, duration_minutes, title, "How do you unit test in Motoko?");
+  const reward  = response.ok.reward;
+  const content  = response.ok.content;
+
+  t.equal(reward, 1250001);
+  t.equal(content, "How do you unit test in Motoko?");
+});
+
 // answer_question
-test("Market.answer_question():[defaultMarketActor]: with invalid question_id => err - verify invoice", async function (t) {
+test("Market.answer_question():[defaultMarketActor]: with invalid question_id => #err(verify invoice)", async function (t) {
   let question_id = "007";
   let content = "Using motoko-matchers.";
 
@@ -121,21 +154,18 @@ test("Market.answer_question():[defaultMarketActor]: with invalid question_id =>
 
 // get_questions
 test("Market.get_questions(): ", async function (t) {
-  const response = await janeGraphqlActor.get_questions();
+  const questions = await janeGraphqlActor.get_questions();
 
-  console.log("response: ", response);
+  const hasQuestions = questions.length > 0;
+  t.equal(hasQuestions, true);
+
+  console.log("questions: ", questions);
 });
 
+
 // TODO:
-// initialize_graphql: () -> (bool);
-// is_graphql_initialized: () -> (bool);
-// create_invoice: (nat) -> (CreateInvoiceResult);
-// ask_question: (nat, nat, text, text) -> (Result_1);
-// answer_question: (text, text) -> (Result_2);
-
-// arbitrate: (text, text) -> (Result);
-// pick_winner: (text, text) -> (Result);
-// trigger_dispute: (text) -> (Result);
-
-
-// update_status: () -> ();
+// answer_question
+// arbitrate
+// pick_winner
+// trigger_dispute
+// update_status
