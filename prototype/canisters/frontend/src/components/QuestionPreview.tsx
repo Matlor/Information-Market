@@ -7,21 +7,24 @@ const QuestionPreview = ({ question }: any) => {
 		if (Object.keys(question).length !== 0) {
 			return (
 				<>
-					<div className="mb-8 ">
+					<div className="mb-6  ">
 						<div className="flex justify-between">
 							{/*   OWNER + CREATED_AT  DIV */}
-							<div className="font-light text-xs mb-1">
+							<div className="font-light text-xs mb-2">
 								Submitted by{" "}
 								<p className="no-underline hover:underline inline-block">
 									user{" "}
 								</p>{" "}
 								at{" "}
-								{graphQlToJsDate(question.creation_date).toLocaleString(undefined, {
-									hour: "numeric",
-									minute: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
+								{graphQlToJsDate(question.creation_date).toLocaleString(
+									undefined,
+									{
+										hour: "numeric",
+										minute: "numeric",
+										month: "long",
+										day: "numeric",
+									}
+								)}
 							</div>
 							{/*   STATUS DIV   */}
 							<div className="font-light text-xs mb-1">
@@ -30,24 +33,25 @@ const QuestionPreview = ({ question }: any) => {
 							</div>
 						</div>
 
-						<div className="font-light text-2xl mb-2 ">
-							{question.title}
-						</div>
-						<p className="text-justify font-light">
-							{question.content}
-						</p>
+						<div className="font-medium text-2xl mb-2 ">{question.title}</div>
+						<p className="text-justify font-light  ">{question.content}</p>
 					</div>
-
+					{/*   REWARD DIV   */}
 					<div className="flex  items-center">
-						<div className="flex items-center mr-5 font-light">
-							<AttachMoney
-								style={{
-									color: "black",
-									width: "17px",
-								}}
-								className="w-2"
-							/>
+						<div className="flex items-center mr-5 font-light ">
 							{Math.round(Number(question.reward) * 10000) / 10000} ICP
+							<svg
+								className="w-4 h-4 ml-2"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								strokeWidth="2"
+								fill="none"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M5 12h14"></path>
+								<path d="M12 5l7 7-7 7"></path>
+							</svg>
 						</div>
 					</div>
 				</>
@@ -59,8 +63,8 @@ const QuestionPreview = ({ question }: any) => {
 	//
 
 	return (
-		<div className="p-2 border-b mb-10 cursor-pointer">
-			<Link to={`/question/${question.id}`}>{showQuestion(question)}</Link>
+		<div className="cursor-pointer">
+			<Link to={`/questions/${question.id}`}>{showQuestion(question)}</Link>
 		</div>
 	);
 };

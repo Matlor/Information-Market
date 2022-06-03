@@ -43,6 +43,8 @@ function Landing({ plug }: any) {
 		// once paid calls open question function it
 		const openQuestionResponse = await plug.actors.marketActor.ask_question(
 			invoiceResponse.ok.invoice.id,
+			parseInt(duration),
+			title,
 			content
 		);
 
@@ -51,40 +53,14 @@ function Landing({ plug }: any) {
 	return (
 		<>
 			{" "}
-			<div className="border p-10  m-20 text-center">
+			<div className="ml-96 mr-96 mt-20 mb-5  ">
 				<div className="mb-10">
-					<h1 className="text-3xl font-bold mr-4 text-slate-700">
-						{" "}
-						Ask a Question
-					</h1>
+					<h1 className="text-2xl  mr-4 font-medium "> Ask a Question</h1>
 				</div>
 
-				<div className="flex justify-center ">
-					<form onSubmit={handleSubmit}>
-						<div className="mb-6 text-center">
-							Title:
-							<input
-								type="text"
-								value={title}
-								onChange={(e) => {
-									setTitle(e.target.value);
-								}}
-								className="w-72 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-							/>
-						</div>
-						<div className="mb-6 text-center">
-							Content:
-							<input
-								type="text"
-								value={content}
-								onChange={(e) => {
-									setContent(e.target.value);
-								}}
-								className="w-72 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-							/>
-						</div>
-
-						<div className="mb-6 text-center">
+				<form onSubmit={handleSubmit}>
+					<div className="flex justify-between">
+						<div className="mb-6 mr-4 text-center w-full">
 							Duration:
 							<input
 								type="number"
@@ -92,11 +68,11 @@ function Landing({ plug }: any) {
 								onChange={(e) => {
 									setDuration(e.target.value);
 								}}
-								className=" w-72 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+								className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full  p-2.5 "
 							/>
 						</div>
 
-						<div className="mb-6 text-center">
+						<div className="mb-6 ml-4 text-center w-full">
 							Reward:
 							<input
 								type="number"
@@ -104,22 +80,43 @@ function Landing({ plug }: any) {
 								onChange={(e) => {
 									setReward(e.target.value);
 								}}
-								className="w-72 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+								className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full p-2.5 "
 							/>
 						</div>
+					</div>
+					<div className="mb-6 text-center ">
+						Title:
+						<input
+							type="text"
+							value={title}
+							onChange={(e) => {
+								setTitle(e.target.value);
+							}}
+							className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+						/>
+					</div>
+					<div className="mb-6 text-center">
+						Content:
+						<input
+							type="text"
+							value={content}
+							onChange={(e) => {
+								setContent(e.target.value);
+							}}
+							className="h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+						/>
+					</div>
 
-						{plug.isConnected ? (
-							<button
-								type="submit"
-								className="text-white bg-slate-400 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center "
-							>
+					{plug.isConnected ? (
+						<div className="flex justify-center">
+							<button type="submit" className="my-button ">
 								Submit
 							</button>
-						) : (
-							<div>Please log in first</div>
-						)}
-					</form>
-				</div>
+						</div>
+					) : (
+						<div className="text-center">Please log in first</div>
+					)}
+				</form>
 			</div>
 		</>
 	);

@@ -4,7 +4,7 @@ const Arbitration = ({ questionState, plug }: any) => {
 	return (
 		<>
 			<div className="border mt-2 mb-2">Arbitration in progress</div>
-			<div className=" p-2">
+			<div>
 				{questionState.answers.map((answer: any) => {
 					return (
 						<Answer

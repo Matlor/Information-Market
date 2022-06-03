@@ -126,7 +126,7 @@ const Question = ({ plug, login }: any) => {
 	return (
 		<>
 			{questionState.hasData ? (
-				<div className="m-20 p-2 border ">
+				<div className="m-20 p-2  ">
 					<Body questionState={questionState} deadline={deadline} />
 					{showStatusComponents()}
 				</div>

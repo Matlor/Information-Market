@@ -5,6 +5,8 @@ import sudograph from "../api/sudograph";
 const Questions = ({}: any) => {
 	console.log(sudograph, "sudograph");
 
+	const [questions, setQuestions] = useState<any>([]);
+
 	useEffect(() => {
 		// not checking for error
 		const fetchQuestions = async () => {
@@ -16,21 +18,25 @@ const Questions = ({}: any) => {
 		fetchQuestions();
 	}, []);
 
-	const [questions, setQuestions] = useState<any>([]);
-
 	return (
-		<div className="ml-72 mr-72 mt-14 mb-5">
-			{questions.length > 0 ? (
-				questions.map((question: any, index: number) => {
-					return (
-						<div key={index}>
-							<QuestionPreview question={question} />
-						</div>
-					);
-				})
-			) : (
-				<div>No list</div>
-			)}
+		<div className="ml-96 mr-96 mt-20 mb-5 ">
+			<h1 className="text-2xl font-medium">Browse Questions</h1>
+			<div className=" flex flex-col justify-between">
+				{questions.length > 0 ? (
+					questions.map((question: any, index: number) => {
+						return (
+							<div
+								key={index}
+								className="pb-10 pt-14 border-b-2 border-secondary"
+							>
+								<QuestionPreview question={question} />
+							</div>
+						);
+					})
+				) : (
+					<div></div>
+				)}
+			</div>
 		</div>
 	);
 };

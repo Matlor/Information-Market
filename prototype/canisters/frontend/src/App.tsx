@@ -1,5 +1,5 @@
 import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
 import Landing from "./components/Landing";
@@ -40,7 +40,7 @@ function App() {
 
 	Scenario.loadScenario(
 		["Alice", "Bob", "Charlie", "Dan"],
-		20,
+		10,
 		60,
 		60,
 		1250000,
@@ -48,18 +48,20 @@ function App() {
 	);
 
 	return (
-		<HashRouter>
-			<Header plug={plug} login={login} logout={logout} />
-			<Routes>
-				<Route path="/" element={<Landing plug={plug} />} />
-				<Route path="/interactions" element={<Interactions plug={plug} />} />
-				<Route path="/questions" element={<Questions />} />
-				<Route
-					path="/question/:id"
-					element={<Question plug={plug} login={login} />}
-				/>
-			</Routes>
-		</HashRouter>
+		<div className="bg-primary leading-relaxed antialiased text-sm min-h-screen  ">
+			<HashRouter>
+				<Header plug={plug} login={login} logout={logout} />
+				<Routes>
+					<Route path="/" element={<Landing plug={plug} />} />
+					<Route path="/interactions" element={<Interactions plug={plug} />} />
+					<Route path="/questions" element={<Questions />} />
+					<Route
+						path="/questions/:id"
+						element={<Question plug={plug} login={login} />}
+					/>
+				</Routes>
+			</HashRouter>
+		</div>
 	);
 }
 

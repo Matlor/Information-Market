@@ -6,7 +6,7 @@ const Closed = ({ questionState, plug }: any) => {
 			<div className="font-light border mt-2 mb-2 ">
 				Question is closed. Winner is: {questionState.question.winner.id}
 			</div>
-			<div className=" p-2">
+			<div>
 				{questionState.answers.map((answer: any) => {
 					return (
 						<Answer

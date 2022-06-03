@@ -24,37 +24,32 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 
 	return (
 		<>
-			<form onSubmit={submitAnswer} className="border mt-4 mb-4 p-4">
-				<div className="mb-6">
-					<textarea
-						className="w-full h-32 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-						value={answerInput}
-						onChange={(e) => {
-							setAnswerInput(e.target.value);
-						}}
-					/>
-				</div>
+			<form onSubmit={submitAnswer}>
+				<textarea
+					className="h-32 mb-2 p-5 bg-primary border  block w-full "
+					value={answerInput}
+					onChange={(e) => {
+						setAnswerInput(e.target.value);
+					}}
+				/>
+
 				{plug.isConnected ? (
-					<button
-						type="submit"
-						className="font-light text-white bg-gray-400 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center "
-					>
+					<button type="submit" className="my-button">
 						Submit
 					</button>
 				) : (
-					<div className="font-light ">
-						<div> You have to be logged in to answer </div>
-
-						<button
-							onClick={loginHandler}
-							className="px-6 py-2  cursor-pointer bg-slate-50 rounded-full"
-						>
+					<div className="font-light flex">
+						<button onClick={loginHandler} className="my-button">
 							log in
 						</button>
+						<div className="self-center ml-2">
+							{" "}
+							You have to be logged in to answer{" "}
+						</div>
 					</div>
 				)}
 			</form>
-			<div className=" p-2">
+			<div>
 				{questionState.answers.map((answer: any, index: number) => {
 					return (
 						<Answer

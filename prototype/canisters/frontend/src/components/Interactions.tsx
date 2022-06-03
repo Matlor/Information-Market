@@ -33,7 +33,7 @@ const Interactions = ({ plug }: any) => {
 						);
 					})
 				) : (
-					<div>No list</div>
+					<div></div>
 				)}
 			</div>
 		</div>

@@ -15,7 +15,7 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 
 	return (
 		<>
-			<div className=" p-2">
+			<div>
 				{questionState.answers.map((answer: any) => {
 					return (
 						<div key={answer.id}>
