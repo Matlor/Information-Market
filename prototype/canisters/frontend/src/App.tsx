@@ -2,8 +2,8 @@ import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
 import { useState } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
-import Landing from "./components/Landing";
-import Questions from "./components/Questions";
+import AddQuestion from "./components/AddQuestion";
+import QuestionsList from "./components/QuestionsList";
 import Question from "./components/Question";
 import Scenario from "./utils/scenario";
 
@@ -52,14 +52,14 @@ function App() {
 				<Header plug={plug} login={login} logout={logout} />
 				<div className=" ml-96 mr-96 mt-20 mb-5">
 					<Routes>
-						<Route path="/" element={<Landing plug={plug} />} />
+						<Route path="/" element={<QuestionsList />} />
 						<Route
 							path="/interactions"
 							element={<Interactions plug={plug} />}
 						/>
-						<Route path="/questions" element={<Questions />} />
+						<Route path="/add-question" element={<AddQuestion plug={plug} />} />
 						<Route
-							path="/questions/:id"
+							path="/question/:id"
 							element={<Question plug={plug} login={login} />}
 						/>
 					</Routes>

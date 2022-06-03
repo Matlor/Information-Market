@@ -2,7 +2,7 @@ import QuestionPreview from "./QuestionPreview";
 import { useState, useEffect } from "react";
 import sudograph from "../api/sudograph";
 
-const Questions = ({}: any) => {
+const QuestionsList = ({}: any) => {
 	console.log(sudograph, "sudograph");
 
 	const [questions, setQuestions] = useState<any>([]);
@@ -38,4 +38,4 @@ const Questions = ({}: any) => {
 	);
 };
 
-export default Questions;
+export default QuestionsList;

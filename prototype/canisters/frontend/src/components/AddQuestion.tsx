@@ -3,7 +3,7 @@ import { useState } from "react";
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
 
-function Landing({ plug }: any) {
+function AddQuestion({ plug }: any) {
 	const [title, setTitle] = useState<any>("");
 	const [content, setContent] = useState<string>("");
 	const [duration, setDuration] = useState<any>(0);
@@ -121,4 +121,4 @@ function Landing({ plug }: any) {
 	);
 }
 
-export default Landing;
+export default AddQuestion;
