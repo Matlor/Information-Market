@@ -53,7 +53,7 @@ function Landing({ plug }: any) {
 	return (
 		<>
 			{" "}
-			<div className=" ">
+			<>
 				<div className="mb-10">
 					<h1 className="text-2xl  mr-4 font-medium "> Ask a Question</h1>
 				</div>
@@ -117,7 +117,7 @@ function Landing({ plug }: any) {
 						<div className="text-center">Please log in first</div>
 					)}
 				</form>
-			</div>
+			</>
 		</>
 	);
 }

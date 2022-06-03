@@ -47,16 +47,12 @@ const Body = ({ questionState, deadline }: any) => {
 
 			{/*   CONTENT DIV   */}
 			<div className="mb-8 ">
-				<div className="font-light text-2xl mb-2 ">
-					{questionState.question.title}
-				</div>
 				<p className="text-justify font-light">
 					{questionState.question.content}
 				</p>
 			</div>
 			<div className="flex justify-between">
 				{/*   REWARD DIV   */}
-
 				<div className="flex  mr-5 font-light">
 					Reward:{" "}
 					{Math.round(Number(questionState.question.reward) * 10000) / 10000}{" "}

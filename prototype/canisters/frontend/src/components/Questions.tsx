@@ -19,7 +19,7 @@ const Questions = ({}: any) => {
 	}, []);
 
 	return (
-		<div className=" ">
+		<>
 			<h1 className="text-2xl font-medium">Browse Questions</h1>
 			<div className=" flex flex-col justify-between">
 				{questions.length > 0 ? (
@@ -37,7 +37,7 @@ const Questions = ({}: any) => {
 					<div></div>
 				)}
 			</div>
-		</div>
+		</>
 	);
 };
 
