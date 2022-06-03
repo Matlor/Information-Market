@@ -25,10 +25,7 @@ const Questions = ({}: any) => {
 				{questions.length > 0 ? (
 					questions.map((question: any, index: number) => {
 						return (
-							<div
-								key={index}
-								className="pb-10 pt-14 border-b-2 border-secondary"
-							>
+							<div key={index}>
 								<QuestionPreview question={question} />
 							</div>
 						);

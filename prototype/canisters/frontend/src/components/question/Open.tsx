@@ -26,7 +26,7 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 		<>
 			<form onSubmit={submitAnswer}>
 				<textarea
-					className="h-32 mb-2 p-5 bg-primary border  block w-full "
+					className="h-32 mb-2 p-2.5 bg-primary border  block w-full "
 					value={answerInput}
 					onChange={(e) => {
 						setAnswerInput(e.target.value);

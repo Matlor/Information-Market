@@ -63,7 +63,7 @@ const QuestionPreview = ({ question }: any) => {
 	//
 
 	return (
-		<div className="cursor-pointer">
+		<div className="cursor-pointer pb-10 pt-14 border-b-2 border-secondary">
 			<Link to={`/questions/${question.id}`}>{showQuestion(question)}</Link>
 		</div>
 	);
