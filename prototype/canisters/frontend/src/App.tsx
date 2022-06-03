@@ -46,20 +46,24 @@ function App() {
 		1250000,
 		100000000
 	);
-
 	return (
-		<div className="bg-primary leading-relaxed antialiased text-sm min-h-screen  ">
+		<div className="bg-primary leading-relaxed antialiased text-sm min-h-screen   ">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
-				<Routes>
-					<Route path="/" element={<Landing plug={plug} />} />
-					<Route path="/interactions" element={<Interactions plug={plug} />} />
-					<Route path="/questions" element={<Questions />} />
-					<Route
-						path="/questions/:id"
-						element={<Question plug={plug} login={login} />}
-					/>
-				</Routes>
+				<div className=" ml-96 mr-96 mt-20 mb-5">
+					<Routes>
+						<Route path="/" element={<Landing plug={plug} />} />
+						<Route
+							path="/interactions"
+							element={<Interactions plug={plug} />}
+						/>
+						<Route path="/questions" element={<Questions />} />
+						<Route
+							path="/questions/:id"
+							element={<Question plug={plug} login={login} />}
+						/>
+					</Routes>
+				</div>
 			</HashRouter>
 		</div>
 	);

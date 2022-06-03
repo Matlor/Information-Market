@@ -22,8 +22,11 @@ const Interactions = ({ plug }: any) => {
 	}, []);
 
 	return (
-		<div>
-			<div className="ml-72 mr-72 mt-14 mb-5">
+		<div className=" ">
+			<div className="mb-10">
+				<h1 className="text-2xl  mr-4 font-medium "> My Interactions</h1>
+			</div>
+			<div className="">
 				{myQuetions.length > 0 ? (
 					myQuetions.map((question: any, index: number) => {
 						return (

@@ -19,7 +19,7 @@ const Questions = ({}: any) => {
 	}, []);
 
 	return (
-		<div className="ml-96 mr-96 mt-20 mb-5 ">
+		<div className=" ">
 			<h1 className="text-2xl font-medium">Browse Questions</h1>
 			<div className=" flex flex-col justify-between">
 				{questions.length > 0 ? (
