@@ -6,7 +6,10 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 			{plug.isConnected &&
 			plug.plug.principalId === questionState.question.author ? (
 				<div className="flex ">
-					<button onClick={(e) => handlePickWinner(e, answer.id)}>
+					<button
+						className=" bg-secondary hover:bg-primary my-button"
+						onClick={(e) => handlePickWinner(e, answer.id)}
+					>
 						Pick Winner
 					</button>
 				</div>
@@ -18,22 +21,27 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 
 	var border = "border-b-2 ";
 	const visualiseWinner = () => {
-		if (questionState.question.status === "DISPUTABLE") {
-			if (answer.id === questionState.question.winner.id) {
-				border = "border-yellow-500 border";
+		try {
+			if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
+				if (answer.id === questionState.question.winner.id) {
+					border = "border-yellow-500 border";
+				}
+			} else if (questionState.question.status === "CLOSED") {
+				if (answer.id === questionState.question.winner.id) {
+					border = "border-green-500 border";
+				}
 			}
-		} else if (questionState.question.status === "CLOSED") {
-			if (answer.id === questionState.question.winner.id) {
-				border = "border-green-500 border";
-			}
-		} else {
+		} catch (e) {
+			console.log(e);
 		}
 	};
 	visualiseWinner();
 
 	return (
-		<div className="p-16 pr-10 pt-5 pb-5 bg-primary mb-4 min-h-24 ">
-			<div className="flex justify-between">
+		<div
+			className={`p-16 pr-10 pt-5 pb-5 bg-primary mb-4 min-h-24 border ${border} `}
+		>
+			<div className="flex justify-between ">
 				<div className=" font-light text-xs mb-2 ">
 					Submitted by{" "}
 					<p className="no-underline hover:underline inline-block">user </p> at{" "}
@@ -47,14 +55,6 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 						}
 					)}
 				</div>
-				{questionState.question.status === "DISPUTABLE" &&
-				answer.id === questionState.question.winner.id ? (
-					<div className=" font-light text-xs bg-orange-300 self-center">
-						WINNER
-					</div>
-				) : (
-					<></>
-				)}
 			</div>
 			<div className="text-justify font-light"> {answer.content}</div>
 			<div className="form-check"></div>

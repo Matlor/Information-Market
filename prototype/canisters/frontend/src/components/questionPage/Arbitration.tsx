@@ -3,7 +3,9 @@ import Answer from "./Answer";
 const Arbitration = ({ questionState, plug }: any) => {
 	return (
 		<>
-			<div className="border mt-2 mb-2">Arbitration in progress</div>
+			<div className="w-full p-10 mb-5 border-t-2 border-b-2 h-44 flex justify-center items-center">
+				A dispute has been triggered, arbitration is in progress
+			</div>
 			<div>
 				{questionState.answers.map((answer: any) => {
 					return (

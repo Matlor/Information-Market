@@ -74,7 +74,7 @@ const Question = ({ question, deadline }: any) => {
 					{/* COUNTDOWN DIV */}
 					<div className="mb-2 ">
 						{" "}
-						{countdown > 0 ? (
+						{countdown > 0 && question.status === "OPEN" ? (
 							<div className="text-justify font-light">
 								{" "}
 								Deadline: {toHHMMSS(countdown)}

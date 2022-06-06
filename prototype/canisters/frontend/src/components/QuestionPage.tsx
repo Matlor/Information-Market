@@ -64,59 +64,48 @@ const QuestionPage = ({ plug, login }: any) => {
 		switch (questionState.question.status) {
 			case "OPEN":
 				return (
-					<>
-						<Open
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
+					<Open
+						questionState={questionState}
+						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
+					/>
 				);
 			case "PICKANSWER":
 				return (
-					<>
-						<PickAnswer
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
+					<PickAnswer
+						questionState={questionState}
+						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
+					/>
 				);
 			case "DISPUTABLE":
 				return (
-					<>
-						<Disputable
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
+					<Disputable
+						questionState={questionState}
+						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
+					/>
 				);
-			case "ARBITRATION":
+			case "DISPUTED":
 				return (
-					<>
-						<Arbitration
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
+					<Arbitration
+						questionState={questionState}
+						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
+					/>
 				);
 			case "CLOSED":
 				return (
-					<>
-						{" "}
-						<Closed
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
+					<Closed
+						questionState={questionState}
+						plug={plug}
+						fetch_data={fetch_data}
+						login={login}
+					/>
 				);
 			default:
 				return <></>;

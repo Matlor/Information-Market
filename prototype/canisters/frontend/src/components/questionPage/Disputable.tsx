@@ -11,8 +11,10 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 
 	const dispute = (
 		<div className="items-center ">
-			<div className="mb-4 ">Winner: {questionState.question.winner.id}</div>
-			<div>
+			<div className="mb-4 decoration-yellow-500 underline ">
+				Winner: {questionState.question.winner.id}
+			</div>
+			<div className="flex justify-center ">
 				{" "}
 				{plug.isConnected ? (
 					<button
@@ -35,14 +37,13 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 
 	return (
 		<>
-			<div className="font-light">
+			<div className="font-light w-full p-10 mb-5 border-t-2 border-b-2 h-44 flex justify-center items-center">
 				{questionState.question.winner ? (
 					dispute
 				) : (
 					<div> Winner: No winner has been picked</div>
 				)}
 			</div>
-
 			<div>
 				{questionState.answers.map((answer: any) => {
 					return (
