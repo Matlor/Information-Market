@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
 import sudograph from "../api/sudograph";
 import { useEffect, useState } from "react";
-import QuestionPreview from "./QuestionPreview";
+import Question from "./Question";
 
-const Interactions = ({ plug }: any) => {
+const QuestionInteractions = ({ plug }: any) => {
 	if (!plug.isConnected) {
 		return <Navigate to="/" replace />;
 	}
@@ -23,13 +23,13 @@ const Interactions = ({ plug }: any) => {
 
 	return (
 		<>
-			<h1 className="text-2xl  mr-4 font-medium "> My Interactions</h1>
+			<h1 className="text-2xl  mr-4 font-medium mb-10"> My Interactions</h1>
 			<div className="">
 				{myQuetions.length > 0 ? (
 					myQuetions.map((question: any, index: number) => {
 						return (
 							<div key={index}>
-								<QuestionPreview question={question} />
+								<Question question={question} />
 							</div>
 						);
 					})
@@ -41,4 +41,4 @@ const Interactions = ({ plug }: any) => {
 	);
 };
 
-export default Interactions;
+export default QuestionInteractions;

@@ -4,10 +4,10 @@ import plugApi from "./api/plug";
 import Header from "./components/Header";
 import AddQuestion from "./components/AddQuestion";
 import QuestionsList from "./components/QuestionsList";
-import Question from "./components/Question";
+import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
 
-import Interactions from "./components/Interactions";
+import QuestionInteractions from "./components/QuestionInteractions";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -47,15 +47,15 @@ function App() {
 		100000000
 	);
 	return (
-		<div className="bg-primary leading-relaxed antialiased text-sm min-h-screen   ">
+		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
-				<div className=" ml-96 mr-96 mt-20 mb-5">
+				<div className=" ml-80 mr-80 mt-10 mb-5">
 					<Routes>
 						<Route path="/" element={<QuestionsList />} />
 						<Route
 							path="/interactions"
-							element={<Interactions plug={plug} />}
+							element={<QuestionInteractions plug={plug} />}
 						/>
 						<Route path="/add-question" element={<AddQuestion plug={plug} />} />
 						<Route

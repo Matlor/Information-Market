@@ -4,14 +4,16 @@ module.exports = {
 		fontFamily: {
 			inter: "'Inter', sans-serif",
 			sans: ["ui-sans-serif", "system-ui"],
+			ibm: ["'IBM Plex Sans'", "sans-serif"],
 		},
 		extend: {
 			colors: {
-				primary: "#FFFBF6",
+				primary: "#FCFCFC",
 				secondary: "#F5F5F5",
 				third: "#5B504D",
+				textGrey: "#1a1a1b",
 			},
 		},
 	},
-	plugins: [],
+	plugins: [require("@tailwindcss/forms")],
 };

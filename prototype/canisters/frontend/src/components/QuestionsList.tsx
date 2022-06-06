@@ -1,4 +1,4 @@
-import QuestionPreview from "./QuestionPreview";
+import Question from "./Question";
 import { useState, useEffect } from "react";
 import sudograph from "../api/sudograph";
 
@@ -20,13 +20,13 @@ const QuestionsList = ({}: any) => {
 
 	return (
 		<>
-			<h1 className="text-2xl font-medium">Browse Questions</h1>
+			<h1 className="text-2xl font-medium mb-10">Browse Questions</h1>
 			<div className=" flex flex-col justify-between">
 				{questions.length > 0 ? (
 					questions.map((question: any, index: number) => {
 						return (
 							<div key={index}>
-								<QuestionPreview question={question} />
+								<Question question={question} />
 							</div>
 						);
 					})

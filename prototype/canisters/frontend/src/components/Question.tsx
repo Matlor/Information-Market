@@ -1,145 +1,100 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import sudograph from "../api/sudograph";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import { toHHMMSS } from "../utils/conversions";
 
-import Body from "./question/Body";
-import Open from "./question/Open";
-import PickAnswer from "./question/PickAnswer";
-import Disputable from "./question/Disputable";
-import Arbitration from "./question/Arbitration";
-import Closed from "./question/Closed";
+import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
 
-// TODO: Fix deadline issues
-const Question = ({ plug, login }: any) => {
-	let { id } = useParams();
+const Question = ({ question, deadline }: any) => {
+	const [countdown, setCountdown] = useState<any>(0);
 
-	const [questionState, setQuestionState] = useState<any>({
-		question: {},
-		hasData: false,
-		answers: [],
-	});
-
-	const [deadline, setDeadline] = useState<any>(0);
-
-	const fetch_data = async () => {
-		try {
-			const {
-				data: { readQuestion },
-			} = await sudograph.get_question(id);
-			console.log(readQuestion, "question");
-
-			const {
-				data: { readAnswer },
-			} = await sudograph.get_question_answers(id);
-			console.log(readAnswer, "answers");
-
-			const sortedAnswers = readAnswer.sort((a, b) => {
-				return a.creation_date - b.creation_date;
-			});
-
-			if (readQuestion.length > 0) {
-				setQuestionState({
-					question: readQuestion[0],
-					hasData: true,
-					answers: sortedAnswers,
-				});
-				const newDeadline =
-					(readQuestion[0].creation_date + readQuestion[0].open_duration) *
-					60 *
-					1000;
-
-				setDeadline(newDeadline);
-			}
-		} catch (err) {
-			// handle error (or empty response)
-			console.log(err);
+	setTimeout(() => {
+		let secondsRemaing = (deadline - Date.now()) / 1000;
+		if (secondsRemaing > 0) {
+			setCountdown(secondsRemaing);
+		} else {
+			setCountdown(null);
 		}
-	};
+	}, 1000);
 
-	useEffect(() => {
-		fetch_data();
-	}, []);
+	const showQuestion = (question: any) => {
+		if (Object.keys(question).length !== 0) {
+			return (
+				<>
+					<div className=" pb-4">
+						<div className="flex justify-between">
+							{/*   OWNER + CREATED_AT  DIV */}
+							<div className="font-light text-xs mb-2">
+								Submitted by{" "}
+								<p className="no-underline hover:underline inline-block">
+									user{" "}
+								</p>{" "}
+								at{" "}
+								{graphQlToJsDate(question.creation_date).toLocaleString(
+									undefined,
+									{
+										hour: "numeric",
+										minute: "numeric",
+										month: "long",
+										day: "numeric",
+									}
+								)}
+							</div>
+							{/*   STATUS DIV   */}
+							<div className="font-light text-xs mb-1">
+								{" "}
+								Status: {questionStatusToString(question.status)}
+							</div>
+						</div>
 
-	const showStatusComponents = () => {
-		switch (questionState.question.status) {
-			case "OPEN":
-				return (
-					<>
-						<Open
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
-				);
-			case "PICKANSWER":
-				return (
-					<>
-						<PickAnswer
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
-				);
-			case "DISPUTABLE":
-				return (
-					<>
-						<Disputable
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
-				);
-			case "ARBITRATION":
-				return (
-					<>
-						<Arbitration
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
-				);
-			case "CLOSED":
-				return (
-					<>
+						<div className="font-medium text-xl mb-2 text-slate-500">
+							<Link to={`/question/${question.id}`}>{question.title}</Link>
+						</div>
+						<p className="text-justify font-light  "> {question.content}</p>
+					</div>
+					{/*   REWARD DIV   */}
+					<div className="flex  items-center">
+						<Link to={`/question/${question.id}`}>
+							<div className="flex items-center mr-5 font-light ">
+								{Math.round(Number(question.reward) * 10000) / 10000} ICP
+								<svg
+									className="w-4 h-4 ml-2"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									strokeWidth="2"
+									fill="none"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								>
+									<path d="M5 12h14"></path>
+									<path d="M12 5l7 7-7 7"></path>
+								</svg>
+							</div>
+						</Link>
+					</div>
+					{/* COUNTDOWN DIV */}
+					<div className="mb-2 ">
 						{" "}
-						<Closed
-							questionState={questionState}
-							plug={plug}
-							fetch_data={fetch_data}
-							login={login}
-						/>
-					</>
-				);
-			default:
-				return <></>;
+						{countdown > 0 ? (
+							<div className="text-justify font-light">
+								{" "}
+								Deadline: {toHHMMSS(countdown)}
+							</div>
+						) : (
+							<div></div>
+						)}
+					</div>
+				</>
+			);
+		} else {
+			return <div>No question</div>;
 		}
 	};
+	//
 
 	return (
-		<>
-			<div className="mb-10">
-				<h1 className="text-2xl  mr-4 font-medium ">
-					{" "}
-					{questionState.question.title}
-				</h1>
-			</div>
-			{questionState.hasData ? (
-				<div className="">
-					<Body questionState={questionState} deadline={deadline} />
-					{showStatusComponents()}
-				</div>
-			) : (
-				<></>
-			)}
-		</>
+		<div className=" pl-16 pr-10 pt-10 pb-10  border-b-2 border-secondary bg-primary mb-4">
+			{showQuestion(question)}
+		</div>
 	);
 };
 

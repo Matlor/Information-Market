@@ -1,23 +1,19 @@
 const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
+	// 	handlePickWinner(e, answer.id);
+
 	const pickWinner = (
-		<div className="font-light">
+		<>
 			{plug.isConnected &&
 			plug.plug.principalId === questionState.question.author ? (
-				<div className="mt-2 mb-2 p-2 flex justify-end">
-					<button
-						className="my-button"
-						onClick={(e) => {
-							handlePickWinner(e, answer.id);
-						}}
-					>
-						{" "}
+				<div className="flex ">
+					<button onClick={(e) => handlePickWinner(e, answer.id)}>
 						Pick Winner
 					</button>
 				</div>
 			) : (
-				<div></div>
+				<></>
 			)}
-		</div>
+		</>
 	);
 
 	var border = "border-b-2 ";
@@ -36,7 +32,7 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 	visualiseWinner();
 
 	return (
-		<div className={`pb-10 pt-10 `}>
+		<div className="p-16 pr-10 pt-5 pb-5 bg-primary mb-4 min-h-24 ">
 			<div className="flex justify-between">
 				<div className=" font-light text-xs mb-2 ">
 					Submitted by{" "}
@@ -61,12 +57,15 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 				)}
 			</div>
 			<div className="text-justify font-light"> {answer.content}</div>
+			<div className="form-check"></div>
 
-			{questionState.question.status === "PICKANSWER" ? (
-				pickWinner
-			) : (
-				<div></div>
-			)}
+			<div className="flex justify-end w-full">
+				{questionState.question.status === "PICKANSWER" ? (
+					pickWinner
+				) : (
+					<div></div>
+				)}
+			</div>
 		</div>
 	);
 };
