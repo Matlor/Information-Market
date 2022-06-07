@@ -1,8 +1,35 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { gql, sudograph } from "sudograph";
 import { e8sToIcp, graphQlToJsDate } from "../utils/conversions";
+import { default as ReactSelect } from "react-select";
+import { components } from "react-select";
 import React from 'react'
+
+const Option = (props) => {
+  return (
+    <div>
+      <components.Option {...props}>
+        <input
+          type="checkbox"
+          checked={props.isSelected}
+          onChange={() => null}
+        />{" "}
+        <label>{props.label}</label>
+      </components.Option>
+    </div>
+  );
+};
+
+const allStatus : StatusMap = [
+  { value: "OPEN", label: "Open"},
+  { value: "PICKANSWER", label: "Winner Selection"},
+  { value: "DISPUTABLE", label: "Open for disputes"},
+  { value: "DISPUTED", label: "Arbitration"},
+  { value: "CLOSED", label: "Closed"}
+];
+
+type Status = {value: string, label:string};
+type StatusMap = Array<Status>;
 
 type JSONValue =
     | string
@@ -21,7 +48,8 @@ type QuestionListState = {
 	questions: JSONArray,
 	orderField: string,
 	orderIsAscending: boolean,
-	searchedText: string 
+	searchedText: string,
+	statusMap: StatusMap
 };
 
 export default class QuestionsList extends React.Component<{}, QuestionListState> {
@@ -32,9 +60,11 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 			questions: [],
 			orderField: 'reward',
 			orderIsAscending: false,
-			searchedText: ''
+			searchedText: '',
+			statusMap: [{ value: "OPEN", label: "Open"}]
 		};
     this.setSearchedText = this.setSearchedText.bind(this);
+		this.setStatusMap = this.setStatusMap.bind(this);
 		this.fetchQuestions = this.fetchQuestions.bind(this);
 		this.getArrow = this.getArrow.bind(this);
 		this.getProgressColors = this.getProgressColors.bind(this);
@@ -56,6 +86,12 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 		this.setState({searchedText: event.target.value});
 	}
 
+	setStatusMap(map) {
+		if (map.length != 0){
+			this.setState({statusMap: map});
+		}
+	}
+
 	componentDidMount(): void {
 		this.fetchQuestions();
 	};
@@ -63,7 +99,8 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<QuestionListState>, snapshot?: any): void {
 		if (this.state.orderField != prevState.orderField ||
 			this.state.orderIsAscending != prevState.orderIsAscending ||
-			this.state.searchedText != prevState.searchedText){
+			this.state.searchedText != prevState.searchedText ||
+			this.state.statusMap != prevState.statusMap){
 			this.fetchQuestions();
 		}
 	}
@@ -72,9 +109,15 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 		let sudographActor = sudograph({canisterId: `${process.env.GRAPHQL_CANISTER_ID}`});
 
 		var queryInputs : string = "order: {" + this.state.orderField + ": " + (this.state.orderIsAscending ? "ASC" : "DESC") + "}";
-		if (this.state.searchedText.length!=0){
-			queryInputs += "search: {or: [{title: {contains: \"" + this.state.searchedText + "\"}}, {content: {contains: \"" + this.state.searchedText + "\"}}]}";
-		}
+		queryInputs += "search: {and: [{or: [{title: {contains: \"" + this.state.searchedText + "\"}}, {content: {contains: \"" + this.state.searchedText + "\"}}]}, {or: [";
+		this.state.statusMap.map((status: Status, index: number) => {
+			if(index!=0){
+				queryInputs += ", ";
+			}	
+			queryInputs += "{status: {eq: \"" + status.value + "\"}}";
+		});
+		queryInputs += "]}]}";
+
 		const result = await sudographActor.query(gql`
 			query {
 				readQuestion(` + queryInputs + `) {
@@ -124,8 +167,20 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 							</div>
 							<input type="text" value={this.state.searchedText} onChange={this.setSearchedText} className="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search questions..." required/>
 					</div>
+					<ReactSelect
+						options={allStatus}
+						isMulti={true}
+						isSearchable={false}
+						closeMenuOnSelect={false}
+						hideSelectedOptions={false}
+						components={{
+							Option
+						}}
+						onChange={this.setStatusMap}
+						value={this.state.statusMap}
+					/>
 				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-200 dark:text-gray-400">
+					<thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-400">
 						<tr>
 							<th scope="col" className="px-6 py-3">
 								Question
@@ -134,7 +189,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 								Answers
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button>Status</button>
+								Status
 							</th>
 							<th scope="col" className="px-6 py-3">
 								<button onClick={() => {this.setOrderField("reward"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Reward { this.getArrow("reward") }</button>
