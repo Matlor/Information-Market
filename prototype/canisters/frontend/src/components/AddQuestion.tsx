@@ -54,9 +54,7 @@ function AddQuestion({ plug }: any) {
 		<>
 			{" "}
 			<>
-				<div className="mb-10">
-					<h1 className="text-2xl  mr-4 font-medium "> Ask a Question</h1>
-				</div>
+				<h1 className="page-title"> Ask a Question</h1>
 
 				<form onSubmit={handleSubmit}>
 					<div className="flex justify-between">

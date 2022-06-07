@@ -1,11 +1,11 @@
 import { useState } from "react";
 import Answer from "./Answer";
+import FieldWrapper from "../layout/FieldWrapper";
 
 const Open = ({ questionState, plug, fetch_data, login }: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
 	const submitAnswer = async (e: any) => {
-		console.log(questionState.question.id, "id");
 		e.preventDefault();
 		// has to be logged in
 		console.log(
@@ -24,11 +24,8 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 
 	return (
 		<>
-			<form
-				onSubmit={submitAnswer}
-				className="p-10 mb-5 border-t-2 border-b-2 h-72 w-full flex items-center"
-			>
-				<div className="w-full">
+			<FieldWrapper>
+				<form onSubmit={submitAnswer} className="w-full">
 					<textarea
 						className="h-36 mb-2 p-2.5 bg-primary border-0 w-full"
 						value={answerInput}
@@ -38,7 +35,7 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 					/>
 
 					{plug.isConnected ? (
-						<button type="submit" className="my-button">
+						<button type="submit" className="my-button ">
 							Submit
 						</button>
 					) : (
@@ -52,21 +49,19 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 							</div>
 						</div>
 					)}
-				</div>
-			</form>
+				</form>
+			</FieldWrapper>
 
-			<div className="">
-				{questionState.answers.map((answer: any, index: number) => {
-					return (
-						<Answer
-							plug={plug}
-							answer={answer}
-							key={answer.id}
-							questionState={questionState}
-						/>
-					);
-				})}
-			</div>
+			{questionState.answers.map((answer: any, index: number) => {
+				return (
+					<Answer
+						plug={plug}
+						answer={answer}
+						key={answer.id}
+						questionState={questionState}
+					/>
+				);
+			})}
 		</>
 	);
 };

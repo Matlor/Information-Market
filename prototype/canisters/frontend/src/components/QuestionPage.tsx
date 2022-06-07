@@ -114,9 +114,7 @@ const QuestionPage = ({ plug, login }: any) => {
 
 	return (
 		<>
-			<div className="mb-10">
-				<h1 className="text-2xl font-medium mr-4"> Question</h1>
-			</div>
+			<h1 className="page-title"> Question</h1>
 			{questionState.hasData ? (
 				<div className="">
 					<Question question={questionState.question} deadline={deadline} />

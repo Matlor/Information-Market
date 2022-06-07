@@ -20,7 +20,7 @@ const QuestionsList = ({}: any) => {
 
 	return (
 		<>
-			<h1 className="text-2xl font-medium mb-10">Browse Questions</h1>
+			<h1 className="page-title">Browse Questions</h1>
 			<div className=" flex flex-col justify-between">
 				{questions.length > 0 ? (
 					questions.map((question: any, index: number) => {

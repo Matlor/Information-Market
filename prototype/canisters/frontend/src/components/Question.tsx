@@ -23,7 +23,7 @@ const Question = ({ question, deadline }: any) => {
 					<div className=" pb-4">
 						<div className="flex justify-between">
 							{/*   OWNER + CREATED_AT  DIV */}
-							<div className="font-light text-xs mb-2">
+							<div className="small-text">
 								Submitted by{" "}
 								<p className="no-underline hover:underline inline-block">
 									user{" "}
@@ -40,7 +40,7 @@ const Question = ({ question, deadline }: any) => {
 								)}
 							</div>
 							{/*   STATUS DIV   */}
-							<div className="font-light text-xs mb-1">
+							<div className="small-text">
 								{" "}
 								Status: {questionStatusToString(question.status)}
 							</div>

@@ -23,7 +23,7 @@ const QuestionInteractions = ({ plug }: any) => {
 
 	return (
 		<>
-			<h1 className="text-2xl  mr-4 font-medium mb-10"> My Interactions</h1>
+			<h1 className="page-title"> My Interactions</h1>
 			<div className="">
 				{myQuetions.length > 0 ? (
 					myQuetions.map((question: any, index: number) => {
