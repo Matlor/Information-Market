@@ -23,10 +23,12 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 				border = "border-yellow-500 border";
 			}
 		} else if (questionState.question.status === "CLOSED") {
-			if (answer.id === questionState.question.winner.id) {
-				border = "border-green-500 border";
+			// @todo
+			if (questionState.question.winner){
+				if (answer.id === questionState.question.winner.id) {
+					border = "border-green-500 border";
+				}
 			}
-		} else {
 		}
 	};
 	visualiseWinner();
