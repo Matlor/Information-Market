@@ -25,7 +25,7 @@ const QuestionsList = ({}: any) => {
 				{questions.length > 0 ? (
 					questions.map((question: any, index: number) => {
 						return (
-							<div key={index}>
+							<div key={index} className="mb-4">
 								<Question question={question} />
 							</div>
 						);
