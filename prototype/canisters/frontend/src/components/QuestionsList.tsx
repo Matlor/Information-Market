@@ -49,6 +49,9 @@ type QuestionListState = {
 	orderField: string,
 	orderIsAscending: boolean,
 	searchedText: string,
+	questionsPerPage: number,
+	pageIndex: number,
+	totalQuestions: number,
 	statusMap: StatusMap
 };
 
@@ -61,6 +64,9 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 			orderField: 'reward',
 			orderIsAscending: false,
 			searchedText: '',
+			questionsPerPage: 3,
+			pageIndex: 0,
+			totalQuestions: 0,
 			statusMap: [{ value: "OPEN", label: "Open"}]
 		};
     this.setSearchedText = this.setSearchedText.bind(this);
@@ -83,12 +89,18 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 	}
 
 	setSearchedText(event) {
-		this.setState({searchedText: event.target.value});
+		this.setState({searchedText: event.target.value, pageIndex:0});
 	}
 
 	setStatusMap(map) {
 		if (map.length != 0){
-			this.setState({statusMap: map});
+			this.setState({statusMap: map, pageIndex:0});
+		}
+	}
+
+	setPageIndex(index) {
+		if(this.state.pageIndex != index){
+			this.setState({pageIndex: index});
 		}
 	}
 
@@ -100,7 +112,8 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 		if (this.state.orderField != prevState.orderField ||
 			this.state.orderIsAscending != prevState.orderIsAscending ||
 			this.state.searchedText != prevState.searchedText ||
-			this.state.statusMap != prevState.statusMap){
+			this.state.statusMap != prevState.statusMap ||
+			this.state.pageIndex != prevState.pageIndex){
 			this.fetchQuestions();
 		}
 	}
@@ -108,7 +121,11 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 	fetchQuestions = async () => {
 		let sudographActor = sudograph({canisterId: `${process.env.GRAPHQL_CANISTER_ID}`});
 
-		var queryInputs : string = "order: {" + this.state.orderField + ": " + (this.state.orderIsAscending ? "ASC" : "DESC") + "}";
+		var queryInputs : string = "";
+		// Add the ordering on a field (ascendant or descendant)
+		queryInputs += "order: {" + this.state.orderField + ": " + (this.state.orderIsAscending ? "ASC" : "DESC") + "}";
+		// Filter the search on key-words (currently hard-coded on question title and content)
+		// and selected status
 		queryInputs += "search: {and: [{or: [{title: {contains: \"" + this.state.searchedText + "\"}}, {content: {contains: \"" + this.state.searchedText + "\"}}]}, {or: [";
 		this.state.statusMap.map((status: Status, index: number) => {
 			if(index!=0){
@@ -118,7 +135,24 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 		});
 		queryInputs += "]}]}";
 
-		const result = await sudographActor.query(gql`
+		const allResults = await sudographActor.query(gql`
+			query {
+				readQuestion(` + queryInputs + `) {
+					id
+				}
+			}
+		`);
+
+		this.setState({
+			totalQuestions : allResults.data.readQuestion.length,
+		});
+
+		// Limit the number of questions per page
+		queryInputs += "limit: " + this.state.questionsPerPage
+		// Offset from page index
+		queryInputs += "offset: " + (this.state.pageIndex * this.state.questionsPerPage);
+
+		const pageResults = await sudographActor.query(gql`
 			query {
 				readQuestion(` + queryInputs + `) {
 					id
@@ -132,8 +166,9 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 				}
 			}
 		`);
+
 		this.setState({
-			questions : result.data.readQuestion,
+			questions : pageResults.data.readQuestion,
 		});
 	}
 
@@ -238,6 +273,21 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 					}
 					</tbody>
 				</table>
+				<div className="flex flex-col items-center">
+				<span className="text-sm text-gray-700 dark:text-gray-400">
+					Showing <span className="font-semibold text-gray-900 dark:text-white">{this.state.pageIndex * this.state.questionsPerPage + 1}</span> to <span className="font-semibold text-gray-900 dark:text-white">{Math.min((this.state.pageIndex + 1) * this.state.questionsPerPage, this.state.totalQuestions)}</span> of <span className="font-semibold text-gray-900 dark:text-white">{this.state.totalQuestions}</span> Entries
+				</span>
+						<div className="inline-flex mt-2 xs:mt-0">
+						<button disabled={this.state.pageIndex < 1} onClick={() => {this.setPageIndex(this.state.pageIndex - 1)}} className="inline-flex items-center py-2 px-4 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+						<svg className="mr-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd"></path></svg>
+							Prev
+						</button>
+						<button disabled={((this.state.pageIndex + 1) * this.state.questionsPerPage) >= this.state.totalQuestions} onClick={() => {this.setPageIndex(this.state.pageIndex + 1)}} className="inline-flex items-center py-2 px-4 text-sm font-medium text-white bg-gray-800 rounded-r border-0 border-l border-gray-700 hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+							Next
+						<svg className="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+						</button>
+					</div>
+				</div>
 			</div>
 		</>
 		)
