@@ -1,23 +1,83 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { gql, sudograph } from "sudograph";
-import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
+import { e8sToIcp, graphQlToJsDate } from "../utils/conversions";
+import React from 'react'
 
-const QuestionsList = ({}: any) => {
+type JSONValue =
+    | string
+    | number
+    | boolean
+    | JSONObject
+    | JSONArray;
 
-	var sudographActor = sudograph({
-		canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
-	});
+	interface JSONObject {
+		[x: string]: JSONValue;
+}
 
-	const [questions, setQuestions] = useState<any>([]);
-	const [orderField, setOrderField] = useState<string>("reward");
-	const [orderIsAscending, setOrderIsAscending] = useState<boolean>(false);
+interface JSONArray extends Array<JSONValue> { }
 
-	const fetchQuestions = async (field: string, isAscending: boolean) => {
-		let orderDirective : string = field + ": " + (isAscending ? "ASC" : "DESC");
+type QuestionListState = {
+	questions: JSONArray,
+	orderField: string,
+	orderIsAscending: boolean,
+	searchedText: string 
+};
+
+export default class QuestionsList extends React.Component<{}, QuestionListState> {
+
+	constructor(props) {
+    super(props);
+    this.state = {
+			questions: [],
+			orderField: 'reward',
+			orderIsAscending: false,
+			searchedText: ''
+		};
+    this.setSearchedText = this.setSearchedText.bind(this);
+		this.fetchQuestions = this.fetchQuestions.bind(this);
+		this.getArrow = this.getArrow.bind(this);
+		this.getProgressColors = this.getProgressColors.bind(this);
+  }
+
+	setOrderField(field) {
+		if (this.state.orderField != field){
+			this.setState({orderField: field});
+		}
+	}
+
+	setOrderIsAscending(isAscending) {
+		if (this.state.orderIsAscending != isAscending){
+			this.setState({orderIsAscending: isAscending});
+		}
+	}
+
+	setSearchedText(event) {
+		this.setState({searchedText: event.target.value});
+	}
+
+	componentDidMount(): void {
+		this.fetchQuestions();
+	};
+
+	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<QuestionListState>, snapshot?: any): void {
+		if (this.state.orderField != prevState.orderField ||
+			this.state.orderIsAscending != prevState.orderIsAscending ||
+			this.state.searchedText != prevState.searchedText){
+			this.fetchQuestions();
+		}
+	}
+
+	fetchQuestions = async () => {
+		let sudographActor = sudograph({canisterId: `${process.env.GRAPHQL_CANISTER_ID}`});
+
+		var queryInputs : string = "order: {" + this.state.orderField + ": " + (this.state.orderIsAscending ? "ASC" : "DESC") + "}";
+		if (this.state.searchedText.length!=0){
+			queryInputs += "search: {or: [{title: {contains: \"" + this.state.searchedText + "\"}}, {content: {contains: \"" + this.state.searchedText + "\"}}]}";
+		}
 		const result = await sudographActor.query(gql`
 			query {
-				readQuestion(order: {` + orderDirective + `}) {
+				readQuestion(` + queryInputs + `) {
 					id
 					title
 					answers {
@@ -29,16 +89,16 @@ const QuestionsList = ({}: any) => {
 				}
 			}
 		`);
-		setQuestions(result.data.readQuestion);
-		setOrderField(field);
-		setOrderIsAscending(isAscending);
+		this.setState({
+			questions : result.data.readQuestion,
+		});
 	}
 
-	const getArrow = (field: string) => {
-		return orderField === field ? (orderIsAscending ? "↑" : "↓") : "";
+	getArrow = (field: string) => {
+		return this.state.orderField === field ? (this.state.orderIsAscending ? "↑" : "↓") : "";
 	}
 
-	const getProgressColors = (status) => {
+	getProgressColors = (status) => {
 		switch (status) {
 			case "OPEN":
 				return ["bg-blue-800", "bg-gray-200", "bg-gray-200", "bg-gray-200", "bg-gray-200"]
@@ -53,23 +113,17 @@ const QuestionsList = ({}: any) => {
 		}
 	}
 
-	useEffect(() => {
-		// not checking for error
-		fetchQuestions(orderField, orderIsAscending);
-	}, []);
-
-	return (
+	render() {
+		return (
 		<>
-			<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-				<div className="p-4">
-					<label htmlFor="table-search" className="sr-only">Search</label>
-					<div className="relative mt-1">
-							<div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-									<svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
+			<div className="relative overflow-x-auto shadow-md sm:rounded-lg"> 
+					<label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-gray-300">Search questions</label>
+					<div className="relative">
+							<div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+									<svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
 							</div>
-							<input type="text" id="table-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-10 p-2.5  dark:bg-gray-200 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for items"/>
+							<input type="text" value={this.state.searchedText} onChange={this.setSearchedText} className="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search questions..." required/>
 					</div>
-				</div>
 				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
 					<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-200 dark:text-gray-400">
 						<tr>
@@ -83,15 +137,15 @@ const QuestionsList = ({}: any) => {
 								<button>Status</button>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button onClick={() => {fetchQuestions("reward", !orderIsAscending);}}>Reward { getArrow("reward") }</button>
+								<button onClick={() => {this.setOrderField("reward"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Reward { this.getArrow("reward") }</button>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button onClick={() => {fetchQuestions("creation_date", !orderIsAscending);}}>Time left { getArrow("creation_date") }</button>
+								<button onClick={() => {this.setOrderField("creation_date"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Time left { this.getArrow("creation_date") }</button>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
-					{questions.map((question: any) => {
+					{this.state.questions.map((question: any) => {
 							return (
 								<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600" key={question.id}>
 									<th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
@@ -102,15 +156,15 @@ const QuestionsList = ({}: any) => {
 									</td>
 									<td className="px-6 py-4">
 									<div className="flex flex-row gap-0.5">
-										<div className={`basis-5 h-1.5 ${getProgressColors(question.status)[0]} dark:${getProgressColors(question.status)[0]}`}/>
-										<div className={`basis-5 h-1.5 ${getProgressColors(question.status)[1]} dark:${getProgressColors(question.status)[1]}`}/>
-										<div className={`basis-5 h-1.5 ${getProgressColors(question.status)[2]} dark:${getProgressColors(question.status)[2]}`}/>
-										<div className={`basis-5 h-1.5 ${getProgressColors(question.status)[3]} dark:${getProgressColors(question.status)[3]}`}/>
-										<div className={`basis-5 h-1.5 ${getProgressColors(question.status)[4]} dark:${getProgressColors(question.status)[4]}`}/>
+										<div className={`basis-5 h-1.5 ${this.getProgressColors(question.status)[0]} dark:${this.getProgressColors(question.status)[0]}`}/>
+										<div className={`basis-5 h-1.5 ${this.getProgressColors(question.status)[1]} dark:${this.getProgressColors(question.status)[1]}`}/>
+										<div className={`basis-5 h-1.5 ${this.getProgressColors(question.status)[2]} dark:${this.getProgressColors(question.status)[2]}`}/>
+										<div className={`basis-5 h-1.5 ${this.getProgressColors(question.status)[3]} dark:${this.getProgressColors(question.status)[3]}`}/>
+										<div className={`basis-5 h-1.5 ${this.getProgressColors(question.status)[4]} dark:${this.getProgressColors(question.status)[4]}`}/>
 									</div>
 									</td>
 									<td className="px-6 py-4">
-										{Math.round(Number(question.reward) * 10000) / 10000} ICP
+										{e8sToIcp(Number(question.reward))} ICP
 									</td>
 									<td className="px-6 py-4 text-right">
 										{graphQlToJsDate(question.creation_date).toLocaleString(
@@ -131,7 +185,6 @@ const QuestionsList = ({}: any) => {
 				</table>
 			</div>
 		</>
-	);
+		)
+	};
 };
-
-export default QuestionsList;
