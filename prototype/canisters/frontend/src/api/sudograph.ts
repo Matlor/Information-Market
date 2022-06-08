@@ -56,6 +56,7 @@ export const get_question_by_invoice = async (invoiceId) => {
           creation_date
           status
           status_update_date
+          status_end_date
           open_duration
           title
           content
@@ -88,6 +89,7 @@ export const get_question = async (questionId) => {
               creation_date
               status
               status_update_date
+              status_end_date
               open_duration
               title
               content
@@ -122,6 +124,7 @@ export const get_questions = async () => {
           creation_date
           status
           status_update_date
+          status_end_date
           open_duration
           title
           content
@@ -209,6 +212,7 @@ export const get_questions_interactions = async (author) => {
         creation_date
         status
         status_update_date
+        status_end_date
         content
         title
         reward
@@ -241,9 +245,9 @@ export const get_questions_interactions = async (author) => {
 }; */
 const create_question = async (questionConfig) => {
 	var res: any = await actor.graphql_mutation(
-		`mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $open_duration: Int!, $title: String!, $content: String!, $reward: Int!) {
+		`mutation ($author: String!, $invoice_id: ID!, $creation_date: Int!, $status_end_date:Int!, $open_duration: Int!, $title: String!, $content: String!, $reward: Int!) {
     createQuestion(
-      input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $creation_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
+      input: {author: $author, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $creation_date, status_end_date: $status_end_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
     ) {
       id
       author
@@ -254,6 +258,7 @@ const create_question = async (questionConfig) => {
       creation_date
       status
       status_update_date
+      status_end_date
       open_duration
       title
       content
@@ -271,6 +276,7 @@ const create_question = async (questionConfig) => {
 			author: "author",
 			invoice_id: "2",
 			creation_date: 4,
+      status_end_date: 32,
 			open_duration: 4320,
 			title: "title",
 			content: "content",

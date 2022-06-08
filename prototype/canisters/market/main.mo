@@ -24,6 +24,7 @@ shared({ caller = initializer }) actor class Market(
     fee: Nat, // in e8s, shall be 10000
     duration_pick_answer: Nat, // in minutes
     duration_disputable: Nat, // in minutes
+    duration_dispute: Nat,
     update_status_on_heartbeat: Bool
 ) = this {
 
@@ -32,8 +33,9 @@ shared({ caller = initializer }) actor class Market(
     private let coin_symbol_ : Text = coin_symbol;
     private let min_reward_ : Nat = min_reward;
     private let fee_ : Nat = fee;
-    private let duration_pick_answer_ : Int = duration_pick_answer;
-    private let duration_disputable_ : Int = duration_disputable;
+    private let duration_pick_answer_ : Int32 = Int32.fromInt(duration_pick_answer);
+    private let duration_disputable_ : Int32 = Int32.fromInt(duration_disputable);
+    private let duration_dispute_ : Int32 = Int32.fromInt(duration_dispute);
     private let update_status_on_heartbeat_: Bool = update_status_on_heartbeat;
 
     public shared func get_coin_symbol() : async Text {
@@ -48,12 +50,16 @@ shared({ caller = initializer }) actor class Market(
         return fee_;
     };
 
-    public shared func get_duration_pick_answer() : async Int {
+    public shared func get_duration_pick_answer() : async Int32 {
         return duration_pick_answer_;
     };
 
-    public shared func get_duration_disputable() : async Int {
+    public shared func get_duration_disputable() : async Int32 {
         return duration_disputable_;
+    };
+
+    public shared func get_duration_dispute() : async Int32 {
+        return duration_dispute_;
     };
 
     public shared func get_update_status_on_heartbeat() : async Bool {
@@ -89,7 +95,7 @@ shared({ caller = initializer }) actor class Market(
 
     // ------------------------- Create Invoice -------------------------
 
-    public shared ({caller}) func create_invoice (reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
+    public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
         if(reward < min_reward_) {
             let invoice_error : InvoiceTypes.CreateInvoiceErr = {
                 kind = #Other;
@@ -155,7 +161,7 @@ shared({ caller = initializer }) actor class Market(
                             return #err(#VerifyInvoiceError);
                         };
                         case(#ok verify_invoice_success){
-                            var invoice_amount : Int = 0;
+                            var invoice_amount : Nat = 0;
                             switch(verify_invoice_success){
                                 case(#AlreadyVerified verified){
                                     // If it has already been verified, check that no
@@ -174,15 +180,16 @@ shared({ caller = initializer }) actor class Market(
                                 };
                             };
                             // Finally create the question
+                            let now = Utils.time_minutes_now();
                             switch (await GraphQL.create_question(
                                 author,
                                 Nat.toText(invoice_id),
-                                Utils.time_minutes_now(),
-                                Utils.time_minutes_now(),
+                                now,
+                                now + Int32.fromInt(duration_minutes),
                                 Int32.fromInt(duration_minutes),
                                 title,
                                 content,
-                                Int32.fromInt(invoice_amount - fee_)
+                                Utils.e8s_to_e3s(invoice_amount - fee_)
                             )){
                                 case(null) {
                                     return #err(#GraphQLError);
@@ -249,13 +256,14 @@ shared({ caller = initializer }) actor class Market(
                 return #err(#NotFound);
             };
             case(?question){
+                let now = Utils.time_minutes_now();
                 if (question.author != Principal.toText(caller)) {
                     return #err(#NotAllowed);
                 } else if (question.status != #PICKANSWER) {
                     return #err(#WrongStatus);
                 } else if ((await GraphQL.get_answer(question_id, answer_id)) == null) {
                     return #err(#NotFound);
-                } else  if (not (await GraphQL.pick_winner(question_id, answer_id, Utils.time_minutes_now()))){
+                } else if (not (await GraphQL.pick_winner(question_id, answer_id, now, now + duration_disputable_))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -275,11 +283,12 @@ shared({ caller = initializer }) actor class Market(
                 return #err(#NotFound);
             };
             case(?question){
+                let now = Utils.time_minutes_now();
                 if (question.status != #DISPUTABLE) {
                     return #err(#WrongStatus);
                 } else if (not(await GraphQL.has_answered(question_id, Principal.toText(caller)))) {
                     return #err(#NotAllowed);
-                } else if (not (await GraphQL.open_dispute(question_id, Utils.time_minutes_now()))){
+                } else if (not (await GraphQL.open_dispute(question_id, now, now + duration_dispute_))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -313,7 +322,7 @@ shared({ caller = initializer }) actor class Market(
                         };
                         case (?answer) {
                             switch(await invoice_canister_.transfer({
-                                amount = Int.abs(Int32.toInt(question.reward));
+                                amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
                                 destination = #principal(Principal.fromText(answer.author));
                             })){
@@ -355,15 +364,15 @@ shared({ caller = initializer }) actor class Market(
         {
             switch(question.status){
                 case(#OPEN){
-                    if (question.status_update_date + question.open_duration < now) {
+                    if (question.status_end_date < now) {
                         if (await GraphQL.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
-                            ignore await GraphQL.must_pick_answer(question.id, now);
+                            ignore await GraphQL.must_pick_answer(question.id, now, now + duration_pick_answer_);
                         } else {
                             // Refund the author if no answer has been given
                             switch(await invoice_canister_.transfer({
-                                amount = Int.abs(Int32.toInt(question.reward));
+                                amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
                                 destination = #principal(Principal.fromText(question.author));
                             })){
@@ -384,14 +393,14 @@ shared({ caller = initializer }) actor class Market(
                     };
                 };
                 case(#PICKANSWER){
-                    if (question.status_update_date + Int32.fromInt(duration_pick_answer_) < now) {
+                    if (question.status_end_date < now) {
                         Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
-                        ignore await GraphQL.open_dispute(question.id, now);
+                        ignore await GraphQL.open_dispute(question.id, now, now + duration_dispute_);
                     };
                 };
                 case(#DISPUTABLE){
-                    if (question.status_update_date + Int32.fromInt(duration_disputable_) < now) {
+                    if (question.status_end_date < now) {
                         // If nobody disputed the picked answer, payout the answer's author
                         // and close the question
                         switch (question.winner) {
@@ -402,7 +411,7 @@ shared({ caller = initializer }) actor class Market(
                             case (?answer){
                                 // Pay the winner
                                 switch(await invoice_canister_.transfer({
-                                    amount = Int.abs(Int32.toInt(question.reward));
+                                    amount = Utils.e3s_to_e8s(question.reward);
                                     token = {symbol = coin_symbol_};
                                     destination = #principal(Principal.fromText(answer.author));
                                 })){

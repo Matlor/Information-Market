@@ -22,6 +22,7 @@ type Question {
     creation_date: Int!
     status: QuestionStatus!
     status_update_date: Int!
+    status_end_date: Int!
     open_duration: Int!
     title: String!
     content: String!

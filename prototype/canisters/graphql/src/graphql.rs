@@ -47,6 +47,7 @@ struct QuestionType {
     creation_date: i32,
     status: QuestionStatusEnum,
     status_update_date: i32,
+    status_end_date: i32,
     open_duration: i32,
     title: String,
     content: String,
@@ -99,7 +100,7 @@ async fn create_question(
     author: String, 
     invoice_id: String, 
     creation_date: i32,
-    status_update_date: i32, 
+    status_end_date: i32,
     open_duration: i32,
     title: String,
     content: String, 
@@ -111,7 +112,7 @@ async fn create_question(
             author,
             invoice_id,
             creation_date,
-            status_update_date,
+            status_end_date,
             open_duration,
             title,
             content,
@@ -153,13 +154,14 @@ async fn create_answer(
 }
 
 #[update]
-async fn must_pick_answer(question_id: String, status_update_date: i32) -> bool {
+async fn must_pick_answer(question_id: String, status_update_date: i32, status_end_date: i32) -> bool {
     let json_str = graphql_query(
         queries::must_pick_answer::macros::mutation!().to_string(),
         format!(
             queries::must_pick_answer::macros::args!(),
             question_id,
-            status_update_date)).await;
+            status_update_date,
+            status_end_date)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::must_pick_answer::macros::response!()].as_array();
     if json_response != None {
@@ -173,13 +175,14 @@ async fn must_pick_answer(question_id: String, status_update_date: i32) -> bool 
 }
 
 #[update]
-async fn open_dispute(question_id: String, status_update_date: i32) -> bool {
+async fn open_dispute(question_id: String, status_update_date: i32, status_end_date: i32) -> bool {
     let json_str = graphql_query(
         queries::open_dispute::macros::mutation!().to_string(),
         format!(
             queries::open_dispute::macros::args!(),
             question_id,
-            status_update_date)).await;
+            status_update_date,
+            status_end_date)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::open_dispute::macros::response!()].as_array();
     if json_response != None {
@@ -219,14 +222,15 @@ async fn solve_dispute(
 }
 
 #[update]
-async fn pick_winner(question_id: String, answer_id: String, status_update_date: i32) -> bool {
+async fn pick_winner(question_id: String, answer_id: String, status_update_date: i32, status_end_date: i32) -> bool {
     let json_str = graphql_query(
         queries::pick_winner::macros::mutation!().to_string(),
         format!(
             queries::pick_winner::macros::args!(),
             question_id,
             answer_id,
-            status_update_date)).await;
+            status_update_date,
+            status_end_date)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::pick_winner::macros::response!()].as_array();
     if json_response != None {

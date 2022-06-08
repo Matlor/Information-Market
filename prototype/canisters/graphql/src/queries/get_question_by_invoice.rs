@@ -15,6 +15,7 @@ pub mod macros{
                 creation_date
                 status
                 status_update_date
+                status_end_date
                 open_duration
                 title
                 content
