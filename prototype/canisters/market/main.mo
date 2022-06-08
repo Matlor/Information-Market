@@ -399,48 +399,40 @@ shared({ caller = initializer }) actor class Market(
                         ignore await GraphQL.open_dispute(question.id, now, now + duration_dispute_);
                     };
                 };
-                case(#DISPUTED){
-                    if (question.status_end_date < now) {
-                        await close_question(question);
-                    };
-                };
                 case(#DISPUTABLE){
                     if (question.status_end_date < now) {
-                        await close_question(question);
+                        // If nobody disputed the picked answer, payout the answer's author
+                        // and close the question
+                        switch (question.winner) {
+                            case (null){
+                                // Nothing to do, it will never happen if we make sure the question 
+                                // is never put in DISPUTABLE state without having a winner
+                            };
+                            case (?answer){
+                                // Pay the winner
+                                switch(await invoice_canister_.transfer({
+                                    amount = Utils.e3s_to_e8s(question.reward);
+                                    token = {symbol = coin_symbol_};
+                                    destination = #principal(Principal.fromText(answer.author));
+                                })){
+                                    case(#ok success){
+                                        // Here there is in theory a severe risk that the transfer worked 
+                                        // but the question is not closed, hence it would be possible to have
+                                        // multiple transfers for the same question
+                                        // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
+                                        // in motoko, to be able to ensure that the question has not already been paid
+                                        Debug.print("Update question \"" # question.id # "\" status to CLOSED");
+                                        ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), now);
+                                    };
+                                    case(_){
+                                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
+                                    };
+                                };
+                            };
+                        };
                     };
                 };
                 case(_){
-                };
-            };
-        };
-    };
-
-    private func close_question(question: GraphQL.QuestionType) : async () {
-        // Payout the answer's author and close the question
-        switch (question.winner) {
-            case (null){
-                // Nothing to do, it will never happen if we make sure the question 
-                // is never put in DISPUTABLE state without having a winner
-            };
-            case (?answer){
-                // Pay the winner
-                switch(await invoice_canister_.transfer({
-                    amount = Utils.e3s_to_e8s(question.reward);
-                    token = {symbol = coin_symbol_};
-                    destination = #principal(Principal.fromText(answer.author));
-                })){
-                    case(#ok success){
-                        // Here there is in theory a severe risk that the transfer worked 
-                        // but the question is not closed, hence it would be possible to have
-                        // multiple transfers for the same question
-                        // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
-                        // in motoko, to be able to ensure that the question has not already been paid
-                        Debug.print("Update question \"" # question.id # "\" status to CLOSED");
-                        ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), Utils.time_minutes_now());
-                    };
-                    case(_){
-                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
-                    };
                 };
             };
         };
