@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
-import { e3sToIcp, graphQlToJsDate } from "../utils/conversions";
+import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
 import { default as ReactSelect } from "react-select";
 import { components } from "react-select";
 import React from 'react'
@@ -52,7 +52,8 @@ type QuestionListState = {
 	questionsPerPage: number,
 	pageIndex: number,
 	totalQuestions: number,
-	statusMap: StatusMap
+	statusMap: StatusMap,
+	fetchQuestionsDate: number
 };
 
 export default class QuestionsList extends React.Component<{}, QuestionListState> {
@@ -67,14 +68,22 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 			questionsPerPage: 10,
 			pageIndex: 0,
 			totalQuestions: 0,
-			statusMap: [{ value: "OPEN", label: "Open"}]
+			statusMap: [{ value: "OPEN", label: "Open"}],
+			fetchQuestionsDate: 0
 		};
     this.setSearchedText = this.setSearchedText.bind(this);
 		this.setStatusMap = this.setStatusMap.bind(this);
 		this.fetchQuestions = this.fetchQuestions.bind(this);
 		this.getArrow = this.getArrow.bind(this);
 		this.getProgressColors = this.getProgressColors.bind(this);
+		this.onIntervalTick = this.onIntervalTick.bind(this);
   }
+
+	onIntervalTick(){
+		if (Date.now() - this.state.fetchQuestionsDate > 10000){
+			this.fetchQuestions();
+		}
+	}
 
 	setOrderField(field) {
 		if (this.state.orderField != field){
@@ -106,6 +115,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 
 	componentDidMount(): void {
 		this.fetchQuestions();
+		setInterval(this.onIntervalTick, 1000);
 	};
 
 	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<QuestionListState>, snapshot?: any): void {
@@ -169,6 +179,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 
 		this.setState({
 			questions : pageResults.data.readQuestion,
+			fetchQuestionsDate: Date.now()
 		});
 	}
 
@@ -230,7 +241,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 								<button onClick={() => {this.setOrderField("reward"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Reward { this.getArrow("reward") }</button>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button onClick={() => {this.setOrderField("status_end_date"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Deadline { this.getArrow("status_end_date") }</button>
+								<button onClick={() => {this.setOrderField("status_end_date"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Time left { this.getArrow("status_end_date") }</button>
 							</th>
 						</tr>
 					</thead>
@@ -257,15 +268,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 										{e3sToIcp(Number(question.reward))} ICP
 									</td>
 									<td className="px-6 py-4 text-right">
-										{graphQlToJsDate(question.status_end_date).toLocaleString(
-											undefined,
-											{
-												hour: "numeric",
-												minute: "numeric",
-												month: "long",
-												day: "numeric",
-											}
-										)}
+										{toHHMM(question.status_end_date - jsToGraphQlDate(Date.now()))}
 									</td>
 								</tr>
 							);

@@ -31,17 +31,17 @@ export const jsToGraphQlDate = (date) => {
 	return Math.floor(date / 60000);
 };
 
-export const toHHMMSS = (durationSeconds: number) => {
-	let hours   = Math.floor(durationSeconds / 3600);
-	let minutes = Math.floor((durationSeconds - (hours * 3600)) / 60);
-	let seconds = Math.floor(durationSeconds - (hours * 3600) - (minutes * 60));
+export const toHHMM = (durationMinutes: number) => {
+	if(durationMinutes <= 0){
+		return "over";
+	}
+	let hours   = Math.floor(durationMinutes / 60);
+	let minutes = Math.floor(durationMinutes - (hours * 60));
 
 	var hoursStr = hours.toString();
 	if (hours   < 10) {hoursStr   = "0"+hoursStr;}
 	var minutesStr = minutes.toString();
 	if (minutes < 10) {minutesStr = "0"+minutesStr;}
-	var secondsStr = seconds.toString();
-	if (seconds < 10) {secondsStr = "0"+secondsStr;}
 	
-	return hoursStr+':'+minutesStr+':'+secondsStr;
+	return hoursStr+':'+minutesStr;
 }

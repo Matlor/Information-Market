@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { toHHMMSS } from "../utils/conversions";
+import { jsToGraphQlDate, toHHMM } from "../utils/conversions";
 
 import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
 
@@ -8,13 +8,13 @@ const Question = ({ question, deadline }: any) => {
 	const [countdown, setCountdown] = useState<any>(0);
 
 	setTimeout(() => {
-		let secondsRemaing = (deadline - Date.now()) / 1000;
-		if (secondsRemaing > 0) {
-			setCountdown(secondsRemaing);
+		let minutesRemaining = (deadline - Date.now() * 60000);
+		if (minutesRemaining > 0) {
+			setCountdown(minutesRemaining);
 		} else {
 			setCountdown(null);
 		}
-	}, 1000);
+	}, 10000);
 
 	const showQuestion = (question: any) => {
 		if (Object.keys(question).length !== 0) {
@@ -74,14 +74,10 @@ const Question = ({ question, deadline }: any) => {
 					{/* COUNTDOWN DIV */}
 					<div className="mb-2 ">
 						{" "}
-						{countdown > 0 && question.status === "OPEN" ? (
 							<div className="text-justify font-light">
 								{" "}
-								Deadline: {toHHMMSS(countdown)}
+								Time left: {toHHMM(deadline - jsToGraphQlDate(Date.now()))}
 							</div>
-						) : (
-							<div></div>
-						)}
 					</div>
 				</>
 			);

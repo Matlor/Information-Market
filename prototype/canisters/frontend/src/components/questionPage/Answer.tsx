@@ -22,13 +22,13 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 	var border = "border-b-2 ";
 	const visualiseWinner = () => {
 		try {
-			if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
-				if (answer.id === questionState.question.winner.id) {
-					border = "border-yellow-500 border";
-				}
-			} else if (questionState.question.status === "CLOSED") {
-				// @todo
-				if (questionState.question.winner){
+			// @todo
+			if (questionState.question.winner){
+				if (questionState.question.status === "DISPUTABLE") {
+					if (answer.id === questionState.question.winner.id) {
+						border = "border-yellow-500 border";
+					}
+				} else if (questionState.question.status === "CLOSED") {
 					if (answer.id === questionState.question.winner.id) {
 						border = "border-green-500 border";
 					}
