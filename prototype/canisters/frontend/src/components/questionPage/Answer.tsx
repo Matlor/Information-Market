@@ -1,23 +1,33 @@
-const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
+import CallStateHandler from "../helperComponents/CallStateHandler";
+
+const Answer = ({
+	answer,
+	questionState,
+	handlePickWinner,
+	plug,
+	callState,
+}: any) => {
 	var border = "border-b-2 ";
 	const visualiseWinner = () => {
-		try {
-			if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
-				if (answer.id === questionState.question.winner.id) {
-					border = "border-yellow-500 border";
-				}
-			} else if (questionState.question.status === "CLOSED") {
-				if (answer.id === questionState.question.winner.id) {
-					border = "border-green-500 border";
-				}
+		if (
+			!questionState.question.winner ||
+			!questionState.question.winner.id ||
+			!answer.id
+		) {
+			return;
+		}
+		if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
+			if (answer.id === questionState.question.winner.id) {
+				border = "border-yellow-500 border";
 			}
-		} catch (e) {
-			console.log(e);
+		} else if (questionState.question.status === "CLOSED") {
+			if (answer.id === questionState.question.winner.id) {
+				border = "border-green-500 border";
+			}
 		}
 	};
 	visualiseWinner();
 
-	// TODO: check if things are defined
 	const pickWinner = (
 		<>
 			{questionState.question.status === "PICKANSWER" &&
@@ -30,6 +40,11 @@ const Answer = ({ answer, questionState, handlePickWinner, plug }: any) => {
 					>
 						Pick Winner
 					</button>
+					<CallStateHandler
+						loading={callState.loading}
+						err={callState.err}
+						errMsg={"Something went wrong"}
+					/>
 				</div>
 			) : (
 				<></>

@@ -6,8 +6,7 @@ import AddQuestion from "./components/AddQuestion";
 import QuestionsList from "./components/QuestionsList";
 import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
-
-import QuestionInteractions from "./components/QuestionInteractions";
+import sudograph from "./api/sudograph";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -39,24 +38,54 @@ function App() {
 	};
 
 	Scenario.loadScenario(
-		["Alice", "Bob", "Charlie", "Dan"],
-		10,
+		[
+			"Alice",
+			"Bob",
+			"Charlie",
+			"Dan",
+			"5komm-kxkxj-hwidx-mjmkr-hhju6-tz22f-ur2wt-iehob-jkw5b-osbtl-bqe",
+		],
+		14,
 		60,
 		60,
 		1250000,
 		100000000
 	);
+
 	return (
 		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
 				<div className=" ml-80 mr-80 mt-10 mb-5">
 					<Routes>
-						<Route path="/" element={<QuestionsList />} />
+						<Route
+							path="/"
+							element={
+								<QuestionsList
+									key={1}
+									title={"Browse Questions"}
+									plug={plug}
+									onlyAuthenticated={false}
+									sudographFunction={sudograph.get_questions}
+								/>
+							}
+						/>
+
 						<Route
 							path="/interactions"
-							element={<QuestionInteractions plug={plug} />}
+							element={
+								<QuestionsList
+									key={2}
+									title={"My Interactions"}
+									plug={plug}
+									onlyAuthenticated={true}
+									sudographFunction={() =>
+										sudograph.get_questions_interactions(plug.plug.principalId)
+									}
+								/>
+							}
 						/>
+
 						<Route path="/add-question" element={<AddQuestion plug={plug} />} />
 						<Route
 							path="/question/:id"

@@ -10,6 +10,7 @@ function AddQuestion({ plug }: any) {
 	const [reward, setReward] = useState<any>("0");
 
 	// TO DO: Has to be improved with security in mind
+	// TO DO: Error handling
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 

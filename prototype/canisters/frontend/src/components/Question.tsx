@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { toHHMMSS } from "../utils/conversions";
-
 import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
 
-const Question = ({ question, deadline }: any) => {
-	const [countdown, setCountdown] = useState<any>(0);
+const Question = ({ question }: any) => {
+	const [countdown, setCountdown] = useState<any>();
 
+	let deadline = (question.creation_date + question.open_duration) * 60 * 1000;
 	setTimeout(() => {
 		let secondsRemaing = (deadline - Date.now()) / 1000;
 		if (secondsRemaing > 0) {
@@ -19,7 +19,6 @@ const Question = ({ question, deadline }: any) => {
 	if (Object.keys(question).length === 0) {
 		return <div>No question</div>;
 	}
-
 	return (
 		<div className="pl-16 pr-10 pt-10 pb-10 border-b-2 border-secondary bg-primary">
 			<div className="pb-4">
@@ -52,33 +51,34 @@ const Question = ({ question, deadline }: any) => {
 
 			{/*   REWARD DIV   */}
 			<Link to={`/question/${question.id}`}>
-				<div className="flex items-center mr-5 font-light ">
-					{Math.round(Number(question.reward) * 10000) / 10000} ICP
-					<svg
-						className="w-4 h-4 ml-2"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						strokeWidth="2"
-						fill="none"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					>
-						<path d="M5 12h14"></path>
-						<path d="M12 5l7 7-7 7"></path>
-					</svg>
+				<div className="flex items-center justify-between mr-5 font-light ">
+					<div className="flex">
+						{Math.round(Number(question.reward) * 10000) / 10000} ICP
+						<svg
+							className="w-4 h-4 ml-2"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth="2"
+							fill="none"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<path d="M5 12h14"></path>
+							<path d="M12 5l7 7-7 7"></path>
+						</svg>
+					</div>
+					{/* COUNTDOWN DIV */}
+					<div className="flex justify-end">
+						{countdown > 0 && question.status === "OPEN" ? (
+							<div className="text-justify font-light">
+								Deadline: {toHHMMSS(countdown)}
+							</div>
+						) : (
+							<div></div>
+						)}
+					</div>
 				</div>
 			</Link>
-
-			{/* COUNTDOWN DIV */}
-			<div className="mb-2">
-				{countdown > 0 && question.status === "OPEN" ? (
-					<div className="text-justify font-light">
-						Deadline: {toHHMMSS(countdown)}
-					</div>
-				) : (
-					<div></div>
-				)}
-			</div>
 		</div>
 	);
 };

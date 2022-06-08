@@ -1,18 +1,32 @@
 import Question from "./Question";
 import { useState, useEffect } from "react";
-import sudograph from "../api/sudograph";
+import { Navigate } from "react-router-dom";
 
-const QuestionsList = ({}: any) => {
-	console.log(sudograph, "sudograph");
+const QuestionsList = ({
+	plug,
+	title,
+	onlyAuthenticated,
+	sudographFunction,
+}: any) => {
+	console.log(onlyAuthenticated);
+
+	if (onlyAuthenticated) {
+		if (!plug.isConnected) {
+			return <Navigate to="/" replace />;
+		}
+	}
 
 	const [questions, setQuestions] = useState<any>([]);
 
 	useEffect(() => {
-		// not checking for error
 		const fetchQuestions = async () => {
-			const res = await sudograph.get_questions();
-			console.log(res.data.readQuestion);
-			setQuestions(res.data.readQuestion);
+			try {
+				const res = await sudographFunction();
+				console.log(res);
+				setQuestions(res.data.readQuestion);
+			} catch (e) {
+				console.log(e);
+			}
 		};
 
 		fetchQuestions();
@@ -20,7 +34,7 @@ const QuestionsList = ({}: any) => {
 
 	return (
 		<>
-			<h1 className="page-title">Browse Questions</h1>
+			<h1 className="page-title">{title}</h1>
 			<div className=" flex flex-col justify-between">
 				{questions.length > 0 ? (
 					questions.map((question: any, index: number) => {
