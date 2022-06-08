@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
-import { e8sToIcp, graphQlToJsDate } from "../utils/conversions";
+import { e3sToIcp, graphQlToJsDate } from "../utils/conversions";
 import { default as ReactSelect } from "react-select";
 import { components } from "react-select";
 import React from 'react'
@@ -64,7 +64,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 			orderField: 'reward',
 			orderIsAscending: false,
 			searchedText: '',
-			questionsPerPage: 3,
+			questionsPerPage: 10,
 			pageIndex: 0,
 			totalQuestions: 0,
 			statusMap: [{ value: "OPEN", label: "Open"}]
@@ -162,7 +162,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 					}
 					status
 					reward
-					creation_date
+					status_end_date
 				}
 			}
 		`);
@@ -230,7 +230,7 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 								<button onClick={() => {this.setOrderField("reward"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Reward { this.getArrow("reward") }</button>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button onClick={() => {this.setOrderField("creation_date"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Time left { this.getArrow("creation_date") }</button>
+								<button onClick={() => {this.setOrderField("status_end_date"); this.setOrderIsAscending(!this.state.orderIsAscending);}}>Deadline { this.getArrow("status_end_date") }</button>
 							</th>
 						</tr>
 					</thead>
@@ -254,10 +254,10 @@ export default class QuestionsList extends React.Component<{}, QuestionListState
 									</div>
 									</td>
 									<td className="px-6 py-4">
-										{e8sToIcp(Number(question.reward))} ICP
+										{e3sToIcp(Number(question.reward))} ICP
 									</td>
 									<td className="px-6 py-4 text-right">
-										{graphQlToJsDate(question.creation_date).toLocaleString(
+										{graphQlToJsDate(question.status_end_date).toLocaleString(
 											undefined,
 											{
 												hour: "numeric",

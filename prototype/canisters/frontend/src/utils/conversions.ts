@@ -1,9 +1,9 @@
-export const e8sToIcp = (e8s: number) => {
-	return e8s / 100000000;
+export const e3sToIcp = (e3s: number) => {
+	return e3s / 1000;
 };
 
-export const icpToE8s = (icp: number) => {
-	return icp * 100000000;
+export const icpToE3s = (icp: number) => {
+	return icp * 1000;
 };
 
 export const questionStatusToString = (status) => {

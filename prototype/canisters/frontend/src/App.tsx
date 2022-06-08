@@ -1,4 +1,4 @@
-import { Route, Routes, HashRouter, Navigate } from "react-router-dom";
+import { Route, Routes, HashRouter } from "react-router-dom";
 import { useState } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
@@ -40,12 +40,11 @@ function App() {
 
 	Scenario.loadScenario(
 		["Alice", "Bob", "Charlie", "Dan"],
-		10,
+		30,
 		60,
-		60,
-		1250000,
-		100000000
+		60
 	);
+
 	return (
 		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
 			<HashRouter>

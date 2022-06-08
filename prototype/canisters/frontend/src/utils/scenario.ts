@@ -1,7 +1,7 @@
 import { gql, sudograph } from "sudograph";
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { LoremIpsum } from "lorem-ipsum";
-import { graphQlToJsDate, jsToGraphQlDate } from "./conversions";
+import { jsToGraphQlDate } from "./conversions";
 
 var sudographActor = sudograph({
 	canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
@@ -47,12 +47,17 @@ async function createQuestion(
 	content: String,
 	reward: number
 ): Promise<String> {
+
+	// @todo: verify if this computation makes sense
+	let status_end_date : number = creation_date + open_duration;
+	
 	const result = await sudographActor.mutation(
 		gql`
 			mutation (
 				$author: String!
 				$invoice_id: ID!
 				$creation_date: Int!
+				$status_end_date: Int!
 				$open_duration: Int!
 				$title: String!
 				$content: String!
@@ -65,6 +70,7 @@ async function createQuestion(
 						creation_date: $creation_date
 						status: OPEN
 						status_update_date: $creation_date
+						status_end_date: $status_end_date
 						open_duration: $open_duration
 						title: $title
 						content: $content
@@ -75,7 +81,7 @@ async function createQuestion(
 				}
 			}
 		`,
-		{ author, invoice_id, creation_date, open_duration, title, content, reward }
+		{ author, invoice_id, creation_date, status_end_date, open_duration, title, content, reward }
 	);
 	console.debug("Create question: " + JSON.stringify(result));
 	return result.data.createQuestion[0].id;
@@ -136,19 +142,22 @@ async function setWinner(
 async function setStatus(
 	question_id: String,
 	status: String,
-	status_update_date: number
+	status_update_date: number,
+	status_end_date: number
 ): Promise<String> {
 	const result = await sudographActor.mutation(
 		gql`
 			mutation (
 				$question_id: ID!
 				$status_update_date: Int!
+				$status_end_date: Int! 
 				$status: QuestionStatus!
 			) {
 				updateQuestion(
 					input: {
 						id: $question_id
 						status_update_date: $status_update_date
+						status_end_date: $status_end_date
 						status: $status
 					}
 				) {
@@ -156,7 +165,7 @@ async function setStatus(
 				}
 			}
 		`,
-		{ question_id, status, status_update_date }
+		{ question_id, status, status_end_date, status_update_date }
 	);
 	console.debug("Set status: " + JSON.stringify(result));
 	return result.data.updateQuestion[0].id;
@@ -183,17 +192,17 @@ function getRandomDuration(maxDuration: number) {
 	return Math.floor(Math.random() * maxDuration) + 1;
 }
 
-function getRandomReward(minReward: number, maxReward: number) {
-	return Math.floor(Math.random() * (maxReward - minReward) + minReward + 1);
+function getRandomRewardE3s() {
+	// Max integer is 2bil, here do random from 0 to 1bil (2 * 10^9) e3s
+	let exponent = Math.floor(Math.random() * 9) + 1;
+	return Math.floor(Math.random() * 10 ** exponent);
 }
 
 const loadScenario = async (
 	names: Array<String>,
 	questionNumber: number,
 	minutesInPast: number,
-	minutesToGo: number,
-	minReward: number,
-	maxReward: number
+	minutesToGo: number
 ) => {
 	const lorem = new LoremIpsum({
 		sentencesPerParagraph: {
@@ -234,7 +243,7 @@ const loadScenario = async (
 			now - creationDate + getRandomDuration(minutesToGo),
 			lorem.generateWords(),
 			lorem.generateSentences(),
-			getRandomReward(minReward, maxReward)
+			getRandomRewardE3s()
 		);
 		console.debug("Question from: " + questionAuthor.name);
 
@@ -262,29 +271,31 @@ const loadScenario = async (
 	// TODO: right now, the status update date might be before the question's creation date or answers' dates
 	for (let [question, answers] of questionMap) {
 		let rand = Math.floor(Math.random() * 100) + 1;
+		let status_update_date = getRandomPastDate(minutesInPast);
+		let status_end_date = status_update_date + getRandomDuration(minutesToGo);
 
 		if (rand < 40) {
 			// 40% of questions will be OPEN
 			continue;
 		} else if (rand < 55) {
 			// 15% of questions will be PICKANSWER
-			await setStatus(question, "PICKANSWER", getRandomPastDate(minutesInPast));
+			await setStatus(question, "PICKANSWER", status_update_date, status_end_date);
 		} else if (rand < 75) {
 			// 20% (max) of questions will be DISPUTABLE
 			if (answers.size == 0) {
-				await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
+				await setStatus(question, "CLOSED", status_update_date, status_end_date);
 			} else {
 				await setWinner(question, [...answers][0]);
 				await setStatus(
 					question,
 					"DISPUTABLE",
-					getRandomPastDate(minutesInPast)
-				);
+					status_update_date, 
+					status_end_date);
 			}
 		} else if (rand < 90) {
 			// 15% (max) of questions will be DISPUTED
 			if (answers.size == 0) {
-				await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
+				await setStatus(question, "CLOSED", status_update_date, status_end_date);
 			} else {
 				// Half of the disputed questions won't have a picked winner,
 				// to simulate when the question's author didn't pick any winner
@@ -292,11 +303,11 @@ const loadScenario = async (
 					// This will pick a winning answer randomly, since it's based on the answer identifier
 					await setWinner(question, [...answers][0]);
 				}
-				await setStatus(question, "DISPUTED", getRandomPastDate(minutesInPast));
+				await setStatus(question, "DISPUTED", status_update_date, status_end_date);
 			}
 		} else {
 			// 10% (min) of questions will be CLOSED
-			await setStatus(question, "CLOSED", getRandomPastDate(minutesInPast));
+			await setStatus(question, "CLOSED", status_update_date, status_end_date);
 		}
 	}
 
