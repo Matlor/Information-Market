@@ -63,16 +63,20 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 					/>
 
 					{plug.isConnected ? (
-						<div className="w-fit">
-							<button type="submit" className="my-button mb-2">
-								Submit
-							</button>
-							<CallStateHandler
-								loading={callState.loading}
-								err={callState.error}
-								errMsg={"Something went wrong"}
-							/>
-						</div>
+						plug.plug.principalId == questionState.question.author ? (
+							<div>You cannot answer your own question</div>
+						) : (
+							<div className="w-fit">
+								<button type="submit" className="my-button mb-2">
+									Submit
+								</button>
+								<CallStateHandler
+									loading={callState.loading}
+									err={callState.error}
+									errMsg={"Something went wrong"}
+								/>
+							</div>
+						)
 					) : (
 						<div className="font-light flex ">
 							<button onClick={loginHandler} className="my-button">

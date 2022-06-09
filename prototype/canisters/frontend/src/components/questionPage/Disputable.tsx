@@ -54,12 +54,18 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 							{plug.isConnected ? (
 								<>
 									<div className="flex justify-center mb-2">
-										<button
-											onClick={(e) => handleTriggerDispute(e)}
-											className="my-button "
-										>
-											dispute
-										</button>
+										{plug.plug.principalId !== questionState.question.author ? (
+											<button
+												onClick={(e) => handleTriggerDispute(e)}
+												className="my-button "
+											>
+												dispute
+											</button>
+										) : (
+											<div>
+												You cannot dispute as the author of the question
+											</div>
+										)}
 									</div>
 									<div className="flex justify-center">
 										<CallStateHandler
@@ -70,9 +76,14 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 									</div>
 								</>
 							) : (
-								<button onClick={login} className="my-button">
-									Login to Dispute
-								</button>
+								<div className="flex justify-center">
+									<button
+										onClick={login}
+										className="my-button flex justify-center"
+									>
+										Login to Dispute
+									</button>
+								</div>
 							)}
 						</>
 					) : (

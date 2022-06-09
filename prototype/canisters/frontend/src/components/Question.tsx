@@ -2,18 +2,22 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
 
-import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
+import { questionStatusToString } from "../utils/conversions";
+import SubmittedBy from "./helperComponents/SubmittedBy";
 
 const Question = ({ question }: any) => {
-
-	const [timeLeft, setTimeLeft] = useState<string>(toHHMM(question.status_end_date - jsToGraphQlDate(Date.now())));
+	const [timeLeft, setTimeLeft] = useState<string>(
+		toHHMM(question.status_end_date - jsToGraphQlDate(Date.now()))
+	);
 
 	useEffect(() => {
-    const interval = setInterval(() => {
-			setTimeLeft(toHHMM(question.status_end_date - jsToGraphQlDate(Date.now())))
+		const interval = setInterval(() => {
+			setTimeLeft(
+				toHHMM(question.status_end_date - jsToGraphQlDate(Date.now()))
+			);
 		}, 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft]);
+		return () => clearInterval(interval);
+	}, [timeLeft]);
 
 	if (Object.keys(question).length === 0) {
 		return <div>No question</div>;
@@ -23,17 +27,10 @@ const Question = ({ question }: any) => {
 			<div className="pb-4">
 				<div className="flex justify-between">
 					{/*   OWNER + CREATED_AT  DIV */}
-					<div className="small-text">
-						Submitted by{" "}
-						<p className="no-underline hover:underline inline-block">user </p>{" "}
-						at{" "}
-						{graphQlToJsDate(question.creation_date).toLocaleString(undefined, {
-							hour: "numeric",
-							minute: "numeric",
-							month: "long",
-							day: "numeric",
-						})}
-					</div>
+					<SubmittedBy
+						author={question.author}
+						creation_date={question.creation_date}
+					/>
 
 					{/*   STATUS DIV   */}
 					<div className="small-text">
@@ -50,7 +47,7 @@ const Question = ({ question }: any) => {
 
 			{/*   REWARD DIV   */}
 			<Link to={`/question/${question.id}`}>
-				<div className="flex items-center justify-between mr-5 font-light ">
+				<div className="flex items-center justify-between font-light ">
 					<div className="flex">
 						{e3sToIcp(Number(question.reward))} ICP
 						<svg
@@ -69,10 +66,10 @@ const Question = ({ question }: any) => {
 					{/* COUNTDOWN DIV */}
 					<div className="mb-2 ">
 						{" "}
-							<div className="text-justify font-light">
-								{" "}
-								Time left: {timeLeft}
-							</div>
+						<div className="text-justify font-light">
+							{" "}
+							Time left: {timeLeft}
+						</div>
 					</div>
 				</div>
 			</Link>

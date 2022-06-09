@@ -25,23 +25,26 @@ const QuestionPage = ({ plug, login }: any) => {
 			const {
 				data: { readQuestion },
 			} = await sudograph.get_question(id);
-			console.log(readQuestion, "question");
 
 			const {
 				data: { readAnswer },
 			} = await sudograph.get_question_answers(id);
-			console.log(readAnswer, "answers");
 
-			const sortedAnswers = readAnswer.sort((a, b) => {
-				return a.creation_date - b.creation_date;
-			});
+			if (readQuestion[0]) {
+				var sortedAnswers = [];
 
-			setQuestionState({
-				question: readQuestion[0],
-				hasData: true,
-				answers: sortedAnswers,
-			});
-			
+				if (readAnswer.length > 0) {
+					sortedAnswers = readAnswer.sort((a, b) => {
+						return a.creation_date - b.creation_date;
+					});
+				}
+
+				setQuestionState({
+					question: readQuestion[0],
+					hasData: true,
+					answers: sortedAnswers,
+				});
+			}
 		} catch (err) {
 			console.log(err);
 		}

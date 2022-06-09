@@ -1,5 +1,5 @@
 import { Route, Routes, HashRouter } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
 import AddQuestion from "./components/AddQuestion";
@@ -8,7 +8,26 @@ import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
 import sudograph from "./api/sudograph";
 
+import { market } from "../declarations/market/index";
+
 function App() {
+	const [minReward, setMinReward] = useState<any>(null);
+	useEffect(() => {
+		// Runs once to get minReward
+		const getMinReward = async () => {
+			try {
+				const res = await market.get_min_reward();
+
+				if (Number(res)) {
+					setMinReward(Number(res));
+				}
+			} catch (e) {
+				console.log(e);
+			}
+		};
+		getMinReward();
+	}, []);
+
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
 		// might not be necessary
@@ -36,7 +55,6 @@ function App() {
 	const logout = async () => {
 		setPlug({ isConnected: false, plug: {}, actor: {} });
 	};
-
 	Scenario.loadScenario(
 		[
 			"Alice",
@@ -84,7 +102,10 @@ function App() {
 							}
 						/>
 
-						<Route path="/add-question" element={<AddQuestion plug={plug} />} />
+						<Route
+							path="/add-question"
+							element={<AddQuestion plug={plug} minReward={minReward} />}
+						/>
 						<Route
 							path="/question/:id"
 							element={<Question plug={plug} login={login} />}

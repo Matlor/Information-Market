@@ -1,33 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
+import Loading from "./helperComponents/Loading";
+import deepcopy from "deepcopy";
+import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
-function AddQuestion({ plug }: any) {
+function AddQuestion({ plug, minReward }: any) {
 	const [title, setTitle] = useState<any>("");
 	const [content, setContent] = useState<string>("");
-	const [duration, setDuration] = useState<any>(0);
-	const [reward, setReward] = useState<any>("0");
+	const [duration, setDuration] = useState<any>("");
+	const [reward, setReward] = useState<any>("");
+
+	const [errors, setErrors] = useState<any>({
+		minRewardErr: false,
+		minRewardErrMsg: `Please use a reward larger than ${e3sToIcp(
+			minReward
+		)} ICP`,
+		minDurationErr: false,
+		minDurationErrMsg: "Please use a positive value",
+		minTitleCharactersErr: false,
+		minTitleCharactersErrMsg: "Title has to be longer than 20 characters",
+	});
+
+	const formValidation = () => {
+		var correctReward = false;
+		var negativeDuration = false;
+		var minTitleCharacters = false;
+
+		if (Number(icpToE3s(reward)) < minReward) {
+			correctReward = true;
+		}
+		if (duration <= 0) {
+			negativeDuration = true;
+		}
+
+		if (title.length <= 20) {
+			minTitleCharacters = true;
+		}
+
+		var newErrors = deepcopy(errors);
+		newErrors.minRewardErr = correctReward;
+		newErrors.minDurationErr = negativeDuration;
+		newErrors.minTitleCharactersErr = minTitleCharacters;
+
+		setErrors(newErrors);
+		if (!correctReward && !negativeDuration && !minTitleCharacters) {
+			return true;
+		}
+	};
 
 	// TO DO: Has to be improved with security in mind
 	// TO DO: Error handling
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
+		if (!formValidation()) {
+			return;
+		}
 
 		if (!(await plugApi.verifyConnection())) {
 			return;
 		}
 
-		const invoiceResponse = await plug.actors.marketActor.create_invoice(
-			BigInt(parseInt(reward))
-		);
-		console.log(invoiceResponse.ok.invoice);
-		// TO DO: check for errors
+		try {
+			const invoiceResponse = await plug.actors.marketActor.create_invoice(
+				BigInt(parseInt(reward))
+			);
+			// if not ok return error
+			console.log(invoiceResponse.ok.invoice);
 
-		// (TO DO: shows invoice to pay with plug)
-		// pays invoice with plug on the ledger
-		console.log(
-			await plug.actors.ledgerActor.transfer({
+			// (TO DO: shows invoice to pay with plug)
+			// pays invoice with plug on the ledger
+
+			const transferResponse = await plug.actors.ledgerActor.transfer({
 				to: Array.from(
 					Principal.fromHex(
 						invoiceResponse.ok.invoice.destination.text
@@ -38,81 +83,113 @@ function AddQuestion({ plug }: any) {
 				from_subaccount: [],
 				created_at_time: [],
 				amount: { e8s: invoiceResponse.ok.invoice.amount + BigInt(10000000) },
-			})
-		);
+			});
 
-		// once paid calls open question function it
-		const openQuestionResponse = await plug.actors.marketActor.ask_question(
-			invoiceResponse.ok.invoice.id,
-			parseInt(duration),
-			title,
-			content
-		);
+			// if not ok return error
+			console.log(transferResponse);
 
-		console.log(openQuestionResponse);
+			// once paid calls open question function it
+			const openQuestionResponse = await plug.actors.marketActor.ask_question(
+				invoiceResponse.ok.invoice.id,
+				parseInt(duration),
+				title,
+				content
+			);
+
+			console.log(openQuestionResponse);
+		} catch (e) {
+			console.log(e);
+		}
 	};
+
+	const form = (
+		<form onSubmit={handleSubmit}>
+			<div className="flex justify-between">
+				<div className="mb-6 mr-4 text-center w-full">
+					Duration:
+					<input
+						type="number"
+						value={duration}
+						onChange={(e) => {
+							setDuration(e.target.value);
+						}}
+						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full  p-2.5 "
+					/>
+					<div className=" text-red-600 mt-2 text-xs">
+						{errors.minDurationErr ? (
+							<div className=" text-red-600 mt-2 text-xs">
+								{errors.minDurationErrMsg}
+							</div>
+						) : (
+							<></>
+						)}
+					</div>
+				</div>
+
+				<div className="mb-10 ml-4 text-center w-full">
+					Reward:
+					<input
+						type="number"
+						value={reward}
+						onChange={(e) => {
+							setReward(e.target.value);
+						}}
+						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full p-2.5 "
+					/>
+					{errors.minRewardErr ? (
+						<div className=" text-red-600 mt-2 text-xs">
+							{errors.minRewardErrMsg}
+						</div>
+					) : (
+						<></>
+					)}
+				</div>
+			</div>
+			<div className="mb-10 text-center ">
+				Title:
+				<input
+					type="text"
+					value={title}
+					onChange={(e) => {
+						setTitle(e.target.value);
+					}}
+					className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+				/>
+				{errors.minTitleCharactersErr ? (
+					<div className=" text-red-600 mt-2 text-xs">
+						{errors.minTitleCharactersErrMsg}
+					</div>
+				) : (
+					<></>
+				)}
+			</div>
+			<div className="mb-6 text-center">
+				Content:
+				<textarea
+					value={content}
+					onChange={(e) => {
+						setContent(e.target.value);
+					}}
+					className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+				/>
+			</div>
+
+			{plug.isConnected ? (
+				<div className="flex justify-center">
+					<button type="submit" className="my-button ">
+						Submit
+					</button>
+				</div>
+			) : (
+				<div className="text-center">Please log in first</div>
+			)}
+		</form>
+	);
+
 	return (
 		<>
 			<h1 className="page-title"> Ask a Question</h1>
-
-			<form onSubmit={handleSubmit}>
-				<div className="flex justify-between">
-					<div className="mb-6 mr-4 text-center w-full">
-						Duration:
-						<input
-							type="number"
-							value={duration}
-							onChange={(e) => {
-								setDuration(e.target.value);
-							}}
-							className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full  p-2.5 "
-						/>
-					</div>
-
-					<div className="mb-6 ml-4 text-center w-full">
-						Reward:
-						<input
-							type="number"
-							value={reward}
-							onChange={(e) => {
-								setReward(e.target.value);
-							}}
-							className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full p-2.5 "
-						/>
-					</div>
-				</div>
-				<div className="mb-6 text-center ">
-					Title:
-					<input
-						type="text"
-						value={title}
-						onChange={(e) => {
-							setTitle(e.target.value);
-						}}
-						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-					/>
-				</div>
-				<div className="mb-6 text-center">
-					Content:
-					<textarea
-						value={content}
-						onChange={(e) => {
-							setContent(e.target.value);
-						}}
-						className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-					/>
-				</div>
-
-				{plug.isConnected ? (
-					<div className="flex justify-center">
-						<button type="submit" className="my-button ">
-							Submit
-						</button>
-					</div>
-				) : (
-					<div className="text-center">Please log in first</div>
-				)}
-			</form>
+			{minReward ? form : <Loading />}
 		</>
 	);
 }
