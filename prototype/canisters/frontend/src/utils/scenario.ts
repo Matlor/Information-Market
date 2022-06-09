@@ -48,7 +48,6 @@ async function createQuestion(
 	reward: number
 ): Promise<String> {
 
-	// @todo: verify if this computation makes sense
 	let status_end_date : number = creation_date + open_duration;
 	
 	const result = await sudographActor.mutation(
