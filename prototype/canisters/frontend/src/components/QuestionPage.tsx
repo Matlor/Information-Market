@@ -10,6 +10,7 @@ import Closed from "./questionPage/Closed";
 import Question from "./Question";
 
 // TODO: Fix deadline issues
+// TODO: Improve error handling
 const QuestionPage = ({ plug, login }: any) => {
 	let { id } = useParams();
 
@@ -18,8 +19,6 @@ const QuestionPage = ({ plug, login }: any) => {
 		hasData: false,
 		answers: [],
 	});
-
-	const [deadline, setDeadline] = useState<any>(0);
 
 	const fetch_data = async () => {
 		try {
@@ -37,17 +36,13 @@ const QuestionPage = ({ plug, login }: any) => {
 				return a.creation_date - b.creation_date;
 			});
 
-			if (readQuestion.length > 0) {
-				setQuestionState({
-					question: readQuestion[0],
-					hasData: true,
-					answers: sortedAnswers,
-				});
-
-				setDeadline(readQuestion[0].status_end_date);
-			}
+			setQuestionState({
+				question: readQuestion[0],
+				hasData: true,
+				answers: sortedAnswers,
+			});
+			
 		} catch (err) {
-			// handle error (or empty response)
 			console.log(err);
 		}
 	};
@@ -110,14 +105,12 @@ const QuestionPage = ({ plug, login }: any) => {
 
 	return (
 		<>
-			<div className="mb-10">
-				<h1 className="text-2xl font-medium mr-4"> Question</h1>
-			</div>
+			<h1 className="page-title"> Question</h1>
 			{questionState.hasData ? (
-				<div className="">
-					<Question question={questionState.question} deadline={deadline} />
+				<>
+					<Question question={questionState.question} />
 					{showStatusComponents()}
-				</div>
+				</>
 			) : (
 				<></>
 			)}

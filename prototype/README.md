@@ -11,17 +11,11 @@ The canister id of the invoice canister is hard-coded into the project right now
 
 Continue with dfx deploy.
 
-## TO DO
-
-Complete on how to deploy graphql canister!
-First mutation shall be a "graphql_mutation": (text, text)
-Need to add documentation on graphql queries
-Watchout overflow of certain types (cast amount in nat to int, maybe use string instead to store in graphql?)
-Need to discuss what happens if ever graphql queries fail (think about scenarios, especially important for payments)
-
 ## Testing
 ` npm run test`
 
-## Notes
+## Types
 
-Time is in minutes, because int32 in database, it shall be enough for our usage (max int32 is 2billion, current time in minutes from 1970 is 27millions)
+GraphQL does not have a Nat or BigInt type, it only supports Int32. For this reason:
+ - the time is stored in minutes
+ - the ICPs are stored in e3s (0.001 ICP and 2 million ICPs are respectively the minimum and maximum possible values)

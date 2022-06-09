@@ -1,61 +1,96 @@
+import { useState } from "react";
 import Answer from "./Answer";
+import FieldWrapper from "../helperComponents/FieldWrapper";
+import CallStateHandler from "../helperComponents/CallStateHandler";
 
 const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
+	const [callState, setCallState] = useState<any>({
+		loading: false,
+		error: false,
+	});
+
 	const handleTriggerDispute = async (e) => {
 		e.preventDefault();
-		console.log(
-			await plug.actors.marketActor.trigger_dispute(questionState.question.id)
-		);
-		await fetch_data();
-	};
+		setCallState({
+			loading: true,
+			error: false,
+		});
+		try {
+			const res = await plug.actors.marketActor.trigger_dispute(
+				questionState.question.id
+			);
 
-	const dispute = (
-		<div className="items-center ">
-			<div className="mb-4 decoration-yellow-500 underline ">
-				Winner: {questionState.question.winner.id}
-			</div>
-			<div className="flex justify-center ">
-				{" "}
-				{plug.isConnected ? (
-					<button
-						onClick={(e) => handleTriggerDispute(e)}
-						className="my-button"
-					>
-						{" "}
-						dispute
-					</button>
-				) : (
-					<div>
-						<button onClick={login} className="my-button">
-							Login to Dispute
-						</button>
-					</div>
-				)}
-			</div>
-		</div>
-	);
+			if (res.err) {
+				setCallState({
+					loading: false,
+					error: true,
+				});
+			} else {
+				setCallState({
+					loading: false,
+					error: false,
+				});
+				await fetch_data();
+			}
+		} catch (e) {
+			setCallState({
+				loading: false,
+				error: true,
+			});
+			console.log(e);
+		}
+	};
 
 	return (
 		<>
-			<div className="font-light w-full p-10 mb-5 border-t-2 border-b-2 h-44 flex justify-center items-center">
-				{questionState.question.winner ? (
-					dispute
-				) : (
-					<div> Winner: No winner has been picked</div>
-				)}
-			</div>
-			<div>
-				{questionState.answers.map((answer: any) => {
-					return (
-						<Answer
-							plug={plug}
-							answer={answer}
-							key={answer.id}
-							questionState={questionState}
-						/>
-					);
-				})}
-			</div>
+			<FieldWrapper>
+				<div className="pt-10 pb-10">
+					{questionState.question.winner ? (
+						<>
+							<div className="mb-4 decoration-yellow-500 underline ">
+								Winner: {questionState.question.winner.id}
+							</div>
+
+							{plug.isConnected ? (
+								<>
+									<div className="flex justify-center mb-2">
+										<button
+											onClick={(e) => handleTriggerDispute(e)}
+											className="my-button "
+										>
+											dispute
+										</button>
+									</div>
+									<div className="flex justify-center">
+										<CallStateHandler
+											loading={callState.loading}
+											err={callState.error}
+											errMsg={"Something went wrong"}
+										/>
+									</div>
+								</>
+							) : (
+								<button onClick={login} className="my-button">
+									Login to Dispute
+								</button>
+							)}
+						</>
+					) : (
+						<div> Winner: No winner has been picked</div>
+					)}
+				</div>
+			</FieldWrapper>
+
+			{questionState.answers.map((answer: any) => {
+				return (
+					<Answer
+						plug={plug}
+						answer={answer}
+						key={answer.id}
+						questionState={questionState}
+					/>
+				);
+			})}
 		</>
 	);
 };
