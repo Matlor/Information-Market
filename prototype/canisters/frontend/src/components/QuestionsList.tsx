@@ -33,7 +33,7 @@ const QuestionsList = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-			// Update the list of questions every 10 seconds if no interactions has trigger
+			// Update the list of questions every 10 seconds if no interactions has triggered
 			// the update in between
       if (Date.now() - fetchQuestionsDate > 10000){
         fetchQuestions();

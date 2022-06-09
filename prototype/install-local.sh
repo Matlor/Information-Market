@@ -28,7 +28,7 @@ export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 dfx deploy graphql
 dfx generate graphql
 
-dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 1440, 2880, false)'
+dfx deploy market --argument='("'${INVOICE_PRINCIPAL}'", "ICP", 1250000, 10000, 1440, 2880, 1000, true)'
 dfx generate market
 
 # For some reason, even if the build stage seems to do the same thing if you call 'dfx build frontend'
