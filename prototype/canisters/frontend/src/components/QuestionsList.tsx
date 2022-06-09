@@ -1,9 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
-import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
-import React, { useEffect } from 'react'
 import StatusSelection from "./StatusSelection";
-import { useState } from "react";
+import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
 
 type Status = {value: string, label:string};
 
@@ -34,6 +33,8 @@ const QuestionsList = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
+			// Update the list of questions every 10 seconds if no interactions has trigger
+			// the update in between
       if (Date.now() - fetchQuestionsDate > 10000){
         fetchQuestions();
       }
@@ -50,68 +51,64 @@ const QuestionsList = () => {
   }
 
   const refreshStatusMap = (map) => {
-    setStatusMap(map);
-    setPageIndex(0);
+		// At least one status has to be selected
+		if (map.length != 0){
+			setStatusMap(map);
+			setPageIndex(0);
+		}
   }
 
 	const fetchQuestions = async () => {
 
-		// Do not attempt to query any questions if no status is selected
-		if(statusMap.length == 0) {
-			setQuestions([]);
-      setTotalQuestions(0);
-		} else {
-		
-			let sudographActor = sudograph({canisterId: `${process.env.GRAPHQL_CANISTER_ID}`});
+		setFetchQuestionsDate(Date.now());
 
-			var queryInputs : string = "";
-			// Add the ordering on a field (ascendant or descendant)
-			queryInputs += "order: {" + orderField + ": " + (orderIsAscending ? "ASC" : "DESC") + "}";
-			// Filter the search on key-words (currently hard-coded on question title and content)
-			// and selected status
-			queryInputs += "search: {and: [{or: [{title: {contains: \"" + searchedText + "\"}}, {content: {contains: \"" + searchedText + "\"}}]}, {or: [";
-			statusMap.map((status: Status, index: number) => {
-				if(index!=0){
-					queryInputs += ", ";
-				}	
-				queryInputs += "{status: {eq: \"" + status.value + "\"}}";
-			});
-			queryInputs += "]}]}";
+		let sudographActor = sudograph({canisterId: `${process.env.GRAPHQL_CANISTER_ID}`});
 
-			const allResults = await sudographActor.query(gql`
-				query {
-					readQuestion(` + queryInputs + `) {
+		var queryInputs : string = "";
+		// Add the ordering on a field (ascendant or descendant)
+		queryInputs += "order: {" + orderField + ": " + (orderIsAscending ? "ASC" : "DESC") + "}";
+		// Filter the search on key-words (currently hard-coded on question title and content)
+		// and selected status
+		queryInputs += "search: {and: [{or: [{title: {contains: \"" + searchedText + "\"}}, {content: {contains: \"" + searchedText + "\"}}]}, {or: [";
+		statusMap.map((status: Status, index: number) => {
+			if(index!=0){
+				queryInputs += ", ";
+			}	
+			queryInputs += "{status: {eq: \"" + status.value + "\"}}";
+		});
+		queryInputs += "]}]}";
+
+		const allResults = await sudographActor.query(gql`
+			query {
+				readQuestion(` + queryInputs + `) {
+					id
+				}
+			}
+		`);
+
+		setTotalQuestions(allResults.data.readQuestion.length);
+
+		// Limit the number of questions per page
+		queryInputs += "limit: " + questionsPerPage
+		// Offset from page index
+		queryInputs += "offset: " + (pageIndex * questionsPerPage);
+
+		const pageResults = await sudographActor.query(gql`
+			query {
+				readQuestion(` + queryInputs + `) {
+					id
+					title
+					answers {
 						id
 					}
+					status
+					reward
+					status_end_date
 				}
-			`);
+			}
+		`);
 
-      setTotalQuestions(allResults.data.readQuestion.length);
-
-			// Limit the number of questions per page
-			queryInputs += "limit: " + questionsPerPage
-			// Offset from page index
-			queryInputs += "offset: " + (pageIndex * questionsPerPage);
-
-			const pageResults = await sudographActor.query(gql`
-				query {
-					readQuestion(` + queryInputs + `) {
-						id
-						title
-						answers {
-							id
-						}
-						status
-						reward
-						status_end_date
-					}
-				}
-			`);
-
-      setQuestions(pageResults.data.readQuestion);
-		}
-
-    setFetchQuestionsDate(Date.now());
+		setQuestions(pageResults.data.readQuestion);
 	}
 
 	const getArrow = (field: string) => {
@@ -142,7 +139,7 @@ const QuestionsList = () => {
             </div>
             <input type="text" value={searchedText} onChange={refreshSearchedText} className="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search questions..." required/>
         </div>
-        <StatusSelection onChange={refreshStatusMap} statupsMap={statusMap}/>
+        <StatusSelection onChange={refreshStatusMap} statusMap={statusMap}/>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-400">
           <tr>

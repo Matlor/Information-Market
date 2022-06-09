@@ -7,6 +7,9 @@ module.exports = {
 			ibm: ["'IBM Plex Sans'", "sans-serif"],
 		},
 		extend: {
+			minHeight: (theme) => ({
+				...theme("spacing"),
+			}),
 			colors: {
 				primary: "#FCFCFC",
 				secondary: "#F5F5F5",

@@ -1,29 +1,58 @@
+import { useState } from "react";
+import FieldWrapper from "../helperComponents/FieldWrapper";
 import Answer from "./Answer";
 
 const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
+	const [callState, setCallState] = useState<any>({
+		loading: false,
+		error: false,
+	});
+
 	const handlePickWinner = async (e, answerId) => {
 		e.preventDefault();
 
-		console.log(
-			await plug.actors.marketActor.pick_winner(
+		setCallState({
+			loading: true,
+			error: false,
+		});
+
+		try {
+			const res = await plug.actors.marketActor.pick_winner(
 				questionState.question.id,
 				answerId
-			)
-		);
+			);
+			if (res.err) {
+				setCallState({
+					loading: false,
+					error: true,
+				});
+			} else {
+				setCallState({
+					loading: false,
+					error: false,
+				});
 
-		fetch_data();
+				await fetch_data();
+			}
+		} catch (e) {
+			setCallState({
+				loading: false,
+				error: true,
+			});
+			console.log(e);
+		}
 	};
 
 	return (
-		<div>
-			<div className="w-full p-10 mb-5 border-t-2 border-b-2 h-44 flex justify-center items-center">
+		<>
+			<FieldWrapper>
 				{plug.isConnected &&
 				plug.plug.principalId === questionState.question.author ? (
 					<> Choose which answer should win the reward</>
 				) : (
 					<>A winner is being picked by the question initiator</>
 				)}
-			</div>
+			</FieldWrapper>
 
 			{questionState.answers.map((answer: any) => {
 				return (
@@ -34,11 +63,12 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 							key={answer.id}
 							questionState={questionState}
 							handlePickWinner={handlePickWinner}
+							callState={callState}
 						/>{" "}
 					</div>
 				);
 			})}
-		</div>
+		</>
 	);
 };
 

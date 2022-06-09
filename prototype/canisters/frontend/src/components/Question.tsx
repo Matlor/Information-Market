@@ -1,95 +1,81 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { jsToGraphQlDate, toHHMM } from "../utils/conversions";
+import { useState, useEffect } from "react";
+import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
 
 import { questionStatusToString, graphQlToJsDate } from "../utils/conversions";
 
-const Question = ({ question, deadline }: any) => {
-	const [countdown, setCountdown] = useState<any>(0);
+const Question = ({ question }: any) => {
 
-	setTimeout(() => {
-		let minutesRemaining = (deadline - Date.now() * 60000);
-		if (minutesRemaining > 0) {
-			setCountdown(minutesRemaining);
-		} else {
-			setCountdown(null);
-		}
-	}, 10000);
+	const [timeLeft, setTimeLeft] = useState<string>(toHHMM(question.status_end_date - jsToGraphQlDate(Date.now())));
 
-	const showQuestion = (question: any) => {
-		if (Object.keys(question).length !== 0) {
-			return (
-				<>
-					<div className=" pb-4">
-						<div className="flex justify-between">
-							{/*   OWNER + CREATED_AT  DIV */}
-							<div className="font-light text-xs mb-2">
-								Submitted by{" "}
-								<p className="no-underline hover:underline inline-block">
-									user{" "}
-								</p>{" "}
-								at{" "}
-								{graphQlToJsDate(question.creation_date).toLocaleString(
-									undefined,
-									{
-										hour: "numeric",
-										minute: "numeric",
-										month: "long",
-										day: "numeric",
-									}
-								)}
-							</div>
-							{/*   STATUS DIV   */}
-							<div className="font-light text-xs mb-1">
-								{" "}
-								Status: {questionStatusToString(question.status)}
-							</div>
-						</div>
+	useEffect(() => {
+    const interval = setInterval(() => {
+			setTimeLeft(toHHMM(question.status_end_date - jsToGraphQlDate(Date.now())))
+		}, 1000);
+    return () => clearInterval(interval);
+  }, [timeLeft]);
 
-						<div className="font-medium text-xl mb-2 text-slate-500">
-							<Link to={`/question/${question.id}`}>{question.title}</Link>
-						</div>
-						<p className="text-justify font-light  "> {question.content}</p>
+	if (Object.keys(question).length === 0) {
+		return <div>No question</div>;
+	}
+	return (
+		<div className="pl-16 pr-10 pt-10 pb-10 border-b-2 border-secondary bg-primary">
+			<div className="pb-4">
+				<div className="flex justify-between">
+					{/*   OWNER + CREATED_AT  DIV */}
+					<div className="small-text">
+						Submitted by{" "}
+						<p className="no-underline hover:underline inline-block">user </p>{" "}
+						at{" "}
+						{graphQlToJsDate(question.creation_date).toLocaleString(undefined, {
+							hour: "numeric",
+							minute: "numeric",
+							month: "long",
+							day: "numeric",
+						})}
 					</div>
-					{/*   REWARD DIV   */}
-					<div className="flex  items-center">
-						<Link to={`/question/${question.id}`}>
-							<div className="flex items-center mr-5 font-light ">
-								{Math.round(Number(question.reward) * 10000) / 10000} ICP
-								<svg
-									className="w-4 h-4 ml-2"
-									viewBox="0 0 24 24"
-									stroke="currentColor"
-									strokeWidth="2"
-									fill="none"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								>
-									<path d="M5 12h14"></path>
-									<path d="M12 5l7 7-7 7"></path>
-								</svg>
-							</div>
-						</Link>
+
+					{/*   STATUS DIV   */}
+					<div className="small-text">
+						{" "}
+						Status: {questionStatusToString(question.status)}
+					</div>
+				</div>
+
+				<div className="font-medium text-xl mb-2 text-slate-500">
+					<Link to={`/question/${question.id}`}>{question.title}</Link>
+				</div>
+				<p className="text-justify font-light  "> {question.content}</p>
+			</div>
+
+			{/*   REWARD DIV   */}
+			<Link to={`/question/${question.id}`}>
+				<div className="flex items-center justify-between mr-5 font-light ">
+					<div className="flex">
+						{e3sToIcp(Number(question.reward))} ICP
+						<svg
+							className="w-4 h-4 ml-2"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth="2"
+							fill="none"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						>
+							<path d="M5 12h14"></path>
+							<path d="M12 5l7 7-7 7"></path>
+						</svg>
 					</div>
 					{/* COUNTDOWN DIV */}
 					<div className="mb-2 ">
 						{" "}
 							<div className="text-justify font-light">
 								{" "}
-								Time left: {toHHMM(deadline - jsToGraphQlDate(Date.now()))}
+								Time left: {timeLeft}
 							</div>
 					</div>
-				</>
-			);
-		} else {
-			return <div>No question</div>;
-		}
-	};
-	//
-
-	return (
-		<div className=" pl-16 pr-10 pt-10 pb-10  border-b-2 border-secondary bg-primary mb-4">
-			{showQuestion(question)}
+				</div>
+			</Link>
 		</div>
 	);
 };
