@@ -90,7 +90,13 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 			}
 			queryInputs += '{status: {eq: "' + status.value + '"}}';
 		});
-		queryInputs += "]}]}";
+
+		queryInputs += "]}";
+
+		if (requireAuthentication) {
+			queryInputs += `,{or: [{answers: {author: {eq:"${plug.plug.principalId}"}}}, {author: {eq: "${plug.plug.principalId}"}}]}`;
+		}
+		queryInputs += "]}";
 
 		const allResults = await sudographActor.query(
 			gql`
