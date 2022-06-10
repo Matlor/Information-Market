@@ -72,7 +72,7 @@ function App() {
 		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
-				<div className=" ml-80 mr-80 mt-10 mb-5">
+				<div className=" ml-36 mr-36 mt-10 mb-5">
 					<Routes>
 						<Route
 							path="/"

@@ -18,6 +18,10 @@ const Header = ({ plug, login, logout }: any) => {
 				) : (
 					<></>
 				)}
+				<li className={` ${pathname === "/" ? "underline" : ""} p-4 mr-8`}>
+					{" "}
+					<Link to="/">Browse Questions </Link>
+				</li>
 
 				<li
 					className={`${
@@ -26,11 +30,6 @@ const Header = ({ plug, login, logout }: any) => {
 				>
 					{" "}
 					<Link to="/add-question">Add Question </Link>
-				</li>
-
-				<li className={` ${pathname === "/" ? "underline" : ""} p-4 mr-8`}>
-					{" "}
-					<Link to="/">Browse Questions </Link>
 				</li>
 			</ul>
 			{plug.isConnected ? (

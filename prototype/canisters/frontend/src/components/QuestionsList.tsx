@@ -191,43 +191,46 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 	return (
 		<>
 			<h1 className="page-title"> {title} </h1>
-			<div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-				<label
-					htmlFor="default-search"
-					className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-gray-300"
-				>
-					Search questions
-				</label>
-				<div className="relative">
-					<div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
-						<svg
-							className="w-5 h-5 text-gray-500 dark:text-gray-400"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							></path>
-						</svg>
-					</div>
+
+			{/* SEARCH & STATUS */}
+			<div className="flex justify-between">
+				{/* SEARCH */}
+				<div className="relative mb-10 w-full mr-4">
+					<svg
+						className="w-5 h-5 text-gray-500 absolute inset-y-4 inset-x-2 "
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth="2"
+							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+						></path>
+					</svg>
 					<input
 						type="text"
 						value={searchedText}
 						onChange={refreshSearchedText}
-						className="block p-4 pl-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+						className="p-4 pl-10 w-full text-sm text-gray-900 bg-primary  focus:ring-blue-500 border-none"
 						placeholder="Search questions..."
 						required
 					/>
 				</div>
-				<StatusSelection onChange={refreshStatusMap} statusMap={statusMap} />
-				<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-					<thead className="text-xs text-gray-700 bg-gray-50 dark:bg-gray-200 dark:text-gray-400">
-						<tr>
+
+				{/* STATUS */}
+				<div className="w-full ml-4">
+					<StatusSelection onChange={refreshStatusMap} statusMap={statusMap} />
+				</div>
+			</div>
+
+			{/* TABLE */}
+			<div className="pl-10 pr-10 pt-10 bg-primary">
+				<table className="w-full text-sm text-left text-gray-500 mt-4  bg-primary">
+					<thead className=" text-gray-700 ">
+						<tr className="h-20">
 							<th scope="col" className="px-6 py-3">
 								Question
 							</th>
@@ -262,13 +265,10 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 					<tbody>
 						{questions.map((question: any) => {
 							return (
-								<tr
-									className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-									key={question.id}
-								>
+								<tr className=" hover:bg-secondary" key={question.id}>
 									<th
 										scope="row"
-										className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
+										className="px-6 py-6 font-medium text-gray-900"
 									>
 										<Link to={`/question/${question.id}`}>
 											{question.title}
@@ -317,65 +317,74 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 						})}
 					</tbody>
 				</table>
-				<div className="flex flex-col items-center">
-					<span className="text-sm text-gray-700 dark:text-gray-400">
-						Showing{" "}
-						<span className="font-semibold text-gray-900 dark:text-white">
-							{totalQuestions == 0 ? 0 : pageIndex * questionsPerPage + 1}
-						</span>{" "}
-						to{" "}
-						<span className="font-semibold text-gray-900 dark:text-white">
-							{Math.min((pageIndex + 1) * questionsPerPage, totalQuestions)}
-						</span>{" "}
-						of{" "}
-						<span className="font-semibold text-gray-900 dark:text-white">
-							{totalQuestions}
-						</span>{" "}
-						Entries
-					</span>
-					<div className="inline-flex mt-2 xs:mt-0">
-						<button
-							disabled={pageIndex < 1}
-							onClick={() => {
-								setPageIndex(pageIndex - 1);
-							}}
-							className="inline-flex items-center py-2 px-4 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-						>
-							<svg
-								className="mr-2 w-5 h-5"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
+			</div>
+
+			{/* PAGINATION */}
+			<div className="flex justify-center items-center pb-10 pt-10  bg-primary ">
+				<div className="">
+					{/* TEXT */}
+					<div className="flex justify-center">
+						<span>
+							Showing{" "}
+							<span>
+								{totalQuestions == 0 ? 0 : pageIndex * questionsPerPage + 1}
+							</span>{" "}
+							to{" "}
+							<span>
+								{Math.min((pageIndex + 1) * questionsPerPage, totalQuestions)}
+							</span>{" "}
+							of <span className=" text-gray-900 ">{totalQuestions}</span>{" "}
+							Entries
+						</span>
+					</div>
+					{/* BUTTONS */}
+					<div className="flex justify-between mt-4 xs:mt-0">
+						<div>
+							<button
+								disabled={pageIndex < 1}
+								onClick={() => {
+									setPageIndex(pageIndex - 1);
+								}}
+								className="inline-flex my-button items-center bg-secondary hover:bg-primary"
 							>
-								<path
-									fillRule="evenodd"
-									d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
-									clipRule="evenodd"
-								></path>
-							</svg>
-							Prev
-						</button>
-						<button
-							disabled={(pageIndex + 1) * questionsPerPage >= totalQuestions}
-							onClick={() => {
-								setPageIndex(pageIndex + 1);
-							}}
-							className="inline-flex items-center py-2 px-4 text-sm font-medium text-white bg-gray-800 rounded-r border-0 border-l border-gray-700 hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-						>
-							Next
-							<svg
-								className="ml-2 w-5 h-5"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
+								<svg
+									className="mr-2 w-5 h-5"
+									fill="currentColor"
+									viewBox="0 0 20 20"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										fillRule="evenodd"
+										d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z"
+										clipRule="evenodd"
+									></path>
+								</svg>
+								Prev
+							</button>
+						</div>
+						<div>
+							<button
+								disabled={(pageIndex + 1) * questionsPerPage >= totalQuestions}
+								onClick={() => {
+									setPageIndex(pageIndex + 1);
+								}}
+								className="inline-flex my-button items-center bg-secondary hover:bg-primary"
 							>
-								<path
-									fillRule="evenodd"
-									d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-									clipRule="evenodd"
-								></path>
-							</svg>
-						</button>
+								Next
+								<svg
+									className="ml-2 w-5 h-5"
+									fill="currentColor"
+									viewBox="0 0 20 20"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										fillRule="evenodd"
+										d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+										clipRule="evenodd"
+									></path>
+								</svg>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
