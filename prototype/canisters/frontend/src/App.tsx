@@ -81,7 +81,7 @@ function App() {
 									key={1}
 									title={"Browse Questions"}
 									plug={plug}
-									onlyAuthenticated={false}
+									requireAuthentication={false}
 									sudographFunction={sudograph.get_questions}
 								/>
 							}
@@ -94,7 +94,7 @@ function App() {
 									key={2}
 									title={"My Interactions"}
 									plug={plug}
-									onlyAuthenticated={true}
+									requireAuthentication={true}
 									sudographFunction={() =>
 										sudograph.get_questions_interactions(plug.plug.principalId)
 									}
