@@ -15,13 +15,7 @@ interface JSONObject {
 
 interface JSONArray extends Array<JSONValue> {}
 
-const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
-	if (requireAuthentication) {
-		if (!plug.isConnected) {
-			return <Navigate to="/" replace />;
-		}
-	}
-
+const QuestionsList = ({ plug }: any) => {
 	const questionsPerPage: number = 10;
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [orderField, setOrderField] = useState<string>("reward");
@@ -33,6 +27,7 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 		{ value: "OPEN", label: "Open" },
 	]);
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
+	const [myInteractions, setMyInteractions] = useState<boolean>(false);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -43,10 +38,22 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 			}
 		}, 1000);
 
+		if (!plug.isConnected) {
+			setMyInteractions(false);
+		}
+
 		fetchQuestions();
 
 		return () => clearInterval(interval);
-	}, [orderField, orderIsAscending, searchedText, statusMap, pageIndex]);
+	}, [
+		orderField,
+		orderIsAscending,
+		searchedText,
+		statusMap,
+		pageIndex,
+		myInteractions,
+		plug.isConnected,
+	]);
 
 	const refreshSearchedText = (event) => {
 		setSearchedText(event.target.value);
@@ -93,7 +100,7 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 
 		queryInputs += "]}";
 
-		if (requireAuthentication) {
+		if (myInteractions) {
 			queryInputs += `,{or: [{answers: {author: {eq:"${plug.plug.principalId}"}}}, {author: {eq: "${plug.plug.principalId}"}}]}`;
 		}
 		queryInputs += "]}";
@@ -188,10 +195,37 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 		}
 	};
 
+	//const [toggle, setToggle] = useState(true);
+	const toggleClass = "transform translate-x-5 ";
+
+	console.log(myInteractions);
 	return (
 		<>
-			<h1 className="page-title"> {title} </h1>
-
+			<h1 className="page-title mb-2"> Browse Questions </h1>
+			<div className="flex justify-end mb-6 h-10 items-center">
+				{plug.isConnected ? (
+					<>
+						<div>My Interactions only</div>
+						<div
+							className={`ml-4 w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer ${
+								myInteractions ? "bg-gray-800" : ""
+							}`}
+							onClick={() => {
+								setMyInteractions(!myInteractions);
+							}}
+						>
+							<div
+								className={
+									"bg-white  h-5 w-5 rounded-full shadow-md transform" +
+									(myInteractions ? toggleClass : null)
+								}
+							></div>
+						</div>
+					</>
+				) : (
+					<div></div>
+				)}
+			</div>
 			{/* SEARCH & STATUS */}
 			<div className="flex justify-between">
 				{/* SEARCH */}
@@ -225,7 +259,6 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 					<StatusSelection onChange={refreshStatusMap} statusMap={statusMap} />
 				</div>
 			</div>
-
 			{/* TABLE */}
 			<div className="pl-10 pr-10 pt-10 bg-primary">
 				<table className="w-full text-sm text-left text-gray-500 mt-4  bg-primary">
@@ -284,7 +317,7 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 										</div>
 									</td>
 									<td className="px-6 py-4  w-2/12 ">
-										<div className="flex flex-row  gap-0.5 h-4 w-full justify-center">
+										<div className="flex flex-row  gap-0.5 h-4 justify-center">
 											<div
 												className={`basis-5 h-1.5 ${
 													getProgressColors(question.status)[0]
@@ -332,7 +365,6 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 					</tbody>
 				</table>
 			</div>
-
 			{/* PAGINATION */}
 			<div className="flex justify-center items-center pb-10 pt-10  bg-primary ">
 				<div className="">

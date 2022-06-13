@@ -6,18 +6,6 @@ const Header = ({ plug, login, logout }: any) => {
 	return (
 		<div className=" mr-10 ml-10 h-[110px] pt-16 pb-12 flex justify-end items-center font-medium ">
 			<ul className="flex mr-20   ">
-				{plug.isConnected ? (
-					<li
-						className={` ${
-							pathname === "/interactions" ? "underline" : ""
-						} p-4 mr-8`}
-					>
-						{" "}
-						<Link to="/interactions">My Interactions </Link>
-					</li>
-				) : (
-					<></>
-				)}
 				<li className={` ${pathname === "/" ? "underline" : ""} p-4 mr-8`}>
 					{" "}
 					<Link to="/">Browse Questions </Link>

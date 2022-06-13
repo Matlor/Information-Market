@@ -74,33 +74,7 @@ function App() {
 				<Header plug={plug} login={login} logout={logout} />
 				<div className=" ml-56 mr-56 mt-10 mb-5">
 					<Routes>
-						<Route
-							path="/"
-							element={
-								<QuestionsList
-									key={1}
-									title={"Browse Questions"}
-									plug={plug}
-									requireAuthentication={false}
-									sudographFunction={sudograph.get_questions}
-								/>
-							}
-						/>
-
-						<Route
-							path="/interactions"
-							element={
-								<QuestionsList
-									key={2}
-									title={"My Interactions"}
-									plug={plug}
-									requireAuthentication={true}
-									sudographFunction={() =>
-										sudograph.get_questions_interactions(plug.plug.principalId)
-									}
-								/>
-							}
-						/>
+						<Route path="/" element={<QuestionsList plug={plug} />} />
 
 						<Route
 							path="/add-question"
