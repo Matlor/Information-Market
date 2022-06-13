@@ -108,7 +108,7 @@ const QuestionPage = ({ plug, login }: any) => {
 
 	return (
 		<>
-			<h1 className="page-title"> Question</h1>
+			<h1 className="page-title mb-10"> Question</h1>
 			{questionState.hasData ? (
 				<>
 					<Question question={questionState.question} />

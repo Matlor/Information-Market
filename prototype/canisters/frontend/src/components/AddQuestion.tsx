@@ -188,7 +188,7 @@ function AddQuestion({ plug, minReward }: any) {
 
 	return (
 		<>
-			<h1 className="page-title mb-10"> Ask a Question</h1>
+			<h1 className="page-title"> Ask a Question</h1>
 			{minReward ? form : <Loading />}
 		</>
 	);
