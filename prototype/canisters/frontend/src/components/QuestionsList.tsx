@@ -231,52 +231,60 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 				<table className="w-full text-sm text-left text-gray-500 mt-4  bg-primary">
 					<thead className=" text-gray-700 ">
 						<tr className="h-20">
-							<th scope="col" className="px-6 py-3">
+							<th scope="col" className="px-6 py-3 items-center">
 								Question
 							</th>
-							<th scope="col" className="px-6 py-3">
-								Answers
+							<th scope="col" className="px-6 py-3 ">
+								<div className="flex justify-center"> Answers</div>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								Status
+								<div className="flex justify-center"> Status</div>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button
-									onClick={() => {
-										setOrderField("reward");
-										setOrderIsAscending(!orderIsAscending);
-									}}
-								>
-									Reward {getArrow("reward")}
-								</button>
+								<div className="flex justify-center">
+									<button
+										onClick={() => {
+											setOrderField("reward");
+											setOrderIsAscending(!orderIsAscending);
+										}}
+									>
+										Reward {getArrow("reward")}
+									</button>
+								</div>
 							</th>
 							<th scope="col" className="px-6 py-3">
-								<button
-									onClick={() => {
-										setOrderField("status_end_date");
-										setOrderIsAscending(!orderIsAscending);
-									}}
-								>
-									Time left {getArrow("status_end_date")}
-								</button>
+								<div className="flex justify-center">
+									<button
+										onClick={() => {
+											setOrderField("status_end_date");
+											setOrderIsAscending(!orderIsAscending);
+										}}
+									>
+										Timeleft {getArrow("status_end_date")}
+									</button>
+								</div>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
 						{questions.map((question: any) => {
 							return (
-								<tr className=" hover:bg-secondary" key={question.id}>
+								<tr className="hover:bg-secondary" key={question.id}>
 									<th
 										scope="row"
-										className="px-6 py-6 font-medium text-gray-900"
+										className="px-6 py-6 font-medium text-gray-900 w-6/12"
 									>
 										<Link to={`/question/${question.id}`}>
 											{question.title}
 										</Link>
 									</th>
-									<td className="px-6 py-4">{question.answers.length}</td>
-									<td className="px-6 py-4">
-										<div className="flex flex-row gap-0.5">
+									<td className="px-6 py-4 w-1/12">
+										<div className="flex justify-center">
+											{question.answers.length}{" "}
+										</div>
+									</td>
+									<td className="px-6 py-4  w-2/12 ">
+										<div className="flex flex-row  gap-0.5 h-4 w-full justify-center">
 											<div
 												className={`basis-5 h-1.5 ${
 													getProgressColors(question.status)[0]
@@ -304,13 +312,19 @@ const QuestionsList = ({ title, requireAuthentication, plug }: any) => {
 											/>
 										</div>
 									</td>
-									<td className="px-6 py-4">
-										{e3sToIcp(Number(question.reward))} ICP
+									<td className="px-6 py-4  w-1/12">
+										<div className="flex justify-center">
+											{e3sToIcp(Number(question.reward))}
+
+											<div className="ml-1">ICP</div>
+										</div>
 									</td>
-									<td className="px-6 py-4 text-right">
-										{toHHMM(
-											question.status_end_date - jsToGraphQlDate(Date.now())
-										)}
+									<td className="px-6 py-4  w-2/12">
+										<div className="flex justify-center">
+											{toHHMM(
+												question.status_end_date - jsToGraphQlDate(Date.now())
+											)}
+										</div>
 									</td>
 								</tr>
 							);
