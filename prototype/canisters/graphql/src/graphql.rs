@@ -175,14 +175,13 @@ async fn must_pick_answer(question_id: String, status_update_date: i32, status_e
 }
 
 #[update]
-async fn open_dispute(question_id: String, status_update_date: i32, status_end_date: i32) -> bool {
+async fn open_dispute(question_id: String, status_update_date: i32) -> bool {
     let json_str = graphql_query(
         queries::open_dispute::macros::mutation!().to_string(),
         format!(
             queries::open_dispute::macros::args!(),
             question_id,
-            status_update_date,
-            status_end_date)).await;
+            status_update_date)).await;
     let json_data : Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::open_dispute::macros::response!()].as_array();
     if json_response != None {

@@ -192,8 +192,8 @@ function getRandomDuration(maxDuration: number) {
 }
 
 function getRandomRewardE3s() {
-	// Max integer is 2bil, here do random from 0 to 1bil (2 * 10^9) e3s
-	let exponent = Math.floor(Math.random() * 9) + 1;
+	// Max integer is 2bil, here do random from 0 to 1 million e3s, hence 0 to 1000 ICPs
+	let exponent = Math.floor(Math.random() * 6) + 1;
 	return Math.floor(Math.random() * 10 ** exponent);
 }
 
@@ -236,7 +236,7 @@ const loadScenario = async (
 			1
 		)[0];
 		let question = await createQuestion(
-			questionAuthor.name,
+			questionAuthor.identity,
 			await createInvoice(questionAuthor.identity),
 			creationDate,
 			now - creationDate + getRandomDuration(minutesToGo),
@@ -255,7 +255,7 @@ const loadScenario = async (
 				answerSet.add(
 					await createAnswer(
 						question,
-						author.name,
+						author.identity,
 						getRandomPastDate(now - creationDate),
 						lorem.generateSentences()
 					)

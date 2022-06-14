@@ -20,13 +20,14 @@
         "@tailwindcss/forms": "^0.5.2",
         "@types/node": "^17.0.35",
         "fs": "^0.0.1-security",
+        "deepcopy": "^2.1.0",
         "lorem-ipsum": "^2.0.4",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
         "react-icons": "^4.3.1",
         "react-router-dom": "^6.3.0",
         "react-select": "^5.3.2",
-        "sudograph": "0.4.3"
+        "sudograph": "^0.4.3"
     },
     "devDependencies": {
         "@types/react": "^18.0.0",

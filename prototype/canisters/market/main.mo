@@ -17,26 +17,16 @@ import Time "mo:base/Time";
 import GraphQL "canister:graphql";
 
 
-shared({ caller = initializer }) actor class Market(
-    invoice_canister: Text,
-    coin_symbol: Text,
-    min_reward: Nat, // in e8s
-    fee: Nat, // in e8s, shall be 10000
-    duration_pick_answer: Nat, // in minutes
-    duration_disputable: Nat, // in minutes
-    duration_dispute: Nat,
-    update_status_on_heartbeat: Bool
-) = this {
+shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
     // Members
-    private let invoice_canister_ : InvoiceTypes.Interface = actor (invoice_canister);
-    private let coin_symbol_ : Text = coin_symbol;
-    private let min_reward_ : Nat = min_reward;
-    private let fee_ : Nat = fee;
-    private let duration_pick_answer_ : Int32 = Int32.fromInt(duration_pick_answer);
-    private let duration_disputable_ : Int32 = Int32.fromInt(duration_disputable);
-    private let duration_dispute_ : Int32 = Int32.fromInt(duration_dispute);
-    private let update_status_on_heartbeat_: Bool = update_status_on_heartbeat;
+    private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(arguments.invoice_canister));
+    private let coin_symbol_ : Text = arguments.coin_symbol;
+    private let min_reward_ : Nat = arguments.min_reward_e8s;
+    private let fee_ : Nat = arguments.transfer_fee_e8s;
+    private let duration_pick_answer_ : Int32 = Int32.fromInt(arguments.pick_answer_duration_minutes);
+    private let duration_disputable_ : Int32 = Int32.fromInt(arguments.disputable_duration_minutes);
+    private let update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
 
     public shared func get_coin_symbol() : async Text {
         return coin_symbol_;
@@ -56,10 +46,6 @@ shared({ caller = initializer }) actor class Market(
 
     public shared func get_duration_disputable() : async Int32 {
         return duration_disputable_;
-    };
-
-    public shared func get_duration_dispute() : async Int32 {
-        return duration_dispute_;
     };
 
     public shared func get_update_status_on_heartbeat() : async Bool {
@@ -288,7 +274,7 @@ shared({ caller = initializer }) actor class Market(
                     return #err(#WrongStatus);
                 } else if (not(await GraphQL.has_answered(question_id, Principal.toText(caller)))) {
                     return #err(#NotAllowed);
-                } else if (not (await GraphQL.open_dispute(question_id, now, now + duration_dispute_))){
+                } else if (not (await GraphQL.open_dispute(question_id, now))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -364,7 +350,7 @@ shared({ caller = initializer }) actor class Market(
         {
             switch(question.status){
                 case(#OPEN){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         if (await GraphQL.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
@@ -393,14 +379,14 @@ shared({ caller = initializer }) actor class Market(
                     };
                 };
                 case(#PICKANSWER){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
-                        ignore await GraphQL.open_dispute(question.id, now, now + duration_dispute_);
+                        ignore await GraphQL.open_dispute(question.id, now);
                     };
                 };
                 case(#DISPUTABLE){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         // If nobody disputed the picked answer, payout the answer's author
                         // and close the question
                         switch (question.winner) {

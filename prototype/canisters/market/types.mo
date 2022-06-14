@@ -5,7 +5,17 @@ import InvoiceTypes "../invoice/types";
 // type of error per function
 module {
 
-   public type Error = {
+    public type InstallMarketArguments = {
+        invoice_canister: Principal;
+        coin_symbol: Text;
+        min_reward_e8s: Nat;
+        transfer_fee_e8s: Nat;
+        pick_answer_duration_minutes: Nat;
+        disputable_duration_minutes: Nat;
+        update_status_on_heartbeat: Bool;
+    };
+
+    public type Error = {
         #NotFound;
         #NotAllowed;
         #WrongStatus;

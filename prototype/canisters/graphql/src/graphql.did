@@ -49,7 +49,7 @@ service : {
     "has_answered": (text, text) -> (bool) query;
     "has_answers": (text) -> (bool) query;
     "must_pick_answer": (text, int32, int32) -> (bool);
-    "open_dispute": (text, int32, int32) -> (bool);
+    "open_dispute": (text, int32) -> (bool);
     "pick_winner": (text, text, int32, int32) -> (bool);
     "solve_dispute": (text, text, text, int32) -> (bool);
 }

@@ -2,8 +2,10 @@
 pub mod macros{
     macro_rules! mutation{
         () => {
-            r#"mutation ($question_id: ID!, $status_update_date: Int!, $status_end_date: Int!) {
-              updateQuestion(input: {id: $question_id, status_update_date: $status_update_date, $status_end_date: Int!, status: DISPUTED}) {
+            r#"mutation ($question_id: ID!, $status_update_date: Int!) {
+              updateQuestion(
+                input: {id: $question_id, status_update_date: $status_update_date, status: DISPUTED}
+              ) {
                 id
                 author
                 author_invoice {
@@ -33,8 +35,7 @@ pub mod macros{
         () => {
             r#"{{
               "question_id": "{}",
-              "status_update_date": {},
-              "status_end_date": {}
+              "status_update_date": {}
             }}"#
         }
     }
