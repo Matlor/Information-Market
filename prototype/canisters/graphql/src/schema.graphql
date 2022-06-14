@@ -1,5 +1,10 @@
-type Initialization {
+type SudographSettings {
+    exportGeneratedMutationFunction: false
+}
+
+type Admin {
     id: ID!
+    principal: String!
 }
 
 enum QuestionStatus {
