@@ -22,4 +22,24 @@
 	.small-text {
 		@apply font-light text-xs mb-2;
 	}
+
+	.editor-wrapper blockquote {
+		@apply pt-1 pl-3 border-l-[6px] border-gray-200  bg-gray-100;
+	}
+
+	.editor-wrapper ul {
+		@apply list-disc ml-6;
+	}
+
+	.editor-wrapper ol {
+		@apply list-decimal ml-6;
+	}
+
+	.editor-wrapper h2 {
+		@apply text-2xl font-medium mr-4;
+	}
+
+	.editor-wrapper h3 {
+		@apply text-xl font-medium mr-4;
+	}
 }

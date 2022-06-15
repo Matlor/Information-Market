@@ -6,6 +6,8 @@ import Loading from "./helperComponents/Loading";
 import deepcopy from "deepcopy";
 import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
+import SlateEditor from "./SlateEditor";
+
 function AddQuestion({ plug, minReward }: any) {
 	const [title, setTitle] = useState<any>("");
 	const [content, setContent] = useState<string>("");
@@ -190,6 +192,7 @@ function AddQuestion({ plug, minReward }: any) {
 
 	return (
 		<>
+			<SlateEditor />
 			<h1 className="page-title mb-10"> Ask a Question</h1>
 			{minReward ? form : <Loading />}
 		</>
