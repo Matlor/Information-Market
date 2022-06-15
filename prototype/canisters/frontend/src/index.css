@@ -27,6 +27,10 @@
 		@apply pt-1 pl-3 border-l-[6px] border-gray-200  bg-gray-100;
 	}
 
+	.editor-wrapper code {
+		@apply p-1;
+	}
+
 	.editor-wrapper ul {
 		@apply list-disc ml-6;
 	}

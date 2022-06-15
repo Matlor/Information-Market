@@ -1,9 +1,17 @@
-import { useCallback, useMemo } from "react";
+// prism
+import Prism from "prismjs";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-php";
+import "prismjs/components/prism-sql";
+import "prismjs/components/prism-java";
+
+import React, { useCallback, useMemo, useState } from "react";
 import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
 
 import { Button, Icon, Toolbar } from "./SlateHelpers";
 import {
+	Text,
 	Editor,
 	Transforms,
 	createEditor,
@@ -23,17 +31,12 @@ const HOTKEYS = {
 	"mod+Enter": "softbreak",
 };
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
-const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 
 const SlateEditor = () => {
 	// ---------------------------------------------- Block == Elements ----------------------------------------------
 
 	const toggleBlock = (editor, format) => {
-		const isActive = isBlockActive(
-			editor,
-			format,
-			TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
-		);
+		const isActive = isBlockActive(editor, format);
 
 		const isList = LIST_TYPES.includes(format);
 
@@ -41,21 +44,16 @@ const SlateEditor = () => {
 			match: (n) =>
 				!Editor.isEditor(n) &&
 				SlateElement.isElement(n) &&
-				LIST_TYPES.includes(n.type) &&
-				!TEXT_ALIGN_TYPES.includes(format),
+				LIST_TYPES.includes(n.type),
 			split: true,
 		});
 
 		let newProperties;
-		if (TEXT_ALIGN_TYPES.includes(format)) {
-			newProperties = {
-				align: isActive ? undefined : format,
-			};
-		} else {
-			newProperties = {
-				type: isActive ? "paragraph" : isList ? "list-item" : format,
-			};
-		}
+
+		newProperties = {
+			type: isActive ? "paragraph" : isList ? "list-item" : format,
+		};
+
 		Transforms.setNodes(editor, newProperties);
 
 		if (!isActive && isList) {
@@ -90,11 +88,7 @@ const SlateEditor = () => {
 		const editor = useSlate();
 		return (
 			<Button
-				active={isBlockActive(
-					editor,
-					format,
-					TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
-				)}
+				active={isBlockActive(editor, format)}
 				onMouseDown={(event) => {
 					event.preventDefault();
 					toggleBlock(editor, format);
@@ -192,30 +186,6 @@ const SlateEditor = () => {
 
 	const renderElement = useCallback((props) => <Element {...props} />, []);
 
-	// ---------------------------------------------- Leaf  ----------------------------------------------
-
-	const Leaf = ({ attributes, children, leaf }) => {
-		if (leaf.bold) {
-			children = <strong>{children}</strong>;
-		}
-
-		if (leaf.code) {
-			children = <code>{children}</code>;
-		}
-
-		if (leaf.italic) {
-			children = <em>{children}</em>;
-		}
-
-		if (leaf.underline) {
-			children = <u>{children}</u>;
-		}
-
-		return <span {...attributes}>{children}</span>;
-	};
-
-	const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-
 	// -------------------------------------------- useMemo & History --------------------------------------------
 	// return a memoized value.
 	// createEditor is the create function and there is list of dependencies.
@@ -232,12 +202,133 @@ const SlateEditor = () => {
 		},
 	];
 
+	// ---------------------------------------------- Leaf (& Prism Leaf)  ----------------------------------------------
+	const cssFunc = (leaf) => {
+		console.log(leaf, "leaf");
+		if (leaf.comment) {
+			return "text-red-400";
+		} else if (leaf.operator || leaf.url) {
+			return "text-yellow-800";
+		} else if (leaf.keyword) {
+			return "text-orange-400";
+		} else if (leaf.variable) {
+			return "text-orange-400";
+		} else if (leaf.variable || leaf.regex) {
+			return "text-orange-400";
+		} else if (
+			leaf.number ||
+			leaf.boolean ||
+			leaf.tag ||
+			leaf.constant ||
+			leaf.symbol ||
+			leaf["attr-name"] ||
+			leaf.selector
+		) {
+			return "text-pink-700";
+		} else if (leaf.punctuation) {
+			return "text-gray-300";
+		} else if (leaf.string || leaf.char) {
+			return "text-green-700";
+		} else if (leaf.function || leaf["class-name"]) {
+			return "text-red-400";
+		}
+	};
+
+	// background: hsla(0, 0%, 100%, 0.5);
+	const Leaf = ({ attributes, children, leaf }) => {
+		if (leaf.bold) {
+			children = <strong>{children}</strong>;
+		}
+
+		if (leaf.code) {
+			console.log(cssFunc(leaf), "css output");
+			children = (
+				<code
+					{...attributes}
+					className={`bg-gray-100
+						${cssFunc(leaf)}
+					`}
+				>
+					{children}
+				</code>
+			);
+		}
+
+		if (leaf.italic) {
+			children = <em>{children}</em>;
+		}
+
+		if (leaf.underline) {
+			children = <u>{children}</u>;
+		}
+
+		return <span {...attributes}>{children}</span>;
+	};
+
+	// 	return <span {...attributes}>{children}</span>;
+
+	const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+
+	// ---------------------------- PRISM --------------------------------------------
+
+	// Use state when adding more languages
+	// const [language, setLanguage] = useState("js");
+	const language = "js";
+
+	// decorate function depends on the language selected
+	const decorate = useCallback(
+		([node, path]) => {
+			const ranges = [];
+			if (!Text.isText(node)) {
+				return ranges;
+			}
+			const tokens = Prism.tokenize(node.text, Prism.languages[language]);
+			let start = 0;
+
+			for (const token of tokens) {
+				const length = getLength(token);
+				const end = start + length;
+
+				if (typeof token !== "string") {
+					ranges.push({
+						[token.type]: true,
+						anchor: { path, offset: start },
+						focus: { path, offset: end },
+					});
+				}
+
+				start = end;
+			}
+
+			return ranges;
+		},
+		[language]
+	);
+
+	// used inside decorate function
+	const getLength = (token) => {
+		if (typeof token === "string") {
+			return token.length;
+		} else if (typeof token.content === "string") {
+			return token.content.length;
+		} else {
+			return token.content.reduce((l, t) => l + getLength(t), 0);
+		}
+	};
+
+	// modifications and additions to prism library
+	Prism.languages.javascript = Prism.languages.extend("javascript", {});
+	Prism.languages.insertBefore("javascript", "prolog", {
+		comment: { pattern: /\/\/[^\n]*/, alias: "comment" },
+	});
+
+	// added decorate function
 	return (
-		<div className=" w-full mb-96 ">
+		<div className=" w-screen mb-96 ">
 			<div className="border bg-red-100 p-20 m-20">
 				<Slate editor={editor} value={initialValue}>
 					<Toolbar>
-						<div className="flex flex-col mb-10">
+						<div className="flex  justify-between">
 							{/* MARKS */}
 							<MarkButton format="bold" icon="format_bold" />
 							<MarkButton format="italic" icon="format_italic" />
@@ -250,16 +341,12 @@ const SlateEditor = () => {
 							<BlockButton format="block-quote" icon="format_quote" />
 							<BlockButton format="numbered-list" icon="format_list_numbered" />
 							<BlockButton format="bulleted-list" icon="format_list_bulleted" />
-							<div> -</div>
-							<BlockButton format="left" icon="format_align_left" />
-							<BlockButton format="center" icon="format_align_center" />
-							<BlockButton format="right" icon="format_align_right" />
-							<BlockButton format="justify" icon="format_align_justify" />
 						</div>
 					</Toolbar>
 
 					<div className="border editor-wrapper">
 						<Editable
+							decorate={decorate}
 							style={{ border: "solid 1px", height: "400px", padding: "20px" }}
 							renderElement={renderElement}
 							renderLeaf={renderLeaf}
@@ -267,6 +354,8 @@ const SlateEditor = () => {
 							spellCheck
 							autoFocus
 							onKeyDown={(event) => {
+								console.log(event, "event");
+
 								for (const hotkey in HOTKEYS) {
 									if (isHotkey(hotkey, event)) {
 										event.preventDefault();
@@ -275,7 +364,10 @@ const SlateEditor = () => {
 									}
 								}
 
-								console.log(event, "event");
+								if (event.key === "Tab") {
+									event.preventDefault();
+									Transforms.insertText(editor, "\t");
+								}
 
 								const resetEverything = (includingList) => {
 									// INSERT NEW DEFAULT
@@ -313,11 +405,7 @@ const SlateEditor = () => {
 								};
 
 								const checkIfList = (format) => {
-									var res = isBlockActive(
-										editor,
-										format,
-										TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
-									);
+									var res = isBlockActive(editor, format);
 									return res;
 								};
 
