@@ -15,12 +15,22 @@ async function getNumberQuestions(): Promise<number> {
 			}
 		}
 	`);
-	console.debug("Read questions: " + JSON.stringify(result));
 	if (result.data == null) {
 		return 0;
 	} else {
 		return result.data.readQuestion.length;
 	}
+}
+
+async function getUser(user_name: String): Promise<Array<string>> {
+	const result = await sudographActor.query(gql`
+		query ($user_name: String!) {
+			readUser (search: {name: {eq: $user_name} }){
+				id
+			}
+		}
+	`, {user_name});
+	return result.data.readUser;
 }
 
 async function createUser(user_id: String, name: String, joined_date: number, avatar: String): Promise<String> {
@@ -188,11 +198,17 @@ async function setStatus(
 async function generateUsers(names: Array<String>, minutesFromNow: number, avatar: string) {
 	var array: Array<String> = new Array();
 	for (var i = 0; i < names.length; ++i) {
-		array.push(await createUser(
-			Ed25519KeyIdentity.generate().getPrincipal().toString(),
-			names[i],
-			getRandomPastDate(minutesFromNow),
-			avatar));
+		let user = await getUser(names[i]);
+		if (user.length != 0){
+			let actual_user : any = user[0];
+			array.push(actual_user.id);
+		} else {
+			array.push(await createUser(
+				Ed25519KeyIdentity.generate().getPrincipal().toString(),
+				names[i],
+				getRandomPastDate(minutesFromNow),
+				avatar));
+		}
 	}
 	return array;
 }
@@ -238,17 +254,17 @@ const loadScenario = async (
 	let generated_users = await generateUsers(names, minutesInPast, default_avatar);
 
 	let numToCreate = Math.max(questionNumber - (await getNumberQuestions()), 0);
-	console.debug(
-		"Add " + numToCreate + " question(s) from " + names.length + " users."
-	);
+	if (numToCreate > 0){
+		console.debug(
+			"Add " + numToCreate + " question(s) from " + names.length + " users."
+		);
+	}
 
 	let questionMap = new Map<String, Set<String>>();
 
 	for (let i = 0; i < numToCreate; i++) {
 		var users = generated_users.slice();
 		let creationDate = getRandomPastDate(minutesInPast);
-
-		console.log(creationDate, "creationDate");
 
 		let user_id = users.splice(
 			Math.floor(Math.random() * users.length), 1)[0];

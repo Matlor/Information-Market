@@ -23,8 +23,6 @@ function AddQuestion({ plug, minReward }: any) {
 		minTitleCharactersErrMsg: "Title has to be longer than 20 characters",
 	});
 
-	console.log(minReward, "min re");
-
 	const formValidation = () => {
 		var correctReward = false;
 		var negativeDuration = false;
