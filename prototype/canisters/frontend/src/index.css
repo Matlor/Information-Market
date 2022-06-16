@@ -46,4 +46,7 @@
 	.editor-wrapper h3 {
 		@apply text-xl font-medium mr-4;
 	}
+	.editor-wrapper {
+		@apply font-normal;
+	}
 }

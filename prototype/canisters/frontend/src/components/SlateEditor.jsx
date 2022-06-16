@@ -48,11 +48,6 @@ const HOTKEYS = {
 };
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-/* 
-
-
-*/
-
 const SlateEditor = ({ inputValue, setInputValue }) => {
 	// make default something that the editor could deal with
 	const [serializedValue, setSerializedValue] = useState("");
@@ -60,13 +55,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	// ---------------------------------------------- Block == Elements ----------------------------------------------
 
 	const isSomeBlockActive = () => {
-		const blocks = [
-			"heading-two",
-			"heading-three",
-			"block-quote",
-			"numbered-list",
-			"bulleted-list",
-		];
+		const blocks = ["block-quote", "numbered-list", "bulleted-list"];
 
 		var someIsActive = false;
 		for (let i = 0; i < blocks.length; i++) {
@@ -82,13 +71,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 
 	const resetBlocks = (excluding) => {
 		// BLOCKS
-		const blocks = [
-			"heading-two",
-			"heading-three",
-			"block-quote",
-			"numbered-list",
-			"bulleted-list",
-		];
+		const blocks = ["block-quote", "numbered-list", "bulleted-list"];
 
 		if (excluding) {
 			for (let i = 0; i < excluding.length; i++) {
@@ -164,10 +147,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 		return !!match;
 	};
 
-	// Ah this is a general button to trigger the block stuff
-	// We pass the format to it (heading-two) and somehow the icon
-	// Ah of course this renders something, and among others, the icon.
-	// depending on what we give it.
 	const BlockButton = ({ format, icon }) => {
 		const editor = useSlate();
 		return (
@@ -262,18 +241,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 						{children}
 					</ul>
 				);
-			case "heading-three":
-				return (
-					<h3 style={style} {...attributes}>
-						{children}
-					</h3>
-				);
-			case "heading-two":
-				return (
-					<h2 style={style} {...attributes}>
-						{children}
-					</h2>
-				);
+
 			case "list-item":
 				return (
 					<li style={style} {...attributes}>
@@ -306,10 +274,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	// WithReact: Adds React and DOM specific behaviors to the editor.
 	// Ok so that just creates the editor basically.
 	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-	editor.selection = {
-		anchor: { path: [0, 0], offset: 0 },
-		focus: { path: [0, 0], offset: 0 },
-	};
 
 	// ---------------------------------------------- Leaf (& Prism Leaf)  ----------------------------------------------
 	const cssFunc = (leaf) => {
@@ -352,7 +316,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 			children = (
 				<code
 					{...attributes}
-					className={`bg-gray-100
+					className={`bg-gray-100 font-mono
 						${cssFunc(leaf)}
 					`}
 				>
@@ -436,11 +400,11 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	];
 
 	return (
-		<div className=" w-screen mb-96 ">
+		<div className=" ">
 			<IconContext.Provider
 				value={{ color: "gray", className: "global-class-name", size: "1.5em" }}
 			>
-				<div className="border bg-red-100 p-20 m-20">
+				<div className=" bg-primary p-10 mb-10 ">
 					<Slate
 						editor={editor}
 						value={initialValue}
@@ -458,7 +422,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 						}}
 					>
 						<Toolbar>
-							<div className="flex justify-between w-72 mb-4 border">
+							<div className="flex justify-between w-72 mb-4  p-2">
 								{/* MARKS */}
 								<MarkButton format="bold" icon={<AiOutlineBold />} />
 								<MarkButton format="italic" icon={<AiOutlineItalic />} />
@@ -466,8 +430,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 								<MarkButton format="code" icon={<BsCodeSlash />} />
 
 								{/* BLOCKS */}
-								<BlockButton format="heading-two" icon={<BsTypeH2 />} />
-								<BlockButton format="heading-three" icon={<BsTypeH3 />} />
+
 								<BlockButton format="block-quote" icon={<RiDoubleQuotesR />} />
 								<BlockButton
 									format="numbered-list"
@@ -480,14 +443,10 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 							</div>
 						</Toolbar>
 
-						<div className="border editor-wrapper">
+						<div className=" editor-wrapper">
 							<Editable
 								decorate={decorate}
-								style={{
-									border: "solid 1px",
-									height: "400px",
-									padding: "20px",
-								}}
+								className="border h-96 p-4"
 								renderElement={renderElement}
 								renderLeaf={renderLeaf}
 								placeholder="Ask your Question here..."

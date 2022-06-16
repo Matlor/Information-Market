@@ -117,6 +117,15 @@ function AddQuestion({ plug, minReward }: any) {
 		}
 	};
 
+	// -------------------- SLATE -----------------------
+	const document = new DOMParser().parseFromString(
+		"<p><strong>euzveriezfvreziv</strong></p><p><em>eirbviuebrvbiuerbviuerbv</em></p><p><u>eiubvierubiuvberv</u></p><p><code>ervrevervrverv</code></p><h2>vervrever</h2><h3>verrvrevervr</h3><blockquote><p>ververvrevrevrev</p></blockquote><ol><li>verrvrev</li><li>vervre</li></ol><ul><li>verrver</li><li>revvrev</li></ul>",
+		"text/html"
+	);
+	const deSer = deserialize(document.body);
+	const [inputValue, setInputValue] = useState(deSer);
+	console.log(inputValue, "in state editor");
+
 	const form = (
 		<form onSubmit={handleSubmit}>
 			<div className="flex justify-between">
@@ -178,15 +187,8 @@ function AddQuestion({ plug, minReward }: any) {
 					<></>
 				)}
 			</div>
-			<div className="mb-6 text-center">
-				Content:
-				<textarea
-					value={content}
-					onChange={(e) => {
-						setContent(e.target.value);
-					}}
-					className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-				/>
+			<div className="mb-6 ">
+				<SlateEditor inputValue={inputValue} setInputValue={setInputValue} />
 			</div>
 
 			{plug.isConnected ? (
@@ -201,23 +203,27 @@ function AddQuestion({ plug, minReward }: any) {
 		</form>
 	);
 
-	const document = new DOMParser().parseFromString(
-		"<p><strong>euzveriezfvreziv</strong></p><p><em>eirbviuebrvbiuerbviuerbv</em></p><p><u>eiubvierubiuvberv</u></p><p><code>ervrevervrverv</code></p><h2>vervrever</h2><h3>verrvrevervr</h3><blockquote><p>ververvrevrevrev</p></blockquote><ol><li>verrvrev</li><li>vervre</li></ol><ul><li>verrver</li><li>revvrev</li></ul>",
-		"text/html"
-	);
-
-	const deSer = deserialize(document.body);
-
-	const [inputValue, setInputValue] = useState(deSer);
-	console.log(inputValue, "in state editor");
-
 	return (
 		<>
-			<SlateEditor inputValue={inputValue} setInputValue={setInputValue} />
 			<h1 className="page-title mb-10"> Ask a Question</h1>
-			{minReward ? form : <Loading />}
+			<div className="mb-10">{form} </div>
 		</>
 	);
 }
 
+// {minReward ? form : <Loading />}
+
 export default AddQuestion;
+
+/* 
+
+Content:
+<textarea
+	value={content}
+	onChange={(e) => {
+		setContent(e.target.value);
+	}}
+	className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+/>
+
+*/
