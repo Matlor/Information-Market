@@ -1,15 +1,13 @@
 #[macro_use]
-pub mod macros{
+pub mod macros {
     macro_rules! query{
         () => {
-            r#"query ($invoice_id:ID!){
-              readInvoice (search: {id: {eq: $invoice_id} } ) {
+            r#"query ($user_id: ID!) {
+              readUser (search: {id: {eq: $user_id} } )
+              {
                 id
-                buyer {
-                  id
-                  name
-                  joined_date
-                }
+                name
+                joined_date
               }
             }"#
         }
@@ -17,13 +15,13 @@ pub mod macros{
     macro_rules! args{
         () => {
             r#"{{
-              "invoice_id": "{}"
+              "user_id": "{}"
             }}"#
         }
     }
     macro_rules! response{
         () => {
-            "readInvoice"
+            "readUser"
         }
     }
     pub(crate) use query;

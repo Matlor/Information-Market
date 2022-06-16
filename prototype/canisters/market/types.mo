@@ -24,5 +24,7 @@ module {
         // at compilation even if it is defined in invoice_types.mo file
         #VerifyInvoiceError; //: InvoiceTypes.VerifyInvoiceErr;
         #TransferError: InvoiceTypes.TransferError;
+        #UserNotFound;
+        #UserExists;
     };
 }

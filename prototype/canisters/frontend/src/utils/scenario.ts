@@ -23,23 +23,38 @@ async function getNumberQuestions(): Promise<number> {
 	}
 }
 
-async function createInvoice(buyer: String): Promise<String> {
+async function createUser(user_id: String, name: String, joined_date: number, avatar: String): Promise<String> {
 	const result = await sudographActor.mutation(
 		gql`
-			mutation ($buyer: String!) {
-				createInvoice(input: { buyer: $buyer }) {
+		mutation ($user_id: ID!, $name: String!, $joined_date: Int!, $avatar: Blob!) {
+			createUser(input: {id: $user_id, name: $name, joined_date: $joined_date, avatar: $avatar}) {
+				id
+			}
+		}
+		`,
+		{ user_id, name, joined_date, avatar }
+	);
+	console.debug("Create user: " + JSON.stringify(result));
+	return result.data.createUser[0].id;
+}
+
+async function createInvoice(buyer_id: String): Promise<String> {
+	const result = await sudographActor.mutation(
+		gql`
+			mutation ($buyer_id: ID!) {
+				createInvoice(input: {buyer: {connect: $buyer_id}}) {
 					id
 				}
 			}
 		`,
-		{ buyer }
+		{buyer_id}
 	);
 	console.debug("Create invoice: " + JSON.stringify(result));
 	return result.data.createInvoice[0].id;
 }
 
 async function createQuestion(
-	author: String,
+	author_id: String,
 	invoice_id: String,
 	creation_date: number,
 	open_duration: number,
@@ -53,7 +68,7 @@ async function createQuestion(
 	const result = await sudographActor.mutation(
 		gql`
 			mutation (
-				$author: String!
+				$author_id: ID!
 				$invoice_id: ID!
 				$creation_date: Int!
 				$status_end_date: Int!
@@ -64,7 +79,7 @@ async function createQuestion(
 			) {
 				createQuestion(
 					input: {
-						author: $author
+						author: {connect: $author_id}
 						author_invoice: { connect: $invoice_id }
 						creation_date: $creation_date
 						status: OPEN
@@ -80,7 +95,7 @@ async function createQuestion(
 				}
 			}
 		`,
-		{ author, invoice_id, creation_date, status_end_date, open_duration, title, content, reward }
+		{ author_id, invoice_id, creation_date, status_end_date, open_duration, title, content, reward }
 	);
 	console.debug("Create question: " + JSON.stringify(result));
 	return result.data.createQuestion[0].id;
@@ -88,7 +103,7 @@ async function createQuestion(
 
 async function createAnswer(
 	question_id: String,
-	author: String,
+	author_id: String,
 	creation_date: number,
 	content: String
 ): Promise<String> {
@@ -96,14 +111,14 @@ async function createAnswer(
 		gql`
 			mutation (
 				$question_id: ID!
-				$author: String!
+				$author_id: ID!
 				$creation_date: Int!
 				$content: String!
 			) {
 				createAnswer(
 					input: {
 						question: { connect: $question_id }
-						author: $author
+						author: { connect: $author_id }
 						creation_date: $creation_date
 						content: $content
 					}
@@ -112,7 +127,7 @@ async function createAnswer(
 				}
 			}
 		`,
-		{ question_id, author, creation_date, content }
+		{ question_id, author_id, creation_date, content }
 	);
 	console.debug("Create answer: " + JSON.stringify(result));
 	return result.data.createAnswer[0].id;
@@ -170,13 +185,14 @@ async function setStatus(
 	return result.data.updateQuestion[0].id;
 }
 
-function generateUsers(names: Array<String>) {
-	var array: Array<{ name: String; identity: String }> = new Array();
+async function generateUsers(names: Array<String>, minutesFromNow: number, avatar: string) {
+	var array: Array<String> = new Array();
 	for (var i = 0; i < names.length; ++i) {
-		array.push({
-			name: names[i],
-			identity: Ed25519KeyIdentity.generate().getPrincipal().toString(),
-		});
+		array.push(await createUser(
+			Ed25519KeyIdentity.generate().getPrincipal().toString(),
+			names[i],
+			getRandomPastDate(minutesFromNow),
+			avatar));
 	}
 	return array;
 }
@@ -201,7 +217,8 @@ const loadScenario = async (
 	names: Array<String>,
 	questionNumber: number,
 	minutesInPast: number,
-	minutesToGo: number
+	minutesToGo: number,
+	default_avatar: string
 ) => {
 	const lorem = new LoremIpsum({
 		sentencesPerParagraph: {
@@ -218,6 +235,8 @@ const loadScenario = async (
 
 	console.debug("Start loading scenario...");
 
+	let generated_users = await generateUsers(names, minutesInPast, default_avatar);
+
 	let numToCreate = Math.max(questionNumber - (await getNumberQuestions()), 0);
 	console.debug(
 		"Add " + numToCreate + " question(s) from " + names.length + " users."
@@ -226,41 +245,40 @@ const loadScenario = async (
 	let questionMap = new Map<String, Set<String>>();
 
 	for (let i = 0; i < numToCreate; i++) {
-		var users = generateUsers(names);
+		var users = generated_users.slice();
 		let creationDate = getRandomPastDate(minutesInPast);
 
 		console.log(creationDate, "creationDate");
 
-		let questionAuthor = users.splice(
-			Math.floor(Math.random() * users.length),
-			1
-		)[0];
+		let user_id = users.splice(
+			Math.floor(Math.random() * users.length), 1)[0];
+
 		let question = await createQuestion(
-			questionAuthor.identity,
-			await createInvoice(questionAuthor.identity),
+			user_id,
+			await createInvoice(user_id),
 			creationDate,
 			now - creationDate + getRandomDuration(minutesToGo),
 			lorem.generateWords(),
 			lorem.generateSentences(),
 			getRandomRewardE3s()
 		);
-		console.debug("Question from: " + questionAuthor.name);
+		console.debug("Question from user id: " + user_id);
 
 		let answerSet = new Set<String>();
 		while (users.length > 0) {
-			let author = users.splice(Math.floor(Math.random() * users.length), 1)[0];
+			let author_id = users.splice(Math.floor(Math.random() * users.length), 1)[0];
 
 			// Half pourcentage of chance to give an answer
 			if (Math.floor(Math.random() * 2)) {
 				answerSet.add(
 					await createAnswer(
 						question,
-						author.identity,
+						author_id,
 						getRandomPastDate(now - creationDate),
 						lorem.generateSentences()
 					)
 				);
-				console.debug("Answer from: " + author.name);
+				console.debug("Answer from author id: " + author_id);
 			}
 		}
 

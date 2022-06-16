@@ -28,7 +28,7 @@ const Question = ({ question }: any) => {
 				<div className="flex justify-between">
 					{/*   OWNER + CREATED_AT  DIV */}
 					<SubmittedBy
-						author={question.author}
+						author={question.author.name}
 						creation_date={question.creation_date}
 					/>
 

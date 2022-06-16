@@ -6,7 +6,6 @@ import AddQuestion from "./components/AddQuestion";
 import QuestionsList from "./components/QuestionsList";
 import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
-import sudograph from "./api/sudograph";
 
 import { market } from "../declarations/market/index";
 
@@ -15,6 +14,25 @@ function App() {
 	useEffect(() => {
 		// Runs once to get minReward
 		const getMinReward = async () => {
+			let motoko = await fetch('/images/motoko.jpg');
+			var reader = new FileReader();
+			reader.readAsDataURL(await motoko.blob());
+			reader.onloadend = async function() {
+				Scenario.loadScenario(
+					[
+						"Alice",
+						"Bob",
+						"Charlie",
+						"Dan",
+						"Edgar",
+					],
+					14,
+					60,
+					60,
+					reader.result
+				);
+			}
+
 			try {
 				const res = await market.get_min_reward();
 
@@ -55,18 +73,6 @@ function App() {
 	const logout = async () => {
 		setPlug({ isConnected: false, plug: {}, actor: {} });
 	};
-	Scenario.loadScenario(
-		[
-			"Alice",
-			"Bob",
-			"Charlie",
-			"Dan",
-			"5komm-kxkxj-hwidx-mjmkr-hhju6-tz22f-ur2wt-iehob-jkw5b-osbtl-bqe",
-		],
-		14,
-		60,
-		60
-	);
 
 	return (
 		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">

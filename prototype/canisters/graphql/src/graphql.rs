@@ -4,6 +4,7 @@ mod queries {
     pub mod create_answer;
     pub mod create_invoice;
     pub mod create_question;
+    pub mod create_user;
     pub mod get_admin;
     pub mod get_answer;
     pub mod get_invoice;
@@ -12,6 +13,7 @@ mod queries {
     pub mod get_question_by_invoice;
     pub mod get_question;
     pub mod get_questions;
+    pub mod get_user;
     pub mod must_pick_answer;
     pub mod open_dispute;
     pub mod pick_winner;
@@ -38,16 +40,24 @@ struct AdminType {
     principal: String
 }
 
+// Do not include the avatar (blob) in exposed user type to lighten up the size of queries
+#[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
+struct UserType {
+    id: String,
+    name: String,
+    joined_date: i32
+}
+
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 struct InvoiceType {
     id: String,
-    buyer: String
+    buyer: UserType
 }
 
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 struct QuestionType {
     id: String,
-    author: String,
+    author: UserType,
     author_invoice: InvoiceType,
     creation_date: i32,
     status: QuestionStatusEnum,
@@ -64,7 +74,7 @@ struct QuestionType {
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 struct AnswerType {
     id: String,
-    author: String,
+    author: UserType,
     creation_date: i32,
     content: String
 }
@@ -129,14 +139,36 @@ async fn check_admin() -> () {
 }
 
 #[update]
-async fn create_invoice(id: String, buyer: String) -> Option<InvoiceType> {
+async fn create_user(user_id: String, name: String, joined_date: i32, avatar: String) -> Option<UserType> {
+    check_admin().await;
+    let json_str = graphql_mutation(
+        queries::create_user::macros::mutation!().to_string(),
+        format!(
+            queries::create_user::macros::args!(),
+            user_id,
+            name,
+            joined_date,
+            avatar)).await;
+    let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::create_user::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+        }
+    }
+    return None;
+}
+
+#[update]
+async fn create_invoice(invoice_id: String, user_id: String) -> Option<InvoiceType> {
     check_admin().await;
     let json_str = graphql_mutation(
         queries::create_invoice::macros::mutation!().to_string(),
         format!(
             queries::create_invoice::macros::args!(),
-            id,
-            buyer)).await;
+            invoice_id,
+            user_id)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::create_invoice::macros::response!()].as_array();
     if json_response != None {
@@ -150,7 +182,7 @@ async fn create_invoice(id: String, buyer: String) -> Option<InvoiceType> {
 
 #[update]
 async fn create_question(
-    author: String, 
+    author_id: String, 
     invoice_id: String, 
     creation_date: i32,
     status_end_date: i32,
@@ -163,7 +195,7 @@ async fn create_question(
         queries::create_question::macros::mutation!().to_string(),
         format!(
             queries::create_question::macros::args!(),
-            author,
+            author_id,
             invoice_id,
             creation_date,
             status_end_date,
@@ -185,7 +217,7 @@ async fn create_question(
 #[update]
 async fn create_answer(
     question_id: String,
-    author: String,
+    author_id: String,
     creation_date: i32,
     content: String) -> Option<AnswerType> {
     check_admin().await;
@@ -194,7 +226,7 @@ async fn create_answer(
         format!(
             queries::create_answer::macros::args!(), 
             question_id,
-            author,
+            author_id,
             creation_date,
             content)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
@@ -327,6 +359,22 @@ async fn close_question(
 }
 
 #[query]
+async fn get_user(user_id: String) -> Option<UserType> {
+    let json_str = graphql_query(
+        queries::get_user::macros::query!().to_string(),
+        format!(queries::get_user::macros::args!(), user_id)).await;
+    let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::get_user::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+        }
+    }
+    return None;
+}
+
+#[query]
 async fn get_invoice(invoice_id: String) -> Option<InvoiceType> {
     let json_str = graphql_query(
         queries::get_invoice::macros::query!().to_string(),
@@ -404,10 +452,10 @@ async fn get_answer(question_id: String, answer_id: String) -> Option<AnswerType
 }
 
 #[query]
-async fn has_answered(question_id: String, author: String) -> bool {
+async fn has_answered(question_id: String, author_id: String) -> bool {
     let json_str = graphql_query(
         queries::get_question_answers_from_author::macros::query!().to_string(),
-        format!(queries::get_question_answers_from_author::macros::args!(), question_id, author)).await;
+        format!(queries::get_question_answers_from_author::macros::args!(), question_id, author_id)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::get_question_answers_from_author::macros::response!()].as_array();
     return json_response != None && json_response.unwrap().len() != 0;

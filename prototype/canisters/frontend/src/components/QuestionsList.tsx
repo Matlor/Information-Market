@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
 import StatusSelection from "./StatusSelection";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
-import { Navigate } from "react-router-dom";
 
 type Status = { value: string; label: string };
 
@@ -28,6 +27,7 @@ const QuestionsList = ({ plug }: any) => {
 	]);
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
+	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -52,6 +52,7 @@ const QuestionsList = ({ plug }: any) => {
 		statusMap,
 		pageIndex,
 		myInteractions,
+		cachedAvatars,
 		plug.isConnected,
 	]);
 
@@ -131,6 +132,10 @@ const QuestionsList = ({ plug }: any) => {
 				queryInputs +
 				`) {
 					id
+					author {
+						id
+						name
+					}
 					title
 					answers {
 						id
@@ -143,7 +148,34 @@ const QuestionsList = ({ plug }: any) => {
 		`
 		);
 
-		setQuestions(pageResults.data.readQuestion);
+		let questionList = pageResults.data.readQuestion;
+		setQuestions(questionList);
+
+		console.log("Number avatars before: " + cachedAvatars.size);
+
+		for (var i = 0; i < questionList.length; i++){
+			let author_id = questionList[i].author.id;
+			let question_id = questionList[i].id;
+			if (!(cachedAvatars.has(author_id))){
+				const query_avatar = await sudographActor.query(
+					gql`
+						query ($question_id:ID!) {
+							readQuestion(search: {id: {eq: $question_id} }) {
+								author {
+									avatar
+								}
+							}
+						}`, {question_id});
+				console.log("Add avatar!:" + author_id);
+				// Method 1
+				setCachedAvatars(prev => new Map([...prev, [author_id, query_avatar.data.readQuestion[0].author.avatar.map(x => String.fromCharCode(x)).join('')]]));
+				// Method 2: @todo
+				//let b64string = query_avatar.data.readQuestion[0].author.avatar.map(x => String.fromCharCode(x)).join('');
+				//let response = await fetch(b64string);
+				//avatar_buffer.push(URL.createObjectURL(await response.blob()));
+			}		
+		}
+		console.log("Number avatars: " + cachedAvatars.size);
 	};
 
 	const getArrow = (field: string) => {
@@ -198,7 +230,6 @@ const QuestionsList = ({ plug }: any) => {
 	//const [toggle, setToggle] = useState(true);
 	const toggleClass = "transform translate-x-5 ";
 
-	console.log(myInteractions);
 	return (
 		<>
 			<h1 className="page-title mb-2"> Browse Questions </h1>
@@ -264,6 +295,9 @@ const QuestionsList = ({ plug }: any) => {
 				<table className="w-full text-sm text-left text-gray-500 mt-4  bg-primary">
 					<thead className=" text-gray-700 ">
 						<tr className="h-20">
+							<th scope="col" className="px-6 py-3">
+								<div className="flex justify-center">Author</div>
+							</th>
 							<th scope="col" className="px-6 py-3 items-center">
 								Question
 							</th>
@@ -300,9 +334,15 @@ const QuestionsList = ({ plug }: any) => {
 						</tr>
 					</thead>
 					<tbody>
-						{questions.map((question: any) => {
+						{questions.map((question: any, index: number) => {
 							return (
 								<tr className="hover:bg-secondary" key={question.id}>
+									<td className="px-6 py-4 w-1/12">
+										<div className="flex justify-center">
+											{question.author.name}
+										</div>
+										<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
+									</td>
 									<th
 										scope="row"
 										className="px-6 py-6 font-medium text-gray-900 w-6/12"

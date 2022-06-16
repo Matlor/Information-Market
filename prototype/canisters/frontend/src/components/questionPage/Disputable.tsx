@@ -54,7 +54,7 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 							{plug.isConnected ? (
 								<>
 									<div className="flex justify-center mb-2">
-										{plug.plug.principalId !== questionState.question.author ? (
+										{plug.plug.principalId !== questionState.question.author.id ? (
 											<button
 												onClick={(e) => handleTriggerDispute(e)}
 												className="my-button "

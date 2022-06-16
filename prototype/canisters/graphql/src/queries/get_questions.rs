@@ -5,10 +5,18 @@ pub mod macros{
             r#"query {
               readQuestion {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 author_invoice {
                   id
-                  buyer
+                  buyer {
+                    id
+                    name
+                    joined_date
+                  }
                 }
                 creation_date
                 status
@@ -20,7 +28,11 @@ pub mod macros{
                 reward
                 winner {
                   id
-                  author
+                  author {
+                    id
+                    name
+                    joined_date
+                  }
                   creation_date
                   content
                 }

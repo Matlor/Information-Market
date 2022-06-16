@@ -18,7 +18,7 @@ const Answer = ({
 		) {
 			return;
 		}
-		if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
+		if (questionState.question.status === "DISPUTABLE") {
 			if (answer.id === questionState.question.winner.id) {
 				border = "border border-yellow-500 border";
 			}
@@ -34,7 +34,7 @@ const Answer = ({
 		<>
 			{questionState.question.status === "PICKANSWER" &&
 			plug.isConnected &&
-			plug.plug.principalId === questionState.question.author ? (
+			plug.plug.principalId === questionState.question.author.id ? (
 				<>
 					<div className="flex justify-end w-full">
 						<div>
@@ -64,7 +64,7 @@ const Answer = ({
 	const answerContent = (
 		<>
 			<SubmittedBy
-				author={answer.author}
+				author={answer.author.name}
 				creation_date={answer.creation_date}
 			/>
 			<div className="text-justify font-light"> {answer.content}</div>

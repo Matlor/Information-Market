@@ -2,18 +2,18 @@ import InvoiceTypes "../invoice/types";
 import Types        "types";
 import Utils        "utils";
 
-import Debug "mo:base/Debug";
-import Int "mo:base/Int";
-import Int32 "mo:base/Int32";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Principal "mo:base/Principal";
-import Result "mo:base/Result";
-import Time "mo:base/Time";
+import Debug        "mo:base/Debug";
+import Int          "mo:base/Int";
+import Int32        "mo:base/Int32";
+import Iter         "mo:base/Iter";
+import Nat          "mo:base/Nat";
+import Nat32        "mo:base/Nat32";
+import Nat64        "mo:base/Nat64";
+import Principal    "mo:base/Principal";
+import Result       "mo:base/Result";
+import Time         "mo:base/Time";
 
-import GraphQL "canister:graphql";
+import GraphQL      "canister:graphql";
 
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
@@ -52,6 +52,27 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
 
+    // ------------------------- Create User -------------------------
+    public shared ({caller}) func create_user(name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
+        let user_id : Text = Principal.toText(caller);
+        switch (await GraphQL.get_user(user_id)){
+            case(?user){
+                return #err(#UserExists);
+            };
+            case(null){
+                switch (await GraphQL.create_user(user_id, name, Utils.time_minutes_now(), avatar)){
+                    case(null) {
+                        return #err(#GraphQLError);
+                    };
+                    case (?user) {
+                        return #ok(user);
+                    };
+                };
+            };
+        };
+    };
+
+
     // ------------------------- Create Invoice -------------------------
 
     public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
@@ -70,24 +91,35 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     symbol = coin_symbol_;
                 };
             };
-            switch (await invoice_canister_.create_invoice(create_invoice_args)){
-                case (#err create_invoice_err) {
-                    return #err(create_invoice_err);
+            switch (await GraphQL.get_user(Principal.toText(caller))){
+                case(null){
+                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
+                        kind = #Other;
+                        message = ?"Unknown user";
+                    };
+                    return #err(invoice_error);
                 };
-                case (#ok create_invoice_success) {
-                    switch (await GraphQL.create_invoice(
-                        Nat.toText(create_invoice_success.invoice.id),
-                        Principal.toText(caller)
-                    )){
-                        case (null) {
-                            let invoice_error : InvoiceTypes.CreateInvoiceErr = {
-                                kind = #Other;
-                                message = ?"GraphQL error";
-                            };
-                            return #err(invoice_error);
+                case(?user){
+                    switch (await invoice_canister_.create_invoice(create_invoice_args)){
+                        case (#err create_invoice_err) {
+                            return #err(create_invoice_err);
                         };
-                        case (?invoice) {
-                            return #ok(create_invoice_success);
+                        case (#ok create_invoice_success) {
+                            switch (await GraphQL.create_invoice(
+                                Nat.toText(create_invoice_success.invoice.id),
+                                user.id
+                            )){
+                                case (null) {
+                                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
+                                        kind = #Other;
+                                        message = ?"GraphQL error";
+                                    };
+                                    return #err(invoice_error);
+                                };
+                                case (?invoice) {
+                                    return #ok(create_invoice_success);
+                                };
+                            };
                         };
                     };
                 };
@@ -110,8 +142,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                 return #err(#NotFound);
             };
             case (?graphql_invoice) {
-                // Verify the buyer of the invoice is the user that is opening up the question
-                if (graphql_invoice.buyer != author) {
+                // Verify the buyer of the invoice is the caller that is opening up the question
+                // This also ensures that there is a user associated to the caller
+                if (graphql_invoice.buyer.id != author) {
                     return #err(#NotAllowed);
                 } else {
                     // Verify the invoice has been paid
@@ -170,36 +203,43 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         question_id: Text,
         content: Text
     ): async Result.Result<GraphQL.AnswerType, Types.Error> {
-        let author = Principal.toText(caller);
-        // Check the question exists
-        switch(await GraphQL.get_question(question_id)){
-             case(null){
-                return #err(#NotFound);
+        // Check the user is registred
+        switch (await GraphQL.get_user(Principal.toText(caller))){
+            case(null){
+                return #err(#UserNotFound);
             };
-            case(?question){
-                // Verify one does not attempt to answer its own question
-                if (question.author == author) {
-                    return #err(#NotAllowed);
-                // Verify the question is open
-                } else if (question.status != #OPEN) {
-                    return #err(#WrongStatus);
-                } else {
-                    switch(await GraphQL.create_answer(
-                        question_id,
-                        author,
-                        Utils.time_minutes_now(),
-                        content
-                    )){
-                        case(null){
-                            return #err(#GraphQLError);
-                        };
-                        case(?answer){
-                            return #ok(answer);
+            case(?user){
+                // Check the question exists
+                switch(await GraphQL.get_question(question_id)){
+                    case(null){
+                        return #err(#NotFound);
+                    };
+                    case(?question){
+                        // Verify one does not attempt to answer its own question
+                        if (question.author.id == user.id) {
+                            return #err(#NotAllowed);
+                        // Verify the question is open
+                        } else if (question.status != #OPEN) {
+                            return #err(#WrongStatus);
+                        } else {
+                            switch(await GraphQL.create_answer(
+                                question_id,
+                                user.id,
+                                Utils.time_minutes_now(),
+                                content
+                            )){
+                                case(null){
+                                    return #err(#GraphQLError);
+                                };
+                                case(?answer){
+                                    return #ok(answer);
+                                };
+                            };
                         };
                     };
                 };
             };
-        }; 
+        };
     };
 
     // ------------------------- Pick Winner -------------------------
@@ -216,7 +256,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
             };
             case(?question){
                 let now = Utils.time_minutes_now();
-                if (question.author != Principal.toText(caller)) {
+                if (question.author.id != Principal.toText(caller)) {
                     return #err(#NotAllowed);
                 } else if (question.status != #PICKANSWER) {
                     return #err(#WrongStatus);
@@ -283,7 +323,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             switch(await invoice_canister_.transfer({
                                 amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(answer.author));
+                                destination = #principal(Principal.fromText(answer.author.id));
                             })){
                                 case(#err err){
                                     return #err(#TransferError(err));
@@ -333,7 +373,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             switch(await invoice_canister_.transfer({
                                 amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(question.author));
+                                destination = #principal(Principal.fromText(question.author.id));
                             })){
                                 case(#ok success){
                                     // Here there is in theory a severe risk that the transfer worked 
@@ -372,7 +412,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                 switch(await invoice_canister_.transfer({
                                     amount = Utils.e3s_to_e8s(question.reward);
                                     token = {symbol = coin_symbol_};
-                                    destination = #principal(Principal.fromText(answer.author));
+                                    destination = #principal(Principal.fromText(answer.author.id));
                                 })){
                                     case(#ok success){
                                         // Here there is in theory a severe risk that the transfer worked 

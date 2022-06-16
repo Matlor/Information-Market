@@ -63,7 +63,7 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 					/>
 
 					{plug.isConnected ? (
-						plug.plug.principalId == questionState.question.author ? (
+						plug.plug.principalId == questionState.question.author.id ? (
 							<div>You cannot answer your own question</div>
 						) : (
 							<div className="w-fit">

@@ -6,14 +6,25 @@ type QuestionStatusEnum = variant {
     CLOSED;
 };
 
+type AdminType = record {
+    id: text;
+    "principal": text;
+};
+
+type UserType = record {
+    id: text;
+    name: text;
+    joined_date: int32;
+};
+
 type InvoiceType = record {
     id: text;
-    buyer: text;
+    buyer: UserType;
 };
 
 type QuestionType = record {
     id: text;
-    author: text;
+    author: UserType;
     author_invoice: InvoiceType;
     creation_date: int32;
     status: QuestionStatusEnum;
@@ -29,7 +40,7 @@ type QuestionType = record {
 
 type AnswerType = record {
     id: text;
-    author: text;
+    author: UserType;
     creation_date: int32;
     content: text;
 };
@@ -41,15 +52,19 @@ service : {
     "create_answer": (text, text, int32, text) -> (opt AnswerType);
     "create_invoice": (text, text) -> (opt InvoiceType);
     "create_question": (text, text, int32, int32, int32, text, text, int32) -> (opt QuestionType);
+    "create_user": (text, text, int32, text) -> (opt UserType);
+    "get_admin": () -> (opt AdminType) query;
     "get_answer": (text, text) -> (opt AnswerType) query;
     "get_invoice": (text) -> (opt InvoiceType) query;
     "get_question_by_invoice": (text) -> (opt QuestionType) query;
     "get_question": (text) -> (opt QuestionType) query;
     "get_questions": () -> (vec QuestionType) query;
+    "get_user": (text) -> (opt AdminType) query;
     "has_answered": (text, text) -> (bool) query;
     "has_answers": (text) -> (bool) query;
     "must_pick_answer": (text, int32, int32) -> (bool);
     "open_dispute": (text, int32) -> (bool);
     "pick_winner": (text, text, int32, int32) -> (bool);
+    "set_admin": (principal) -> ();
     "solve_dispute": (text, text, text, int32) -> (bool);
 }

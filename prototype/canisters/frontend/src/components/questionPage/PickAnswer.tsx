@@ -47,7 +47,7 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 		<>
 			<FieldWrapper>
 				{plug.isConnected &&
-				plug.plug.principalId === questionState.question.author ? (
+				plug.plug.principalId === questionState.question.author.id ? (
 					<> Choose which answer should win the reward</>
 				) : (
 					<>A winner is being picked by the question initiator</>
