@@ -22,39 +22,71 @@ const QuestionsList = ({ plug }: any) => {
 	const [searchedText, setSearchedText] = useState<string>("");
 	const [pageIndex, setPageIndex] = useState<number>(0);
 	const [totalQuestions, setTotalQuestions] = useState<number>(0);
-	const [statusMap, setStatusMap] = useState<Array<Status>>([
-		{ value: "OPEN", label: "Open" },
-	]);
+	const [statusMap, setStatusMap] = useState<Array<Status>>([{ value: "OPEN", label: "Open" }]);
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
 	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
+	// Fetch the list of questions every 10 seconds if no 
+	// fetch has been triggered in between
 	useEffect(() => {
 		const interval = setInterval(() => {
-			// Update the list of questions every 10 seconds if no interactions has triggered
-			// the update in between
 			if (Date.now() - fetchQuestionsDate > 10000) {
 				fetchQuestions();
 			}
 		}, 1000);
+		return () => clearInterval(interval);
+	}, [fetchQuestionsDate]);
 
+	// Enable/disable my interactions depending if plug is connected or not
+	useEffect(() => {
 		if (!plug.isConnected) {
 			setMyInteractions(false);
 		}
+	}, [plug.isConnected]);
 
+	// Fetch the list of questions every time:
+	// - the order field changed
+	// - the order direction changed
+	// - the searched text changed
+	// - the status map changed
+	// - the page index changed
+	// - the filter on my interactions changed
+	useEffect(() => {
 		fetchQuestions();
-
-		return () => clearInterval(interval);
 	}, [
 		orderField,
 		orderIsAscending,
 		searchedText,
 		statusMap,
 		pageIndex,
-		myInteractions,
-		cachedAvatars,
-		plug.isConnected,
+		myInteractions
 	]);
+
+	// Load the list of avatars in the cache
+	useEffect(() => {		
+		const loadAvatars = async function () {
+			try {
+				for (var i = 0; i < questions.length; i++){
+					let question : any = questions[i];
+					if (!(cachedAvatars.has(question.author.id))){
+						let base64str = await loadAvatar(question.author.id);
+						setCachedAvatars(prev => new Map([...prev, [question.author.id, base64str]]));
+					}
+					for (var j = 0; j < question.answers.length; j++){
+						let answer : any = question.answers[j];
+						if (!(cachedAvatars.has(answer.author.id))){
+							let base64str = await loadAvatar(answer.author.id);
+							setCachedAvatars(prev => new Map([...prev, [answer.author.id, base64str]]));
+						}
+					}
+				}
+			} catch (error) {
+				console.log("Failed to load avatars!");
+			}
+		};
+		loadAvatars();
+	}, [questions]);
 
 	const refreshSearchedText = (event) => {
 		setSearchedText(event.target.value);
@@ -70,8 +102,6 @@ const QuestionsList = ({ plug }: any) => {
 	};
 
 	const fetchQuestions = async () => {
-		setFetchQuestionsDate(Date.now());
-
 		let sudographActor = sudograph({
 			canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 		});
@@ -98,9 +128,7 @@ const QuestionsList = ({ plug }: any) => {
 			}
 			queryInputs += '{status: {eq: "' + status.value + '"}}';
 		});
-
 		queryInputs += "]}";
-
 		if (myInteractions) {
 			queryInputs += `,{or: [{answers: {author: {eq:"${plug.plug.principalId}"}}}, {author: {eq: "${plug.plug.principalId}"}}]}`;
 		}
@@ -117,8 +145,6 @@ const QuestionsList = ({ plug }: any) => {
 			}
 		`
 		);
-
-		setTotalQuestions(allResults.data.readQuestion.length);
 
 		// Limit the number of questions per page
 		queryInputs += "limit: " + questionsPerPage;
@@ -139,44 +165,36 @@ const QuestionsList = ({ plug }: any) => {
 					title
 					answers {
 						id
+						author {
+							id
+						}
 					}
 					status
 					reward
 					status_end_date
 				}
 			}
-		`
-		);
+		`);
 
-		let questionList = pageResults.data.readQuestion;
-		setQuestions(questionList);
-
-		console.log("Number avatars before: " + cachedAvatars.size);
-
-		for (var i = 0; i < questionList.length; i++){
-			let author_id = questionList[i].author.id;
-			let question_id = questionList[i].id;
-			if (!(cachedAvatars.has(author_id))){
-				const query_avatar = await sudographActor.query(
-					gql`
-						query ($question_id:ID!) {
-							readQuestion(search: {id: {eq: $question_id} }) {
-								author {
-									avatar
-								}
-							}
-						}`, {question_id});
-				console.log("Add avatar!:" + author_id);
-				// Method 1
-				setCachedAvatars(prev => new Map([...prev, [author_id, query_avatar.data.readQuestion[0].author.avatar.map(x => String.fromCharCode(x)).join('')]]));
-				// Method 2: @todo
-				//let b64string = query_avatar.data.readQuestion[0].author.avatar.map(x => String.fromCharCode(x)).join('');
-				//let response = await fetch(b64string);
-				//avatar_buffer.push(URL.createObjectURL(await response.blob()));
-			}		
-		}
-		console.log("Number avatars: " + cachedAvatars.size);
+		setTotalQuestions(allResults.data.readQuestion.length);
+		setQuestions(pageResults.data.readQuestion);
+		setFetchQuestionsDate(Date.now());
 	};
+
+	const loadAvatar = async (user_id: string) : Promise<string> => {
+		let sudographActor = sudograph({
+			canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
+		});
+		const query_avatar = await sudographActor.query(
+			gql`
+				query ($user_id:ID!) {
+					readUser(search: {id: {eq: $user_id} }) {
+						avatar
+					}
+				}`, {user_id});
+		// TO DO: investigate if fetch + createObjectURL would make more sense
+		return query_avatar.data.readUser[0].avatar.map(x => String.fromCharCode(x)).join('');
+	}
 
 	const getArrow = (field: string) => {
 		return orderField === field ? (orderIsAscending ? "↑" : "↓") : "";
@@ -227,7 +245,6 @@ const QuestionsList = ({ plug }: any) => {
 		}
 	};
 
-	//const [toggle, setToggle] = useState(true);
 	const toggleClass = "transform translate-x-5 ";
 
 	return (
@@ -338,9 +355,6 @@ const QuestionsList = ({ plug }: any) => {
 							return (
 								<tr className="hover:bg-secondary" key={question.id}>
 									<td className="px-6 py-4 w-1/12">
-										<div className="flex justify-center">
-											{question.author.name}
-										</div>
 										<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
 									</td>
 									<th
@@ -352,8 +366,15 @@ const QuestionsList = ({ plug }: any) => {
 										</Link>
 									</th>
 									<td className="px-6 py-4 w-1/12">
-										<div className="flex justify-center">
-											{question.answers.length}{" "}
+										<div className="flex justify-center -space-x-4">
+											{
+												//question.answers.length
+												question.answers.map((answer: any) => {
+													return (
+														<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt="" key={answer.id}/>
+													);
+												})
+											}
 										</div>
 									</td>
 									<td className="px-6 py-4  w-2/12 ">
