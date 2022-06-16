@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+import { deserialize } from "./SlateHelpers";
 
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
@@ -24,8 +26,6 @@ function AddQuestion({ plug, minReward }: any) {
 		minTitleCharactersErr: false,
 		minTitleCharactersErrMsg: "Title has to be longer than 20 characters",
 	});
-
-	console.log(minReward, "min re");
 
 	const formValidation = () => {
 		var correctReward = false;
@@ -67,6 +67,17 @@ function AddQuestion({ plug, minReward }: any) {
 		}
 
 		try {
+			console.log(
+				"reward:",
+				reward,
+				"title:",
+				title,
+				"duration:",
+				duration,
+				"input:",
+				inputValue
+			);
+
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
 				BigInt(parseInt(reward))
 			);
@@ -97,7 +108,7 @@ function AddQuestion({ plug, minReward }: any) {
 				invoiceResponse.ok.invoice.id,
 				parseInt(duration),
 				title,
-				content
+				inputValue
 			);
 
 			console.log(openQuestionResponse);
@@ -190,9 +201,19 @@ function AddQuestion({ plug, minReward }: any) {
 		</form>
 	);
 
+	const document = new DOMParser().parseFromString(
+		"<p><strong>euzveriezfvreziv</strong></p><p><em>eirbviuebrvbiuerbviuerbv</em></p><p><u>eiubvierubiuvberv</u></p><p><code>ervrevervrverv</code></p><h2>vervrever</h2><h3>verrvrevervr</h3><blockquote><p>ververvrevrevrev</p></blockquote><ol><li>verrvrev</li><li>vervre</li></ol><ul><li>verrver</li><li>revvrev</li></ul>",
+		"text/html"
+	);
+
+	const deSer = deserialize(document.body);
+
+	const [inputValue, setInputValue] = useState(deSer);
+	console.log(inputValue, "in state editor");
+
 	return (
 		<>
-			<SlateEditor />
+			<SlateEditor inputValue={inputValue} setInputValue={setInputValue} />
 			<h1 className="page-title mb-10"> Ask a Question</h1>
 			{minReward ? form : <Loading />}
 		</>

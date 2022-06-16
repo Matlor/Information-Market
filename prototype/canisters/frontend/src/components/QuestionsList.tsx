@@ -195,10 +195,8 @@ const QuestionsList = ({ plug }: any) => {
 		}
 	};
 
-	//const [toggle, setToggle] = useState(true);
 	const toggleClass = "transform translate-x-5 ";
 
-	console.log(myInteractions);
 	return (
 		<>
 			<h1 className="page-title mb-2"> Browse Questions </h1>

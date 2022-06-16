@@ -1,9 +1,13 @@
 // prism
 import Prism from "prismjs";
+
+// TODO: check if necessary
 import "prismjs/components/prism-python";
 import "prismjs/components/prism-php";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-java";
+
+import { serialize } from "./SlateHelpers";
 
 import React, { useCallback, useMemo, useState } from "react";
 import isHotkey from "is-hotkey";
@@ -20,6 +24,18 @@ import {
 
 import { withHistory } from "slate-history";
 
+import { IconContext } from "react-icons";
+import {
+	AiOutlineBold,
+	AiOutlineItalic,
+	AiOutlineUnderline,
+	AiOutlineOrderedList,
+	AiOutlineUnorderedList,
+	AiOutlineFontSize,
+} from "react-icons/ai";
+
+import { BsCodeSlash, BsTypeH2, BsTypeH3 } from "react-icons/bs";
+import { RiDoubleQuotesR } from "react-icons/ri";
 // ---------------------------------------------- Added functionalities ----------------------------------------------
 
 // KEY SHORTCUTS
@@ -32,11 +48,79 @@ const HOTKEYS = {
 };
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const SlateEditor = () => {
+/* 
+
+
+*/
+
+const SlateEditor = ({ inputValue, setInputValue }) => {
+	// make default something that the editor could deal with
+	const [serializedValue, setSerializedValue] = useState("");
+
 	// ---------------------------------------------- Block == Elements ----------------------------------------------
+
+	const isSomeBlockActive = () => {
+		const blocks = [
+			"heading-two",
+			"heading-three",
+			"block-quote",
+			"numbered-list",
+			"bulleted-list",
+		];
+
+		var someIsActive = false;
+		for (let i = 0; i < blocks.length; i++) {
+			var format = blocks[i];
+			if (isBlockActive(editor, format)) {
+				console.log(format, "active format");
+				someIsActive = true;
+			}
+		}
+
+		return someIsActive;
+	};
+
+	const resetBlocks = (excluding) => {
+		// BLOCKS
+		const blocks = [
+			"heading-two",
+			"heading-three",
+			"block-quote",
+			"numbered-list",
+			"bulleted-list",
+		];
+
+		if (excluding) {
+			for (let i = 0; i < excluding.length; i++) {
+				for (let j = 0; j < blocks.length; j++) {
+					if (excluding[i] === blocks[j]) {
+						blocks.splice(j, 1);
+					}
+				}
+			}
+		}
+
+		for (let i = 0; i < blocks.length; i++) {
+			var format = blocks[i];
+			if (isBlockActive(editor, format)) {
+				toggleBlock(editor, format);
+			}
+		}
+
+		format = "code";
+		if (isMarkActive(editor, format)) {
+			toggleMark(editor, format);
+		}
+	};
 
 	const toggleBlock = (editor, format) => {
 		const isActive = isBlockActive(editor, format);
+
+		// if block is not active, toggle all others.
+		// only one block can be active.
+		if (!isActive) {
+			resetBlocks([format]);
+		}
 
 		const isList = LIST_TYPES.includes(format);
 
@@ -99,6 +183,33 @@ const SlateEditor = () => {
 		);
 	};
 	// ---------------------------------------------- Mark == Text  ----------------------------------------------
+
+	const isSomeMarkActive = () => {
+		const marks = ["bold", "italic", "underline", "code"];
+
+		var someIsActive = false;
+		for (let i = 0; i < marks.length; i++) {
+			var format = marks[i];
+			if (isMarkActive(editor, format)) {
+				someIsActive = true;
+			}
+		}
+
+		return someIsActive;
+	};
+
+	const resetMarks = () => {
+		// MARKS
+		const marks = ["bold", "italic", "underline", "code"];
+
+		for (let i = 0; i < marks.length; i++) {
+			var format = marks[i];
+
+			if (isMarkActive(editor, format)) {
+				toggleMark(editor, format);
+			}
+		}
+	};
 
 	// is used inside of event handler called toggleMark
 	// just checks whate the current mark is
@@ -175,6 +286,7 @@ const SlateEditor = () => {
 						{children}
 					</ol>
 				);
+
 			default:
 				return (
 					<p style={style} {...attributes}>
@@ -194,17 +306,13 @@ const SlateEditor = () => {
 	// WithReact: Adds React and DOM specific behaviors to the editor.
 	// Ok so that just creates the editor basically.
 	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-
-	const initialValue = [
-		{
-			type: "paragraph",
-			children: [{ text: "" }],
-		},
-	];
+	editor.selection = {
+		anchor: { path: [0, 0], offset: 0 },
+		focus: { path: [0, 0], offset: 0 },
+	};
 
 	// ---------------------------------------------- Leaf (& Prism Leaf)  ----------------------------------------------
 	const cssFunc = (leaf) => {
-		console.log(leaf, "leaf");
 		if (leaf.comment) {
 			return "text-red-400";
 		} else if (leaf.operator || leaf.url) {
@@ -241,7 +349,6 @@ const SlateEditor = () => {
 		}
 
 		if (leaf.code) {
-			console.log(cssFunc(leaf), "css output");
 			children = (
 				<code
 					{...attributes}
@@ -266,7 +373,6 @@ const SlateEditor = () => {
 	};
 
 	// 	return <span {...attributes}>{children}</span>;
-
 	const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
 
 	// ---------------------------- PRISM --------------------------------------------
@@ -322,187 +428,164 @@ const SlateEditor = () => {
 		comment: { pattern: /\/\/[^\n]*/, alias: "comment" },
 	});
 
-	// added decorate function
+	const initialValue = [
+		{
+			type: "paragraph",
+			children: [{ text: "" }],
+		},
+	];
+
 	return (
 		<div className=" w-screen mb-96 ">
-			<div className="border bg-red-100 p-20 m-20">
-				<Slate editor={editor} value={initialValue}>
-					<Toolbar>
-						<div className="flex  justify-between">
-							{/* MARKS */}
-							<MarkButton format="bold" icon="format_bold" />
-							<MarkButton format="italic" icon="format_italic" />
-							<MarkButton format="underline" icon="format_underlined" />
-							<MarkButton format="code" icon="code" />
+			<IconContext.Provider
+				value={{ color: "gray", className: "global-class-name", size: "1.5em" }}
+			>
+				<div className="border bg-red-100 p-20 m-20">
+					<Slate
+						editor={editor}
+						value={initialValue}
+						onChange={(value) => {
+							const isAstChange = editor.operations.some(
+								(op) => "set_selection" !== op.type
+							);
+							if (isAstChange) {
+								// Save the value to Local Storage.
 
-							{/* BLOCKS */}
-							<BlockButton format="heading-two" icon="looks_two" />
-							<BlockButton format="heading-three" icon="looks_three" />
-							<BlockButton format="block-quote" icon="format_quote" />
-							<BlockButton format="numbered-list" icon="format_list_numbered" />
-							<BlockButton format="bulleted-list" icon="format_list_bulleted" />
-						</div>
-					</Toolbar>
+								//const content = JSON.stringify(value);
+								setInputValue(serialize(editor));
+								//localStorage.setItem("content", content);
+							}
+						}}
+					>
+						<Toolbar>
+							<div className="flex justify-between w-72 mb-4 border">
+								{/* MARKS */}
+								<MarkButton format="bold" icon={<AiOutlineBold />} />
+								<MarkButton format="italic" icon={<AiOutlineItalic />} />
+								<MarkButton format="underline" icon={<AiOutlineUnderline />} />
+								<MarkButton format="code" icon={<BsCodeSlash />} />
 
-					<div className="border editor-wrapper">
-						<Editable
-							decorate={decorate}
-							style={{ border: "solid 1px", height: "400px", padding: "20px" }}
-							renderElement={renderElement}
-							renderLeaf={renderLeaf}
-							placeholder="Enter some rich text…"
-							spellCheck
-							autoFocus
-							onKeyDown={(event) => {
-								console.log(event, "event");
+								{/* BLOCKS */}
+								<BlockButton format="heading-two" icon={<BsTypeH2 />} />
+								<BlockButton format="heading-three" icon={<BsTypeH3 />} />
+								<BlockButton format="block-quote" icon={<RiDoubleQuotesR />} />
+								<BlockButton
+									format="numbered-list"
+									icon={<AiOutlineOrderedList />}
+								/>
+								<BlockButton
+									format="bulleted-list"
+									icon={<AiOutlineUnorderedList />}
+								/>
+							</div>
+						</Toolbar>
 
-								for (const hotkey in HOTKEYS) {
-									if (isHotkey(hotkey, event)) {
-										event.preventDefault();
-										const mark = HOTKEYS[hotkey];
-										toggleMark(editor, mark);
-									}
-								}
-
-								if (event.key === "Tab") {
-									event.preventDefault();
-									Transforms.insertText(editor, "\t");
-								}
-
-								const resetEverything = (includingList) => {
-									// INSERT NEW DEFAULT
-									//editor.insertNode({});
-									Editor.insertBreak(editor);
-
-									// MARKS
-									const marks = ["bold", "italic", "underline", "code"];
-
-									for (let i = 0; i < marks.length; i++) {
-										var format = marks[i];
-
-										if (isMarkActive(editor, format)) {
-											console.log("hit inner");
-											toggleMark(editor, format);
+						<div className="border editor-wrapper">
+							<Editable
+								decorate={decorate}
+								style={{
+									border: "solid 1px",
+									height: "400px",
+									padding: "20px",
+								}}
+								renderElement={renderElement}
+								renderLeaf={renderLeaf}
+								placeholder="Ask your Question here..."
+								spellCheck
+								autoFocus
+								onKeyDown={(event) => {
+									for (const hotkey in HOTKEYS) {
+										if (isHotkey(hotkey, event)) {
+											event.preventDefault();
+											const mark = HOTKEYS[hotkey];
+											toggleMark(editor, mark);
 										}
 									}
-									// BLOCKS
-									const blocks = [
-										"heading-two",
-										"heading-three",
-										"block-quote",
-									];
-									if (includingList) {
-										blocks.push("numbered-list");
-										blocks.push("bulleted-list");
-									}
 
-									for (let i = 0; i < blocks.length; i++) {
-										var format = blocks[i];
-										if (isBlockActive(editor, format)) {
-											toggleBlock(editor, format);
-										}
-									}
-								};
+									const checkIfList = (format) => {
+										var res = isBlockActive(editor, format);
+										return res;
+									};
 
-								const checkIfList = (format) => {
-									var res = isBlockActive(editor, format);
-									return res;
-								};
-
-								const toggleIfEmptyList = (format) => {
-									const leaf = Editor.leaf(editor, editor.selection);
-									if (leaf[0].text === "") {
-										event.preventDefault();
-										toggleBlock(editor, format);
-									}
-								};
-
-								/* TOGGLE LIST IF EMPTY AND BACKSPACE */
-								if (event.key === "Backspace") {
-									// CHECK IF WITHIN LIST
-									const bullFormat = "bulleted-list";
-									if (checkIfList(bullFormat)) {
-										toggleIfEmptyList(bullFormat);
-									}
-
-									const numFormat = "numbered-list";
-									if (checkIfList(numFormat)) {
-										toggleIfEmptyList(numFormat);
-									}
-								}
-
-								/* NEW LINE ON ENTER, RESET SYTLING, UNLESS LIST */
-								if (event.key === "Enter" && !event.shiftKey) {
-									event.preventDefault();
-
-									const bullFormat = "bulleted-list";
-									if (checkIfList(bullFormat)) {
-										resetEverything(false);
-										return;
-									}
-
-									const numFormat = "numbered-list";
-									if (checkIfList(numFormat)) {
-										resetEverything(false);
-										return;
-									}
-
-									resetEverything(true);
-
-									/* // IF EITHER HBULLET OR NUMBERED DO THIS
-									if (resNum || resBul) {
-										console.log("should ot");
+									const toggleIfEmptyList = (format) => {
 										const leaf = Editor.leaf(editor, editor.selection);
 
 										if (leaf[0].text === "") {
 											event.preventDefault();
 											toggleBlock(editor, format);
-										} else {
-											resetEverything();
-											if (resNum) {
-												toggleBlock(editor, "numbered-list");
-											}
-											if (resBul) {
-												toggleBlock(editor, "bulleted-list");
-											}
+										}
+									};
+
+									if (event.key === "Backspace") {
+										// IF ON FIRST LINE OF DOCUMENT, RESET THE STYLING COMPLETELY.
+										var { selection } = editor;
+										if (
+											selection.anchor.path[0] === 0 &&
+											selection.anchor.path[1] === 0 &&
+											selection.focus.path[0] === 0 &&
+											selection.focus.path[1] === 0 &&
+											selection.anchor.offset === 0 &&
+											selection.focus.offset === 0
+										) {
+											resetBlocks();
+											resetMarks();
 										}
 
-										// ELSE DO SOMETHING COMPLETELY UNRELATED
-									} else {
-										resetEverything();
-									} */
-								}
+										// IF CURSER AT BEGINNING OF LI AND BACKSPACE, RESET BLOCKS
+										const bullFormat = "bulleted-list";
+										const numFormat = "numbered-list";
 
-								// unrelated to above
-								if (event.key === "Enter" || event.key === "Backspace") {
-								}
+										var isList = false;
+										if (checkIfList(bullFormat) || checkIfList(numFormat)) {
+											isList = true;
+										}
 
-								if (event.key === "Enter" && event.shiftKey) {
-									event.preventDefault();
-									editor.insertText("\n");
-								}
-							}}
-						/>
-					</div>
-				</Slate>
-			</div>
+										selection = editor.selection;
+										if (
+											isList &&
+											selection.anchor.offset === 0 &&
+											selection.focus.offset === 0
+										) {
+											event.preventDefault();
+											resetBlocks();
+										}
+									}
+
+									// TAB
+									if (event.key === "Tab") {
+										event.preventDefault();
+										Transforms.insertText(editor, "\t");
+									}
+
+									// NEW LINE ON ENTER, RESET SYTLING, UNLESS LIST
+									if (event.key === "Enter" && !event.shiftKey) {
+										event.preventDefault();
+
+										Editor.insertBreak(editor);
+
+										const bullFormat = "bulleted-list";
+										const numFormat = "numbered-list";
+										if (checkIfList(bullFormat) || checkIfList(numFormat)) {
+											resetBlocks(["numbered-list", "bulleted-list"]);
+										} else {
+											resetBlocks();
+										}
+
+										resetMarks();
+									}
+
+									if (event.key === "Enter" && event.shiftKey) {
+										event.preventDefault();
+										editor.insertText("\n");
+									}
+								}}
+							/>
+						</div>
+					</Slate>
+				</div>
+			</IconContext.Provider>
 		</div>
 	);
 };
 
 export default SlateEditor;
-
-//const test = Array.from(Editor.nodes(editor, { at: [] }));
-//console.log(Editor.leaf(editor, editor.selection), "my thing");
-//console.log(editor.selection, "selec");
-
-/* 
-		console.log(
-			Editor.nodes(editor, {
-				at: Editor.unhangRange(editor, selection),
-				match: (n) =>
-					!Editor.isEditor(n) &&
-					SlateElement.isElement(n) &&
-					n[blockType] === format,
-			})
-		); */
