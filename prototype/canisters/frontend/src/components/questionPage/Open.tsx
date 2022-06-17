@@ -3,7 +3,7 @@ import Answer from "./Answer";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 
-const Open = ({ questionState, plug, fetch_data, login }: any) => {
+const Open = ({ questionState, plug, fetch_data, login, cachedAvatars, loadAvatar }: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
 	const [callState, setCallState] = useState<any>({
@@ -98,6 +98,8 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 						answer={answer}
 						key={answer.id}
 						questionState={questionState}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			})}

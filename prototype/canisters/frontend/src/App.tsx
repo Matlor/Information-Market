@@ -160,13 +160,50 @@ function App() {
 		setPlug({ isConnected: false, userName: "", joinedDate: "", avatar: "", plug: {}, actor: {} });
 	};
 
+	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
+
+	const loadAvatars = async function (questions: any) {
+		try {
+			for (var i = 0; i < questions.length; i++){
+				let question : any = questions[i];
+				if (!(cachedAvatars.has(question.author.id))){
+					await loadAvatar(question.author.id);
+				}
+				for (var j = 0; j < question.answers.length; j++){
+					let answer : any = question.answers[j];
+					if (!(cachedAvatars.has(answer.author.id))){
+						await loadAvatar(answer.author.id);
+					}
+				}
+			}
+		} catch (error) {
+			console.log("Failed to load avatars!");
+		}
+	};
+
+	const loadAvatar = async (user_id: string) => {
+		let sudographActor = sudograph({
+			canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
+		});
+		const query_avatar = await sudographActor.query(
+			gql`
+				query ($user_id:ID!) {
+					readUser(search: {id: {eq: $user_id} }) {
+						avatar
+					}
+				}`, {user_id});
+		// TO DO: investigate if fetch + createObjectURL would make more sense
+		let avatar = blobToBase64Str(query_avatar.data.readUser[0].avatar);
+		setCachedAvatars(prev => new Map([...prev, [user_id, avatar]]));
+	}
+
 	return (
 		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
 				<div className="ml-64 mr-64 mt-10 mb-5">
 					<Routes>
-						<Route path="/" element={<QuestionsList plug={plug} />} />
+						<Route path="/" element={<QuestionsList plug={plug} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} />} />
 
 						<Route
 							path="/add-question"
@@ -174,7 +211,7 @@ function App() {
 						/>
 						<Route
 							path="/question/:id"
-							element={<Question plug={plug} login={login} />}
+							element={<Question plug={plug} login={login} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} loadAvatar={loadAvatar} />}
 						/>
 					</Routes>
 				</div>

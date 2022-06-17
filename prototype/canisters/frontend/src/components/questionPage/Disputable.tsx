@@ -3,7 +3,7 @@ import Answer from "./Answer";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 
-const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
+const Disputable = ({ questionState, plug, fetch_data, login, cachedAvatars, loadAvatar }: any) => {
 	const [callState, setCallState] = useState<any>({
 		loading: false,
 		error: false,
@@ -99,6 +99,8 @@ const Disputable = ({ questionState, plug, fetch_data, login }: any) => {
 						answer={answer}
 						key={answer.id}
 						questionState={questionState}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			})}

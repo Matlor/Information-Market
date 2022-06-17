@@ -51,6 +51,12 @@ export const get_question = async (questionId) => {
               status_end_date
               open_duration
               title
+              answers {
+                id
+                author {
+                  id
+                }
+              }
               content
               reward
               winner {

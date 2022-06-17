@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 import SubmittedBy from "../helperComponents/SubmittedBy";
 
@@ -8,8 +8,11 @@ const Answer = ({
 	handlePickWinner,
 	plug,
 	callState,
+	cachedAvatars,
+	loadAvatar
 }: any) => {
 	var border = "";
+	
 	const visualiseWinner = () => {
 		if (
 			!questionState.question.winner ||
@@ -29,6 +32,11 @@ const Answer = ({
 		}
 	};
 	visualiseWinner();
+
+	// Make sure to load all the avatars for this question
+	useEffect(() => {
+		loadAvatar(answer.author.id);
+	}, []);
 
 	const pickWinner = (
 		<>
@@ -63,10 +71,7 @@ const Answer = ({
 
 	const answerContent = (
 		<>
-			<SubmittedBy
-				author={answer.author.name}
-				creation_date={answer.creation_date}
-			/>
+			<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt=""/>
 			<div className="text-justify font-light"> {answer.content}</div>
 		</>
 	);

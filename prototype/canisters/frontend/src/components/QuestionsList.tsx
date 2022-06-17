@@ -14,7 +14,7 @@ interface JSONObject {
 
 interface JSONArray extends Array<JSONValue> {}
 
-const QuestionsList = ({ plug }: any) => {
+const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 	const questionsPerPage: number = 10;
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [orderField, setOrderField] = useState<string>("reward");
@@ -25,7 +25,6 @@ const QuestionsList = ({ plug }: any) => {
 	const [statusMap, setStatusMap] = useState<Array<Status>>([{ value: "OPEN", label: "Open" }]);
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
-	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
 	// Fetch the list of questions every 10 seconds if no 
 	// fetch has been triggered in between
@@ -65,27 +64,7 @@ const QuestionsList = ({ plug }: any) => {
 
 	// Load the list of avatars in the cache
 	useEffect(() => {		
-		const loadAvatars = async function () {
-			try {
-				for (var i = 0; i < questions.length; i++){
-					let question : any = questions[i];
-					if (!(cachedAvatars.has(question.author.id))){
-						let base64str = await loadAvatar(question.author.id);
-						setCachedAvatars(prev => new Map([...prev, [question.author.id, base64str]]));
-					}
-					for (var j = 0; j < question.answers.length; j++){
-						let answer : any = question.answers[j];
-						if (!(cachedAvatars.has(answer.author.id))){
-							let base64str = await loadAvatar(answer.author.id);
-							setCachedAvatars(prev => new Map([...prev, [answer.author.id, base64str]]));
-						}
-					}
-				}
-			} catch (error) {
-				console.log("Failed to load avatars!");
-			}
-		};
-		loadAvatars();
+		loadAvatars(questions);
 	}, [questions]);
 
 	const refreshSearchedText = (event) => {
@@ -180,21 +159,6 @@ const QuestionsList = ({ plug }: any) => {
 		setQuestions(pageResults.data.readQuestion);
 		setFetchQuestionsDate(Date.now());
 	};
-
-	const loadAvatar = async (user_id: string) : Promise<string> => {
-		let sudographActor = sudograph({
-			canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
-		});
-		const query_avatar = await sudographActor.query(
-			gql`
-				query ($user_id:ID!) {
-					readUser(search: {id: {eq: $user_id} }) {
-						avatar
-					}
-				}`, {user_id});
-		// TO DO: investigate if fetch + createObjectURL would make more sense
-		return blobToBase64Str(query_avatar.data.readUser[0].avatar);
-	}
 
 	const getArrow = (field: string) => {
 		return orderField === field ? (orderIsAscending ? "↑" : "↓") : "";

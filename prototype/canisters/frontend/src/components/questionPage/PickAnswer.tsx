@@ -2,7 +2,7 @@ import { useState } from "react";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 import Answer from "./Answer";
 
-const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
+const PickAnswer = ({ questionState, plug, fetch_data, cachedAvatars, loadAvatar }: any) => {
 	const [callState, setCallState] = useState<any>({
 		loading: false,
 		error: false,
@@ -64,6 +64,8 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 							questionState={questionState}
 							handlePickWinner={handlePickWinner}
 							callState={callState}
+							cachedAvatars={cachedAvatars}
+							loadAvatar={loadAvatar}
 						/>{" "}
 					</div>
 				);
