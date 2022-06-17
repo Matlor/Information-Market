@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 import { graphQlToStrDate } from "../../utils/conversions";
+import parse from "html-react-parser";
 
 const Answer = ({
 	answer,
@@ -9,10 +10,10 @@ const Answer = ({
 	plug,
 	callState,
 	cachedAvatars,
-	loadAvatar
+	loadAvatar,
 }: any) => {
 	var border = "";
-	
+
 	const visualiseWinner = () => {
 		if (
 			!questionState.question.winner ||
@@ -83,7 +84,7 @@ const Answer = ({
 								{graphQlToStrDate(answer.creation_date)}
 							</div>
 						</div>
-						<p className="text-left font-light"> {answer.content}</p>
+						<div className="editor-wrapper">{parse(answer.content)}</div>
 					</div>
 				</div>
 			</div>

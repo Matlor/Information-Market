@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
@@ -6,11 +6,13 @@ import Loading from "./helperComponents/Loading";
 import deepcopy from "deepcopy";
 import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
+import SlateEditor from "./SlateEditor";
+
 function AddQuestion({ plug, minReward }: any) {
 	const [title, setTitle] = useState<any>("");
-	const [content, setContent] = useState<string>("");
+	const [inputValue, setInputValue] = useState("");
 	const [duration, setDuration] = useState<any>("");
-	const [reward, setReward] = useState<any>("");
+	const [reward, setReward] = useState<any>("0");
 
 	const [errors, setErrors] = useState<any>({
 		minRewardErr: false,
@@ -54,6 +56,7 @@ function AddQuestion({ plug, minReward }: any) {
 	// TO DO: Error handling
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
+
 		if (!formValidation()) {
 			return;
 		}
@@ -63,11 +66,22 @@ function AddQuestion({ plug, minReward }: any) {
 		}
 
 		try {
+			console.log(
+				"reward:",
+				reward,
+				"title:",
+				title,
+				"duration:",
+				duration,
+				"input:",
+				inputValue
+			);
+
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
-				BigInt(parseInt(reward))
+				BigInt(Number(reward))
 			);
 			// if not ok return error
-			console.log(invoiceResponse.ok.invoice);
+			console.log(invoiceResponse);
 
 			// (TO DO: shows invoice to pay with plug)
 			// pays invoice with plug on the ledger
@@ -91,9 +105,9 @@ function AddQuestion({ plug, minReward }: any) {
 			// once paid calls open question function it
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
-				parseInt(duration),
+				Number(duration),
 				title,
-				content
+				inputValue
 			);
 
 			console.log(openQuestionResponse);
@@ -163,15 +177,8 @@ function AddQuestion({ plug, minReward }: any) {
 					<></>
 				)}
 			</div>
-			<div className="mb-6 text-center">
-				Content:
-				<textarea
-					value={content}
-					onChange={(e) => {
-						setContent(e.target.value);
-					}}
-					className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-				/>
+			<div className="mb-6 ">
+				<SlateEditor inputValue={inputValue} setInputValue={setInputValue} />
 			</div>
 
 			{plug.isConnected ? (
@@ -189,9 +196,11 @@ function AddQuestion({ plug, minReward }: any) {
 	return (
 		<>
 			<h1 className="page-title mb-10"> Ask a Question</h1>
-			{minReward ? form : <Loading />}
+			<div className="mb-10">{form} </div>
 		</>
 	);
 }
+
+// {minReward ? form : <Loading />}
 
 export default AddQuestion;

@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
-
 import { questionStatusToString, graphQlToStrDate } from "../utils/conversions";
 import QuestionStatusBar from "./QuestionStatusBar";
 import CoinStackIcon from "./questionPage/CoinStackIcon";
+import parse from "html-react-parser";
 
 const timeLeftToStr = (timeLeft) => {
 	if (timeLeft < 0) {
@@ -56,7 +56,7 @@ const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 								{graphQlToStrDate(question.creation_date)}
 							</div>
 						</div>
-						<p className="text-justify font-light  "> {question.content}</p>
+						<div className="editor-wrapper">{parse(question.content)}</div>
 					</div>
 					<div className="flex h-4"/>
 					<div className="flex flex-row justify-between font-light ">
