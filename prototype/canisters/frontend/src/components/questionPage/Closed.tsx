@@ -4,7 +4,10 @@ import FieldWrapper from "../helperComponents/FieldWrapper";
 const Closed = ({ questionState, plug, cachedAvatars, loadAvatar }: any) => {
 	const checkIfWinner = () => {
 		try {
-			return <div>{questionState.question.winner.id}</div>;
+			if (questionState.question.winner===null){
+				return "";
+			}
+			return ", the winner is " + questionState.question.winner.author.name;
 		} catch (e) {
 			return <></>;
 		}
@@ -14,7 +17,7 @@ const Closed = ({ questionState, plug, cachedAvatars, loadAvatar }: any) => {
 		<>
 			<FieldWrapper>
 				<div className="w-full flex justify-center">
-					Question is closed. Winner is: {checkIfWinner()}
+					Question is closed{checkIfWinner()}
 				</div>
 			</FieldWrapper>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
-import SubmittedBy from "../helperComponents/SubmittedBy";
+import { graphQlToStrDate } from "../../utils/conversions";
 
 const Answer = ({
 	answer,
@@ -67,12 +67,26 @@ const Answer = ({
 		</>
 	);
 
-	const [show, setShow] = useState<any>(false);
-
 	const answerContent = (
 		<>
-			<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt=""/>
-			<div className="text-justify font-light"> {answer.content}</div>
+			<div className="flex flex-row">
+				<div className="w-20">
+					<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt=""/>
+				</div>
+				<div className="flex flex-col grow">
+					<div className="pb-4">
+						<div className="flex justify-between pb-2">
+							<div className="font-medium">
+								{answer.author.name}
+							</div>
+							<div className="small-text">
+								{graphQlToStrDate(answer.creation_date)}
+							</div>
+						</div>
+						<p className="text-left font-light"> {answer.content}</p>
+					</div>
+				</div>
+			</div>
 		</>
 	);
 

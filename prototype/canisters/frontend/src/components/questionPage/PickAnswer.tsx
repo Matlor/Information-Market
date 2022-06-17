@@ -50,7 +50,7 @@ const PickAnswer = ({ questionState, plug, fetch_data, cachedAvatars, loadAvatar
 				plug.plug.principalId === questionState.question.author.id ? (
 					<> Choose which answer should win the reward</>
 				) : (
-					<>A winner is being picked by the question initiator</>
+					<>A winner is being picked by {questionState.question.author.name}</>
 				)}
 			</FieldWrapper>
 

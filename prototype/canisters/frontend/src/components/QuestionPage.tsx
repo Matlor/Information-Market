@@ -118,7 +118,6 @@ const QuestionPage = ({ plug, login, cachedAvatars, loadAvatars, loadAvatar}: an
 
 	return (
 		<>
-			<h1 className="page-title mb-10"> Question</h1>
 			{questionState.hasData ? (
 				<>
 					<Question question={questionState.question} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} />

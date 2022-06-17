@@ -48,7 +48,7 @@ const Disputable = ({ questionState, plug, fetch_data, login, cachedAvatars, loa
 					{questionState.question.winner ? (
 						<>
 							<div className="mb-4 decoration-yellow-500 underline ">
-								Winner: {questionState.question.winner.id}
+								{questionState.question.winner.author.name} has been picked by {questionState.question.author.name} as the winner
 							</div>
 
 							{plug.isConnected ? (

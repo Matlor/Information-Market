@@ -46,7 +46,7 @@ export const blobToBase64Str = (blob) => {
 
 export const toHHMM = (durationMinutes: number) => {
 	if(durationMinutes <= 0){
-		return "over";
+		return "00:00";
 	}
 	let hours   = Math.floor(durationMinutes / 60);
 	let minutes = Math.floor(durationMinutes - (hours * 60));
