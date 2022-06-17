@@ -3,6 +3,8 @@ import Answer from "./Answer";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 
+import SlateEditor from "../SlateEditor";
+
 const Open = ({ questionState, plug, fetch_data, login }: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
@@ -54,12 +56,9 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 		<>
 			<FieldWrapper>
 				<form onSubmit={submitAnswer} className="w-full">
-					<textarea
-						className="h-36 mb-2 p-2.5 bg-primary border-0 w-full"
-						value={answerInput}
-						onChange={(e) => {
-							setAnswerInput(e.target.value);
-						}}
+					<SlateEditor
+						inputValue={answerInput}
+						setInputValue={setAnswerInput}
 					/>
 
 					{plug.isConnected ? (

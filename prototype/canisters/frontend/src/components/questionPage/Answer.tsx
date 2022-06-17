@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 import SubmittedBy from "../helperComponents/SubmittedBy";
+import parse from "html-react-parser";
 
 const Answer = ({
 	answer,
@@ -67,7 +68,7 @@ const Answer = ({
 				author={answer.author}
 				creation_date={answer.creation_date}
 			/>
-			<div className="text-justify font-light"> {answer.content}</div>
+			<div className="editor-wrapper">{parse(answer.content)}</div>
 		</>
 	);
 
