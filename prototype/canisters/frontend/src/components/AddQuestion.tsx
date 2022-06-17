@@ -1,7 +1,5 @@
 import { useState } from "react";
 
-import { deserialize } from "./SlateHelpers";
-
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
 import Loading from "./helperComponents/Loading";
@@ -12,9 +10,9 @@ import SlateEditor from "./SlateEditor";
 
 function AddQuestion({ plug, minReward }: any) {
 	const [title, setTitle] = useState<any>("");
-	const [content, setContent] = useState<string>("");
+	const [inputValue, setInputValue] = useState("");
 	const [duration, setDuration] = useState<any>("");
-	const [reward, setReward] = useState<any>("");
+	const [reward, setReward] = useState<any>("0");
 
 	const [errors, setErrors] = useState<any>({
 		minRewardErr: false,
@@ -58,6 +56,7 @@ function AddQuestion({ plug, minReward }: any) {
 	// TO DO: Error handling
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
+
 		if (!formValidation()) {
 			return;
 		}
@@ -79,10 +78,10 @@ function AddQuestion({ plug, minReward }: any) {
 			);
 
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
-				BigInt(parseInt(reward))
+				BigInt(Number(reward))
 			);
 			// if not ok return error
-			console.log(invoiceResponse.ok.invoice);
+			console.log(invoiceResponse);
 
 			// (TO DO: shows invoice to pay with plug)
 			// pays invoice with plug on the ledger
@@ -106,7 +105,7 @@ function AddQuestion({ plug, minReward }: any) {
 			// once paid calls open question function it
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
-				parseInt(duration),
+				Number(duration),
 				title,
 				inputValue
 			);
@@ -116,15 +115,6 @@ function AddQuestion({ plug, minReward }: any) {
 			console.log(e);
 		}
 	};
-
-	// -------------------- SLATE -----------------------
-	const document = new DOMParser().parseFromString(
-		"<p><strong>euzveriezfvreziv</strong></p><p><em>eirbviuebrvbiuerbviuerbv</em></p><p><u>eiubvierubiuvberv</u></p><p><code>ervrevervrverv</code></p><h2>vervrever</h2><h3>verrvrevervr</h3><blockquote><p>ververvrevrevrev</p></blockquote><ol><li>verrvrev</li><li>vervre</li></ol><ul><li>verrver</li><li>revvrev</li></ul>",
-		"text/html"
-	);
-	const deSer = deserialize(document.body);
-	const [inputValue, setInputValue] = useState(deSer);
-	console.log(inputValue, "in state editor");
 
 	const form = (
 		<form onSubmit={handleSubmit}>
@@ -214,16 +204,3 @@ function AddQuestion({ plug, minReward }: any) {
 // {minReward ? form : <Loading />}
 
 export default AddQuestion;
-
-/* 
-
-Content:
-<textarea
-	value={content}
-	onChange={(e) => {
-		setContent(e.target.value);
-	}}
-	className=" h-40 bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-/>
-
-*/

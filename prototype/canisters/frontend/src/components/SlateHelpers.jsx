@@ -2,13 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import escapeHtml from "escape-html";
 import { jsx } from "slate-hyperscript";
-import {
-	Text,
-	Editor,
-	Transforms,
-	createEditor,
-	Element as SlateElement,
-} from "slate";
+import { Text, Element as SlateElement } from "slate";
 
 export const Button = React.forwardRef(
 	({ className, active, reversed, ...props }, ref) => (
@@ -54,14 +48,10 @@ export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
 ));
 
 export const serialize = (node) => {
-	console.log(node);
 	if (Text.isText(node)) {
 		let string = escapeHtml(node.text);
 		if (node.bold) {
 			string = `<strong>${string}</strong>`;
-		}
-		if (node.code) {
-			string = `<code>${string}</code>`;
 		}
 		if (node.italic) {
 			string = `<em>${string}</em>`;
@@ -78,6 +68,7 @@ export const serialize = (node) => {
 	switch (node.type) {
 		case "block-quote":
 			return `<blockquote><p>${children}</p></blockquote>`;
+
 		case "bulleted-list":
 			return `<ul>${children}</ul>`;
 
@@ -104,6 +95,7 @@ export const serialize = (node) => {
 	}
 };
 
+// Not used right now. Will be required for editing text.
 export const deserialize = (el, markAttributes = {}) => {
 	if (el.nodeType === Node.TEXT_NODE) {
 		return jsx("text", markAttributes, el.textContent);
@@ -116,9 +108,6 @@ export const deserialize = (el, markAttributes = {}) => {
 	switch (el.nodeName) {
 		case "STRONG":
 			nodeAttributes.bold = true;
-			break;
-		case "CODE":
-			nodeAttributes.code = true;
 			break;
 
 		case "EM":

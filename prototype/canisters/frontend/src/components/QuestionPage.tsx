@@ -10,7 +10,6 @@ import Closed from "./questionPage/Closed";
 import Question from "./Question";
 
 // TODO: Fix deadline issues
-// TODO: Improve error handling
 const QuestionPage = ({ plug, login }: any) => {
 	let { id } = useParams();
 
