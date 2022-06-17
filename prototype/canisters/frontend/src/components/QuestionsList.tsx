@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
 import StatusSelection from "./StatusSelection";
-import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
-import { Navigate } from "react-router-dom";
+import { e3sToIcp, jsToGraphQlDate, toHHMM, blobToBase64Str } from "../utils/conversions";
 
 type Status = { value: string; label: string };
 
@@ -15,7 +14,7 @@ interface JSONObject {
 
 interface JSONArray extends Array<JSONValue> {}
 
-const QuestionsList = ({ plug }: any) => {
+const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 	const questionsPerPage: number = 10;
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [orderField, setOrderField] = useState<string>("reward");
@@ -23,37 +22,50 @@ const QuestionsList = ({ plug }: any) => {
 	const [searchedText, setSearchedText] = useState<string>("");
 	const [pageIndex, setPageIndex] = useState<number>(0);
 	const [totalQuestions, setTotalQuestions] = useState<number>(0);
-	const [statusMap, setStatusMap] = useState<Array<Status>>([
-		{ value: "OPEN", label: "Open" },
-	]);
+	const [statusMap, setStatusMap] = useState<Array<Status>>([{ value: "OPEN", label: "Open" }]);
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
 
+	// Fetch the list of questions every 10 seconds if no 
+	// fetch has been triggered in between
 	useEffect(() => {
 		const interval = setInterval(() => {
-			// Update the list of questions every 10 seconds if no interactions has triggered
-			// the update in between
 			if (Date.now() - fetchQuestionsDate > 10000) {
 				fetchQuestions();
 			}
 		}, 1000);
+		return () => clearInterval(interval);
+	}, [fetchQuestionsDate]);
 
+	// Enable/disable my interactions depending if plug is connected or not
+	useEffect(() => {
 		if (!plug.isConnected) {
 			setMyInteractions(false);
 		}
+	}, [plug.isConnected]);
 
+	// Fetch the list of questions every time:
+	// - the order field changed
+	// - the order direction changed
+	// - the searched text changed
+	// - the status map changed
+	// - the page index changed
+	// - the filter on my interactions changed
+	useEffect(() => {
 		fetchQuestions();
-
-		return () => clearInterval(interval);
 	}, [
 		orderField,
 		orderIsAscending,
 		searchedText,
 		statusMap,
 		pageIndex,
-		myInteractions,
-		plug.isConnected,
+		myInteractions
 	]);
+
+	// Load the list of avatars in the cache
+	useEffect(() => {		
+		loadAvatars(questions);
+	}, [questions]);
 
 	const refreshSearchedText = (event) => {
 		setSearchedText(event.target.value);
@@ -69,8 +81,6 @@ const QuestionsList = ({ plug }: any) => {
 	};
 
 	const fetchQuestions = async () => {
-		setFetchQuestionsDate(Date.now());
-
 		let sudographActor = sudograph({
 			canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 		});
@@ -97,9 +107,7 @@ const QuestionsList = ({ plug }: any) => {
 			}
 			queryInputs += '{status: {eq: "' + status.value + '"}}';
 		});
-
 		queryInputs += "]}";
-
 		if (myInteractions) {
 			queryInputs += `,{or: [{answers: {author: {eq:"${plug.plug.principalId}"}}}, {author: {eq: "${plug.plug.principalId}"}}]}`;
 		}
@@ -117,8 +125,6 @@ const QuestionsList = ({ plug }: any) => {
 		`
 		);
 
-		setTotalQuestions(allResults.data.readQuestion.length);
-
 		// Limit the number of questions per page
 		queryInputs += "limit: " + questionsPerPage;
 		// Offset from page index
@@ -131,19 +137,27 @@ const QuestionsList = ({ plug }: any) => {
 				queryInputs +
 				`) {
 					id
+					author {
+						id
+						name
+					}
 					title
 					answers {
 						id
+						author {
+							id
+						}
 					}
 					status
 					reward
 					status_end_date
 				}
 			}
-		`
-		);
+		`);
 
+		setTotalQuestions(allResults.data.readQuestion.length);
 		setQuestions(pageResults.data.readQuestion);
+		setFetchQuestionsDate(Date.now());
 	};
 
 	const getArrow = (field: string) => {
@@ -262,6 +276,9 @@ const QuestionsList = ({ plug }: any) => {
 				<table className="w-full text-sm text-left text-gray-500 mt-4  bg-primary">
 					<thead className=" text-gray-700 ">
 						<tr className="h-20">
+							<th scope="col" className="px-6 py-3">
+								<div className="flex justify-center">Author</div>
+							</th>
 							<th scope="col" className="px-6 py-3 items-center">
 								Question
 							</th>
@@ -298,9 +315,14 @@ const QuestionsList = ({ plug }: any) => {
 						</tr>
 					</thead>
 					<tbody>
-						{questions.map((question: any) => {
+						{questions.map((question: any, index: number) => {
 							return (
 								<tr className="hover:bg-secondary" key={question.id}>
+									<td className="px-6 py-4 w-1/12">
+										<div className="flex justify-center">
+											<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
+										</div>
+									</td>
 									<th
 										scope="row"
 										className="px-6 py-6 font-medium text-gray-900 w-6/12"
@@ -310,8 +332,14 @@ const QuestionsList = ({ plug }: any) => {
 										</Link>
 									</th>
 									<td className="px-6 py-4 w-1/12">
-										<div className="flex justify-center">
-											{question.answers.length}{" "}
+										<div className="flex justify-center -space-x-4">
+											{
+												question.answers.map((answer: any) => {
+													return (
+														<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt="" key={answer.id}/>
+													);
+												})
+											}
 										</div>
 									</td>
 									<td className="px-6 py-4  w-2/12 ">

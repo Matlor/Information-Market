@@ -1,7 +1,7 @@
 import Answer from "./Answer";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 
-const Arbitration = ({ questionState, plug }: any) => {
+const Arbitration = ({ questionState, plug, cachedAvatars, loadAvatar }: any) => {
 	return (
 		<>
 			<FieldWrapper>
@@ -15,6 +15,8 @@ const Arbitration = ({ questionState, plug }: any) => {
 						answer={answer}
 						key={answer.id}
 						questionState={questionState}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			})}

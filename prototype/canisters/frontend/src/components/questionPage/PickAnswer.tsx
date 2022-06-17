@@ -2,7 +2,7 @@ import { useState } from "react";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 import Answer from "./Answer";
 
-const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
+const PickAnswer = ({ questionState, plug, fetch_data, cachedAvatars, loadAvatar }: any) => {
 	const [callState, setCallState] = useState<any>({
 		loading: false,
 		error: false,
@@ -47,7 +47,7 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 		<>
 			<FieldWrapper>
 				{plug.isConnected &&
-				plug.plug.principalId === questionState.question.author ? (
+				plug.plug.principalId === questionState.question.author.id ? (
 					<> Choose which answer should win the reward</>
 				) : (
 					<>A winner is being picked by the question initiator</>
@@ -64,6 +64,8 @@ const PickAnswer = ({ questionState, plug, fetch_data }: any) => {
 							questionState={questionState}
 							handlePickWinner={handlePickWinner}
 							callState={callState}
+							cachedAvatars={cachedAvatars}
+							loadAvatar={loadAvatar}
 						/>{" "}
 					</div>
 				);

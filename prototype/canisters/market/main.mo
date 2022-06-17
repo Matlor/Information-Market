@@ -2,41 +2,30 @@ import InvoiceTypes "../invoice/types";
 import Types        "types";
 import Utils        "utils";
 
-import Debug "mo:base/Debug";
-import Text "mo:base/Text";
-import Int "mo:base/Int";
-import Int32 "mo:base/Int32";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Principal "mo:base/Principal";
-import Result "mo:base/Result";
-import Time "mo:base/Time";
+import Debug        "mo:base/Debug";
+import Int          "mo:base/Int";
+import Int32        "mo:base/Int32";
+import Iter         "mo:base/Iter";
+import Nat          "mo:base/Nat";
+import Nat32        "mo:base/Nat32";
+import Nat64        "mo:base/Nat64";
+import Principal    "mo:base/Principal";
+import Result       "mo:base/Result";
+import Time         "mo:base/Time";
 
-import GraphQL "canister:graphql";
+import GraphQL      "canister:graphql";
 
 
-shared({ caller = initializer }) actor class Market(
-    invoice_canister: Text,
-    coin_symbol: Text,
-    min_reward: Nat, // in e8s
-    fee: Nat, // in e8s, shall be 10000
-    duration_pick_answer: Nat, // in minutes
-    duration_disputable: Nat, // in minutes
-    duration_dispute: Nat,
-    update_status_on_heartbeat: Bool
-) = this {
+shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
     // Members
-    private let invoice_canister_ : InvoiceTypes.Interface = actor (invoice_canister);
-    private let coin_symbol_ : Text = coin_symbol;
-    private let min_reward_ : Nat = min_reward;
-    private let fee_ : Nat = fee;
-    private let duration_pick_answer_ : Int32 = Int32.fromInt(duration_pick_answer);
-    private let duration_disputable_ : Int32 = Int32.fromInt(duration_disputable);
-    private let duration_dispute_ : Int32 = Int32.fromInt(duration_dispute);
-    private let update_status_on_heartbeat_: Bool = update_status_on_heartbeat;
+    private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(arguments.invoice_canister));
+    private let coin_symbol_ : Text = arguments.coin_symbol;
+    private let min_reward_ : Nat = arguments.min_reward_e8s;
+    private let fee_ : Nat = arguments.transfer_fee_e8s;
+    private let duration_pick_answer_ : Int32 = Int32.fromInt(arguments.pick_answer_duration_minutes);
+    private let duration_disputable_ : Int32 = Int32.fromInt(arguments.disputable_duration_minutes);
+    private let update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
 
     public shared func get_coin_symbol() : async Text {
         return coin_symbol_;
@@ -58,40 +47,31 @@ shared({ caller = initializer }) actor class Market(
         return duration_disputable_;
     };
 
-    public shared func get_duration_dispute() : async Int32 {
-        return duration_dispute_;
-    };
-
     public shared func get_update_status_on_heartbeat() : async Bool {
         return update_status_on_heartbeat_;
     };
 
 
-    // ------------------------- Initialization -------------------------
-
-    // There seems to be a bug in graphql, if the first mutation called on the graphql
-    // canister is a custom mutation (not the graphql_mutation(text, text) -> text), then
-    // the graphql mutations traps. Here we do a dummy mutation to create an "Initialization"
-    // table inside the graphql database so the next mutations performed by this canister work.
-    public shared func initialize_graphql() : async Bool {
-        if (not (await is_graphql_initialized()))
-        {
-            return Text.startsWith(
-                await GraphQL.graphql_mutation("mutation{createInitialization{id}}", "{}"),
-                #text("{\"data\":{\"createInitialization\":[{\"id\""));
-        } else {
-            return true;
-        }
+    // ------------------------- Create User -------------------------
+    public shared ({caller}) func create_user(name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
+        let user_id : Text = Principal.toText(caller);
+        switch (await GraphQL.get_user(user_id)){
+            case(?user){
+                return #err(#UserExists);
+            };
+            case(null){
+                switch (await GraphQL.create_user(user_id, name, Utils.time_minutes_now(), avatar)){
+                    case(null) {
+                        return #err(#GraphQLError);
+                    };
+                    case (?user) {
+                        return #ok(user);
+                    };
+                };
+            };
+        };
     };
 
-    // Check if there is an "Initialization" table inside the GraphQL database. This is
-    // required because it can happen in development that the graphql canister is re-deployed 
-    // alone, so one need to call the initialize_graphql function once again.
-    public shared func is_graphql_initialized() : async Bool {
-        return Text.startsWith(
-            await GraphQL.graphql_query("query{readInitialization{id}}", "{}"),
-            #text("{\"data\":{\"readInitialization\":[{\"id\""));
-    };
 
     // ------------------------- Create Invoice -------------------------
 
@@ -111,24 +91,35 @@ shared({ caller = initializer }) actor class Market(
                     symbol = coin_symbol_;
                 };
             };
-            switch (await invoice_canister_.create_invoice(create_invoice_args)){
-                case (#err create_invoice_err) {
-                    return #err(create_invoice_err);
+            switch (await GraphQL.get_user(Principal.toText(caller))){
+                case(null){
+                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
+                        kind = #Other;
+                        message = ?"Unknown user";
+                    };
+                    return #err(invoice_error);
                 };
-                case (#ok create_invoice_success) {
-                    switch (await GraphQL.create_invoice(
-                        Nat.toText(create_invoice_success.invoice.id),
-                        Principal.toText(caller)
-                    )){
-                        case (null) {
-                            let invoice_error : InvoiceTypes.CreateInvoiceErr = {
-                                kind = #Other;
-                                message = ?"GraphQL error";
-                            };
-                            return #err(invoice_error);
+                case(?user){
+                    switch (await invoice_canister_.create_invoice(create_invoice_args)){
+                        case (#err create_invoice_err) {
+                            return #err(create_invoice_err);
                         };
-                        case (?invoice) {
-                            return #ok(create_invoice_success);
+                        case (#ok create_invoice_success) {
+                            switch (await GraphQL.create_invoice(
+                                Nat.toText(create_invoice_success.invoice.id),
+                                user.id
+                            )){
+                                case (null) {
+                                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
+                                        kind = #Other;
+                                        message = ?"GraphQL error";
+                                    };
+                                    return #err(invoice_error);
+                                };
+                                case (?invoice) {
+                                    return #ok(create_invoice_success);
+                                };
+                            };
                         };
                     };
                 };
@@ -151,8 +142,9 @@ shared({ caller = initializer }) actor class Market(
                 return #err(#NotFound);
             };
             case (?graphql_invoice) {
-                // Verify the buyer of the invoice is the user that is opening up the question
-                if (graphql_invoice.buyer != author) {
+                // Verify the buyer of the invoice is the caller that is opening up the question
+                // This also ensures that there is a user associated to the caller
+                if (graphql_invoice.buyer.id != author) {
                     return #err(#NotAllowed);
                 } else {
                     // Verify the invoice has been paid
@@ -211,36 +203,43 @@ shared({ caller = initializer }) actor class Market(
         question_id: Text,
         content: Text
     ): async Result.Result<GraphQL.AnswerType, Types.Error> {
-        let author = Principal.toText(caller);
-        // Check the question exists
-        switch(await GraphQL.get_question(question_id)){
-             case(null){
-                return #err(#NotFound);
+        // Check the user is registred
+        switch (await GraphQL.get_user(Principal.toText(caller))){
+            case(null){
+                return #err(#UserNotFound);
             };
-            case(?question){
-                // Verify one does not attempt to answer its own question
-                if (question.author == author) {
-                    return #err(#NotAllowed);
-                // Verify the question is open
-                } else if (question.status != #OPEN) {
-                    return #err(#WrongStatus);
-                } else {
-                    switch(await GraphQL.create_answer(
-                        question_id,
-                        author,
-                        Utils.time_minutes_now(),
-                        content
-                    )){
-                        case(null){
-                            return #err(#GraphQLError);
-                        };
-                        case(?answer){
-                            return #ok(answer);
+            case(?user){
+                // Check the question exists
+                switch(await GraphQL.get_question(question_id)){
+                    case(null){
+                        return #err(#NotFound);
+                    };
+                    case(?question){
+                        // Verify one does not attempt to answer its own question
+                        if (question.author.id == user.id) {
+                            return #err(#NotAllowed);
+                        // Verify the question is open
+                        } else if (question.status != #OPEN) {
+                            return #err(#WrongStatus);
+                        } else {
+                            switch(await GraphQL.create_answer(
+                                question_id,
+                                user.id,
+                                Utils.time_minutes_now(),
+                                content
+                            )){
+                                case(null){
+                                    return #err(#GraphQLError);
+                                };
+                                case(?answer){
+                                    return #ok(answer);
+                                };
+                            };
                         };
                     };
                 };
             };
-        }; 
+        };
     };
 
     // ------------------------- Pick Winner -------------------------
@@ -257,7 +256,7 @@ shared({ caller = initializer }) actor class Market(
             };
             case(?question){
                 let now = Utils.time_minutes_now();
-                if (question.author != Principal.toText(caller)) {
+                if (question.author.id != Principal.toText(caller)) {
                     return #err(#NotAllowed);
                 } else if (question.status != #PICKANSWER) {
                     return #err(#WrongStatus);
@@ -288,7 +287,7 @@ shared({ caller = initializer }) actor class Market(
                     return #err(#WrongStatus);
                 } else if (not(await GraphQL.has_answered(question_id, Principal.toText(caller)))) {
                     return #err(#NotAllowed);
-                } else if (not (await GraphQL.open_dispute(question_id, now, now + duration_dispute_))){
+                } else if (not (await GraphQL.open_dispute(question_id, now))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -324,7 +323,7 @@ shared({ caller = initializer }) actor class Market(
                             switch(await invoice_canister_.transfer({
                                 amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(answer.author));
+                                destination = #principal(Principal.fromText(answer.author.id));
                             })){
                                 case(#err err){
                                     return #err(#TransferError(err));
@@ -364,7 +363,7 @@ shared({ caller = initializer }) actor class Market(
         {
             switch(question.status){
                 case(#OPEN){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         if (await GraphQL.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
@@ -374,7 +373,7 @@ shared({ caller = initializer }) actor class Market(
                             switch(await invoice_canister_.transfer({
                                 amount = Utils.e3s_to_e8s(question.reward);
                                 token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(question.author));
+                                destination = #principal(Principal.fromText(question.author.id));
                             })){
                                 case(#ok success){
                                     // Here there is in theory a severe risk that the transfer worked 
@@ -393,14 +392,14 @@ shared({ caller = initializer }) actor class Market(
                     };
                 };
                 case(#PICKANSWER){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
-                        ignore await GraphQL.open_dispute(question.id, now, now + duration_dispute_);
+                        ignore await GraphQL.open_dispute(question.id, now);
                     };
                 };
                 case(#DISPUTABLE){
-                    if (question.status_end_date < now) {
+                    if (now >= question.status_end_date) {
                         // If nobody disputed the picked answer, payout the answer's author
                         // and close the question
                         switch (question.winner) {
@@ -413,7 +412,7 @@ shared({ caller = initializer }) actor class Market(
                                 switch(await invoice_canister_.transfer({
                                     amount = Utils.e3s_to_e8s(question.reward);
                                     token = {symbol = coin_symbol_};
-                                    destination = #principal(Principal.fromText(answer.author));
+                                    destination = #principal(Principal.fromText(answer.author.id));
                                 })){
                                     case(#ok success){
                                         // Here there is in theory a severe risk that the transfer worked 

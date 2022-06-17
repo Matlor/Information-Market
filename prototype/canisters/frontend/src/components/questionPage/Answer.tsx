@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
-import SubmittedBy from "../helperComponents/SubmittedBy";
 import parse from "html-react-parser";
 
 const Answer = ({
@@ -9,8 +8,11 @@ const Answer = ({
 	handlePickWinner,
 	plug,
 	callState,
+	cachedAvatars,
+	loadAvatar,
 }: any) => {
 	var border = "";
+
 	const visualiseWinner = () => {
 		if (
 			!questionState.question.winner ||
@@ -19,7 +21,7 @@ const Answer = ({
 		) {
 			return;
 		}
-		if (questionState.question.status === "DISPUTABLE" || "DISPUTABLE") {
+		if (questionState.question.status === "DISPUTABLE") {
 			if (answer.id === questionState.question.winner.id) {
 				border = "border border-yellow-500 border";
 			}
@@ -31,11 +33,16 @@ const Answer = ({
 	};
 	visualiseWinner();
 
+	// Make sure to load all the avatars for this question
+	useEffect(() => {
+		loadAvatar(answer.author.id);
+	}, []);
+
 	const pickWinner = (
 		<>
 			{questionState.question.status === "PICKANSWER" &&
 			plug.isConnected &&
-			plug.plug.principalId === questionState.question.author ? (
+			plug.plug.principalId === questionState.question.author.id ? (
 				<>
 					<div className="flex justify-end w-full">
 						<div>
@@ -64,9 +71,10 @@ const Answer = ({
 
 	const answerContent = (
 		<>
-			<SubmittedBy
-				author={answer.author}
-				creation_date={answer.creation_date}
+			<img
+				className="w-10 h-10 rounded-full"
+				src={cachedAvatars.get(answer.author.id)}
+				alt=""
 			/>
 			<div className="editor-wrapper">{parse(answer.content)}</div>
 		</>

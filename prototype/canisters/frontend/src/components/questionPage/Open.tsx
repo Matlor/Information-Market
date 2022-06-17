@@ -5,7 +5,14 @@ import CallStateHandler from "../helperComponents/CallStateHandler";
 
 import SlateEditor from "../SlateEditor";
 
-const Open = ({ questionState, plug, fetch_data, login }: any) => {
+const Open = ({
+	questionState,
+	plug,
+	fetch_data,
+	login,
+	cachedAvatars,
+	loadAvatar,
+}: any) => {
 	const [answerInput, setAnswerInput] = useState<any>("");
 
 	const [callState, setCallState] = useState<any>({
@@ -62,7 +69,7 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 					/>
 
 					{plug.isConnected ? (
-						plug.plug.principalId == questionState.question.author ? (
+						plug.plug.principalId == questionState.question.author.id ? (
 							<div>You cannot answer your own question</div>
 						) : (
 							<div className="w-fit">
@@ -97,6 +104,8 @@ const Open = ({ questionState, plug, fetch_data, login }: any) => {
 						answer={answer}
 						key={answer.id}
 						questionState={questionState}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			})}

@@ -5,10 +5,18 @@ pub mod macros{
             r#"mutation ($question_id: ID!, $status_update_date: Int!, $status_end_date: Int!) {
               updateQuestion(input: {id: $question_id, status_update_date: $status_update_date, status_end_date: $status_end_date, status: PICKANSWER}) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 author_invoice {
                   id
-                  buyer
+                  buyer {
+                    id
+                    name
+                    joined_date
+                  }
                 }
                 creation_date
                 status
@@ -20,7 +28,11 @@ pub mod macros{
                 reward
                 winner {
                   id
-                  author
+                  author {
+                    id
+                    name
+                    joined_date
+                  }
                   creation_date
                   content
                 }

@@ -2,10 +2,14 @@
 pub mod macros {
     macro_rules! mutation{
         () => {
-            r#"mutation ($id: ID!, $buyer: String!) {
-              createInvoice(input: {id: $id, buyer: $buyer}) {
+            r#"mutation ($id: ID!, $buyer_id: ID!) {
+              createInvoice(input: {id: $id, buyer: {connect: $buyer_id}}) {
                 id
-                buyer
+                buyer {
+                  id
+                  name
+                  joined_date
+                }
               }
             }"#
         }
@@ -14,7 +18,7 @@ pub mod macros {
         () => {
             r#"{{
               "id": "{}",
-              "buyer": "{}"
+              "buyer_id": "{}"
             }}"#
         }
     }

@@ -2,28 +2,23 @@
 pub mod macros{
     macro_rules! query{
         () => {
-            r#"query ($invoice_id:ID!){
-              readInvoice (search: {id: {eq: $invoice_id} } ) {
-                id
-                buyer {
+            r#"query {
+                readAdmin {
                   id
-                  name
-                  joined_date
+                  principal
                 }
               }
-            }"#
+            "#
         }
     }
     macro_rules! args{
         () => {
-            r#"{{
-              "invoice_id": "{}"
-            }}"#
+          r#"{{}}"#
         }
     }
     macro_rules! response{
         () => {
-            "readInvoice"
+          "readAdmin"
         }
     }
     pub(crate) use query;

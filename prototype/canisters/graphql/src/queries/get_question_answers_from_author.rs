@@ -2,24 +2,27 @@
 pub mod macros{
     macro_rules! query{
         () => {
-            r#"query ($question_id: ID!, $author: String!) {
+            r#"query ($question_id: ID!, $author_id: ID!) {
               readAnswer(
-                search: {and: [{question: {id: {eq: $question_id}}}, {author: {eq: $author}}]}
+                search: {and: [{question: {id: {eq: $question_id}}}, {author: {id: {eq: $author_id}}}]}
               ) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 creation_date
                 content
               }
-            }
-            "#
+            }"#
         }
     }    
     macro_rules! args{
         () => {
             r#"{{
               "question_id": "{}",
-              "author": "{}"
+              "author_id": "{}"
             }}"#
         }
     }
