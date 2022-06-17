@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { gql, sudograph } from "sudograph";
 import StatusSelection from "./StatusSelection";
-import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
+import { e3sToIcp, jsToGraphQlDate, toHHMM, blobToBase64Str } from "../utils/conversions";
 
 type Status = { value: string; label: string };
 
@@ -193,7 +193,7 @@ const QuestionsList = ({ plug }: any) => {
 					}
 				}`, {user_id});
 		// TO DO: investigate if fetch + createObjectURL would make more sense
-		return query_avatar.data.readUser[0].avatar.map(x => String.fromCharCode(x)).join('');
+		return blobToBase64Str(query_avatar.data.readUser[0].avatar);
 	}
 
 	const getArrow = (field: string) => {
@@ -355,7 +355,9 @@ const QuestionsList = ({ plug }: any) => {
 							return (
 								<tr className="hover:bg-secondary" key={question.id}>
 									<td className="px-6 py-4 w-1/12">
-										<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
+										<div className="flex justify-center">
+											<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
+										</div>
 									</td>
 									<th
 										scope="row"
@@ -368,7 +370,6 @@ const QuestionsList = ({ plug }: any) => {
 									<td className="px-6 py-4 w-1/12">
 										<div className="flex justify-center -space-x-4">
 											{
-												//question.answers.length
 												question.answers.map((answer: any) => {
 													return (
 														<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt="" key={answer.id}/>
