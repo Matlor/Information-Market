@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import CallStateHandler from "../helperComponents/CallStateHandler";
 import SubmittedBy from "../helperComponents/SubmittedBy";
+import parse from "html-react-parser";
 
 const Answer = ({
 	answer,
@@ -9,10 +10,10 @@ const Answer = ({
 	plug,
 	callState,
 	cachedAvatars,
-	loadAvatar
+	loadAvatar,
 }: any) => {
 	var border = "";
-	
+
 	const visualiseWinner = () => {
 		if (
 			!questionState.question.winner ||
@@ -67,12 +68,14 @@ const Answer = ({
 		</>
 	);
 
-	const [show, setShow] = useState<any>(false);
-
 	const answerContent = (
 		<>
-			<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(answer.author.id)} alt=""/>
-			<div className="text-justify font-light"> {answer.content}</div>
+			<img
+				className="w-10 h-10 rounded-full"
+				src={cachedAvatars.get(answer.author.id)}
+				alt=""
+			/>
+			<div className="editor-wrapper">{parse(answer.content)}</div>
 		</>
 	);
 

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
-
 import { questionStatusToString } from "../utils/conversions";
 import SubmittedBy from "./helperComponents/SubmittedBy";
+import parse from "html-react-parser";
 
 const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 	const [timeLeft, setTimeLeft] = useState<string>(
@@ -44,27 +44,13 @@ const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 				<div className="font-medium text-xl mb-2 text-slate-500">
 					<Link to={`/question/${question.id}`}>{question.title}</Link>
 				</div>
-				<p className="text-justify font-light  "> {question.content}</p>
+				<div className="editor-wrapper">{parse(question.content)}</div>
 			</div>
 
 			{/*   REWARD DIV   */}
 			<Link to={`/question/${question.id}`}>
 				<div className="flex items-center justify-between font-light ">
-					<div className="flex">
-						{e3sToIcp(Number(question.reward))} ICP
-						<svg
-							className="w-4 h-4 ml-2"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth="2"
-							fill="none"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						>
-							<path d="M5 12h14"></path>
-							<path d="M12 5l7 7-7 7"></path>
-						</svg>
-					</div>
+					<div className="flex">{e3sToIcp(Number(question.reward))} ICP</div>
 					{/* COUNTDOWN DIV */}
 					<div className="mb-2 ">
 						{" "}
