@@ -7,7 +7,11 @@ pub mod macros{
                 search: {question: {id: {eq: $question_id}}}
               ) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 creation_date
                 content
               }

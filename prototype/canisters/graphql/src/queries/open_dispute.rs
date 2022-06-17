@@ -2,13 +2,23 @@
 pub mod macros{
     macro_rules! mutation{
         () => {
-            r#"mutation ($question_id: ID!, $status_update_date: Int!, $status_end_date: Int!) {
-              updateQuestion(input: {id: $question_id, status_update_date: $status_update_date, $status_end_date: Int!, status: DISPUTED}) {
+            r#"mutation ($question_id: ID!, $status_update_date: Int!) {
+              updateQuestion(
+                input: {id: $question_id, status_update_date: $status_update_date, status: DISPUTED}
+              ) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 author_invoice {
                   id
-                  buyer
+                  buyer {
+                    id
+                    name
+                    joined_date
+                  }
                 }
                 creation_date
                 status
@@ -20,7 +30,11 @@ pub mod macros{
                 reward
                 winner {
                   id
-                  author
+                  author {
+                    id
+                    name
+                    joined_date
+                  }
                   creation_date
                   content
                 }
@@ -33,8 +47,7 @@ pub mod macros{
         () => {
             r#"{{
               "question_id": "{}",
-              "status_update_date": {},
-              "status_end_date": {}
+              "status_update_date": {}
             }}"#
         }
     }

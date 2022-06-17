@@ -1,7 +1,7 @@
 import Answer from "./Answer";
 import FieldWrapper from "../helperComponents/FieldWrapper";
 
-const Closed = ({ questionState, plug }: any) => {
+const Closed = ({ questionState, plug, cachedAvatars, loadAvatar }: any) => {
 	const checkIfWinner = () => {
 		try {
 			return <div>{questionState.question.winner.id}</div>;
@@ -25,6 +25,8 @@ const Closed = ({ questionState, plug }: any) => {
 						answer={answer}
 						key={answer.id}
 						questionState={questionState}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			})}

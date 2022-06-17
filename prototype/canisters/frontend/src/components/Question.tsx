@@ -5,10 +5,15 @@ import { questionStatusToString } from "../utils/conversions";
 import SubmittedBy from "./helperComponents/SubmittedBy";
 import parse from "html-react-parser";
 
-const Question = ({ question }: any) => {
+const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 	const [timeLeft, setTimeLeft] = useState<string>(
 		toHHMM(question.status_end_date - jsToGraphQlDate(Date.now()))
 	);
+
+	// Make sure to load all the avatars for this question
+	useEffect(() => {
+		loadAvatars([question]);
+	}, []);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -27,10 +32,7 @@ const Question = ({ question }: any) => {
 			<div className="pb-4">
 				<div className="flex justify-between">
 					{/*   OWNER + CREATED_AT  DIV */}
-					<SubmittedBy
-						author={question.author}
-						creation_date={question.creation_date}
-					/>
+					<img className="w-10 h-10 rounded-full" src={cachedAvatars.get(question.author.id)} alt=""/>
 
 					{/*   STATUS DIV   */}
 					<div className="small-text">

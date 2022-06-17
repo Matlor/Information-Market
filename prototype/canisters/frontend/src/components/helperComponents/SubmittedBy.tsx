@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { graphQlToJsDate } from "../../utils/conversions";
+import { graphQlToStrDate } from "../../utils/conversions";
 
 const SubmittedBy = ({ author, creation_date }: any) => {
 	const [show, setShow] = useState<any>(false);
@@ -22,12 +22,7 @@ const SubmittedBy = ({ author, creation_date }: any) => {
 				user{" "}
 			</p>{" "}
 			at{" "}
-			{graphQlToJsDate(creation_date).toLocaleString(undefined, {
-				hour: "numeric",
-				minute: "numeric",
-				month: "long",
-				day: "numeric",
-			})}
+			{graphQlToStrDate(creation_date)}
 		</div>
 	);
 };

@@ -10,7 +10,8 @@ import Closed from "./questionPage/Closed";
 import Question from "./Question";
 
 // TODO: Fix deadline issues
-const QuestionPage = ({ plug, login }: any) => {
+// TODO: Improve error handling
+const QuestionPage = ({ plug, login, cachedAvatars, loadAvatars, loadAvatar}: any) => {
 	let { id } = useParams();
 
 	const [questionState, setQuestionState] = useState<any>({
@@ -62,6 +63,8 @@ const QuestionPage = ({ plug, login }: any) => {
 						plug={plug}
 						fetch_data={fetch_data}
 						login={login}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			case "PICKANSWER":
@@ -71,6 +74,8 @@ const QuestionPage = ({ plug, login }: any) => {
 						plug={plug}
 						fetch_data={fetch_data}
 						login={login}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			case "DISPUTABLE":
@@ -80,6 +85,8 @@ const QuestionPage = ({ plug, login }: any) => {
 						plug={plug}
 						fetch_data={fetch_data}
 						login={login}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			case "DISPUTED":
@@ -89,6 +96,8 @@ const QuestionPage = ({ plug, login }: any) => {
 						plug={plug}
 						fetch_data={fetch_data}
 						login={login}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			case "CLOSED":
@@ -98,6 +107,8 @@ const QuestionPage = ({ plug, login }: any) => {
 						plug={plug}
 						fetch_data={fetch_data}
 						login={login}
+						cachedAvatars={cachedAvatars}
+						loadAvatar={loadAvatar}
 					/>
 				);
 			default:
@@ -110,7 +121,7 @@ const QuestionPage = ({ plug, login }: any) => {
 			<h1 className="page-title mb-10"> Question</h1>
 			{questionState.hasData ? (
 				<>
-					<Question question={questionState.question} />
+					<Question question={questionState.question} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} />
 					{showStatusComponents()}
 				</>
 			) : (

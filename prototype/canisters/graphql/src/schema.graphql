@@ -1,5 +1,10 @@
-type Initialization {
-    id: ID!
+type SudographSettings {
+    exportGeneratedMutationFunction: true
+}
+
+type Admin {
+    id: ID! # Auto-generated
+    principal: String!
 }
 
 enum QuestionStatus {
@@ -10,14 +15,24 @@ enum QuestionStatus {
     CLOSED
 }
 
+type User {
+    id: ID! # The user's principal
+    name: String!
+    joined_date: Int!
+    avatar: Blob!
+    invoices: [Invoice!]! @relation(name: "User:invoices::Invoice:buyer")
+    questions: [Question!]! @relation(name: "User:questions::Question:author")
+    answers: [Answer!]! @relation(name: "User:answers::Answer:author")
+}
+
 type Invoice {
-    id: ID! # The invoice ID
-    buyer: String!
+    id: ID! # From the invoice canister
+    buyer: User! @relation(name: "User:invoices::Invoice:buyer")
 }
 
 type Question {
-    id: ID!
-    author: String!
+    id: ID! # Auto-generated
+    author: User! @relation(name: "User:questions::Question:author")
     author_invoice: Invoice!
     creation_date: Int!
     status: QuestionStatus!
@@ -33,8 +48,8 @@ type Question {
 }
 
 type Answer {
-    id: ID!
-    author: String!
+    id: ID! # Auto-generated
+    author: User! @relation(name: "User:answers::Answer:author")
     creation_date: Int!
     content: String!
     question: Question! @relation(name: "Question:answers::Answer:question")

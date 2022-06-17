@@ -7,10 +7,18 @@ pub mod macros{
                 search: {author_invoice: {id: {eq: $invoice_id}}}
               ) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 author_invoice {
                   id
-                  buyer
+                  buyer {
+                    id
+                    name
+                    joined_date
+                  }
                 }
                 creation_date
                 status
@@ -22,7 +30,11 @@ pub mod macros{
                 reward
                 winner {
                   id
-                  author
+                  author {
+                    id
+                    name
+                    joined_date
+                  }
                   creation_date
                   content
                 }

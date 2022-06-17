@@ -17,14 +17,14 @@ const Header = ({ plug, login, logout }: any) => {
 					} p-4 mr-8`}
 				>
 					{" "}
-					<Link to="/add-question">Add Question </Link>
+					<Link to="/add-question">Ask a Question</Link>
 				</li>
 			</ul>
 			{plug.isConnected ? (
 				<div className=" w-40 flex justify-center">
-					<button onClick={logout} className="my-button ">
-						Log out
-					</button>
+					<div className="flex justify-center">
+						<img className="w-10 h-10 rounded-full ring-2 ring-gray-300" src={plug.avatar} alt=""/>
+					</div>
 				</div>
 			) : (
 				<div className="w-40 flex justify-center">

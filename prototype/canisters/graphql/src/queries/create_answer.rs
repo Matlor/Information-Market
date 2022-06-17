@@ -2,12 +2,16 @@
 pub mod macros {
     macro_rules! mutation{
         () => {
-            r#"mutation ($question_id: ID!, $author: String!, $creation_date: Int!, $content: String!) {
+            r#"mutation ($question_id: ID!, $author_id: ID!, $creation_date: Int!, $content: String!) {
               createAnswer(
-                input: {question: {connect: $question_id}, author: $author, creation_date: $creation_date, content: $content}
+                input: {question: {connect: $question_id}, author: {connect: $author_id}, creation_date: $creation_date, content: $content}
               ) {
                 id
-                author
+                author {
+                  id
+                  name
+                  joined_date
+                }
                 creation_date
                 content
               }
@@ -18,7 +22,7 @@ pub mod macros {
         () => {
             r#"{{
               "question_id": "{}",
-              "author": "{}",
+              "author_id": "{}",
               "creation_date": {},
               "content": "{}"
             }}"#

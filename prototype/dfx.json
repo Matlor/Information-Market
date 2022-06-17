@@ -38,7 +38,10 @@
 			"frontend": {
 				"entrypoint": "index.html"
 			},
-			"source": ["canisters/frontend/dist/"],
+			"source": [
+				"canisters/frontend/dist/",
+				"canisters/frontend/assets"
+			],
 			"type": "assets",
 			"declarations": {
 				"output": "declarations/frontend"

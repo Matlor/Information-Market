@@ -31,6 +31,19 @@ export const jsToGraphQlDate = (date) => {
 	return Math.floor(date / 60000);
 };
 
+export const graphQlToStrDate = (minutes) => {
+	return graphQlToJsDate(minutes).toLocaleString('en-US', {
+		hour: "numeric",
+		minute: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+}
+
+export const blobToBase64Str = (blob) => {
+	return blob.map(x => String.fromCharCode(x)).join('');
+}
+
 export const toHHMM = (durationMinutes: number) => {
 	if(durationMinutes <= 0){
 		return "over";
