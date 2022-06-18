@@ -127,7 +127,7 @@ function AddQuestion({ plug, minReward }: any) {
 						onChange={(e) => {
 							setDuration(e.target.value);
 						}}
-						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full  p-2.5 "
+						className="p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none"
 					/>
 					<div className=" text-red-600 mt-2 text-xs">
 						{errors.minDurationErr ? (
@@ -148,7 +148,7 @@ function AddQuestion({ plug, minReward }: any) {
 						onChange={(e) => {
 							setReward(e.target.value);
 						}}
-						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full p-2.5 "
+						className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
 					/>
 					{errors.minRewardErr ? (
 						<div className=" text-red-600 mt-2 text-xs">
@@ -159,7 +159,7 @@ function AddQuestion({ plug, minReward }: any) {
 					)}
 				</div>
 			</div>
-			<div className="mb-10 text-center ">
+			<div className="mb-10 text-center  ">
 				Title:
 				<input
 					type="text"
@@ -167,7 +167,7 @@ function AddQuestion({ plug, minReward }: any) {
 					onChange={(e) => {
 						setTitle(e.target.value);
 					}}
-					className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+					className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
 				/>
 				{errors.minTitleCharactersErr ? (
 					<div className=" text-red-600 mt-2 text-xs">
