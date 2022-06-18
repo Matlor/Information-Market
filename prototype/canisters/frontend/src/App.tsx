@@ -2,6 +2,7 @@ import { Route, Routes, HashRouter } from "react-router-dom";
 import { useState, useEffect } from "react";
 import plugApi from "./api/plug";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import AddQuestion from "./components/AddQuestion";
 import QuestionsList from "./components/QuestionsList";
 import Question from "./components/QuestionPage";
@@ -198,23 +199,25 @@ function App() {
 	}
 
 	return (
-		<div className="bg-secondary antialiased text-sm min-h-screen pb-40 font-light">
+		<div className="flex flex-col min-h-screen bg-secondary justify-between antialiased text-sm font-light">
 			<HashRouter>
-				<Header plug={plug} login={login} logout={logout} />
-				<div className="ml-64 mr-64 mt-10 mb-5">
-					<Routes>
-						<Route path="/" element={<QuestionsList plug={plug} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} />} />
-
-						<Route
-							path="/add-question"
-							element={<AddQuestion plug={plug} minReward={minReward} />}
-						/>
-						<Route
-							path="/question/:id"
-							element={<Question plug={plug} login={login} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} loadAvatar={loadAvatar} />}
-						/>
-					</Routes>
+				<div className="flex flex-col justify-start">
+					<Header plug={plug} login={login}/>
+					<div className="ml-64 mr-64 mt-10 mb-5">
+						<Routes>
+							<Route path="/" element={<QuestionsList plug={plug} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} />} />
+							<Route
+								path="/add-question"
+								element={<AddQuestion plug={plug} minReward={minReward} />}
+							/>
+							<Route
+								path="/question/:id"
+								element={<Question plug={plug} login={login} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} loadAvatar={loadAvatar} />}
+							/>
+						</Routes>
+					</div>
 				</div>
+				<Footer/>
 			</HashRouter>
 		</div>
 	);
