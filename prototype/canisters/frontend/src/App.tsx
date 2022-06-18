@@ -224,10 +224,10 @@ function App() {
 	};
 
 	return (
-		<div className="pl-4  pr-4 border bg-secondary antialiased text-sm min-h-screen pb-40 font-light bg-red-100 sm:bg-red-300 md:bg-red-600 lg:bg-red-800">
+		<div className="pl-4  pr-4 border bg-secondary antialiased text-sm min-h-screen pb-40 font-light ">
 			<HashRouter>
 				<Header plug={plug} login={login} logout={logout} />
-				<div className="p-4 w-full flex justify-center border border-black mt-10 mb-5 ">
+				<div className="p-4 w-full flex justify-center  mt-10 mb-5 ">
 					<div className="max-w-screen-lg w-full">
 						<Routes>
 							<Route
