@@ -17,7 +17,7 @@
 	}
 
 	.page-title {
-		@apply mb-10 text-2xl font-medium mr-4;
+		@apply mb-10 text-2xl font-medium mr-4  text-center md:text-left;
 	}
 	.small-text {
 		@apply font-light text-xs mb-2;
