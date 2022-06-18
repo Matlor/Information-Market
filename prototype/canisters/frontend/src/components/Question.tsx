@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
 import { questionStatusToString, graphQlToStrDate } from "../utils/conversions";
 import QuestionStatusBar from "./QuestionStatusBar";
-import CoinStackIcon from "./questionPage/CoinStackIcon";
 import parse from "html-react-parser";
 
 const timeLeftToStr = (timeLeft) => {
@@ -74,7 +73,7 @@ const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 							<QuestionStatusBar status={question.status}/>
 						</div>
 						<div className="flex flex-row items-center">
-							<CoinStackIcon/>
+							<img src="coinstack.svg" className="w-9 h-9" alt="Logo" />
 							<div className="flex w-3"/>
 							<div className="font-medium text-xl mb-2">
 								{e3sToIcp(Number(question.reward))} ICP
