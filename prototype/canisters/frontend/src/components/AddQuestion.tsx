@@ -16,9 +16,7 @@ function AddQuestion({ plug, minReward, login }: any) {
 	const [errors, setErrors] = useState<any>({
 		loading: false,
 		minRewardErr: false,
-		minRewardErrMsg: `Please use a reward larger than ${e3sToIcp(
-			minReward
-		)} ICP`,
+		minRewardErrMsg: `Please use a reward larger than ${minReward} ICP`,
 		minDurationErr: false,
 		minDurationErrMsg: "Please use a positive value",
 		minTitleCharactersErr: false,

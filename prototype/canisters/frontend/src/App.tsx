@@ -9,6 +9,7 @@ import Profile from "./components/Profile";
 import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
 import { graphQlToStrDate, blobToBase64Str } from "./utils/conversions";
+import { e8sToE3s, e3sToIcp } from "./utils/conversions";
 
 import { market } from "../declarations/market/index";
 import { gql, sudograph } from "sudograph";
@@ -32,8 +33,16 @@ function App() {
 		const getMinReward = async () => {
 			try {
 				const res = await market.get_min_reward();
+
+				console.log(res, "min reward res");
+
+				const t = e8sToE3s(Number(res));
+				console.log(t);
+
+				console.log(e3sToIcp(t));
+
 				if (Number(res)) {
-					setMinReward(Number(res));
+					setMinReward(e3sToIcp(e8sToE3s(Number(res))));
 				}
 			} catch (error) {
 				console.error("Failed to get min reward: " + error);
