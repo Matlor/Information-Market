@@ -8,7 +8,7 @@ const Header = ({ plug, login }: any) => {
 		<div className="container flex flox-row justify-between items-center mx-auto">
 			<Link to="/">
 				<div className="flex flex-row items-center">
-					<img src="rdf.svg" className="w-10 h-10" alt="Logo" />
+					<img src="rdf.svg" className="w-12 h-12" alt="Logo" />
 					<div className="w-2"></div>
 					<span className="self-center text-xl font-semibold whitespace-nowrap">Information market</span>
 				</div>
@@ -25,7 +25,9 @@ const Header = ({ plug, login }: any) => {
 				<div className="flex justify-end ml-20">
 					{plug.isConnected ? (
 					<div className="w-40 flex">
-						<img className="w-10 h-10 rounded-full ring-2 ring-gray-300" src={plug.avatar} alt=""/>
+						<Link to="/profile">
+							<img className="w-12 h-12 rounded-full ring-2 ring-gray-300" src={plug.avatar} alt=""/>
+						</Link>
 					</div>
 					) : (
 						<div className="w-40 flex">

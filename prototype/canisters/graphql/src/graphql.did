@@ -59,7 +59,7 @@ service : {
     "get_question_by_invoice": (text) -> (opt QuestionType) query;
     "get_question": (text) -> (opt QuestionType) query;
     "get_questions": () -> (vec QuestionType) query;
-    "get_user": (text) -> (opt AdminType) query;
+    "get_user": (text) -> (opt UserType) query;
     "has_answered": (text, text) -> (bool) query;
     "has_answers": (text) -> (bool) query;
     "must_pick_answer": (text, int32, int32) -> (bool);
@@ -67,4 +67,5 @@ service : {
     "pick_winner": (text, text, int32, int32) -> (bool);
     "set_admin": (principal) -> ();
     "solve_dispute": (text, text, text, int32) -> (bool);
+    "update_user": (text, text, text) -> (opt UserType);
 }

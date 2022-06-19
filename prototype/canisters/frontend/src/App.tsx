@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AddQuestion from "./components/AddQuestion";
 import QuestionsList from "./components/QuestionsList";
+import Profile from "./components/Profile";
 import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
 import { graphQlToStrDate, blobToBase64Str } from "./utils/conversions";
@@ -132,7 +133,7 @@ function App() {
 		var reader = new FileReader();
 		reader.readAsDataURL(await motoko_image.blob());
 		reader.onloadend = async function() {
-			let createUser = await res.market.create_user("New User", reader.result);
+			let createUser = await res.market.create_user(window.ic.plug.principalId, "New User", reader.result);
 			if (!createUser.ok) {
 				console.log("Failed to create a new user!");
 				setPlug({ isConnected: false, userName: "", joinedDate: "", avatar: "", plug: {}, actor: {} });
@@ -213,6 +214,10 @@ function App() {
 							<Route
 								path="/question/:id"
 								element={<Question plug={plug} login={login} cachedAvatars={cachedAvatars} loadAvatars={loadAvatars} loadAvatar={loadAvatar} />}
+							/>
+							<Route
+								path="/profile"
+								element={<Profile plug={plug} logout={logout}/>}
 							/>
 						</Routes>
 					</div>

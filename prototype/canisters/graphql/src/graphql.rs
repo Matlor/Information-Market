@@ -19,6 +19,7 @@ mod queries {
     pub mod pick_winner;
     pub mod solve_dispute;
     pub mod update_admin;
+    pub mod update_user;
 }
 
 use sudograph::graphql_database;
@@ -151,6 +152,27 @@ async fn create_user(user_id: String, name: String, joined_date: i32, avatar: St
             avatar)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::create_user::macros::response!()].as_array();
+    if json_response != None {
+        let vec_values = json_response.unwrap();
+        if vec_values.len() == 1 {
+            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+        }
+    }
+    return None;
+}
+
+#[update]
+async fn update_user(user_id: String, name: String, avatar: String) -> Option<UserType> {
+    check_admin().await;
+    let json_str = graphql_mutation(
+        queries::update_user::macros::mutation!().to_string(),
+        format!(
+            queries::update_user::macros::args!(),
+            user_id,
+            name,
+            avatar)).await;
+    let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
+    let json_response = json_data["data"][queries::update_user::macros::response!()].as_array();
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {

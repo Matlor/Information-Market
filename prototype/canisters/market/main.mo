@@ -53,14 +53,35 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
 
     // ------------------------- Create User -------------------------
-    public shared ({caller}) func create_user(name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        let user_id : Text = Principal.toText(caller);
+
+    public shared ({caller}) func create_user(user_id: Text, name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
         switch (await GraphQL.get_user(user_id)){
             case(?user){
                 return #err(#UserExists);
             };
             case(null){
                 switch (await GraphQL.create_user(user_id, name, Utils.time_minutes_now(), avatar)){
+                    case(null) {
+                        return #err(#GraphQLError);
+                    };
+                    case (?user) {
+                        return #ok(user);
+                    };
+                };
+            };
+        };
+    };
+
+
+    // ------------------------- Update User -------------------------
+
+    public shared ({caller}) func update_user(user_id: Text, name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
+        switch (await GraphQL.get_user(user_id)){
+            case(null){
+                return #err(#UserNotFound);
+            };
+            case(?user){
+                switch (await GraphQL.update_user(user_id, name, avatar)){
                     case(null) {
                         return #err(#GraphQLError);
                     };
