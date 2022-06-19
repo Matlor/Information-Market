@@ -213,6 +213,4 @@ function AddQuestion({ plug, minReward, login }: any) {
 	);
 }
 
-// {minReward ? form : <Loading />}
-
 export default AddQuestion;

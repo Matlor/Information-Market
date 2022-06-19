@@ -307,7 +307,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 
 						<div className=" editor-wrapper">
 							<Editable
-								className="border h-96 overflow-auto p-4"
+								className="border h-96 overflow-y-scroll overflow-x-hidden p-4"
 								renderElement={renderElement}
 								renderLeaf={renderLeaf}
 								placeholder="Ask your Question here..."
