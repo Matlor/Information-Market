@@ -70,7 +70,9 @@ const Question = ({ question, cachedAvatars, loadAvatars }: any) => {
 								</div>
 								</div>
 							<div className="flex h-2"/>
-							<QuestionStatusBar status={question.status}/>
+							<div className="flex flex-row gap-0.5 h-4">
+								<QuestionStatusBar status={question.status}/>
+							</div>
 						</div>
 						<div className="flex flex-row items-center">
 							<img src="coinstack.svg" className="w-9 h-9" alt="Logo" />

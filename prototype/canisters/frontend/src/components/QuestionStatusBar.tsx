@@ -53,23 +53,24 @@ const getProgressColors = (status) => {
 
 const QuestionStatusBar = ({ status }) => {
 	return (
-  <div className="flex flex-row gap-0.5 h-4">
-    <div
-      className={`basis-5 h-1.5 ${getProgressColors(status)[0]} `}
-    />
-    <div
-      className={`basis-5 h-1.5 ${getProgressColors(status)[1]} `}
-    />
-    <div
-      className={`basis-5 h-1.5 ${getProgressColors(status)[2]} `}
-    />
-    <div
-      className={`basis-5 h-1.5 ${getProgressColors(status)[3]} `}
-    />
-    <div
-      className={`basis-5 h-1.5 ${getProgressColors(status)[4]} `}
-    />
-  </div>);
+    <>
+      <div
+        className={`basis-5 h-1.5 ${getProgressColors(status)[0]} `}
+      />
+      <div
+        className={`basis-5 h-1.5 ${getProgressColors(status)[1]} `}
+      />
+      <div
+        className={`basis-5 h-1.5 ${getProgressColors(status)[2]} `}
+      />
+      <div
+        className={`basis-5 h-1.5 ${getProgressColors(status)[3]} `}
+      />
+      <div
+        className={`basis-5 h-1.5 ${getProgressColors(status)[4]} `}
+      />
+    </>
+    );
 };
 
 export default QuestionStatusBar;

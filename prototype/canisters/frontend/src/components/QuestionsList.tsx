@@ -110,7 +110,7 @@ const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 		});
 		queryInputs += "]}";
 		if (myInteractions) {
-			queryInputs += `,{or: [{answers: {author: {eq:"${plug.plug.principalId}"}}}, {author: {eq: "${plug.plug.principalId}"}}]}`;
+			queryInputs += `,{or: [{answers: {author: {id: {eq:"${plug.plug.principalId}"}}}}, {author: {id: {eq: "${plug.plug.principalId}"}}}]}`;
 		}
 		queryInputs += "]}";
 
@@ -296,13 +296,14 @@ const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 												}
 											</div>
 										</td>
-										<td className="px-6 py-4  w-2/12 ">
-											<QuestionStatusBar status={question.status}/>
+										<td className="px-6 py-4 w-2/12">
+											<div className="flex flex-row justify-center gap-0.5 h-4">
+												<QuestionStatusBar status={question.status}/>
+											</div>
 										</td>
 										<td className="px-6 py-4  w-1/12">
 											<div className="flex justify-center">
 												{e3sToIcp(Number(question.reward))}
-
 												<div className="ml-1">ICP</div>
 											</div>
 										</td>
