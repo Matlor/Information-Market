@@ -47,7 +47,7 @@ const Profile = ({ plug, logout }: any) => {
         </div>
       <div className="space-y-1 flex-grow font-medium">
         <input type="text" className="bg-transparent border-none text-gray-900 text-xl font-semibold rounded-lg w-30 p-2.5 text-center" onChange={handleNameChange} placeholder={userName}/>
-        <div className="text italic text-center text-gray-900">{joinedDate}</div>
+        <div className="text italic text-center text-gray-900">Joined {joinedDate}</div>
       </div>
       <div className="flex flex-row space-x-5">
         <Link to="/" onClick={updateProfile}>

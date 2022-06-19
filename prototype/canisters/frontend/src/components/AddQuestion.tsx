@@ -8,7 +8,7 @@ import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
 import SlateEditor from "./SlateEditor";
 
-function AddQuestion({ plug, minReward }: any) {
+function AddQuestion({ plug, minReward, login }: any) {
 	const [title, setTitle] = useState<any>("");
 	const [inputValue, setInputValue] = useState("");
 	const [duration, setDuration] = useState<any>("");
@@ -127,7 +127,7 @@ function AddQuestion({ plug, minReward }: any) {
 						onChange={(e) => {
 							setDuration(e.target.value);
 						}}
-						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full  p-2.5 "
+						className="p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none"
 					/>
 					<div className=" text-red-600 mt-2 text-xs">
 						{errors.minDurationErr ? (
@@ -148,7 +148,7 @@ function AddQuestion({ plug, minReward }: any) {
 						onChange={(e) => {
 							setReward(e.target.value);
 						}}
-						className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  w-full p-2.5 "
+						className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
 					/>
 					{errors.minRewardErr ? (
 						<div className=" text-red-600 mt-2 text-xs">
@@ -159,7 +159,7 @@ function AddQuestion({ plug, minReward }: any) {
 					)}
 				</div>
 			</div>
-			<div className="mb-10 text-center ">
+			<div className="mb-10 text-center  ">
 				Title:
 				<input
 					type="text"
@@ -167,7 +167,7 @@ function AddQuestion({ plug, minReward }: any) {
 					onChange={(e) => {
 						setTitle(e.target.value);
 					}}
-					className=" bg-primary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+					className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
 				/>
 				{errors.minTitleCharactersErr ? (
 					<div className=" text-red-600 mt-2 text-xs">
@@ -188,7 +188,19 @@ function AddQuestion({ plug, minReward }: any) {
 					</button>
 				</div>
 			) : (
-				<div className="text-center">Please log in first</div>
+				<div className="font-light flex justify-center">
+					<div>
+						<div className="flex justify-center">
+							<button onClick={login} className="my-button mb-2">
+								Log in
+							</button>
+						</div>
+						<div className="self-center">
+							{" "}
+							You have to be logged in to submit{" "}
+						</div>
+					</div>
+				</div>
 			)}
 		</form>
 	);
@@ -199,7 +211,5 @@ function AddQuestion({ plug, minReward }: any) {
 		</>
 	);
 }
-
-// {minReward ? form : <Loading />}
 
 export default AddQuestion;
