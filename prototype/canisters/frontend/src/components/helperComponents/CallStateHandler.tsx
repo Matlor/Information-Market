@@ -11,7 +11,7 @@ const CallStateHandler = ({ loading, err, errMsg }: any) => {
 	} else if (err) {
 		return <Error children={errMsg} />;
 	} else {
-		<></>;
+		<div></div>;
 	}
 };
 

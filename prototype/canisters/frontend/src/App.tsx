@@ -24,7 +24,7 @@ function App() {
 	const [user, setUser] = useState<any>({
 		userName: "",
 		joinedDate: "",
-		avatar: ""
+		avatar: "",
 	});
 
 	useEffect(() => {
@@ -69,10 +69,10 @@ function App() {
 	}, []);
 
 	useEffect(() => {
-		const refreshUser = async () =>{
+		const refreshUser = async () => {
 			// If plug is not connect, empty user info
-			if(!plug.isConnected){
-				setUser({userName: "", joinedDate: "", avatar: ""});
+			if (!plug.isConnected) {
+				setUser({ userName: "", joinedDate: "", avatar: "" });
 				return;
 			}
 			// Create a new user if no user has been found
@@ -81,19 +81,23 @@ function App() {
 				let motoko_image = await fetch("motoko.jpg");
 				var reader = new FileReader();
 				reader.readAsDataURL(await motoko_image.blob());
-				reader.onloadend = async function() {
-					let createUser = await plug.actors.marketActor.create_user(window.ic.plug.principalId, "New User", reader.result);
+				reader.onloadend = async function () {
+					let createUser = await plug.actors.marketActor.create_user(
+						window.ic.plug.principalId,
+						"New User",
+						reader.result
+					);
 					if (!createUser.ok) {
-						setUser({userName: "", joinedDate: "", avatar: ""});
+						setUser({ userName: "", joinedDate: "", avatar: "" });
 						console.error("Failed to create a new user!");
 						return;
 					}
 					await fetchCurrentUser();
-				}
+				};
 			}
-		}
+		};
 		refreshUser();
-	}, [plug])
+	}, [plug]);
 
 	const fetchCurrentUser = async () => {
 		let sudographActor = sudograph({
@@ -113,7 +117,7 @@ function App() {
 			{ principal_id }
 		);
 		if (fetchUser.data.readUser == 0) {
-			setUser({userName: "", joinedDate: "", avatar: ""});
+			setUser({ userName: "", joinedDate: "", avatar: "" });
 			return false;
 		} else {
 			setUser({
@@ -146,6 +150,54 @@ function App() {
 				},
 			});
 		}
+
+		console.log("Create new user"); // @todo
+		let motoko_image = await fetch("motoko.jpg");
+		var reader = new FileReader();
+		reader.readAsDataURL(await motoko_image.blob());
+		reader.onloadend = async function () {
+			let createUser = await res.market.create_user(
+				window.ic.plug.principalId,
+				"New User",
+				reader.result
+			);
+			if (!createUser.ok) {
+				console.log("Failed to create a new user!");
+				setPlug({
+					isConnected: false,
+					userName: "",
+					joinedDate: "",
+					avatar: "",
+					plug: {},
+					actor: {},
+				});
+				return;
+			}
+			let fetchNewUser = await fetchCurrentUser();
+			if (fetchNewUser.length == 0) {
+				console.log("Failed to fetch the new user!");
+				setPlug({
+					isConnected: false,
+					userName: "",
+					joinedDate: "",
+					avatar: "",
+					plug: {},
+					actor: {},
+				});
+				return;
+			}
+			setPlug({
+				isConnected: true,
+				userName: fetchNewUser[0].name,
+				joinedDate: graphQlToStrDate(fetchNewUser[0].joined_date),
+				avatar: blobToBase64Str(fetchNewUser[0].avatar),
+				plug: await window.ic.plug,
+				actors: {
+					marketActor: res.market,
+					ledgerActor: res.ledger,
+				},
+			});
+		};
 	};
 
 	const logout = async () => {
@@ -200,11 +252,11 @@ function App() {
 		<div className="flex flex-col min-h-screen bg-secondary justify-between antialiased text-sm font-light">
 			<HashRouter>
 				<div className="flex flex-col justify-start">
-					<Header plug={plug} login={login} user={user}/>
+					<Header plug={plug} login={login} user={user} />
 					<div className="ml-64 mr-64 mt-10 mb-5">
 						<Routes>
-							<Route 
-								path="/" 
+							<Route
+								path="/"
 								element={
 									<QuestionsList
 										plug={plug}
@@ -219,6 +271,7 @@ function App() {
 									<AddQuestion
 										plug={plug}
 										minReward={minReward}
+										login={login}
 									/>
 								}
 							/>
@@ -228,8 +281,8 @@ function App() {
 									<Question
 										plug={plug}
 										login={login}
-									 	cachedAvatars={cachedAvatars}
-									 	loadAvatars={loadAvatars}
+										cachedAvatars={cachedAvatars}
+										loadAvatars={loadAvatars}
 										loadAvatar={loadAvatar}
 									/>
 								}
@@ -248,7 +301,7 @@ function App() {
 						</Routes>
 					</div>
 				</div>
-				<Footer/>
+				<Footer />
 			</HashRouter>
 		</div>
 	);
