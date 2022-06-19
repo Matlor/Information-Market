@@ -312,7 +312,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 								renderLeaf={renderLeaf}
 								placeholder="Ask your Question here..."
 								spellCheck
-								autoFocus
 								onKeyDown={(event) => {
 									for (const hotkey in HOTKEYS) {
 										if (isHotkey(hotkey, event)) {
