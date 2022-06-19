@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-const Header = ({ plug, login }: any) => {
+const Header = ({ plug, login, user }: any) => {
 	let { pathname } = useLocation();
 
 	return (
@@ -24,11 +24,11 @@ const Header = ({ plug, login }: any) => {
 				</ul>
 				<div className="flex justify-end ml-20">
 					{plug.isConnected ? (
-					<div className="w-40 flex">
-						<Link to="/profile">
-							<img className="w-12 h-12 rounded-full ring-2 ring-gray-300" src={plug.avatar} alt=""/>
-						</Link>
-					</div>
+						<div className="w-40 flex">
+							<Link to="/profile">
+								<img className="w-12 h-12 rounded-full ring-2 ring-gray-300" src={user.avatar} alt="avatar"/>
+							</Link>
+						</div>
 					) : (
 						<div className="w-40 flex">
 							<button onClick={login} className="my-button ">

@@ -1,21 +1,19 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-const Profile = ({ plug, logout }: any) => {
+const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
 
   const imageRef = useRef<HTMLInputElement | null>(null);
-  const [userName, setUserName] = useState<string>(plug.userName);
-  const [joinedDate] = useState<string>(plug.joinedDate);
-  const [avatar, setAvatar] = useState<string>(plug.avatar);
+  const [userName, setUserName] = useState<string>(user.userName);
+  const [joinedDate] = useState<string>(user.joinedDate);
+  const [avatar, setAvatar] = useState<string>(user.avatar);
 
   const showOpenFileDialog = () => {
     imageRef.current.click();
   };
 
   const handleImageChange = (event) => {
-    console.log("Change image")
     const file = event.target.files[0];
-    console.log("file is " + file.toString())
     var reader = new FileReader();
 		reader.readAsDataURL(file);
     reader.onloadend = async function() {
@@ -24,16 +22,15 @@ const Profile = ({ plug, logout }: any) => {
   };
 
   const handleNameChange = (event) => {
-    console.log("Set name to:" + event.target.value)
     setUserName(event.target.value);
   }
 
   const updateProfile = async () => {
 		let updateUser = await plug.actors.marketActor.update_user(window.ic.plug.principalId, userName, avatar);
-    console.log(updateUser.err);
     if (!updateUser.ok) {
-      console.log("Failed to update user!");
-      return;
+      console.error("Failed to update user: " + updateUser.err);
+    } else {
+      fetchCurrentUser();
     }
   }
 
@@ -50,11 +47,9 @@ const Profile = ({ plug, logout }: any) => {
         <div className="text italic text-center text-gray-900">Joined {joinedDate}</div>
       </div>
       <div className="flex flex-row space-x-5">
-        <Link to="/" onClick={updateProfile}>
-          <button className="my-button w-40">
-            Save changes
-          </button>
-        </Link>
+        <button className="my-button w-40" onClick={updateProfile}>
+          Save changes
+        </button>
         <Link to="/" onClick={logout}>
           <button className="my-button w-40">
             Log out

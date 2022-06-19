@@ -28,7 +28,7 @@ const establishConnection = async () => {
 
 		return { market: marketActor, ledger: ledgerActor };
 	} catch (e) {
-		console.log(e);
+		console.error("Failed to establish connection: " + e);
 		return {};
 	}
 };
@@ -42,7 +42,7 @@ const verifyConnection = async () => {
 		}
 		return true;
 	} catch (e) {
-		console.log(e);
+		console.error("Failed to verify connection: " + e);
 		return false;
 	}
 };
