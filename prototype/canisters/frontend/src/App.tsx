@@ -125,7 +125,7 @@ function App() {
 			`,
 			{ principal_id }
 		);
-		if (fetchUser.data.readUser == 0) {
+		if (fetchUser.data.readUser.length === 0) {
 			setUser({ userName: "", joinedDate: "", avatar: "" });
 			return false;
 		} else {
@@ -159,54 +159,6 @@ function App() {
 				},
 			});
 		}
-
-		console.log("Create new user"); // @todo
-		let motoko_image = await fetch("motoko.jpg");
-		var reader = new FileReader();
-		reader.readAsDataURL(await motoko_image.blob());
-		reader.onloadend = async function () {
-			let createUser = await res.market.create_user(
-				window.ic.plug.principalId,
-				"New User",
-				reader.result
-			);
-			if (!createUser.ok) {
-				console.log("Failed to create a new user!");
-				setPlug({
-					isConnected: false,
-					userName: "",
-					joinedDate: "",
-					avatar: "",
-					plug: {},
-					actor: {},
-				});
-				return;
-			}
-			let fetchNewUser = await fetchCurrentUser();
-			if (fetchNewUser.length == 0) {
-				console.log("Failed to fetch the new user!");
-				setPlug({
-					isConnected: false,
-					userName: "",
-					joinedDate: "",
-					avatar: "",
-					plug: {},
-					actor: {},
-				});
-				return;
-			}
-			setPlug({
-				isConnected: true,
-				userName: fetchNewUser[0].name,
-				joinedDate: graphQlToStrDate(fetchNewUser[0].joined_date),
-				avatar: blobToBase64Str(fetchNewUser[0].avatar),
-				plug: await window.ic.plug,
-				actors: {
-					marketActor: res.market,
-					ledgerActor: res.ledger,
-				},
-			});
-		};
 	};
 
 	const logout = async () => {
