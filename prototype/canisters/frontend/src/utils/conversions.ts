@@ -6,6 +6,14 @@ export const icpToE3s = (icp: number) => {
 	return icp * 1000;
 };
 
+export const e8sToE3s = (num: number) => {
+	return num / 100000;
+};
+
+export const e3sToE8s = (num: number) => {
+	return num * 100000;
+};
+
 export const questionStatusToString = (status) => {
 	switch (status) {
 		case "OPEN":
@@ -32,29 +40,33 @@ export const jsToGraphQlDate = (date) => {
 };
 
 export const graphQlToStrDate = (minutes) => {
-	return graphQlToJsDate(minutes).toLocaleString('en-US', {
+	return graphQlToJsDate(minutes).toLocaleString("en-US", {
 		hour: "numeric",
 		minute: "numeric",
 		month: "long",
 		day: "numeric",
 	});
-}
+};
 
 export const blobToBase64Str = (blob) => {
-	return blob.map(x => String.fromCharCode(x)).join('');
-}
+	return blob.map((x) => String.fromCharCode(x)).join("");
+};
 
 export const toHHMM = (durationMinutes: number) => {
-	if(durationMinutes <= 0){
+	if (durationMinutes <= 0) {
 		return "00:00";
 	}
-	let hours   = Math.floor(durationMinutes / 60);
-	let minutes = Math.floor(durationMinutes - (hours * 60));
+	let hours = Math.floor(durationMinutes / 60);
+	let minutes = Math.floor(durationMinutes - hours * 60);
 
 	var hoursStr = hours.toString();
-	if (hours   < 10) {hoursStr   = "0"+hoursStr;}
+	if (hours < 10) {
+		hoursStr = "0" + hoursStr;
+	}
 	var minutesStr = minutes.toString();
-	if (minutes < 10) {minutesStr = "0"+minutesStr;}
-	
-	return hoursStr+':'+minutesStr;
-}
+	if (minutes < 10) {
+		minutesStr = "0" + minutesStr;
+	}
+
+	return hoursStr + ":" + minutesStr;
+};
