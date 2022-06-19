@@ -13,6 +13,7 @@ import { gql, sudograph } from "sudograph";
 
 function App() {
 	const [minReward, setMinReward] = useState<any>(null);
+	console.log(minReward);
 
 	useEffect(() => {
 		// Runs once to get minReward
@@ -243,7 +244,13 @@ function App() {
 
 							<Route
 								path="/add-question"
-								element={<AddQuestion plug={plug} minReward={minReward} />}
+								element={
+									<AddQuestion
+										plug={plug}
+										minReward={minReward}
+										login={login}
+									/>
+								}
 							/>
 							<Route
 								path="/question/:id"

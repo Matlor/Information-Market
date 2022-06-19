@@ -8,7 +8,7 @@ import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
 import SlateEditor from "./SlateEditor";
 
-function AddQuestion({ plug, minReward }: any) {
+function AddQuestion({ plug, minReward, login }: any) {
 	const [title, setTitle] = useState<any>("");
 	const [inputValue, setInputValue] = useState("");
 	const [duration, setDuration] = useState<any>("");
@@ -188,7 +188,19 @@ function AddQuestion({ plug, minReward }: any) {
 					</button>
 				</div>
 			) : (
-				<div className="text-center">Please log in first</div>
+				<div className="font-light flex justify-center">
+					<div>
+						<div className="flex justify-center">
+							<button onClick={login} className="my-button mb-2">
+								Log in
+							</button>
+						</div>
+						<div className="self-center">
+							{" "}
+							You have to be logged in to submit{" "}
+						</div>
+					</div>
+				</div>
 			)}
 		</form>
 	);
