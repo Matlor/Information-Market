@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
 import Loading from "./helperComponents/Loading";
@@ -15,6 +14,7 @@ function AddQuestion({ plug, minReward, login }: any) {
 	const [reward, setReward] = useState<any>("0");
 
 	const [errors, setErrors] = useState<any>({
+		loading: false,
 		minRewardErr: false,
 		minRewardErrMsg: `Please use a reward larger than ${e3sToIcp(
 			minReward
@@ -23,7 +23,13 @@ function AddQuestion({ plug, minReward, login }: any) {
 		minDurationErrMsg: "Please use a positive value",
 		minTitleCharactersErr: false,
 		minTitleCharactersErrMsg: "Title has to be longer than 20 characters",
+		insufficientFundsErr: false,
+		insufficientFundsErrMsg: "Insuffcient funds",
+		otherErr: false,
+		otherErrMsg: "Something went wrong",
 	});
+
+	const [success, setSuccess] = useState<any>(false);
 
 	const formValidation = () => {
 		var correctReward = false;
@@ -52,8 +58,6 @@ function AddQuestion({ plug, minReward, login }: any) {
 		}
 	};
 
-	// TO DO: Has to be improved with security in mind
-	// TO DO: Error handling
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
 
@@ -66,25 +70,15 @@ function AddQuestion({ plug, minReward, login }: any) {
 		}
 
 		try {
-			console.log(
-				"reward:",
-				reward,
-				"title:",
-				title,
-				"duration:",
-				duration,
-				"input:",
-				inputValue
-			);
+			var newErrors = deepcopy(errors);
+			newErrors.loading = true;
+			setErrors(newErrors);
 
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
 				BigInt(Number(reward))
 			);
-			// if not ok return error
-			console.log(invoiceResponse);
 
-			// (TO DO: shows invoice to pay with plug)
-			// pays invoice with plug on the ledger
+			console.log(invoiceResponse, "invoice response");
 
 			const transferResponse = await plug.actors.ledgerActor.transfer({
 				to: Array.from(
@@ -99,10 +93,16 @@ function AddQuestion({ plug, minReward, login }: any) {
 				amount: { e8s: invoiceResponse.ok.invoice.amount + BigInt(10000000) },
 			});
 
-			// if not ok return error
+			if (transferResponse?.Err?.InsufficientFunds !== undefined) {
+				var newErrors = deepcopy(errors);
+				newErrors.loading = false;
+				newErrors.insufficientFundsErr = true;
+				setErrors(newErrors);
+				return;
+			}
+
 			console.log(transferResponse);
 
-			// once paid calls open question function it
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
 				Number(duration),
@@ -111,8 +111,43 @@ function AddQuestion({ plug, minReward, login }: any) {
 			);
 
 			console.log(openQuestionResponse);
+
+			var newErrors = deepcopy(errors);
+			newErrors.loading = false;
+			newErrors.otherErr = false;
+			setErrors(newErrors);
+			setSuccess(true);
 		} catch (e) {
 			console.log(e);
+			var newErrors = deepcopy(errors);
+			newErrors.loading = false;
+			newErrors.otherErr = true;
+			setErrors(newErrors);
+		}
+	};
+
+	const loginHandler = async (e: any) => {
+		e.preventDefault();
+		login();
+	};
+
+	const submissionState = () => {
+		if (errors.loading) {
+			return (
+				<div className=" text-red-600 mt-2 text-xs">
+					<Loading />
+				</div>
+			);
+		} else if (errors.insufficientFundsErr) {
+			return (
+				<div className=" text-red-600 text-xs">
+					{errors.insufficientFundsErrMsg}
+				</div>
+			);
+		} else if (errors.otherErr) {
+			return <div className=" text-red-600 text-xs">{errors.otherErr}</div>;
+		} else if (success) {
+			return <div className=" text-green-600  text-xs">Success!</div>;
 		}
 	};
 
@@ -183,15 +218,18 @@ function AddQuestion({ plug, minReward, login }: any) {
 
 			{plug.isConnected ? (
 				<div className="flex justify-center">
-					<button type="submit" className="my-button ">
-						Submit
-					</button>
+					<div>
+						<button type="submit" className="my-button mb-2">
+							Submit
+						</button>
+						<div className="flex justify-center">{submissionState()}</div>
+					</div>
 				</div>
 			) : (
 				<div className="font-light flex justify-center">
 					<div>
 						<div className="flex justify-center">
-							<button onClick={login} className="my-button mb-2">
+							<button onClick={loginHandler} className="my-button mb-2">
 								Log in
 							</button>
 						</div>
