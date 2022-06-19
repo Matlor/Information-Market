@@ -66,6 +66,7 @@ const Open = ({
 					<SlateEditor
 						inputValue={answerInput}
 						setInputValue={setAnswerInput}
+						placeholder={"Write your answer here!"}
 					/>
 
 					{plug.isConnected ? (

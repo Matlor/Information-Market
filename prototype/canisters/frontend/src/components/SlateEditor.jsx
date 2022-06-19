@@ -30,7 +30,7 @@ const HOTKEYS = {
 };
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const SlateEditor = ({ inputValue, setInputValue }) => {
+const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 	// ---------------------------------------------- Block ----------------------------------------------
 
 	const isSomeBlockActive = () => {
@@ -310,7 +310,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 								className="border h-96 overflow-y-scroll overflow-x-hidden p-4"
 								renderElement={renderElement}
 								renderLeaf={renderLeaf}
-								placeholder="Ask your Question here..."
+								placeholder={placeholder}
 								spellCheck
 								onKeyDown={(event) => {
 									for (const hotkey in HOTKEYS) {

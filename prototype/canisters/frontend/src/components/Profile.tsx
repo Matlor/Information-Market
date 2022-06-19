@@ -40,7 +40,7 @@ const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
       <div className="flex flex-col items-center space-y-5">
         <div className="flex w-60 h-60">
           <input type='file' ref={imageRef} style={{display: 'none'}} onChange={handleImageChange}/>
-          <img className="rounded-full hover:cursor-pointer" onClick={showOpenFileDialog} src={avatar} alt="avatar"/>
+          <img className="rounded-full hover:cursor-pointer" onClick={showOpenFileDialog} src={avatar} alt=""/>
         </div>
       <div className="space-y-1 flex-grow font-medium">
         <input type="text" className="bg-transparent border-none text-gray-900 text-xl font-semibold rounded-lg w-30 p-2.5 text-center" onChange={handleNameChange} placeholder={userName}/>

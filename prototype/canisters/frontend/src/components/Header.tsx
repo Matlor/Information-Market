@@ -26,7 +26,7 @@ const Header = ({ plug, login, user }: any) => {
 					{plug.isConnected ? (
 						<div className="w-40 flex">
 							<Link to="/profile">
-								<img className="w-12 h-12 rounded-full ring-2 ring-gray-300" src={user.avatar} alt="avatar"/>
+								<img className="w-12 h-12 rounded-full ring-2 ring-gray-300" src={user.avatar} alt=""/>
 							</Link>
 						</div>
 					) : (

@@ -213,7 +213,7 @@ function AddQuestion({ plug, minReward, login }: any) {
 				)}
 			</div>
 			<div className="mb-6 ">
-				<SlateEditor inputValue={inputValue} setInputValue={setInputValue} />
+				<SlateEditor inputValue={inputValue} setInputValue={setInputValue} placeholder={"Write your question here!"} />
 			</div>
 
 			{plug.isConnected ? (
