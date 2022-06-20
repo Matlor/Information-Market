@@ -19,6 +19,6 @@ module {
     };
 
     public func e3s_to_e8s(amount: Int32) : Nat {
-        return Int.abs(Int32.toInt(amount * 100000));
+        return Int.abs(Int32.toInt(amount)) * 100000;
     };
 }
