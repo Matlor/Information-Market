@@ -1,83 +1,54 @@
-import { useState } from "react";
+import Loading from "./helperComponents/Loading";
+import SlateEditor from "./SlateEditor";
+import { icpToE8s } from "../utils/conversions";
+
+import { useState, useEffect } from "react";
 import plugApi from "../api/plug";
 import { Principal } from "@dfinity/principal";
-import Loading from "./helperComponents/Loading";
-import deepcopy from "deepcopy";
-import { e3sToIcp, icpToE3s } from "../utils/conversions";
 
-import SlateEditor from "./SlateEditor";
+function AddQuestion({ plug, minRewardIcp, login, minTitleCharacters }: any) {
 
-function AddQuestion({ plug, minReward, login }: any) {
-	const [title, setTitle] = useState<any>("");
-	const [inputValue, setInputValue] = useState("");
-	const [duration, setDuration] = useState<any>("");
-	const [reward, setReward] = useState<any>("0");
+	const [rewardIcp, setRewardIcp] = useState<number>(1);
+	const [minRewardErr, setMinRewardErr] = useState<boolean>(false);
+	const [title, setTitle] = useState<string>("");
+	const [minTitleCharactersErr, setMinTitleCharactersErr] = useState<boolean>(false);
+	const [duration, setDuration] = useState<number>(60);
+	const [minDurationErr, setMinDurationErr] = useState<boolean>(false);
+	const [content, setContent] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(false);
+	// TODO: one shall be able to distinguish if create_invoice, transfer, or create_question failed
+	// and hence have 3 different kinds of errors
+	const [insufficientFundsErr, setInsufficientFundsErr] = useState<boolean>(false);
+	const [otherError, setOtherError] = useState<boolean>(false);
 
-	const [errors, setErrors] = useState<any>({
-		loading: false,
-		minRewardErr: false,
-		minRewardErrMsg: `Please use a reward larger than ${minReward} ICP`,
-		minDurationErr: false,
-		minDurationErrMsg: "Please use a positive value",
-		minTitleCharactersErr: false,
-		minTitleCharactersErrMsg: "Title has to be longer than 20 characters",
-		insufficientFundsErr: false,
-		insufficientFundsErrMsg: "Insuffcient funds",
-		otherErr: false,
-		otherErrMsg: "Something went wrong",
-	});
+	useEffect(()=>{
+		setMinRewardErr(rewardIcp < minRewardIcp);
+	}, [rewardIcp]);
 
-	const [success, setSuccess] = useState<any>(false);
+	useEffect(()=>{
+		setMinTitleCharactersErr(title.length <= minTitleCharacters);
+	}, [title]);
 
-	const formValidation = () => {
-		var correctReward = false;
-		var negativeDuration = false;
-		var minTitleCharacters = false;
-
-		if (Number(icpToE3s(reward)) < minReward) {
-			correctReward = true;
-		}
-		if (duration <= 0) {
-			negativeDuration = true;
-		}
-
-		if (title.length <= 20) {
-			minTitleCharacters = true;
-		}
-
-		var newErrors = deepcopy(errors);
-		newErrors.minRewardErr = correctReward;
-		newErrors.minDurationErr = negativeDuration;
-		newErrors.minTitleCharactersErr = minTitleCharacters;
-
-		setErrors(newErrors);
-		if (!correctReward && !negativeDuration && !minTitleCharacters) {
-			return true;
-		}
-	};
+	useEffect(()=>{
+		setMinDurationErr(duration <= 0);
+	}, [duration]);
 
 	const handleSubmit = async (e: any) => {
 		e.preventDefault();
-
-		if (!formValidation()) {
-			return;
-		}
-
 		if (!(await plugApi.verifyConnection())) {
 			return;
 		}
-
 		try {
-			var newErrors = deepcopy(errors);
-			newErrors.loading = true;
-			setErrors(newErrors);
-
+			setLoading(true);
+			// Refresh insufficient funds error
+			setInsufficientFundsErr(false);
+			setOtherError(false);
+			// 1. Create the invoice
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
-				BigInt(Number(reward))
+				icpToE8s(rewardIcp)
 			);
-
 			console.log(invoiceResponse, "invoice response");
-
+			// 2. Perform the transfer
 			const transferResponse = await plug.actors.ledgerActor.transfer({
 				to: Array.from(
 					Principal.fromHex(
@@ -90,37 +61,34 @@ function AddQuestion({ plug, minReward, login }: any) {
 				created_at_time: [],
 				amount: { e8s: invoiceResponse.ok.invoice.amount + BigInt(10000000) },
 			});
-
-			if (transferResponse?.Err?.InsufficientFunds !== undefined) {
-				var newErrors = deepcopy(errors);
-				newErrors.loading = false;
-				newErrors.insufficientFundsErr = true;
-				setErrors(newErrors);
+			console.log(transferResponse);
+			if (transferResponse?.Err !== undefined){
+				if (transferResponse?.Err?.InsufficientFunds !== undefined) {
+					setInsufficientFundsErr(true);
+				} else {
+					setOtherError(true);
+				};
 				return;
 			}
-
-			console.log(transferResponse);
-
+			// 3. Create the question
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
-				Number(duration),
+				duration,
 				title,
-				inputValue
+				content
 			);
-
 			console.log(openQuestionResponse);
-
-			var newErrors = deepcopy(errors);
-			newErrors.loading = false;
-			newErrors.otherErr = false;
-			setErrors(newErrors);
-			setSuccess(true);
+			if (openQuestionResponse.err){
+				console.error("market canister ask_question call returned the error: " + openQuestionResponse.err);
+				setOtherError(true);
+				return;
+			}
+			// Success! Redirect to question page
+      window.location.href = "#/question/" + openQuestionResponse.ok.id;
 		} catch (e) {
-			console.log(e);
-			var newErrors = deepcopy(errors);
-			newErrors.loading = false;
-			newErrors.otherErr = true;
-			setErrors(newErrors);
+			setOtherError(true);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -130,69 +98,78 @@ function AddQuestion({ plug, minReward, login }: any) {
 	};
 
 	const submissionState = () => {
-		if (errors.loading) {
+		if (loading) {
 			return (
-				<div className=" text-red-600 mt-2 text-xs">
+				<div className="text-red-600 mt-2 text-xs">
 					<Loading />
 				</div>
 			);
-		} else if (errors.insufficientFundsErr) {
+		} else if (insufficientFundsErr) {
 			return (
-				<div className=" text-red-600 text-xs">
-					{errors.insufficientFundsErrMsg}
+				<div className="text-red-600 text-xs">
+					Insufficient funds
 				</div>
 			);
-		} else if (errors.otherErr) {
-			return <div className=" text-red-600 text-xs">{errors.otherErr}</div>;
-		} else if (success) {
-			return <div className=" text-green-600  text-xs">Success!</div>;
+		} else if (otherError) {
+			return <div className="text-red-600 text-xs">{otherError}</div>;
 		}
 	};
 
 	const form = (
 		<form onSubmit={handleSubmit}>
-			<div className="flex justify-between">
-				<div className="mb-6 mr-4 text-center w-full">
-					Duration:
-					<input
-						type="number"
-						value={duration}
-						onChange={(e) => {
-							setDuration(e.target.value);
-						}}
-						className="p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none"
-					/>
-					<div className=" text-red-600 mt-2 text-xs">
-						{errors.minDurationErr ? (
-							<div className=" text-red-600 mt-2 text-xs">
-								{errors.minDurationErrMsg}
-							</div>
-						) : (
-							<></>
-						)}
+			<div className="flex justify-evenly">
+				<div className="flex flex-col justify-between">
+					<div className="flex flex-row items-center">
+						<span className=" mr-2">
+							Duration:
+						</span>
+						<input
+							type="number"
+							value={duration}
+							onChange={(e) => {
+								setDuration(Number(e.target.value));
+							}}
+							step="5"
+							className="p-4 w-full  text-gray-900 bg-primary focus:ring-gray-400 border-none text-center font-semibold"
+						/>
+						<span className=" text-left pl-2">
+							minutes
+						</span>
 					</div>
+					{minDurationErr ? (
+						<div className="text-red-600 mt-2 text-xs">
+							Please use a positive value
+						</div>
+					) : (
+						<></>
+					)}
 				</div>
-
-				<div className="mb-10 ml-4 text-center w-full">
-					Reward:
-					<input
-						type="number"
-						value={reward}
-						onChange={(e) => {
-							setReward(e.target.value);
-						}}
-						className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
-					/>
-					{errors.minRewardErr ? (
-						<div className=" text-red-600 mt-2 text-xs">
-							{errors.minRewardErrMsg}
+				<div className="flex flex-col justify-between">
+					<div className="flex flex-row items-center">
+						<span className=" mr-2">
+							Reward:
+						</span>
+						<input
+							type="number"
+							value={rewardIcp}
+							onChange={(e) => {setRewardIcp(e.target.value)}}
+							step="0.1"
+							className="p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none text-center font-semibold"
+						/>
+						<span className=" text-left pl-2">
+							ICPs
+						</span>
+					</div>
+					{minRewardErr ? (
+						<div className="text-red-600 mt-2 text-xs">
+							Please use a reward larger than {minRewardIcp} ICP
 						</div>
 					) : (
 						<></>
 					)}
 				</div>
 			</div>
-			<div className="mb-10 text-center  ">
+			<div className="mt-10 mb-10 text-center ">
 				Title:
 				<input
 					type="text"
@@ -200,24 +177,24 @@ function AddQuestion({ plug, minReward, login }: any) {
 					onChange={(e) => {
 						setTitle(e.target.value);
 					}}
-					className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none "
+					className=" p-4 w-full text-sm text-gray-900 bg-primary  focus:ring-gray-400 border-none font-semibold "
 				/>
-				{errors.minTitleCharactersErr ? (
-					<div className=" text-red-600 mt-2 text-xs">
-						{errors.minTitleCharactersErrMsg}
+				{minTitleCharactersErr ? (
+					<div className="text-red-600 mt-2 text-xs">
+						Title has to be longer than 20 characters
 					</div>
 				) : (
 					<></>
 				)}
 			</div>
 			<div className="mb-6 ">
-				<SlateEditor inputValue={inputValue} setInputValue={setInputValue} placeholder={"Write your question here!"} />
+				<SlateEditor inputValue={content} setInputValue={setContent} placeholder={"Write your question here!"} />
 			</div>
 
 			{plug.isConnected ? (
 				<div className="flex justify-center">
 					<div>
-						<button type="submit" className="my-button mb-2">
+						<button type="submit" disabled={!plug.isConnected || minRewardErr || minTitleCharactersErr || minDurationErr} className="my-button mb-2">
 							Submit
 						</button>
 						<div className="flex justify-center">{submissionState()}</div>
@@ -243,7 +220,7 @@ function AddQuestion({ plug, minReward, login }: any) {
 
 	return (
 		<>
-			<div className="mb-10">{form} </div>
+			<div className="mb-10">{form}</div>
 		</>
 	);
 }

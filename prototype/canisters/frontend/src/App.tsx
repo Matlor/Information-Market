@@ -9,13 +9,12 @@ import Profile from "./components/Profile";
 import Question from "./components/QuestionPage";
 import Scenario from "./utils/scenario";
 import { graphQlToStrDate, blobToBase64Str } from "./utils/conversions";
-import { e8sToE3s, e3sToIcp } from "./utils/conversions";
-
+import { e8sToIcp } from "./utils/conversions";
 import { market } from "../declarations/market/index";
 import { gql, sudograph } from "sudograph";
 
 function App() {
-	const [minReward, setMinReward] = useState<any>(null);
+	const [minRewardIcp, setMinRewardIcp] = useState<number>(-1);
 	const [scenarioLoaded, setScenarioLoaded] = useState<boolean>(false);
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
@@ -29,26 +28,18 @@ function App() {
 	});
 
 	useEffect(() => {
-		// Runs once to get minReward
-		const getMinReward = async () => {
+		// Runs once to get the minimum reward
+		const getMinRewardIcp = async () => {
 			try {
 				const res = await market.get_min_reward();
-
-				console.log(res, "min reward res");
-
-				const t = e8sToE3s(Number(res));
-				console.log(t);
-
-				console.log(e3sToIcp(t));
-
 				if (Number(res)) {
-					setMinReward(e3sToIcp(e8sToE3s(Number(res))));
+					setMinRewardIcp(e8sToIcp(res));
 				}
 			} catch (error) {
 				console.error("Failed to get min reward: " + error);
 			}
 		};
-		getMinReward();
+		getMinRewardIcp();
 	}, []);
 
 	useEffect(() => {
@@ -231,8 +222,9 @@ function App() {
 								element={
 									<AddQuestion
 										plug={plug}
-										minReward={minReward}
+										minRewardIcp={minRewardIcp}
 										login={login}
+										minTitleCharacters={20}
 									/>
 								}
 							/>
@@ -262,7 +254,7 @@ function App() {
 						</Routes>
 					</div>
 				</div>
-				<Footer />
+				<Footer/>
 			</HashRouter>
 		</div>
 	);
