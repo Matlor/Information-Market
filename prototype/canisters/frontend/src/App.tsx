@@ -205,7 +205,7 @@ function App() {
 			<HashRouter>
 				<div className="flex flex-col justify-start">
 					<Header plug={plug} login={login} user={user} />
-					<div className="ml-64 mr-64 mt-10 mb-5">
+					<div className="ml-64 mr-64 mt-4 mb-4">
 						<Routes>
 							<Route
 								path="/"

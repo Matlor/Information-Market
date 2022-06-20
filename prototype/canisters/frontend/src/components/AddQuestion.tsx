@@ -220,7 +220,7 @@ function AddQuestion({ plug, minRewardIcp, login, minTitleCharacters }: any) {
 
 	return (
 		<>
-			<div className="mb-10">{form}</div>
+			<div className="mb-14 mt-14">{form}</div>
 		</>
 	);
 }

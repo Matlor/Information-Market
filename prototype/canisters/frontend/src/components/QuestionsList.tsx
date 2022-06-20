@@ -169,7 +169,7 @@ const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 
 	return (
 		<>
-			<div className="flex flex-col justify-start">
+			<div className="flex flex-col justify-start mb-14 mt-14">
 			{plug.isConnected ? (
 				<div className="flex justify-end mb-6 h-10 items-center">
 					<div>My Interactions only</div>

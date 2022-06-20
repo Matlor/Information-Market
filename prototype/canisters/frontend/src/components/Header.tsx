@@ -4,13 +4,14 @@ const Header = ({ plug, login, user }: any) => {
 	let { pathname } = useLocation();
 
 	return (
-		<nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5">
+		<nav className="bg-primary border-gray-200 px-2 sm:px-4 py-2.5">
 		<div className="container flex flox-row justify-between items-center mx-auto">
 			<Link to="/">
 				<div className="flex flex-row items-center">
-					<img src="rdf.svg" className="w-12 h-12" alt="Logo" />
 					<div className="w-2"></div>
-					<span className="self-center text-xl font-semibold whitespace-nowrap">Information market</span>
+					<span className="self-center text-2xl font-semibold whitespace-nowrap ">
+						Leap
+					</span>
 				</div>
 			</Link>
 			<div className="flex flex-row">
@@ -30,8 +31,8 @@ const Header = ({ plug, login, user }: any) => {
 							</Link>
 						</div>
 					) : (
-						<div className="w-40 flex">
-							<button onClick={login} className="my-button ">
+						<div className="w-40 flex justify-center items-center">
+							<button onClick={login} className="my-button bg-secondary hover:bg-primary">
 								Log in
 							</button>
 						</div>
