@@ -23,6 +23,7 @@ module {
         // TO DO: somehow the VerifyInvoiceErr from the InvoiceTypes is not present 
         // at compilation even if it is defined in invoice_types.mo file
         #VerifyInvoiceError; //: InvoiceTypes.VerifyInvoiceErr;
+        #AccountIdentifierError;
         #TransferError: InvoiceTypes.TransferError;
         #UserNotFound;
         #UserExists;

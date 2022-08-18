@@ -59,7 +59,7 @@ function AddQuestion({ plug, minRewardIcp, login, minTitleCharacters }: any) {
 				memo: BigInt(0),
 				from_subaccount: [],
 				created_at_time: [],
-				amount: { e8s: invoiceResponse.ok.invoice.amount + BigInt(10000000) },
+				amount: { e8s: invoiceResponse.ok.invoice.amount },
 			});
 			console.log(transferResponse);
 			if (transferResponse?.Err !== undefined){

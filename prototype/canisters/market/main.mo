@@ -342,15 +342,11 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             return #err(#NotFound);
                         };
                         case (?answer) {
-                            switch(await invoice_canister_.transfer({
-                                amount = Utils.e3s_to_e8s(question.reward);
-                                token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(answer.author.id));
-                            })){
+                            switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
                                 case(#err err){
-                                    return #err(#TransferError(err));
+                                    return #err(err);
                                 };
-                                case(#ok success){
+                                case(#ok block_height){
                                     // Here there is in theory a severe risk that the transfer worked 
                                     // but the question is not closed, hence it would be possible to have
                                     // multiple transfers for the same question
@@ -359,7 +355,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                     if(await GraphQL.solve_dispute(
                                         question_id,
                                         answer_id,
-                                        Nat64.toText(success.blockHeight),
+                                        Nat64.toText(block_height),
                                         Utils.time_minutes_now()
                                     )){
                                         return #ok();
@@ -392,19 +388,15 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             ignore await GraphQL.must_pick_answer(question.id, now, now + duration_pick_answer_);
                         } else {
                             // Refund the author if no answer has been given
-                            switch(await invoice_canister_.transfer({
-                                amount = Utils.e3s_to_e8s(question.reward);
-                                token = {symbol = coin_symbol_};
-                                destination = #principal(Principal.fromText(question.author.id));
-                            })){
-                                case(#ok success){
+                            switch(await transfer(Principal.fromText(question.author.id), question.reward)){
+                                case(#ok block_height){
                                     // Here there is in theory a severe risk that the transfer worked 
                                     // but the question is not closed, hence it would be possible to have
                                     // multiple transfers for the same question
                                     // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                     // in motoko, to be able to ensure that the question has not already been paid
                                     Debug.print("Update question \"" # question.id # "\" status to CLOSE");
-                                    ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), now);
+                                    ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
                                 };
                                 case(_){
                                     Debug.print("Failed to reward the author for question \"" # question.id # "\"");
@@ -431,19 +423,15 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             };
                             case (?answer){
                                 // Pay the winner
-                                switch(await invoice_canister_.transfer({
-                                    amount = Utils.e3s_to_e8s(question.reward);
-                                    token = {symbol = coin_symbol_};
-                                    destination = #principal(Principal.fromText(answer.author.id));
-                                })){
-                                    case(#ok success){
+                                switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
+                                    case(#ok block_height){
                                         // Here there is in theory a severe risk that the transfer worked 
                                         // but the question is not closed, hence it would be possible to have
                                         // multiple transfers for the same question
                                         // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                         // in motoko, to be able to ensure that the question has not already been paid
                                         Debug.print("Update question \"" # question.id # "\" status to CLOSED");
-                                        ignore await GraphQL.close_question(question.id, Nat64.toText(success.blockHeight), now);
+                                        ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
                                     };
                                     case(_){
                                         Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
@@ -459,10 +447,35 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         };
     };
 
+    // ------------------------- Transfer -------------------------
+    
+    private func transfer(to: Principal, amount_e3s: Int32) : async Result.Result<Nat64, Types.Error> {
+        switch(Utils.getDefaultAccountIdentifier(to)){
+            case (null) {
+                return #err(#AccountIdentifierError);
+            };
+            case (?account_identifier) {
+                // Watchout: use a #blob (for destination account) instead of a #principal because with the
+                // principal the invoice canister transfer the funds to what seems to be an invoice subaccount...
+                switch(await invoice_canister_.transfer({
+                    amount = Utils.e3s_to_e8s(amount_e3s);
+                    token = {symbol = coin_symbol_};
+                    destination = #blob(account_identifier);
+                })){
+                    case(#err err){
+                        return #err(#TransferError(err));
+                    };
+                    case(#ok success){
+                        return #ok(success.blockHeight);
+                    };
+                };
+            };
+        };
+    };
     
     // ------------------------- Heartbeat -------------------------
 
-    /// TO DO: investigate if the hearbeat function makes sense to update
+    /// TO DO: investigate if the heartbeat function makes sense to update
     /// questions' status or if it should be triggered by something else
     system func heartbeat() : async () {
         if (update_status_on_heartbeat_){

@@ -1,7 +1,10 @@
 import Debug "mo:base/Debug";
 import Int32 "mo:base/Int32";
 import Int "mo:base/Int";
+import Principal "mo:base/Principal";
 import Time "mo:base/Time";
+
+import Accounts "ledger/accounts";
 
 module {
 
@@ -20,5 +23,16 @@ module {
 
     public func e3s_to_e8s(amount: Int32) : Nat {
         return Int.abs(Int32.toInt(amount)) * 100000;
+    };
+
+    public func getDefaultAccountIdentifier(
+        principal: Principal,
+    ) : ?Accounts.AccountIdentifier {
+        let identifier = Accounts.accountIdentifier(principal, Accounts.defaultSubaccount());
+        if(Accounts.validateAccountIdentifier(identifier)){
+            return ?identifier;
+        } else {
+            return null;
+        };
     };
 }
