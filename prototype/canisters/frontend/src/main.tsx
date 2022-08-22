@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import App from "./screens/App";
 
 // to fix decoder of agent-js
 window.global = window;
