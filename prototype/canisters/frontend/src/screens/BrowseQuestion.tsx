@@ -16,9 +16,9 @@ const BrowseQuestion = () => {
 				{questions.map((question) => (
 					<QuestionPreview question={question} />
 				))}
-				<QuestionPreview /> <QuestionPreview /> <QuestionPreview />{" "}
+				<QuestionPreview /> <QuestionPreview /> <QuestionPreview />
 			</ListWrapper>
-			<Pagination />{" "}
+			<Pagination />
 		</>
 	);
 };
