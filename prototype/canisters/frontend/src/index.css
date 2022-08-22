@@ -1,52 +1,28 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-	html {
-		@apply font-ibm overflow-scroll overscroll-none text-textGrey;
-	}
-}
-
 @layer components {
-	.my-button {
-		@apply px-6 py-2  cursor-pointer  bg-primary hover:bg-secondary rounded-full;
+	.heading1-20x-stretch {
+		@apply text-colorText font-OpenSans font-normal tracking-widest text-20 leading-27;
+	}
+	.heading2-20px {
+		@apply text-colorText font-OpenSans font-normal tracking-normal text-20 leading-27;
 	}
 
-	.page-title {
-		@apply mb-10 text-2xl font-medium mr-4  text-center md:text-left;
-	}
-	.small-text {
-		@apply font-light text-xs mb-2;
+	.heading3-18px {
+		@apply text-colorText font-OpenSans font-normal tracking-normal text-18 leading-25;
 	}
 
-	.editor-wrapper blockquote {
-		@apply pt-1 pl-3 border-l-[6px] border-gray-200  bg-gray-100;
+	.text-14px {
+		@apply text-colorText font-OpenSans font-normal tracking-normal text-14 leading-19;
 	}
 
-	.editor-wrapper code {
-		@apply p-1;
-	}
-
-	.editor-wrapper ul {
-		@apply list-disc ml-6;
-	}
-
-	.editor-wrapper ol {
-		@apply list-decimal ml-6;
-	}
-
-	.editor-wrapper h2 {
-		@apply text-2xl font-medium mr-4;
-	}
-
-	.editor-wrapper h3 {
-		@apply text-xl font-medium mr-4;
-	}
-	.editor-wrapper {
-		@apply font-normal;
+	.text-small-12px {
+		@apply text-colorText font-OpenSans font-normal tracking-normal text-12 leading-16;
 	}
 }
+
