@@ -1,4 +1,4 @@
-import ProfileAnswers from "../coreComponents/ProfileAnswers";
+import ProfileAnswers from "../core/ProfileAnswers";
 import StagesBar from "./StagesBar";
 
 const QuestionPreview = ({ question }) => {

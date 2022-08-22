@@ -1,4 +1,4 @@
-import ListWrapper from "../components/coreComponents/ListWrapper";
+import ListWrapper from "../components/core/ListWrapper";
 import FilterBar from "../components/browseQuestion/FilterBar.jsx";
 import QuestionPreview from "../components/browseQuestion/QuestionPreview.jsx";
 import Pagination from "../components/browseQuestion/Pagination.jsx";

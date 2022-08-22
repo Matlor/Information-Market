@@ -1,4 +1,4 @@
-import Button from "../coreComponents/Button";
+import Button from "../core/Button";
 import Logo from "./Logo";
 
 const Header = () => {
