@@ -5,7 +5,7 @@ import Pagination from "../components/browseQuestion/Pagination.jsx";
 
 import { useState } from "react";
 
-const BrowseQuestion = () => {
+const BrowseQuestion = ({ plug }) => {
 	const [questions, setQuestions] = useState([]);
 
 	return (

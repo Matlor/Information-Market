@@ -52,8 +52,41 @@ const batchTransaction = async (array: Array<any>) => {
 	return result;
 };
 
+const login = async (setPlug) => {
+	const res = await establishConnection();
+
+	if (Object.keys(res).length === 0) {
+		console.error("Failed to establish plug connection!");
+		setPlug({
+			isConnected: false,
+			plug: {},
+			actor: {},
+		});
+	} else {
+		console.log("Successfully connected with plug");
+		setPlug({
+			isConnected: true,
+			plug: await window.ic.plug,
+			actors: {
+				marketActor: res.market,
+				ledgerActor: res.ledger,
+			},
+		});
+	}
+};
+
+const logout = async (setPlug) => {
+	setPlug({
+		isConnected: false,
+		plug: {},
+		actor: {},
+	});
+};
+
 export default {
 	establishConnection,
 	verifyConnection,
 	batchTransaction,
+	login,
+	logout,
 };

@@ -3,7 +3,7 @@ import Logo from "./Logo";
 
 import { Link, useLocation } from "react-router-dom";
 
-const Header = () => {
+const Header = ({ login }) => {
 	let { pathname } = useLocation();
 
 	return (
@@ -18,7 +18,7 @@ const Header = () => {
 				<Link to="/add-question">
 					<div className="heading1-20x-stretch">Add Question</div>
 				</Link>
-				<Button />
+				<Button propFunction={login} />
 			</div>
 		</div>
 	);
