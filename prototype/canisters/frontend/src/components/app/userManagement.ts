@@ -33,6 +33,7 @@ const fetchCurrentUser = async (setUser, sudograph, gql) => {
 		canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 	});
 	let principal_id: string = window.ic.plug.principalId;
+
 	const fetchUser = await sudographActor.query(
 		gql`
 			query ($principal_id: ID!) {
@@ -45,6 +46,7 @@ const fetchCurrentUser = async (setUser, sudograph, gql) => {
 		`,
 		{ principal_id }
 	);
+
 	if (fetchUser.data.readUser.length === 0) {
 		setUser({ userName: "", joinedDate: "", avatar: "" });
 		return false;
@@ -60,4 +62,5 @@ const fetchCurrentUser = async (setUser, sudograph, gql) => {
 
 export default {
 	refreshUser,
+	fetchCurrentUser,
 };
