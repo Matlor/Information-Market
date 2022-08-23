@@ -6,11 +6,11 @@ import PageLayout from "../components/app/PageLayout";
 import Header from "../components/app/Header";
 import Footer from "../components/app/Footer";
 import BrowseQuestion from "./BrowseQuestion";
+import Profile from "./Profile";
 
 import plugApi from "../api/plug";
-import userManagement from "../components/app/userManagement";
-
 import { gql, sudograph } from "sudograph";
+import userManagement from "../components/app/userManagement";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -37,7 +37,19 @@ function App() {
 					<Route path="/" element={<BrowseQuestion plug={plug} />} />
 					<Route path="/add-question" />
 					<Route path="/question/:id" />
-					<Route path="/profile" />
+					<Route
+						path="/profile"
+						element={
+							<Profile
+								plug={plug}
+								logout={() => plugApi.logout(setPlug)}
+								user={user}
+								fetchCurrentUser={() =>
+									userManagement.fetchCurrentUser(setUser, sudograph, gql)
+								}
+							/>
+						}
+					/>
 				</Routes>
 				<Footer />
 			</HashRouter>
