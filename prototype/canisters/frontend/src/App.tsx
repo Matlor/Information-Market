@@ -83,7 +83,6 @@ function App() {
 				reader.readAsDataURL(await motoko_image.blob());
 				reader.onloadend = async function () {
 					let createUser = await plug.actors.marketActor.create_user(
-						window.ic.plug.principalId,
 						"New User",
 						reader.result
 					);

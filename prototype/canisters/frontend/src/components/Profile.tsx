@@ -26,7 +26,7 @@ const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
   }
 
   const updateProfile = async () => {
-		let updateUser = await plug.actors.marketActor.update_user(window.ic.plug.principalId, userName, avatar);
+		let updateUser = await plug.actors.marketActor.update_user(userName, avatar);
     if (!updateUser.ok) {
       console.error("Failed to update user: " + updateUser.err);
     } else {
