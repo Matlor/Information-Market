@@ -24,7 +24,6 @@ let market_arguments = record {
   transfer_fee_e8s = (10_000 : nat);
   pick_answer_duration_minutes = (1_440 : int32);
   disputable_duration_minutes = (2_880 : int32);
-  update_status_on_heartbeat = true;
 };
 let market = installMarket(market_arguments);
 

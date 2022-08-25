@@ -11,7 +11,6 @@ module {
     transfer_fee_e8s: Nat;
     pick_answer_duration_minutes: Int32;
     disputable_duration_minutes: Int32;
-    update_status_on_heartbeat: Bool;
   };
 
   public type UpdateMarketParams = {
@@ -19,7 +18,6 @@ module {
     transfer_fee_e8s: ?Nat;
     pick_answer_duration_minutes: ?Int32;
     disputable_duration_minutes: ?Int32;
-    update_status_on_heartbeat: ?Bool;
   };
 
   public type Error = {

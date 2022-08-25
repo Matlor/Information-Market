@@ -21,7 +21,6 @@ let market_arguments = record {
   transfer_fee_e8s = (10_000 : nat);
   pick_answer_duration_minutes = (1_440 : int32);
   disputable_duration_minutes = (2_880 : int32);
-  update_status_on_heartbeat = true;
 };
 let market = installMarket(market_arguments);
 
@@ -36,8 +35,6 @@ call market.get_duration_pick_answer();
 assert _ == (1_440 : int32);
 call market.get_duration_disputable();
 assert _ == (2_880 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;
 
 // Test that with another identity that the market initializer, updating the params fails
 identity alice;
@@ -56,8 +53,6 @@ call market.get_duration_pick_answer();
 assert _ == (1_440 : int32);
 call market.get_duration_disputable();
 assert _ == (2_880 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;
 
 // Update transfer_fee_e8s only
 call market.update_market_params(record { transfer_fee_e8s = opt (20_000 : nat); });
@@ -69,8 +64,6 @@ call market.get_duration_pick_answer();
 assert _ == (1_440 : int32);
 call market.get_duration_disputable();
 assert _ == (2_880 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;
 
 // Update pick_answer_duration_minutes only
 call market.update_market_params(record { pick_answer_duration_minutes = opt (3_000 : int32); });
@@ -82,8 +75,6 @@ call market.get_duration_pick_answer();
 assert _ == (3_000 : int32);
 call market.get_duration_disputable();
 assert _ == (2_880 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;
 
 // Update disputable_duration_minutes only
 call market.update_market_params(record { disputable_duration_minutes = opt (6_000 : int32); });
@@ -95,21 +86,6 @@ call market.get_duration_pick_answer();
 assert _ == (3_000 : int32);
 call market.get_duration_disputable();
 assert _ == (6_000 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;
-
-// Update update_status_on_heartbeat only
-call market.update_market_params(record { update_status_on_heartbeat = opt (false); });
-call market.get_min_reward();
-assert _ == (1_500_000 : nat);
-call market.get_fee();
-assert _ == (20_000 : nat);
-call market.get_duration_pick_answer();
-assert _ == (3_000 : int32);
-call market.get_duration_disputable();
-assert _ == (6_000 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == false;
 
 // Update all of them
 call market.update_market_params(
@@ -118,7 +94,6 @@ call market.update_market_params(
     transfer_fee_e8s = opt (30_000 : nat);
     pick_answer_duration_minutes = opt (4_000 : int32);
     disputable_duration_minutes = opt (8_000 : int32);
-    update_status_on_heartbeat = opt (true);
   }
 );
 call market.get_min_reward();
@@ -129,5 +104,3 @@ call market.get_duration_pick_answer();
 assert _ == (4_000 : int32);
 call market.get_duration_disputable();
 assert _ == (8_000 : int32);
-call market.get_update_status_on_heartbeat();
-assert _ == true;

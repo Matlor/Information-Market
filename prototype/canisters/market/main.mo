@@ -19,14 +19,16 @@ import GraphQL      "canister:graphql";
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketParams) = this {
 
-  // Members
+  // ------------------------- Members -------------------------
+
   private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(arguments.invoice_canister));
   private let coin_symbol_ : Text = arguments.coin_symbol;
   private var min_reward_ : Nat = arguments.min_reward_e8s;
   private var fee_ : Nat = arguments.transfer_fee_e8s;
   private var duration_pick_answer_ : Int32 = arguments.pick_answer_duration_minutes;
   private var duration_disputable_ : Int32 = arguments.disputable_duration_minutes;
-  private var update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
+
+  // ------------------------- Getters -------------------------
 
   public shared func get_coin_symbol() : async Text {
     return coin_symbol_;
@@ -48,11 +50,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     return duration_disputable_;
   };
 
-  public shared func get_update_status_on_heartbeat() : async Bool {
-    return update_status_on_heartbeat_;
-  };
-
-  
   // ------------------------- Update market params -------------------------
 
   public shared({caller}) func update_market_params(params: Types.UpdateMarketParams) : async Result.Result<(), Types.Error>{
@@ -63,10 +60,8 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     fee_ := Option.get(params.transfer_fee_e8s, fee_);
     duration_pick_answer_ := Option.get(params.pick_answer_duration_minutes, duration_pick_answer_);
     duration_disputable_ := Option.get(params.disputable_duration_minutes, duration_disputable_);
-    update_status_on_heartbeat_ := Option.get(params.update_status_on_heartbeat, update_status_on_heartbeat_);
     return #ok;
   };
-
 
   // ------------------------- Create User -------------------------
 
@@ -89,7 +84,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
   };
 
-
   // ------------------------- Update User -------------------------
 
   public shared ({caller}) func update_user(name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
@@ -110,7 +104,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
       };
     };
   };
-
 
   // ------------------------- Create Invoice -------------------------
 
@@ -166,23 +159,11 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
   };
 
-  public shared func get_invoice ( invoice_id: Nat) : async Result.Result<Text, Types.Error> {
-    Debug.print("Invoice id: " # Nat.toText(invoice_id));
-    switch (await GraphQL.get_invoice(Nat.toText(invoice_id))){
-      case (null) {
-        return #err(#NotFound);
-      };
-      case (?graphql_invoice) {
-        return #ok(Nat.toText(invoice_id));
-      };
-    };
-  };
-
   // ------------------------- Ask Question -------------------------
 
   public shared ({caller}) func ask_question (
     invoice_id: Nat,
-    duration_minutes: Nat,
+    duration_minutes: Int32,
     title: Text,
     content: Text
   ) : async Result.Result<GraphQL.QuestionType, Types.Error> {
@@ -228,8 +209,8 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                 author,
                 Nat.toText(invoice_id),
                 now,
-                now + Int32.fromInt(duration_minutes),
-                Int32.fromInt(duration_minutes),
+                now + duration_minutes,
+                duration_minutes,
                 title,
                 content,
                 Utils.e8s_to_e3s(invoice_amount - fee_)
@@ -248,7 +229,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
   };
   
-
   // ------------------------- Answer Question -------------------------
 
   public shared ({caller}) func answer_question(
@@ -296,8 +276,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
   // ------------------------- Pick Winner -------------------------
 
-  // TO DO: (optimisation) ideally one could have spare the call to GraphQL.get_question if a variable
-  // question: QuestionType is added to the AnswerType inside the graphql.rs canister
   public shared ({caller}) func pick_winner(
     question_id: Text,
     answer_id: Text
@@ -351,7 +329,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
   // ------------------------- Arbitrate -------------------------
 
   // Centralised version: the contract deployer is the arbitrator
-  // TO DO: the case is not handled that the arbitrator never does it's job.
   public shared ({caller}) func arbitrate(
     question_id: Text,
     answer_id: Text
@@ -407,67 +384,77 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
   public func update_status() : async () {
     let now = Utils.time_minutes_now();
     let questions : [GraphQL.QuestionType] = await GraphQL.get_questions();
-    for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
-    {
-      if (now >= question.status_end_date) {
-        switch(question.status){
-          case(#OPEN){
-            if (await GraphQL.has_answers(question.id)){
+    for (question in Iter.fromArray<GraphQL.QuestionType>(questions)) {
+      await update_question_status(question, now);
+    };
+  };
+
+  private func update_question_status(question: GraphQL.QuestionType, now: Int32) : async () {
+    if (now >= question.status_end_date) {
+      switch(question.status){
+        case(#OPEN){
+          if (await GraphQL.has_answers(question.id)){
+            let pick_answer_end = question.status_end_date + duration_pick_answer_;
+            if (now >= pick_answer_end){
+              // Automatically trigger a dispute if the author did not pick a winner
+              Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
+              ignore await GraphQL.open_dispute(question.id, pick_answer_end);
+            } else {
               // Update the question's state, the author must pick an answer
               Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
-              ignore await GraphQL.must_pick_answer(question.id, now, now + duration_pick_answer_);
-            } else {
-              // Refund the author if no answer has been given
-              switch(await transfer(Principal.fromText(question.author.id), question.reward)){
+              ignore await GraphQL.must_pick_answer(question.id, question.status_end_date, pick_answer_end);
+            }
+          } else {
+            // Refund the author if no answer has been given
+            switch(await transfer(Principal.fromText(question.author.id), question.reward)){
+              case(#ok block_height){
+                // Here there is in theory a severe risk that the transfer worked 
+                // but the question is not closed, hence it would be possible to have
+                // multiple transfers for the same question
+                // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
+                // in motoko, to be able to ensure that the question has not already been paid
+                Debug.print("Update question \"" # question.id # "\" status to CLOSE");
+                ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), question.status_end_date);
+              };
+              case(_){
+                Debug.print("Failed to reward the author for question \"" # question.id # "\"");
+              };
+            };
+          };
+        };
+        case(#PICKANSWER){
+          // Automatically trigger a dispute if the author did not pick a winner
+          Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
+          ignore await GraphQL.open_dispute(question.id, question.status_end_date);
+        };
+        case(#DISPUTABLE){
+          // If nobody disputed the picked answer, payout the answer's author
+          // and close the question
+          switch (question.winner) {
+            case (null){
+              // Nothing to do, it will never happen if we make sure the question 
+              // is never put in DISPUTABLE state without having a winner
+            };
+            case (?answer){
+              // Pay the winner
+              switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
                 case(#ok block_height){
                   // Here there is in theory a severe risk that the transfer worked 
                   // but the question is not closed, hence it would be possible to have
                   // multiple transfers for the same question
                   // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                   // in motoko, to be able to ensure that the question has not already been paid
-                  Debug.print("Update question \"" # question.id # "\" status to CLOSE");
-                  ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
+                  Debug.print("Update question \"" # question.id # "\" status to CLOSED");
+                  ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), question.status_end_date);
                 };
                 case(_){
-                  Debug.print("Failed to reward the author for question \"" # question.id # "\"");
+                  Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
                 };
               };
             };
           };
-          case(#PICKANSWER){
-            Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
-            // Automatically trigger a dispute if the author did not pick a winner
-            ignore await GraphQL.open_dispute(question.id, now);
-          };
-          case(#DISPUTABLE){
-            // If nobody disputed the picked answer, payout the answer's author
-            // and close the question
-            switch (question.winner) {
-              case (null){
-                // Nothing to do, it will never happen if we make sure the question 
-                // is never put in DISPUTABLE state without having a winner
-              };
-              case (?answer){
-                // Pay the winner
-                switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
-                  case(#ok block_height){
-                    // Here there is in theory a severe risk that the transfer worked 
-                    // but the question is not closed, hence it would be possible to have
-                    // multiple transfers for the same question
-                    // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
-                    // in motoko, to be able to ensure that the question has not already been paid
-                    Debug.print("Update question \"" # question.id # "\" status to CLOSED");
-                    ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
-                  };
-                  case(_){
-                    Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
-                  };
-                };
-              };
-            };
-          };
-          case(_){
-          };
+        };
+        case(_){
         };
       };
     };
@@ -499,13 +486,4 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
   };
   
-  // ------------------------- Heartbeat -------------------------
-
-  /// TO DO: investigate if the heartbeat function makes sense to update
-  /// questions' status or if it should be triggered by something else
-  system func heartbeat() : async () {
-    if (update_status_on_heartbeat_){
-      await update_status();
-    };
-  };
 };

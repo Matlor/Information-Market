@@ -4,6 +4,7 @@ import { gql, sudograph } from "sudograph";
 import StatusSelection from "./StatusSelection";
 import QuestionStatusBar from "./QuestionStatusBar";
 import { e3sToIcp, jsToGraphQlDate, toHHMM } from "../utils/conversions";
+import { market } from "../../declarations/market/index";
 
 type Status = { value: string; label: string };
 
@@ -32,7 +33,7 @@ const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			if (Date.now() - fetchQuestionsDate > 10000) {
-				fetchQuestions();
+				updateQuestions();
 			}
 		}, 1000);
 		return () => clearInterval(interval);
@@ -79,6 +80,13 @@ const QuestionsList = ({ plug, cachedAvatars, loadAvatars }: any) => {
 			setStatusMap(map);
 			setPageIndex(0);
 		}
+	};
+
+	const updateQuestions = async () => {
+		// Update the question status
+		await market.update_status();
+		// Fetch the questions
+		await fetchQuestions();
 	};
 
 	const fetchQuestions = async () => {

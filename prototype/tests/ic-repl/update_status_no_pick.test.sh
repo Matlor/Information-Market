@@ -22,13 +22,10 @@ let market_arguments = record {
   coin_symbol = "ICP";
   min_reward_e8s = (1_250_000 : nat);
   transfer_fee_e8s = (10_000 : nat);
-  pick_answer_duration_minutes = (0 : int32);
-  disputable_duration_minutes = (0 : int32);
-  update_status_on_heartbeat = false;
+  pick_answer_duration_minutes = (0 : int32); // 0 to simulate no pick answer
+  disputable_duration_minutes = (60 : int32);
 };
 let market = installMarket(market_arguments);
-call market.get_update_status_on_heartbeat();
-assert _ == false;
 
 identity alice;
 call market.create_user("alice", "");
@@ -85,12 +82,7 @@ call market.answer_question(question_id, "Summer 1914");
 assert _ ~= variant { ok = record { content = "Summer 1914"; } };
 let carlos_answer = _.ok.id;
 
-// Verify that update status put the question in PICKANSWER
-call market.update_status();
-call graphql.get_question(question_id);
-assert _ ~= opt (record { id = question_id; status = variant {PICKANSWER} });
-
-// Verify that another update status put the question in DISPUTED (simulate the canister
+// Verify that another update status put the question in DISPUTED (simulate the case
 // where the author did no pick any answer)
 call market.update_status();
 call graphql.get_question(question_id);
