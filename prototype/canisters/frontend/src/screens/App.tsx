@@ -12,6 +12,8 @@ import plugApi from "../api/plug";
 import { gql, sudograph } from "sudograph";
 import userManagement from "../components/app/userManagement";
 
+import Scenario from "../utils/scenario";
+
 function App() {
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
@@ -28,6 +30,33 @@ function App() {
 	useEffect(() => {
 		userManagement.refreshUser(setUser, plug, sudograph, gql);
 	}, [plug]);
+
+	const [scenarioLoaded, setScenarioLoaded] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (!scenarioLoaded) {
+			const loadScenario = async () => {
+				try {
+					let motoko_image = await fetch("motoko.jpg");
+					var reader = new FileReader();
+					reader.readAsDataURL(await motoko_image.blob());
+					reader.onloadend = async function () {
+						Scenario.loadScenario(
+							["Alice", "Bob", "Charlie", "Dan", "Edgar"],
+							14,
+							60,
+							60,
+							reader.result
+						);
+					};
+				} catch (error) {
+					console.error("Failed to load scenario: " + error);
+				}
+			};
+			loadScenario();
+			setScenarioLoaded(true);
+		}
+	}, []);
 
 	return (
 		<PageLayout>
