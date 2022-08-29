@@ -138,7 +138,12 @@ const BrowseQuestion = ({ plug }) => {
 					<QuestionPreview question={question} key={index} />
 				))}
 			</ListWrapper>
-			<Pagination />
+			<Pagination
+				pageIndex={pageIndex}
+				setPageIndex={setPageIndex}
+				totalQuestions={totalQuestions}
+				questionsPerPage={questionsPerPage}
+			/>
 		</>
 	);
 };
