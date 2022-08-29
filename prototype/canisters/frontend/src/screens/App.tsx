@@ -9,8 +9,8 @@ import BrowseQuestion from "./BrowseQuestion";
 import Profile from "./Profile";
 
 import plugApi from "../api/plug";
-import { gql, sudograph } from "sudograph";
-import userManagement from "../components/app/userManagement";
+import sudograph from "../api/sudograph";
+import { graphQlToStrDate, blobToBase64Str } from "../utils/conversions";
 
 import Scenario from "../utils/scenario";
 
@@ -21,6 +21,38 @@ function App() {
 		actors: { marketActor: {}, ledgerActor: {} },
 	});
 
+	const login = async () => {
+		const res = await plugApi.establishConnection();
+
+		if (Object.keys(res).length === 0) {
+			console.error("Failed to establish plug connection!");
+			setPlug({
+				isConnected: false,
+				plug: {},
+				actor: {},
+			});
+		} else {
+			console.log("Successfully connected with plug");
+			setPlug({
+				isConnected: true,
+				plug: await window.ic.plug,
+				actors: {
+					marketActor: res.market,
+					ledgerActor: res.ledger,
+				},
+			});
+		}
+	};
+
+	const logout = async (setPlug) => {
+		setPlug({
+			isConnected: false,
+			plug: {},
+			actor: {},
+		});
+	};
+
+	/* USER DATA FETCHING */
 	const [user, setUser] = useState<any>({
 		userName: "",
 		joinedDate: "",
@@ -28,9 +60,22 @@ function App() {
 	});
 
 	useEffect(() => {
-		userManagement.refreshUser(setUser, plug, sudograph, gql);
+		const fetchCurrentUser = async () => {
+			const user = await sudograph.fetchUser(plug.plug.principalId);
+			if (user.data === null || user.data.readUser.length === 0) {
+				setUser({ userName: "", joinedDate: "", avatar: "" });
+			} else {
+				setUser({
+					userName: user.data.readUser[0].name,
+					joinedDate: graphQlToStrDate(user.data.readUser[0].joined_date),
+					avatar: blobToBase64Str(user.data.readUser[0].avatar),
+				});
+			}
+		};
+		fetchCurrentUser();
 	}, [plug]);
 
+	/* SCENARIO */
 	const [scenarioLoaded, setScenarioLoaded] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -61,7 +106,7 @@ function App() {
 	return (
 		<PageLayout>
 			<HashRouter>
-				<Header login={() => plugApi.login(setPlug)} />
+				<Header login={login} />
 				<Routes>
 					<Route path="/" element={<BrowseQuestion plug={plug} />} />
 					<Route path="/add-question" />
@@ -74,7 +119,7 @@ function App() {
 								logout={() => plugApi.logout(setPlug)}
 								user={user}
 								fetchCurrentUser={() =>
-									userManagement.fetchCurrentUser(setUser, sudograph, gql)
+									userManagement.fetchCurrentUser(setUser)
 								}
 							/>
 						}
