@@ -20,14 +20,14 @@ if (process.env.NODE_ENV !== "production") {
 	});
 }
 
-export const actor = Actor.createActor(idlFactory, {
+const actor = Actor.createActor(idlFactory, {
 	agent,
 	canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 });
 
 // ------------------------------------ Query ------------------------------------
 
-export const get_question = async (questionId) => {
+const get_question = async (questionId) => {
 	var res: any = await actor.graphql_query(
 		`query ($question_id:ID!){
             readQuestion (search: {id: {eq: $question_id} } ) {
@@ -80,7 +80,7 @@ export const get_question = async (questionId) => {
 	return JSON.parse(res);
 };
 
-export const get_question_answers = async (questionId) => {
+const get_question_answers = async (questionId) => {
 	var res: any = await actor.graphql_query(
 		`query ($question_id: ID!) {
         readAnswer(
@@ -102,7 +102,37 @@ export const get_question_answers = async (questionId) => {
 	return JSON.parse(res);
 };
 
+const fetchUser = async (principal_id) => {
+	var res: any = await actor.graphql_query(
+		`query ($principal_id: ID!) {
+      readUser(search: { id: { eq: $principal_id } }) {
+        name
+        joined_date
+        avatar
+      }
+    }`,
+		JSON.stringify({ principal_id: `${principal_id}` })
+	);
+
+	return JSON.parse(res);
+};
+
+const query_avatar = async (user_id) => {
+	var res: any = await actor.graphql_query(
+		`query ($user_id: ID!) {
+      readUser(search: { id: { eq: $user_id } }) {
+        avatar
+      }
+    }`,
+		JSON.stringify({ user_id: `${user_id}` })
+	);
+
+	return JSON.parse(res);
+};
+
 export default {
 	get_question,
-	get_question_answers
+	get_question_answers,
+	fetchUser,
+	query_avatar,
 };
