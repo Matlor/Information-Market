@@ -1,4 +1,4 @@
-const NumberOfAnswers = ({ numberOfAnswers }) => {
+const NumberOfAnswers = ({ answers }) => {
 	return (
 		<div className="flex justify-center items-center gap-2.5 w-max">
 			<svg
@@ -14,7 +14,7 @@ const NumberOfAnswers = ({ numberOfAnswers }) => {
 				/>
 			</svg>
 
-			<div className="text-small-12px">{numberOfAnswers} answers</div>
+			<div className="text-small-12px">{answers} answers</div>
 		</div>
 	);
 };
