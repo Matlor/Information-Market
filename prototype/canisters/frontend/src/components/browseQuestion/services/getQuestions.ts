@@ -17,6 +17,12 @@ const getQuestions = async (
 		canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 	});
 
+	var questionData = {
+		totalQuestions: 0,
+		questions: [],
+		timestamp: Date.now(),
+	};
+
 	var queryInputs: string = "";
 	// Add the ordering on a field (ascendant or descendant)
 	queryInputs +=
@@ -29,6 +35,10 @@ const getQuestions = async (
 		'"}}, {content: {contains: "' +
 		searchedText +
 		'"}}]}, {or: [';
+
+	if (statusMap.length === 0) {
+		return questionData;
+	}
 	if (statusMap.length > 0) {
 		statusMap.map((status: Status, index: number) => {
 			if (index != 0) {
@@ -86,11 +96,9 @@ const getQuestions = async (
     `
 	);
 
-	const questionData = {
-		totalQuestions: allResults.data.readQuestion.length,
-		questions: pageResults.data.readQuestion,
-		timestamp: Date.now(),
-	};
+	questionData.totalQuestions = allResults.data.readQuestion.length;
+	questionData.questions = pageResults.data.readQuestion;
+	questionData.timestamp = Date.now();
 	return questionData;
 };
 

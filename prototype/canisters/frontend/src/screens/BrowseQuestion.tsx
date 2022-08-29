@@ -6,6 +6,7 @@ import Pagination from "../components/browseQuestion/view/Pagination.js";
 import { useState, useEffect } from "react";
 import getQuestions from "../components/browseQuestion/services/getQuestions";
 import avatar from "../components/core/services/avatar";
+import { conditionalDelay } from "@dfinity/agent/lib/cjs/polling/strategy";
 
 const BrowseQuestion = ({ plug }) => {
 	/* FETCHING DATA */
@@ -22,15 +23,17 @@ const BrowseQuestion = ({ plug }) => {
 	const [searchedText, setSearchedText] = useState<string>("");
 	const [pageIndex, setPageIndex] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
-	const [statusMap, setStatusMap] = useState<Array<Status>>([]);
+	const [statusMap, setStatusMap] = useState<Array<Status>>([
+		{ value: "OPEN", label: "Open" },
+		{ value: "PICKANSWER", label: "Winner Selection" },
+		{ value: "DISPUTABLE", label: "Open for disputes" },
+		{ value: "DISPUTED", label: "Arbitration" },
+		{ value: "CLOSED", label: "Closed" },
+	]);
 
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [totalQuestions, setTotalQuestions] = useState<number>(0);
-
-	console.log(pageIndex, "pageIndex");
-	console.log(totalQuestions, "totalQuestions");
-	console.log(questions);
 
 	/* FETCHING QUESTIONS */
 	// Fetch the list of questions every 10 seconds if no

@@ -19,7 +19,6 @@ const Pagination = ({
 	}
 
 	const decreaseIndex = () => {
-		console.log(pageIndex, "PAGE INDEX");
 		if (pageIndex == 0) {
 			return;
 		} else {

@@ -3,6 +3,33 @@ import { useState } from "react";
 // TO DO: Simplify and style checkbox/dropdown
 
 const Filter = ({ statusMap, setStatusMap }) => {
+	const options = [
+		{ value: "OPEN", label: "Open" },
+		{ value: "PICKANSWER", label: "Winner Selection" },
+		{ value: "DISPUTABLE", label: "Open for disputes" },
+		{ value: "DISPUTED", label: "Arbitration" },
+		{ value: "CLOSED", label: "Closed" },
+	];
+
+	const checkIfStatusIsSelected = (specificStatus) => {
+		for (let i = 0; i < statusMap.length; i++) {
+			if (statusMap[i].value === specificStatus.value) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	console.log(statusMap);
+	const [checkBoxState, setCheckBoxState] = useState<any>([
+		checkIfStatusIsSelected(options[0]),
+		checkIfStatusIsSelected(options[1]),
+		checkIfStatusIsSelected(options[2]),
+		checkIfStatusIsSelected(options[3]),
+		checkIfStatusIsSelected(options[4]),
+	]);
+
 	const [display, setDisplay] = useState<any>("hidden");
 
 	const rotateIconHandler = () => {
@@ -21,27 +48,11 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		}
 	};
 
-	const [checkBoxState, setCheckBoxState] = useState<any>([
-		false,
-		false,
-		false,
-		false,
-		false,
-	]);
-
 	const checkbox = (num, checkBoxState, setCheckBoxState) => {
 		const clickHandler = (num, checkBoxState, setCheckBoxState) => {
 			const newCheckBoxState = [...checkBoxState];
 			newCheckBoxState[num] = !newCheckBoxState[num];
 			setCheckBoxState(newCheckBoxState);
-
-			const options = [
-				{ value: "OPEN", label: "Open" },
-				{ value: "PICKANSWER", label: "Winner Selection" },
-				{ value: "DISPUTABLE", label: "Open for disputes" },
-				{ value: "DISPUTED", label: "Arbitration" },
-				{ value: "CLOSED", label: "Closed" },
-			];
 
 			// Modify status map
 			const newStatusMap = [...statusMap];
