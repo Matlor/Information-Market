@@ -1,5 +1,6 @@
-import { blobToBase64Str } from "../../utils/conversions";
-import sudograph from "../../api/sudograph";
+import { blobToBase64Str } from "../../../utils/conversions";
+
+import sudograph from "./sudograph";
 
 const loadAvatar = async (user_id: string) => {
 	const query_avatar = await sudograph.query_avatar(user_id);

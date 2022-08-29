@@ -1,11 +1,11 @@
-import ListWrapper from "../components/core/ListWrapper";
-import FilterBar from "../components/browseQuestion/FilterBar.jsx";
-import QuestionPreview from "../components/browseQuestion/QuestionPreview.jsx";
-import Pagination from "../components/browseQuestion/Pagination.jsx";
+import ListWrapper from "../components/core/view/ListWrapper";
+import FilterBar from "../components/browseQuestion/view/FilterBar.jsx";
+import QuestionPreview from "../components/browseQuestion/view/QuestionPreview.js";
+import Pagination from "../components/browseQuestion/view/Pagination.js";
 
 import { useState, useEffect } from "react";
-import getQuestions from "../components/browseQuestion/getQuestions";
-import avatar from "../components/core/avatar";
+import getQuestions from "../components/browseQuestion/services/getQuestions";
+import avatar from "../components/core/services/avatar";
 
 const BrowseQuestion = ({ plug }) => {
 	/* FETCHING DATA */

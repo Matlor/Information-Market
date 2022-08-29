@@ -2,14 +2,14 @@ import "../index.css";
 import { Route, Routes, HashRouter } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import PageLayout from "../components/app/PageLayout";
-import Header from "../components/app/Header";
-import Footer from "../components/app/Footer";
+import PageLayout from "../components/app/view/PageLayout";
+import Header from "../components/app/view/Header";
+import Footer from "../components/app/view/Footer";
 import BrowseQuestion from "./BrowseQuestion";
 import Profile from "./Profile";
 
-import plugApi from "../api/plug";
-import sudograph from "../api/sudograph";
+import plugApi from "../components/core/services/plug";
+import sudograph from "../components/core/services/sudograph";
 import { graphQlToStrDate, blobToBase64Str } from "../utils/conversions";
 
 import Scenario from "../utils/scenario";

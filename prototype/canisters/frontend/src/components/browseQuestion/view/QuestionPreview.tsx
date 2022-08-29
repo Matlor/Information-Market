@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import ProfileAnswers from "../core/ProfileAnswers";
+
+import ProfileAnswers from "../../core/view/ProfileAnswers";
 import StagesBar from "./StagesBar";
 
 const QuestionPreview = ({ question }) => {

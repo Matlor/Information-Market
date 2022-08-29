@@ -1,4 +1,4 @@
-import Button from "../core/Button";
+import Button from "../../../components/core/view/Button";
 import Logo from "./Logo";
 
 import { Link, useLocation } from "react-router-dom";

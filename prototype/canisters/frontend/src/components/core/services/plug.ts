@@ -1,5 +1,5 @@
-import { idlFactory as idlMarket } from "../../declarations/market";
-import { idlFactory as idlledger } from "../../declarations/ledger";
+import { idlFactory as idlMarket } from "../../../../declarations/market";
+import { idlFactory as idlledger } from "../../../../declarations/ledger";
 
 const host = window.location.origin;
 
