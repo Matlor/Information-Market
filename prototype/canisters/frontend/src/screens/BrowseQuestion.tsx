@@ -1,7 +1,7 @@
 import ListWrapper from "../components/core/view/ListWrapper";
-import FilterBar from "../components/browseQuestion/view/FilterBar.jsx";
-import QuestionPreview from "../components/browseQuestion/view/QuestionPreview.js";
-import Pagination from "../components/browseQuestion/view/Pagination.js";
+import FilterBar from "../components/browseQuestion/view/FilterBar";
+import QuestionPreview from "../components/browseQuestion/view/QuestionPreview";
+import Pagination from "../components/browseQuestion/view/Pagination";
 
 import { useState, useEffect } from "react";
 import getQuestions from "../components/browseQuestion/services/getQuestions";
