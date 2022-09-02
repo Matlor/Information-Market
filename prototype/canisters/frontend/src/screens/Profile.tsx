@@ -1,11 +1,10 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
-const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
+const Profile = ({ plug, logout, setPlug }: any) => {
 	const imageRef = useRef<HTMLInputElement | null>(null);
-	const [userName, setUserName] = useState<string>(user.userName);
-	const [joinedDate] = useState<string>(user.joinedDate);
-	const [avatar, setAvatar] = useState<string>(user.avatar);
+	const [userName, setUserName] = useState<string>(plug.user.userName);
+	const [avatar, setAvatar] = useState<string>(plug.user.avatar);
 
 	const showOpenFileDialog = () => {
 		imageRef.current.click();
@@ -33,7 +32,14 @@ const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
 		if (!updateUser.ok) {
 			console.error("Failed to update user: " + updateUser.err);
 		} else {
-			fetchCurrentUser();
+			setPlug({
+				...plug,
+				user: {
+					userName: updateUser.userName,
+					avatar: updateUser.avatar,
+					joinedDate: plug.user.userName,
+				},
+			});
 		}
 	};
 
@@ -60,10 +66,10 @@ const Profile = ({ plug, logout, user, fetchCurrentUser }: any) => {
 							type="text"
 							className="bg-transparent border-none text-gray-900 text-xl font-semibold rounded-lg w-30 p-2.5 text-center"
 							onChange={handleNameChange}
-							placeholder={userName}
+							placeholder={plug.user.userName}
 						/>
 						<div className="text italic text-center text-gray-900">
-							Joined {joinedDate}
+							Joined: {plug.user.joinedDate}
 						</div>
 					</div>
 					<div className="flex flex-row space-x-5">

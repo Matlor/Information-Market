@@ -145,14 +145,7 @@ function App() {
 					<Route path="/question/:id" />
 					<Route
 						path="/profile"
-						element={
-							<Profile
-								plug={plug}
-								logout={() => plugApi.logout(setPlug)}
-								user={user}
-								fetchCurrentUser={console.log("missing props")}
-							/>
-						}
+						element={<Profile plug={plug} logout={logout} setPlug={setPlug} />}
 					/>
 				</Routes>
 
