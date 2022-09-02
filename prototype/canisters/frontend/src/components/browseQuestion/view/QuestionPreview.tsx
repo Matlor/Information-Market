@@ -31,26 +31,8 @@ const QuestionPreview = ({ question }) => {
 				<StagesBar status={question.status} />
 			</div>
 
-			<div className="h-fit">
-				<svg
-					width="2"
-					height="121px"
-					viewBox="0 0 2 121"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<line
-						x1="1"
-						y1="-4.43495e-08"
-						x2="1.00001"
-						y2="121"
-						stroke="#CED8DE"
-						strokeOpacity="0.8"
-						strokeWidth="2"
-					/>
-				</svg>
-			</div>
-			<div className="flex flex-col gap-[12px]">
+			<div className="border-colorLines border-l-[2px] w-0 self-stretch "></div>
+			<div className="flex flex-col gap-[15px]">
 				<div className="heading3-18px">
 					{question.title} erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh
 					erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh erbvuerzbvurh jh ej
