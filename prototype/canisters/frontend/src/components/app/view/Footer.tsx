@@ -4,7 +4,7 @@ const Footer = () => {
 	return (
 		<div className="flex justify-between items-center p-0 self-stretch">
 			<div className="flex gap-[14px]">
-				<div className="heading2-20py">Powered by</div>
+				<div className="heading2-20px">Powered by</div>
 				<a href="https://internetcomputer.org/">
 					<svg
 						width="45"
