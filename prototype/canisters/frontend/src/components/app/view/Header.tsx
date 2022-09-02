@@ -18,7 +18,7 @@ const Header = ({ login }) => {
 				<Link to="/add-question">
 					<div className="heading1-20x-stretch">Add Question</div>
 				</Link>
-				<Button propFunction={login} />
+				<Button propFunction={login} text={"Login"} />
 			</div>
 		</div>
 	);
