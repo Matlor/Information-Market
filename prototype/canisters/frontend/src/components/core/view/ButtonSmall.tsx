@@ -1,4 +1,4 @@
-const ButtonSmall = ({ propFunction }) => {
+const ButtonSmall = ({ propFunction, text }) => {
 	const clickHandler = (event) => {
 		event.preventDefault();
 		propFunction();
@@ -9,7 +9,7 @@ const ButtonSmall = ({ propFunction }) => {
 			className="heading3-18px flex justify-center items-center px-[25px] py-[10px] bg-colorBackgroundComponents shadow-md rounded-lg"
 			onClick={clickHandler}
 		>
-			Login
+			{text}
 		</button>
 	);
 };
