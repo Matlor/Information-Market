@@ -1,4 +1,4 @@
-import { blobToBase64Str } from "../../../utils/conversions";
+import { blobToBase64Str } from "../services/utils/conversions";
 
 import sudograph from "./sudograph";
 
