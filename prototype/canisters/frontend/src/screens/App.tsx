@@ -10,70 +10,101 @@ import Profile from "./Profile";
 
 import plugApi from "../components/core/services/plug";
 import sudograph from "../components/core/services/sudograph";
-import { graphQlToStrDate, blobToBase64Str } from "../utils/conversions";
 
-import Scenario from "../utils/scenario";
+import {
+	graphQlToStrDate,
+	blobToBase64Str,
+} from "../components/core/services/utils/conversions";
+import Scenario from "../components/core/services/utils/scenario";
+
+import AddQuestion from "./AddQuestion";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
 		isConnected: false,
-		plug: {},
+		principal: "",
 		actors: { marketActor: {}, ledgerActor: {} },
+		user: {
+			userName: "",
+			joinedDate: "",
+			avatar: "",
+		},
 	});
 
-	const login = async () => {
-		const res = await plugApi.establishConnection();
+	// 1 establish connection. store plug object in some var. if it has a principal continue.
+	// 2 get principal of plug object,
+	// 3 pass principal to sudograph function to fetch user. if unsuccessful do 4
+	// 4 use plug object in variable to call create user function -> somehow passing userId, name and principal (I think they have to be generated)
+	// 5 steSate
 
-		if (Object.keys(res).length === 0) {
-			console.error("Failed to establish plug connection!");
-			setPlug({
-				isConnected: false,
-				plug: {},
-				actor: {},
-			});
-		} else {
-			console.log("Successfully connected with plug");
-			setPlug({
-				isConnected: true,
-				plug: await window.ic.plug,
-				actors: {
-					marketActor: res.market,
-					ledgerActor: res.ledger,
-				},
-			});
+	const login = async () => {
+		// 1 connect to plug
+		const plugObject = await plugApi.establishConnection();
+		if (Object.keys(plugObject).length === 0) {
+			return;
 		}
+
+		// 2 the principal is added to the window object when user signed in
+		let principal_id = window.ic.plug.principalId;
+		if (!principal_id) {
+			return;
+		}
+
+		// 3 fetch user
+		const user: any = {};
+		const resFetchUser = await sudograph.fetchUser(principal_id);
+
+		if (resFetchUser.data === null || resFetchUser.data.readUser.length === 0) {
+			// 4 create user
+			// TO DO: check with latest backend
+			// in latest backend we only pass name and avatar (principal comes from plug)
+			let createUser = await plugObject.market.create_user(
+				principal_id,
+				"New User",
+				"avatar"
+			);
+
+			if (!createUser.ok) {
+				console.error("Failed to create a new user!");
+				return;
+			}
+			user.userName = resFetchUser.name;
+			user.joinedDate = graphQlToStrDate(resFetchUser.joined_date);
+
+			// avatar not considered
+		} else {
+			// user existed, therefore store data in user variable
+			user.userName = resFetchUser.data.readUser[0].name;
+			user.joinedDate = graphQlToStrDate(
+				resFetchUser.data.readUser[0].joined_date
+			);
+			user.avatar = blobToBase64Str(resFetchUser.data.readUser[0].avatar);
+		}
+
+		// 5
+		setPlug({
+			isConnected: true,
+			principal: principal_id,
+			actors: {
+				marketActor: plugObject.market,
+				ledgerActor: plugObject.ledger,
+			},
+			user,
+		});
 	};
 
 	const logout = async (setPlug) => {
 		setPlug({
 			isConnected: false,
-			plug: {},
-			actor: {},
+			principal: "",
+			actors: { marketActor: {}, ledgerActor: {} },
+			user: {
+				userName: "",
+				joinedDate: "",
+				avatar: "",
+			},
 		});
 	};
-
-	/* USER DATA FETCHING */
-	const [user, setUser] = useState<any>({
-		userName: "",
-		joinedDate: "",
-		avatar: "",
-	});
-
-	useEffect(() => {
-		const fetchCurrentUser = async () => {
-			const user = await sudograph.fetchUser(plug.plug.principalId);
-			if (user.data === null || user.data.readUser.length === 0) {
-				setUser({ userName: "", joinedDate: "", avatar: "" });
-			} else {
-				setUser({
-					userName: user.data.readUser[0].name,
-					joinedDate: graphQlToStrDate(user.data.readUser[0].joined_date),
-					avatar: blobToBase64Str(user.data.readUser[0].avatar),
-				});
-			}
-		};
-		fetchCurrentUser();
-	}, [plug]);
 
 	/* SCENARIO */
 	const [scenarioLoaded, setScenarioLoaded] = useState<boolean>(false);
@@ -107,9 +138,10 @@ function App() {
 		<PageLayout>
 			<HashRouter>
 				<Header login={login} />
+
 				<Routes>
 					<Route path="/" element={<BrowseQuestion plug={plug} />} />
-					<Route path="/add-question" />
+					<Route path="/add-question" element={<AddQuestion plug={plug} />} />
 					<Route path="/question/:id" />
 					<Route
 						path="/profile"
@@ -118,13 +150,12 @@ function App() {
 								plug={plug}
 								logout={() => plugApi.logout(setPlug)}
 								user={user}
-								fetchCurrentUser={() =>
-									userManagement.fetchCurrentUser(setUser)
-								}
+								fetchCurrentUser={console.log("missing props")}
 							/>
 						}
 					/>
 				</Routes>
+
 				<Footer />
 			</HashRouter>
 		</PageLayout>
