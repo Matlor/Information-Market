@@ -1,6 +1,10 @@
 const Input = ({ value, setValue, placeholder, unit, type }) => {
 	const handler = (e) => {
-		setValue(e.target.value);
+		if (type === "number") {
+			setValue(Number(e.target.value));
+		} else {
+			setValue(e.target.value);
+		}
 	};
 
 	return (

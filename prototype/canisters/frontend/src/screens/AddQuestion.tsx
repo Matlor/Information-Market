@@ -11,8 +11,8 @@ import { Principal } from "@dfinity/principal";
 
 const AddQuestion = ({ plug }) => {
 	const [title, setTitle] = useState("");
-	const [duration, setDuration] = useState("");
-	const [reward, setReward] = useState(0);
+	const [duration, setDuration] = useState<number>(0);
+	const [reward, setReward] = useState<number>(0);
 	const [content, setContent] = useState("");
 
 	const submit = async () => {
@@ -21,6 +21,7 @@ const AddQuestion = ({ plug }) => {
 			return;
 		}
 
+		// TODO: Add error handling
 		try {
 			// 1. Create the invoice
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
@@ -40,13 +41,14 @@ const AddQuestion = ({ plug }) => {
 				created_at_time: [],
 				amount: { e8s: invoiceResponse.ok.invoice.amount },
 			});
-
+			console.log(transferResponse, "transfer response");
 			if (transferResponse?.Err !== undefined) {
 				if (transferResponse?.Err?.InsufficientFunds !== undefined) {
 				} else {
 				}
 				return;
 			}
+
 			// 3. Create the question
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
@@ -54,6 +56,7 @@ const AddQuestion = ({ plug }) => {
 				title,
 				content
 			);
+			console.log(openQuestionResponse, "openQuestionResponse");
 
 			if (openQuestionResponse.err) {
 				console.error(
@@ -65,7 +68,7 @@ const AddQuestion = ({ plug }) => {
 			}
 
 			setTitle("");
-			setDuration("");
+			setDuration(0);
 			setReward(0);
 			setContent("");
 
