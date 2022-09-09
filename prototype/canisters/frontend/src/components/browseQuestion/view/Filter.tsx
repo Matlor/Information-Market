@@ -1,8 +1,15 @@
 import { useState } from "react";
+import RoundedCheckox from "../..//core/view/RoundedCheckbox";
 
 // TO DO: Simplify and style checkbox/dropdown
 
 const Filter = ({ statusMap, setStatusMap }) => {
+	window.addEventListener("click", () => {
+		if (display === "visible") {
+			setDisplay("hidden");
+		}
+	});
+
 	const options = [
 		{ value: "OPEN", label: "Open" },
 		{ value: "PICKANSWER", label: "Winner Selection" },
@@ -21,7 +28,6 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		return false;
 	};
 
-	console.log(statusMap);
 	const [checkBoxState, setCheckBoxState] = useState<any>([
 		checkIfStatusIsSelected(options[0]),
 		checkIfStatusIsSelected(options[1]),
@@ -44,7 +50,7 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		if (display === "visible") {
 			return "rotate-180";
 		} else {
-			return ")";
+			return "";
 		}
 	};
 
@@ -71,11 +77,11 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		};
 
 		return (
-			<input
-				type="checkbox"
-				checked={checkBoxState[num]}
-				onChange={() => clickHandler(num, checkBoxState, setCheckBoxState)}
-			/>
+			<>
+				<div onClick={() => clickHandler(num, checkBoxState, setCheckBoxState)}>
+					<RoundedCheckox isChecked={checkBoxState[num]} />
+				</div>
+			</>
 		);
 	};
 
@@ -83,7 +89,12 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		<div className="w-[163px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
 			<div className="flex justify-between items-center gap-[79px] py-[10px] px-[15px] ">
 				Filter
-				<button onClick={rotateIconHandler}>
+				<button
+					onClick={(e) => {
+						rotateIconHandler();
+						e.stopPropagation();
+					}}
+				>
 					<div className={rotateIcon()}>
 						<svg
 							width="14"
@@ -102,7 +113,10 @@ const Filter = ({ statusMap, setStatusMap }) => {
 			</div>
 
 			<div
-				className={`${display} absolute mt-[5px] py-[10px] shadow-lg  flex flex-col gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
+				className={`${display} absolute  mt-[5px] py-[10px] shadow-lg  flex flex-col gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
 			>
 				<div className="w-[163px] z-10 flex items-center gap-[18px] px-[15px]">
 					{checkbox(0, checkBoxState, setCheckBoxState)}
