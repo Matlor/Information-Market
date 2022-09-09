@@ -1,4 +1,4 @@
-const Title = ({ value, setValue, placeholder }) => {
+const Title = ({ value, setValue, placeholder, maxChar = 300 }) => {
 	const handler = (e) => {
 		setValue(e.target.value);
 	};
@@ -10,10 +10,11 @@ const Title = ({ value, setValue, placeholder }) => {
 				type="text"
 				placeholder={placeholder}
 				value={value}
+				maxLength={maxChar}
 				onChange={handler}
 			/>
 
-			<div className="heading3-18px">0/300</div>
+			<div className="heading3-18px">{value.length}/300</div>
 		</div>
 	);
 };

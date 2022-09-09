@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ListWrapper from "../components/core/view/ListWrapper";
 import TitleBar from "../components/addQuestion/view/TitleBar";
@@ -10,22 +10,57 @@ import { icpToE8s } from "../components/core/services/utils/conversions";
 import { Principal } from "@dfinity/principal";
 
 const AddQuestion = ({ plug }) => {
-	const [title, setTitle] = useState("");
-	const [duration, setDuration] = useState<number>(0);
-	const [reward, setReward] = useState<number>(0);
-	const [content, setContent] = useState("");
+	const [titleSpecification, setTitleSpecification] = useState({
+		title: "",
+		maxTitle: 300,
+	});
+	const [durationSpecification, setDurationSpecification] = useState<any>({
+		duration: 60,
+		minDuration: 60,
+		maxDuration: 7200,
+	});
+	const [rewardSpecification, setRewardSpecification] = useState<any>({
+		reward: 0.1,
+		minReward: 0.1,
+		maxReward: 500,
+	});
 
+	const [content, setContent] = useState("");
+	const [isValidated, setIsValidated] = useState(false);
+
+	const isBetweenMinMax = (value, min, max) => {
+		return value >= min && value <= max;
+	};
+
+	useEffect(() => {
+		if (
+			titleSpecification.title.length <= titleSpecification.maxTitle &&
+			durationSpecification.duration >= durationSpecification.minDuration &&
+			durationSpecification.maxDuration >= durationSpecification.duration &&
+			rewardSpecification.reward >= rewardSpecification.minReward &&
+			rewardSpecification.maxReward >= rewardSpecification.reward
+		) {
+			setIsValidated(true);
+		} else {
+			setIsValidated(false);
+		}
+	}, [titleSpecification, durationSpecification, rewardSpecification]);
+
+	// TODO: round number if ICP
 	const submit = async () => {
-		// TO DO: Structure of app is confusing if that is imported from plug directly
-		if (!(await plugApi.verifyConnection())) {
+		if (!isValidated) {
 			return;
 		}
 
+		// TODO: Structure of app is confusing if that is imported from plug directly
+		if (!(await plugApi.verifyConnection())) {
+			return;
+		}
 		// TODO: Add error handling
 		try {
 			// 1. Create the invoice
 			const invoiceResponse = await plug.actors.marketActor.create_invoice(
-				icpToE8s(reward)
+				icpToE8s(rewardSpecification.reward)
 			);
 			console.log(invoiceResponse, "invoice response");
 			// 2. Perform the transfer
@@ -52,8 +87,8 @@ const AddQuestion = ({ plug }) => {
 			// 3. Create the question
 			const openQuestionResponse = await plug.actors.marketActor.ask_question(
 				invoiceResponse.ok.invoice.id,
-				duration,
-				title,
+				durationSpecification.duration,
+				titleSpecification.title,
 				content
 			);
 			console.log(openQuestionResponse, "openQuestionResponse");
@@ -67,9 +102,9 @@ const AddQuestion = ({ plug }) => {
 				return;
 			}
 
-			setTitle("");
-			setDuration(0);
-			setReward(0);
+			setTitleSpecification({ ...titleSpecification, title: "" });
+			setDurationSpecification({ ...durationSpecification, duration: 0 });
+			setRewardSpecification({ ...rewardSpecification, reward: 0 });
 			setContent("");
 
 			// Success! Redirect to question page
@@ -82,19 +117,63 @@ const AddQuestion = ({ plug }) => {
 	return (
 		<ListWrapper>
 			<TitleBar
-				title={title}
-				setTitle={setTitle}
-				duration={duration}
-				setDuration={setDuration}
-				reward={reward}
-				setReward={setReward}
+				duration={durationSpecification.duration}
+				setDuration={(newDuration) => {
+					setDurationSpecification({
+						...durationSpecification,
+						duration: newDuration,
+					});
+				}}
+				isDurationError={
+					!isBetweenMinMax(
+						durationSpecification.duration,
+						durationSpecification.minDuration,
+						durationSpecification.maxDuration
+					)
+				}
+				minDuration={durationSpecification.minDuration}
+				maxDuration={durationSpecification.maxDuration}
+				reward={rewardSpecification.reward}
+				setReward={(newReward) => {
+					setRewardSpecification({
+						...rewardSpecification,
+						reward: newReward,
+					});
+				}}
+				isRewardError={
+					!isBetweenMinMax(
+						rewardSpecification.reward,
+						rewardSpecification.minReward,
+						rewardSpecification.maxReward
+					)
+				}
+				minReward={rewardSpecification.minReward}
+				maxReward={rewardSpecification.maxReward}
+				title={titleSpecification.title}
+				setTitle={(newTitle) =>
+					setTitleSpecification({
+						...titleSpecification,
+						title: newTitle,
+					})
+				}
 			/>
 			<SlateEditor inputValue={content} setInputValue={setContent} />
 
 			{plug.isConnected ? (
-				<div>
-					<ButtonSmall propFunction={submit} text={"Submit"} />
-				</div>
+				<>
+					{isValidated ? (
+						<div>
+							<ButtonSmall
+								propFunction={submit}
+								text={"Submit"}
+								font={""}
+								loading={true}
+							/>
+						</div>
+					) : (
+						<div className="heading3-18px">Fill out the form correctly</div>
+					)}
+				</>
 			) : (
 				<div className="heading3-18px"> Login to Submit</div>
 			)}
