@@ -31,12 +31,63 @@ function App() {
 		},
 	});
 
+	const refreshUser = async () => {
+		try {
+			// verify connetion, if false log out
+			if (!(await plugApi.verifyConnection())) {
+				logout();
+				return;
+			}
+
+			// fetch user
+			const fetchedUser = await sudograph.fetchUser(plug.principal);
+
+			// if return is ok and above is ok
+			if (fetchedUser.data === null || fetchedUser.data.readUser.length === 0) {
+				logout();
+				return;
+			}
+			// set user
+			setPlug({
+				...plug,
+				user: {
+					...plug.user,
+					avatar: blobToBase64Str(fetchedUser.data.readUser[0].avatar),
+					username: fetchedUser.data.readUser[0].name,
+				},
+			});
+		} catch (error) {
+			console.error("Failed to get user: " + error);
+			logout();
+		}
+	};
+
+	const updateUserInformation = async (newUserName, newAvatar) => {
+		// check connection
+		if (!(await plugApi.verifyConnection())) {
+			logout();
+			return;
+		}
+
+		// update inforamtion
+		let updateUser = await plug.actors.marketActor.update_user(
+			window.ic.plug.principalId,
+			newUserName,
+			newAvatar
+		);
+
+		if (!updateUser.ok) {
+			console.error("Failed to update user: " + updateUser.err);
+		} else {
+			refreshUser();
+		}
+	};
+
 	// 1 establish connection. store plug object in some var. if it has a principal continue.
 	// 2 get principal of plug object,
 	// 3 pass principal to sudograph function to fetch user. if unsuccessful do 4
 	// 4 use plug object in variable to call create user function -> somehow passing userId, name and principal (I think they have to be generated)
 	// 5 steSate
-
 	const login = async () => {
 		// 1 connect to plug
 		const plugObject = await plugApi.establishConnection();
@@ -93,7 +144,7 @@ function App() {
 		});
 	};
 
-	const logout = async (setPlug) => {
+	const logout = async () => {
 		setPlug({
 			isConnected: false,
 			principal: "",
@@ -138,17 +189,20 @@ function App() {
 		<PageLayout>
 			<HashRouter>
 				<Header login={login} />
-
 				<Routes>
 					<Route path="/" element={<BrowseQuestion plug={plug} />} />
 					<Route path="/add-question" element={<AddQuestion plug={plug} />} />
 					<Route path="/question/:id" />
 					<Route
 						path="/profile"
-						element={<Profile plug={plug} logout={logout} setPlug={setPlug} />}
+						element={
+							<Profile
+								plug={plug}
+								updateUserInformation={updateUserInformation}
+							/>
+						}
 					/>
 				</Routes>
-
 				<Footer />
 			</HashRouter>
 		</PageLayout>
