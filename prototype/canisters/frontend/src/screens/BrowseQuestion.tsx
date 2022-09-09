@@ -126,6 +126,19 @@ const BrowseQuestion = ({ plug }) => {
 	// pass avatars to the QuestionPreview component
 	// change preview component to use the avatars
 
+	if (totalQuestions === 0) {
+		return (
+			<div className="self-stretch">
+				<FilterBar
+					setSearchedText={setSearchedText}
+					statusMap={statusMap}
+					setStatusMap={setStatusMap}
+					setOrderIsAscending={setOrderIsAscending}
+					setOrderField={setOrderField}
+				/>
+			</div>
+		);
+	}
 	return (
 		<>
 			<ListWrapper>
