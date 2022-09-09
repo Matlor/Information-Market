@@ -33,12 +33,13 @@ const QuestionPreview = ({ question }) => {
 
 			<div className="border-colorLines border-l-[2px] w-0 self-stretch "></div>
 			<div className="flex flex-col gap-[15px]">
-				<div className="heading3-18px">
-					{question.title} erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh
-					erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh erbvuerzbvurh jh ej
-					jhre ejfh rejh jrej jrhe ejh erb
-				</div>
-
+				<Link to={`/question/${question.id}`}>
+					<div className="heading3-18px">
+						{question.title} erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh
+						erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh erbvuerzbvurh jh ej
+						jhre ejfh rejh jrej jrhe ejh erb
+					</div>
+				</Link>
 				<ProfileAnswers
 					name={question.author.name}
 					answers={question.answers.length}
