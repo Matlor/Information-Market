@@ -270,7 +270,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	];
 
 	return (
-		<div className="flex flex-col gap-[37px] items-start bg-colorBackgroundComponents self-stretch h-[319px] shadow-md rounded-md w-full p-[45px] editor-wrapper">
+		<div className="flex flex-col gap-[37px] pb-[100px] pt-[36px] pr-[100px] pl-[61px]  items-start bg-colorBackgroundComponents self-stretch h-[319px] shadow-md rounded-md w-full  editor-wrapper">
 			<IconContext.Provider
 				value={{
 					color: "gray",
@@ -288,9 +288,9 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 						if (isAstChange) {
 							console.log("hit");
 							// Save the value to Local Storage.
-							//const content = JSON.stringify(value);
+							// const content = JSON.stringify(value);
 							setInputValue(serialize(editor));
-							//localStorage.setItem("content", content);
+							// localStorage.setItem("content", content);
 						}
 					}}
 				>
