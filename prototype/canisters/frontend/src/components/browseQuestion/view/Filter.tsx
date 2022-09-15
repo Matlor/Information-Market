@@ -3,7 +3,13 @@ import RoundedCheckox from "../..//core/view/RoundedCheckbox";
 
 // TO DO: Simplify and style checkbox/dropdown
 
-const Filter = ({ statusMap, setStatusMap }) => {
+const Filter = ({
+	statusMap,
+	setStatusMap,
+	myInteractions,
+	setMyInteractions,
+	isConnected,
+}) => {
 	window.addEventListener("click", () => {
 		if (display === "visible") {
 			setDisplay("hidden");
@@ -85,9 +91,13 @@ const Filter = ({ statusMap, setStatusMap }) => {
 		);
 	};
 
+	const myInteractionsHandler = () => {
+		setMyInteractions(!myInteractions);
+	};
+
 	return (
-		<div className="w-[163px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
-			<div className="flex justify-between items-center gap-[79px] py-[10px] px-[15px] ">
+		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
+			<div className="flex justify-between items-center py-[10px] px-[15px] ">
 				Filter
 				<button
 					onClick={(e) => {
@@ -113,30 +123,41 @@ const Filter = ({ statusMap, setStatusMap }) => {
 			</div>
 
 			<div
-				className={`${display} absolute  mt-[5px] py-[10px] shadow-lg  flex flex-col gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
+				className={`${display} absolute w-full mt-[5px] py-[10px] shadow-lg  flex flex-col gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
 				onClick={(e) => {
 					e.stopPropagation();
 				}}
 			>
-				<div className="w-[163px] z-10 flex items-center gap-[18px] px-[15px]">
+				<div className=" w-max z-10 flex items-center gap-[18px] px-[15px]">
 					{checkbox(0, checkBoxState, setCheckBoxState)}
 					Open
 				</div>
-				<div className="w-[163px] z-10 flex items-center gap-[18px] px-[15px]">
+				<div className="w-max z-10 flex items-center gap-[18px] px-[15px]">
 					{checkbox(1, checkBoxState, setCheckBoxState)}
 					Winner Selection
 				</div>
-				<div className="w-[163px] z-10 flex  items-center gap-[18px] px-[15px]">
+				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
 					{checkbox(2, checkBoxState, setCheckBoxState)}
 					Open for Dispute
 				</div>
-				<div className="w-[163px] z-10 flex  items-center gap-[18px] px-[15px]">
+				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
 					{checkbox(3, checkBoxState, setCheckBoxState)}
 					Arbitration
 				</div>
-				<div className="w-[163px] z-10 flex  items-center gap-[18px] px-[15px]">
+				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
 					{checkbox(4, checkBoxState, setCheckBoxState)}
 					Closed
+				</div>
+				<div className="h-[1px] bg-colorLines"></div>
+
+				<div
+					className={`${
+						isConnected ? "visible" : "hidden"
+					} w-max z-10 flex items-center gap-[18px] px-[15px]`}
+					onClick={myInteractionsHandler}
+				>
+					<RoundedCheckox isChecked={myInteractions} />
+					My Interactions
 				</div>
 			</div>
 		</div>
