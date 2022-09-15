@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-const Sort = ({ setOrderIsAscending, setOrderField }) => {
+const Sort = ({
+	setOrderIsAscending,
+	setOrderField,
+	orderIsAscending,
+}: any) => {
 	const [display, setDisplay] = useState<any>("hidden");
 
 	window.addEventListener("click", () => {
@@ -45,7 +49,7 @@ const Sort = ({ setOrderIsAscending, setOrderField }) => {
 	};
 
 	return (
-		<div className="w-[163px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
+		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
 			<div className="flex justify-between items-center gap-[79px] py-[10px] px-[15px] ">
 				Sort
 				<button
