@@ -6,9 +6,8 @@ import Pagination from "../components/browseQuestion/view/Pagination";
 import { useState, useEffect } from "react";
 import getQuestions from "../components/browseQuestion/services/getQuestions";
 import avatar from "../components/core/services/avatar";
-import { conditionalDelay } from "@dfinity/agent/lib/cjs/polling/strategy";
 
-const BrowseQuestion = ({ plug }) => {
+const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	/* FETCHING DATA */
 	type Status = { value: string; label: string };
 	type JSONValue = string | number | boolean | JSONObject | JSONArray;
@@ -47,7 +46,7 @@ const BrowseQuestion = ({ plug }) => {
 					searchedText,
 					statusMap,
 					myInteractions,
-					plug,
+					userPrincipal,
 					questionsPerPage,
 					pageIndex
 				);
@@ -60,7 +59,6 @@ const BrowseQuestion = ({ plug }) => {
 		return () => clearInterval(interval);
 	}, [fetchQuestionsDate]);
 
-	// Fetch the list of questions every time one of the variables changes
 	useEffect(() => {
 		(async () => {
 			const result = await getQuestions(
@@ -69,7 +67,7 @@ const BrowseQuestion = ({ plug }) => {
 				searchedText,
 				statusMap,
 				myInteractions,
-				plug,
+				userPrincipal,
 				questionsPerPage,
 				pageIndex
 			);
@@ -122,23 +120,6 @@ const BrowseQuestion = ({ plug }) => {
 		loadAvatars(questions, cachedAvatars, setCachedAvatars);
 	}, [questions]);
 
-	// TO DO:
-	// pass avatars to the QuestionPreview component
-	// change preview component to use the avatars
-
-	if (totalQuestions === 0) {
-		return (
-			<div className="self-stretch">
-				<FilterBar
-					setSearchedText={setSearchedText}
-					statusMap={statusMap}
-					setStatusMap={setStatusMap}
-					setOrderIsAscending={setOrderIsAscending}
-					setOrderField={setOrderField}
-				/>
-			</div>
-		);
-	}
 	return (
 		<>
 			<ListWrapper>
@@ -147,12 +128,31 @@ const BrowseQuestion = ({ plug }) => {
 					setSearchedText={setSearchedText}
 					statusMap={statusMap}
 					setStatusMap={setStatusMap}
+					orderIsAscending={orderIsAscending}
 					setOrderIsAscending={setOrderIsAscending}
 					setOrderField={setOrderField}
+					myInteractions={myInteractions}
+					setMyInteractions={setMyInteractions}
+					isConnected={isConnected}
 				/>
-				{questions.map((question, index) => (
-					<QuestionPreview question={question} key={index} />
-				))}
+				{totalQuestions === 0 ? (
+					<></>
+				) : (
+					<>
+						{questions.map((question: any, index) => (
+							<QuestionPreview
+								reward={question.reward}
+								status={question.status}
+								id={question.id}
+								title={question.title}
+								authorName={question.author.name}
+								numAnswers={question.answers.length}
+								avatar={cachedAvatars.get(question.author.id)}
+								key={index}
+							/>
+						))}
+					</>
+				)}
 			</ListWrapper>
 			<Pagination
 				pageIndex={pageIndex}
