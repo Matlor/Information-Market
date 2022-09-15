@@ -197,10 +197,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	// ---------------------------------------------- Element  ----------------------------------------------
 
 	const Element = ({ attributes, children, element }) => {
-		console.log(attributes, "attributes");
-		console.log(children, "children");
-		console.log(element, "element");
-
 		const style = { textAlign: element.align };
 		switch (element.type) {
 			case "block-quote":
@@ -270,10 +266,10 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	];
 
 	return (
-		<div className="flex flex-col gap-[37px] pb-[100px] pt-[36px] pr-[100px] pl-[61px]  items-start bg-colorBackgroundComponents self-stretch h-[319px] shadow-md rounded-md w-full  editor-wrapper">
+		<div className="flex flex-col gap-[37px] py-[36px] pr-[100px] pl-[61px]  items-start bg-colorBackgroundComponents self-stretch h-[319px] shadow-md rounded-md w-full  editor-wrapper">
 			<IconContext.Provider
 				value={{
-					color: "gray",
+					color: "#969696",
 					className: "global-class-name",
 					size: "1.5em",
 				}}
