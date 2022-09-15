@@ -9,9 +9,10 @@ import plugApi from "../components/core/services/plug";
 import { icpToE8s } from "../components/core/services/utils/conversions";
 import { Principal } from "@dfinity/principal";
 
-const AddQuestion = ({ plug }) => {
+const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 	const [titleSpecification, setTitleSpecification] = useState({
-		title: "",
+		title: "Add your title here...",
+		minTitle: 20,
 		maxTitle: 300,
 	});
 	const [durationSpecification, setDurationSpecification] = useState<any>({
@@ -20,8 +21,8 @@ const AddQuestion = ({ plug }) => {
 		maxDuration: 7200,
 	});
 	const [rewardSpecification, setRewardSpecification] = useState<any>({
-		reward: 0.1,
-		minReward: 0.1,
+		reward: 0,
+		minReward: 0,
 		maxReward: 500,
 	});
 
@@ -34,6 +35,7 @@ const AddQuestion = ({ plug }) => {
 
 	useEffect(() => {
 		if (
+			titleSpecification.minTitle <= titleSpecification.title.length &&
 			titleSpecification.title.length <= titleSpecification.maxTitle &&
 			durationSpecification.duration >= durationSpecification.minDuration &&
 			durationSpecification.maxDuration >= durationSpecification.duration &&
@@ -59,12 +61,12 @@ const AddQuestion = ({ plug }) => {
 		// TODO: Add error handling
 		try {
 			// 1. Create the invoice
-			const invoiceResponse = await plug.actors.marketActor.create_invoice(
+			const invoiceResponse = await createInvoice(
 				icpToE8s(rewardSpecification.reward)
 			);
 			console.log(invoiceResponse, "invoice response");
 			// 2. Perform the transfer
-			const transferResponse = await plug.actors.ledgerActor.transfer({
+			const transferResponse = await transfer({
 				to: Array.from(
 					Principal.fromHex(
 						invoiceResponse.ok.invoice.destination.text
@@ -85,7 +87,7 @@ const AddQuestion = ({ plug }) => {
 			}
 
 			// 3. Create the question
-			const openQuestionResponse = await plug.actors.marketActor.ask_question(
+			const openQuestionResponse = await askQuestion(
 				invoiceResponse.ok.invoice.id,
 				durationSpecification.duration,
 				titleSpecification.title,
@@ -156,10 +158,19 @@ const AddQuestion = ({ plug }) => {
 						title: newTitle,
 					})
 				}
+				isTitleError={
+					!isBetweenMinMax(
+						titleSpecification.title.length,
+						titleSpecification.minTitle,
+						titleSpecification.maxTitle
+					)
+				}
+				minTitle={titleSpecification.minTitle}
+				maxTitle={titleSpecification.maxTitle}
 			/>
 			<SlateEditor inputValue={content} setInputValue={setContent} />
 
-			{plug.isConnected ? (
+			{isConnected ? (
 				<>
 					{isValidated ? (
 						<div>
