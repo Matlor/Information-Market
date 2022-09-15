@@ -6,8 +6,8 @@ export const icpToE3s = (icp: number) => {
 	return icp * 1000;
 };
 
-export const e8sToIcp = (e8s: bigint) => {
-	return Number(e8s) / (10 ** 8);
+export const e8sToIcp = (e8s: any) => {
+	return Number(e8s) / 10 ** 8;
 };
 
 export const icpToE8s = (icp: number) => {

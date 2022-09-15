@@ -5,7 +5,9 @@ import Pagination from "../components/browseQuestion/view/Pagination";
 
 import { useState, useEffect } from "react";
 import getQuestions from "../components/browseQuestion/services/getQuestions";
-import avatar from "../components/core/services/avatar";
+
+import sudograph from "../components/core/services/sudograph";
+import { blobToBase64Str } from "../components/core/services/utils/conversions";
 
 const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	/* FETCHING DATA */
@@ -98,19 +100,12 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 				for (var i = 0; i < questions.length; i++) {
 					let question: any = questions[i];
 					if (!cachedAvatars.has(question.author.id)) {
-						const loadedAvatar = await avatar.loadAvatar(question.author.id);
+						const res = await sudograph.query_avatar(question.author.id);
+						const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
 						setCachedAvatars(
-							(prev) => new Map([...prev, [question.author.id, loadedAvatar]])
+							(prev: any) =>
+								new Map([...prev, [question.author.id, loadedAvatar]])
 						);
-					}
-					for (var j = 0; j < question.answers.length; j++) {
-						let answer: any = question.answers[j];
-						if (!cachedAvatars.has(answer.author.id)) {
-							const loadedAvatar = await avatar.loadAvatar(answer.author.id);
-							setCachedAvatars(
-								(prev) => new Map([...prev, [answer.author.id, loadedAvatar]])
-							);
-						}
 					}
 				}
 			} catch (error) {

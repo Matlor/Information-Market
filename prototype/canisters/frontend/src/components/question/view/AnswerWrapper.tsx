@@ -6,17 +6,19 @@ const AnswerWrapper = ({
 	currentStatus,
 	currentUserRole,
 	answer,
+	avatar,
 	pickedWinnerId,
 	setWinnerId,
 	winnerByChoice,
 	finalWinner,
-}) => {
+}: any) => {
 	if (checkIfCaseTrue("OPEN", "any", currentStatus, currentUserRole)) {
 		return (
 			<Answer
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 			/>
 		);
 	} else if (
@@ -33,6 +35,7 @@ const AnswerWrapper = ({
 					content={answer.content}
 					date={answer.creation_date}
 					authorName={answer.author.name}
+					avatar={avatar}
 					isChoice={pickedWinnerId === answer.id}
 					choiceBorder={"border-2 border-colorLines"}
 					isHover={true}
@@ -56,6 +59,7 @@ const AnswerWrapper = ({
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 			/>
 		);
 	} else if (
@@ -67,6 +71,7 @@ const AnswerWrapper = ({
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 				isChoice={winnerByChoice.id === answer.id}
 				choiceBorder={"border-2 border-colorLines"}
 				isHover={false}
@@ -83,6 +88,7 @@ const AnswerWrapper = ({
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 			/>
 		);
 	} else if (checkIfCaseTrue("CLOSED", "any", currentStatus, currentUserRole)) {
@@ -91,6 +97,7 @@ const AnswerWrapper = ({
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 				isChoice={finalWinner.id === answer.id}
 				choiceBorder={"border-2 border-colorLines"}
 				isHover={false}
@@ -105,6 +112,7 @@ const AnswerWrapper = ({
 				content={answer.content}
 				date={answer.creation_date}
 				authorName={answer.author.name}
+				avatar={avatar}
 			/>
 		);
 	}

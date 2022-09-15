@@ -10,15 +10,23 @@ import sudograph from "../components/core/services/sudograph";
 
 import StatusIndicator from "../components/question/view/StatusIndicator";
 import StatusWrapper from "../components/question/view/StatusWrapper";
+import { blobToBase64Str } from "../components/core/services/utils/conversions";
 
-const Question = ({ plug }) => {
+import Loading from "../components/core/view/Loading";
+
+const Question = ({
+	isConnected,
+	answerQuestion,
+	pickWinner,
+	triggerDispute,
+	userPrincipal,
+}: any) => {
 	let { id } = useParams();
 
-	// answer state
 	const [answerInput, setAnswerInput] = useState<any>("");
 	const [questionState, setQuestionState] = useState<any>({
-		question: {},
 		hasData: false,
+		question: {},
 		answers: [],
 	});
 
@@ -42,7 +50,7 @@ const Question = ({ plug }) => {
 				var sortedAnswers = [];
 
 				if (readAnswer.length > 0) {
-					sortedAnswers = readAnswer.sort((a, b) => {
+					sortedAnswers = readAnswer.sort((a: any, b: any) => {
 						return a.creation_date - b.creation_date;
 					});
 				}
@@ -58,12 +66,52 @@ const Question = ({ plug }) => {
 		}
 	};
 
+	/* FETCHING AVATARS */
+	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
+	useEffect(() => {
+		const loadAvatars = async function (
+			questionState: any,
+			cachedAvatars: any,
+			setCachedAvatars: any
+		) {
+			if (!questionState.hasData) {
+				return;
+			}
+			try {
+				if (!cachedAvatars.has(questionState.question.author.id)) {
+					const res = await sudograph.query_avatar(
+						questionState.question.author.id
+					);
+					const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+					setCachedAvatars(
+						(prev: any) =>
+							new Map([
+								...prev,
+								[questionState.question.author.id, loadedAvatar],
+							])
+					);
+				}
+				for (var j = 0; j < questionState.answers.length; j++) {
+					let answer: any = questionState.answers[j];
+					if (!cachedAvatars.has(answer.author.id)) {
+						const res = await sudograph.query_avatar(answer.author.id);
+						const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+						setCachedAvatars(
+							(prev: any) =>
+								new Map([...prev, [answer.author.id, loadedAvatar]])
+						);
+					}
+				}
+			} catch (error) {
+				console.error("Failed to load avatars!");
+			}
+		};
+		loadAvatars(questionState, cachedAvatars, setCachedAvatars);
+	}, [questionState]);
+
 	const submitAnswer = async () => {
 		try {
-			const res = await plug.actors.marketActor.answer_question(
-				questionState.question.id,
-				answerInput
-			);
+			const res = await answerQuestion(questionState.question.id, answerInput);
 
 			if (res.err) {
 				console.log(res.err);
@@ -77,10 +125,7 @@ const Question = ({ plug }) => {
 
 	const submitWinner = async () => {
 		try {
-			const res = await plug.actors.marketActor.pick_winner(
-				questionState.question.id,
-				pickedWinnerId
-			);
+			const res = await pickWinner(questionState.question.id, pickedWinnerId);
 
 			if (res.err) {
 			} else {
@@ -91,15 +136,9 @@ const Question = ({ plug }) => {
 		}
 	};
 
-	if (!questionState.hasData) {
-		return <div>Loading...</div>;
-	}
-
 	const submitDispute = async () => {
 		try {
-			const res = await plug.actors.marketActor.trigger_dispute(
-				questionState.question.id
-			);
+			const res = await triggerDispute(questionState.question.id);
 
 			if (res.err) {
 			} else {
@@ -112,15 +151,23 @@ const Question = ({ plug }) => {
 
 	const isAnswerAuthor = () => {
 		for (var i = 0; i < questionState.answers.length; i++) {
-			if (questionState.answers[i].author.id === plug.principal) {
+			if (questionState.answers[i].author.id === userPrincipal) {
 				return true;
 			} else {
 				return false;
 			}
 		}
 	};
+	if (!questionState.hasData) {
+		return (
+			<div className="mt-[103px]">
+				<Loading />
+			</div>
+		);
+	}
+
 	var currentUserRole = "none";
-	if (questionState.question.author.id === plug.principal) {
+	if (questionState.question.author.id === userPrincipal) {
 		currentUserRole = "questionAuthor";
 	} else if (isAnswerAuthor()) {
 		currentUserRole = "answerAuthor";
@@ -145,6 +192,7 @@ const Question = ({ plug }) => {
 				title={questionState.question.title}
 				content={questionState.question.content}
 				authorName={questionState.question.author.name}
+				avatar={cachedAvatars.get(questionState.question.author.id)}
 				numberOfAnswers={questionState.answers.length}
 				date={questionState.question.creation_date}
 			/>
@@ -155,7 +203,7 @@ const Question = ({ plug }) => {
 				slateInput={answerInput}
 				setSlateInput={setAnswerInput}
 				propFunction={submitAnswer}
-				isLoggedIn={plug.isConnected}
+				isLoggedIn={isConnected}
 			/>
 
 			{questionState.answers.map((answer: any) => {
@@ -165,6 +213,7 @@ const Question = ({ plug }) => {
 						currentStatus={questionState.question.status}
 						currentUserRole={currentUserRole}
 						answer={answer}
+						avatar={cachedAvatars.get(answer.author.id)}
 						pickedWinnerId={pickedWinnerId}
 						setWinnerId={setWinnerId}
 						winnerByChoice={questionState.question.winner}
