@@ -16,6 +16,10 @@ const establishConnection = async () => {
 			host,
 		});
 
+		if (process.env.NODE_ENV !== "production") {
+			await window.ic?.plug?.agent?.fetchRootKey();
+		}
+
 		var marketActor = await window.ic.plug.createActor({
 			canisterId: marketCanisterId,
 			interfaceFactory: idlMarket,
@@ -29,6 +33,9 @@ const establishConnection = async () => {
 		return { market: marketActor, ledger: ledgerActor };
 	} catch (e) {
 		console.error("Failed to establish connection: " + e);
+		// TODO: Only redirect if plug is not found
+		// window.location.href = "https://plugwallet.ooo/";
+
 		return {};
 	}
 };
