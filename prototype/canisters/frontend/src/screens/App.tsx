@@ -3,9 +3,9 @@ import { Route, Routes, HashRouter } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import PageLayout from "../components/app/view/PageLayout";
-import Header from "../components/app/view/Header";
-import Footer from "../components/app/view/Footer";
 import BrowseQuestion from "./BrowseQuestion";
+import AddQuestion from "./AddQuestion";
+import Question from "./Question";
 import Profile from "./Profile";
 
 import plugApi from "../components/core/services/plug";
@@ -16,8 +16,6 @@ import {
 	blobToBase64Str,
 } from "../components/core/services/utils/conversions";
 import Scenario from "../components/core/services/utils/scenario";
-
-import AddQuestion from "./AddQuestion";
 
 function App() {
 	const [plug, setPlug] = useState<any>({
@@ -186,26 +184,59 @@ function App() {
 	}, []);
 
 	return (
-		<PageLayout>
-			<HashRouter>
-				<Header login={login} />
+		<HashRouter>
+			<PageLayout
+				isConnected={plug.isConnected}
+				login={login}
+				logout={logout}
+				avatar={plug.user.avatar}
+			>
 				<Routes>
-					<Route path="/" element={<BrowseQuestion plug={plug} />} />
-					<Route path="/add-question" element={<AddQuestion plug={plug} />} />
-					<Route path="/question/:id" />
+					<Route
+						path="/"
+						element={
+							<BrowseQuestion
+								isConnected={plug.isConnected}
+								userPrincipal={plug.principal}
+							/>
+						}
+					/>
+					<Route
+						path="/add-question"
+						element={
+							<AddQuestion
+								isConnected={plug.isConnected}
+								createInvoice={plug.actors.marketActor.create_invoice}
+								transfer={plug.actors.ledgerActor.transfer}
+								askQuestion={plug.actors.marketActor.ask_question}
+							/>
+						}
+					/>
+					<Route
+						path="/question/:id"
+						element={
+							<Question
+								isConnected={plug.isConnected}
+								answerQuestion={plug.actors.marketActor.answer_question}
+								pickWinner={plug.actors.marketActor.pick_winner}
+								triggerDispute={plug.actors.marketActor.trigger_dispute}
+								userPrincipal={plug.principal}
+							/>
+						}
+					/>
 					<Route
 						path="/profile"
 						element={
 							<Profile
-								plug={plug}
+								isConnected={plug.isConnected}
+								user={plug.user}
 								updateUserInformation={updateUserInformation}
 							/>
 						}
 					/>
 				</Routes>
-				<Footer />
-			</HashRouter>
-		</PageLayout>
+			</PageLayout>
+		</HashRouter>
 	);
 }
 
