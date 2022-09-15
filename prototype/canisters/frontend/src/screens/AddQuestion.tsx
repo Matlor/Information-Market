@@ -9,6 +9,9 @@ import plugApi from "../components/core/services/plug";
 import { icpToE8s } from "../components/core/services/utils/conversions";
 import { Principal } from "@dfinity/principal";
 
+import { getMinReward } from "../components/addQuestion/services/market";
+import { e8sToIcp } from "../components/core/services/utils/conversions";
+
 const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 	const [titleSpecification, setTitleSpecification] = useState({
 		title: "Add your title here...",
@@ -28,6 +31,18 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 
 	const [content, setContent] = useState("");
 	const [isValidated, setIsValidated] = useState(false);
+
+	useEffect(() => {
+		(async () => {
+			const fetchedMin = await getMinReward();
+
+			setRewardSpecification({
+				...rewardSpecification,
+				minReward: e8sToIcp(fetchedMin),
+				reward: e8sToIcp(fetchedMin),
+			});
+		})();
+	}, []);
 
 	const isBetweenMinMax = (value, min, max) => {
 		return value >= min && value <= max;
