@@ -9,7 +9,7 @@ const getQuestions = async (
 	searchedText,
 	statusMap,
 	myInteractions,
-	plug,
+	userPrincipal,
 	questionsPerPage,
 	pageIndex
 ) => {
@@ -49,7 +49,7 @@ const getQuestions = async (
 	}
 	queryInputs += "]}";
 	if (myInteractions) {
-		queryInputs += `,{or: [{answers: {author: {id: {eq:"${plug.plug.principalId}"}}}}, {author: {id: {eq: "${plug.plug.principalId}"}}}]}`;
+		queryInputs += `,{or: [{answers: {author: {id: {eq:"${userPrincipal}"}}}}, {author: {id: {eq: "${userPrincipal}"}}}]}`;
 	}
 	queryInputs += "]}";
 

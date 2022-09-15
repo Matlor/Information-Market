@@ -1,11 +1,11 @@
 import { useState } from "react";
 import ButtonSmall from "../components/core/view/ButtonSmall";
 
-const Profile = ({ plug, updateUserInformation }: any) => {
-	const [userName, setUserName] = useState<string>(plug.user.userName);
+const Profile = ({ isConnected, user, updateUserInformation }: any) => {
+	const [userName, setUserName] = useState<string>(user.userName);
 	const [avatar, setAvatar] = useState<any>("");
 
-	const handleImageChange = (event) => {
+	const handleImageChange = (event: any) => {
 		const file = event.target.files[0];
 		var reader = new FileReader();
 		reader.readAsDataURL(file);
@@ -14,12 +14,12 @@ const Profile = ({ plug, updateUserInformation }: any) => {
 		};
 	};
 
-	const handleNameChange = (event) => {
+	const handleNameChange = (event: any) => {
 		setUserName(event.target.value);
 	};
 
 	const updateProfile = async () => {
-		var currentAvatar = plug.user.avatar;
+		var currentAvatar = user.avatar;
 		if (avatar) {
 			currentAvatar = avatar;
 		}
@@ -30,7 +30,7 @@ const Profile = ({ plug, updateUserInformation }: any) => {
 
 	return (
 		<>
-			{plug.isConnected ? (
+			{isConnected ? (
 				<div className="flex flex-col gap-[20px]  ">
 					<label
 						className="p-6 flex w-60 h-60 rounded-full bg-colorBackgroundComponents shadow-md relative hover:cursor-pointer "
@@ -48,7 +48,7 @@ const Profile = ({ plug, updateUserInformation }: any) => {
 						/>
 						<img
 							className="rounded-full"
-							src={avatar ? avatar : plug.user.avatar}
+							src={avatar ? avatar : user.avatar}
 							alt=""
 						/>
 						<div
@@ -74,11 +74,11 @@ const Profile = ({ plug, updateUserInformation }: any) => {
 					<div className="flex flex-col gap-[3px] items-center heading3-18px">
 						<input
 							type="text"
-							className="w-30  p-2.5 text-center outline-none placeholder:heading3-18px   rounded-md shadow-md bg-colorBackgroundComponents border-none"
+							className="w-30  p-2.5 text-center outline-none placeholder:heading3-18px rounded-md shadow-md bg-colorBackgroundComponents border-none"
 							onChange={handleNameChange}
-							placeholder={plug.user.userName}
+							placeholder={user.userName}
 						/>
-						<div className="text-14px">Joined: {plug.user.joinedDate}</div>
+						<div className="text-14px">Joined: {user.joinedDate}</div>
 					</div>
 
 					<div className="self-center">
