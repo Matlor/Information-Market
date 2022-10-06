@@ -8,18 +8,18 @@ import SlateSubmit from "../components/question/view/SlateSubmit";
 
 import sudograph from "../components/core/services/sudograph";
 
-import StatusIndicator from "../components/question/view/StatusIndicator";
-import StatusWrapper from "../components/question/view/StatusWrapper";
 import { blobToBase64Str } from "../components/core/services/utils/conversions";
 
 import Loading from "../components/core/view/Loading";
 
+import QuestionMenu from "../components/question/view/QuestionMenu";
+import Title from "../components/question/view/Title";
+
 const Question = ({
-	isConnected,
+	userPrincipal,
 	answerQuestion,
 	pickWinner,
 	triggerDispute,
-	userPrincipal,
 }: any) => {
 	let { id } = useParams();
 
@@ -30,7 +30,8 @@ const Question = ({
 		answers: [],
 	});
 
-	const [pickedWinnerId, setWinnerId] = useState<any>("");
+	console.log(questionState, "questionState");
+	const [pickedWinner, setWinner] = useState<any>("");
 
 	useEffect(() => {
 		fetch_data();
@@ -62,7 +63,7 @@ const Question = ({
 				});
 			}
 		} catch (err) {
-			console.log(err);
+			console.debug(err);
 		}
 	};
 
@@ -103,7 +104,7 @@ const Question = ({
 					}
 				}
 			} catch (error) {
-				console.error("Failed to load avatars!");
+				console.error(error, "Failed to load avatars!");
 			}
 		};
 		loadAvatars(questionState, cachedAvatars, setCachedAvatars);
@@ -112,7 +113,6 @@ const Question = ({
 	const submitAnswer = async () => {
 		try {
 			const res = await answerQuestion(questionState.question.id, answerInput);
-
 			if (res.err) {
 				console.log(res.err);
 			} else {
@@ -125,8 +125,7 @@ const Question = ({
 
 	const submitWinner = async () => {
 		try {
-			const res = await pickWinner(questionState.question.id, pickedWinnerId);
-
+			const res = await pickWinner(questionState.question.id, pickedWinner);
 			if (res.err) {
 			} else {
 				await fetch_data();
@@ -139,7 +138,6 @@ const Question = ({
 	const submitDispute = async () => {
 		try {
 			const res = await triggerDispute(questionState.question.id);
-
 			if (res.err) {
 			} else {
 				await fetch_data();
@@ -150,8 +148,8 @@ const Question = ({
 	};
 
 	const isAnswerAuthor = () => {
-		for (var i = 0; i < questionState.answers.length; i++) {
-			if (questionState.answers[i].author.id === userPrincipal) {
+		for (var i = 0; i < questionState.question.answers.length; i++) {
+			if (questionState.question.answers[i].author.id === userPrincipal) {
 				return true;
 			} else {
 				return false;
@@ -160,35 +158,41 @@ const Question = ({
 	};
 	if (!questionState.hasData) {
 		return (
-			<div className="mt-[103px]">
+			<div className="mt-[78px]">
 				<Loading />
 			</div>
 		);
 	}
 
-	var currentUserRole = "none";
+	var currentUserRole = "isNone";
+
 	if (questionState.question.author.id === userPrincipal) {
-		currentUserRole = "questionAuthor";
+		currentUserRole = "isQuestionAuthor";
 	} else if (isAnswerAuthor()) {
-		currentUserRole = "answerAuthor";
+		currentUserRole = "isAnswerAuthor";
+	} else if (userPrincipal === "") {
+		currentUserRole = "isNotLoggedIn";
 	}
 
+	// TODO: Final Winner might be assumed to be of wrong structure
 	return (
 		<ListWrapper>
-			<div className="flex gap-[17px]">
-				<StatusIndicator status={questionState.question.status} />
-				<StatusWrapper
-					currentStatus={questionState.question.status}
-					currentUserRole={currentUserRole}
-					pickedWinnerId={pickedWinnerId}
-					submitWinner={submitWinner}
-					submitDispute={submitDispute}
-					winnerByChoice={questionState.question.winner}
-				/>
-			</div>
-
-			<QuestionBody
+			<Title
+				currentStatus={questionState.question.status}
+				currentUserRole={currentUserRole}
+				pickedWinner={pickedWinner}
+			/>
+			<QuestionMenu
+				currentStatus={questionState.question.status}
+				currentUserRole={currentUserRole}
+				timeLeftMin={questionState.question.status_end_date}
 				reward={questionState.question.reward}
+				pickedWinner={pickedWinner}
+				submitWinner={submitWinner}
+				submitDispute={submitDispute}
+				finalWinner={questionState.question.winner}
+			/>
+			<QuestionBody
 				title={questionState.question.title}
 				content={questionState.question.content}
 				authorName={questionState.question.author.name}
@@ -196,31 +200,28 @@ const Question = ({
 				numberOfAnswers={questionState.answers.length}
 				date={questionState.question.creation_date}
 			/>
-
 			<SlateSubmit
 				currentStatus={questionState.question.status}
 				currentUserRole={currentUserRole}
 				slateInput={answerInput}
 				setSlateInput={setAnswerInput}
 				propFunction={submitAnswer}
-				isLoggedIn={isConnected}
 			/>
 
-			{questionState.answers.map((answer: any) => {
-				return (
-					<AnswerWrapper
-						key={answer.id}
-						currentStatus={questionState.question.status}
-						currentUserRole={currentUserRole}
-						answer={answer}
-						avatar={cachedAvatars.get(answer.author.id)}
-						pickedWinnerId={pickedWinnerId}
-						setWinnerId={setWinnerId}
-						winnerByChoice={questionState.question.winner}
-						finalWinner={questionState.question.winner}
-					/>
-				);
-			})}
+			<AnswerWrapper
+				answers={questionState.answers}
+				currentStatus={questionState.question.status}
+				currentUserRole={currentUserRole}
+				cachedAvatars={cachedAvatars}
+				pickedWinnerId={pickedWinner && pickedWinner.id ? pickedWinner.id : ""}
+				setWinner={setWinner}
+				winnerByChoiceId={
+					questionState.question.winner ? questionState.question.winner.id : ""
+				}
+				finalWinnerId={
+					questionState.question.winner ? questionState.question.winner.id : ""
+				}
+			/>
 		</ListWrapper>
 	);
 };
