@@ -164,6 +164,10 @@ function App() {
 
 	useEffect(() => {
 		if (!scenarioLoaded) {
+			if (process.env.NODE_ENV !== "development") {
+				console.log("production");
+				return;
+			}
 			const loadScenario = async () => {
 				try {
 					const result = await createDefaultAvatar();
