@@ -16,7 +16,8 @@ cp canisters/ledger/ledger.public.did canisters/ledger/ledger.did
 dfx generate ledger
 
 # 2. Deploy the invoice canister
-dfx deploy invoice
+export LEDGER_PRINCIPAL=$(dfx canister id ledger)
+dfx deploy invoice  --argument='(principal "'${LEDGER_PRINCIPAL}'")'
 dfx generate invoice
 
 # 3. Deploy the graphql canister
@@ -25,7 +26,8 @@ dfx generate graphql
 
 # 4. Deploy the market canister
 export INVOICE_PRINCIPAL=$(dfx canister id invoice)
-dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 1440; disputable_duration_minutes = 2880; update_status_on_heartbeat = true; })'
+export GRAPHQL_PRINCIPAL=$(dfx canister id graphql)
+dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 1440; disputable_duration_minutes = 2880; update_status_on_heartbeat = true; })'
 dfx generate market
 
 # 5. Deploy the frontend canister
