@@ -1,5 +1,4 @@
 import "../index.css";
-import { Route, Routes, HashRouter } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import PageLayout from "../components/app/view/PageLayout";
@@ -10,6 +9,8 @@ import Profile from "./Profile";
 
 import plugApi from "../components/core/services/plug";
 import sudograph from "../components/core/services/sudograph";
+
+import motokoPath from "../../assets/motoko.jpg";
 
 import {
 	graphQlToStrDate,
@@ -81,6 +82,18 @@ function App() {
 		}
 	};
 
+	async function createDefaultAvatar() {
+		return new Promise(async (resolve) => {
+			let motoko_image = await fetch(motokoPath);
+			var reader = new FileReader();
+			reader.readAsDataURL(await motoko_image.blob());
+			console.log(reader, "reader");
+			reader.onload = () => {
+				resolve(reader.result);
+			};
+		});
+	}
+
 	// 1 establish connection. store plug object in some var. if it has a principal continue.
 	// 2 get principal of plug object,
 	// 3 pass principal to sudograph function to fetch user. if unsuccessful do 4
@@ -101,34 +114,25 @@ function App() {
 
 		// 3 fetch user
 		const user: any = {};
-		const resFetchUser = await sudograph.fetchUser(principal_id);
-
+		var resFetchUser = await sudograph.fetchUser(principal_id);
 		if (resFetchUser.data === null || resFetchUser.data.readUser.length === 0) {
 			// 4 create user
-			// TO DO: check with latest backend
-			// in latest backend we only pass name and avatar (principal comes from plug)
+			const result = await createDefaultAvatar();
 			let createUser = await plugObject.market.create_user(
 				principal_id,
 				"New User",
-				"avatar"
+				result
 			);
-
 			if (!createUser.ok) {
-				console.error("Failed to create a new user!");
 				return;
 			}
-			user.userName = resFetchUser.name;
-			user.joinedDate = graphQlToStrDate(resFetchUser.joined_date);
-
-			// avatar not considered
-		} else {
-			// user existed, therefore store data in user variable
-			user.userName = resFetchUser.data.readUser[0].name;
-			user.joinedDate = graphQlToStrDate(
-				resFetchUser.data.readUser[0].joined_date
-			);
-			user.avatar = blobToBase64Str(resFetchUser.data.readUser[0].avatar);
+			resFetchUser = await sudograph.fetchUser(principal_id);
 		}
+		user.userName = resFetchUser.data.readUser[0].name;
+		user.joinedDate = graphQlToStrDate(
+			resFetchUser.data.readUser[0].joined_date
+		);
+		user.avatar = blobToBase64Str(resFetchUser.data.readUser[0].avatar);
 
 		// 5
 		setPlug({
@@ -162,18 +166,14 @@ function App() {
 		if (!scenarioLoaded) {
 			const loadScenario = async () => {
 				try {
-					let motoko_image = await fetch("motoko.jpg");
-					var reader = new FileReader();
-					reader.readAsDataURL(await motoko_image.blob());
-					reader.onloadend = async function () {
-						Scenario.loadScenario(
-							["Alice", "Bob", "Charlie", "Dan", "Edgar"],
-							14,
-							60,
-							60,
-							reader.result
-						);
-					};
+					const result = await createDefaultAvatar();
+					Scenario.loadScenario(
+						["Alice", "Bob", "Charlie", "Dan", "Edgar"],
+						6,
+						60,
+						60,
+						result
+					);
 				} catch (error) {
 					console.error("Failed to load scenario: " + error);
 				}
@@ -184,59 +184,57 @@ function App() {
 	}, []);
 
 	return (
-		<HashRouter>
-			<PageLayout
-				isConnected={plug.isConnected}
-				login={login}
-				logout={logout}
-				avatar={plug.user.avatar}
-			>
-				<Routes>
-					<Route
-						path="/"
-						element={
-							<BrowseQuestion
-								isConnected={plug.isConnected}
-								userPrincipal={plug.principal}
-							/>
-						}
-					/>
-					<Route
-						path="/add-question"
-						element={
-							<AddQuestion
-								isConnected={plug.isConnected}
-								createInvoice={plug.actors.marketActor.create_invoice}
-								transfer={plug.actors.ledgerActor.transfer}
-								askQuestion={plug.actors.marketActor.ask_question}
-							/>
-						}
-					/>
-					<Route
-						path="/question/:id"
-						element={
-							<Question
-								isConnected={plug.isConnected}
-								answerQuestion={plug.actors.marketActor.answer_question}
-								pickWinner={plug.actors.marketActor.pick_winner}
-								triggerDispute={plug.actors.marketActor.trigger_dispute}
-								userPrincipal={plug.principal}
-							/>
-						}
-					/>
-					<Route
-						path="/profile"
-						element={
-							<Profile
-								isConnected={plug.isConnected}
-								user={plug.user}
-								updateUserInformation={updateUserInformation}
-							/>
-						}
-					/>
-				</Routes>
-			</PageLayout>
-		</HashRouter>
+		<PageLayout
+			isConnected={plug.isConnected}
+			login={login}
+			logout={logout}
+			avatar={plug.user.avatar}
+		>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<BrowseQuestion
+							isConnected={plug.isConnected}
+							userPrincipal={plug.principal}
+						/>
+					}
+				/>
+				<Route
+					path="/add-question"
+					element={
+						<AddQuestion
+							isConnected={plug.isConnected}
+							createInvoice={plug.actors.marketActor.create_invoice}
+							transfer={plug.actors.ledgerActor.transfer}
+							askQuestion={plug.actors.marketActor.ask_question}
+						/>
+					}
+				/>
+				<Route
+					path="/question/:id"
+					element={
+						<Question
+							isConnected={plug.isConnected}
+							userPrincipal={plug.principal}
+							answerQuestion={plug.actors.marketActor.answer_question}
+							pickWinner={plug.actors.marketActor.pick_winner}
+							triggerDispute={plug.actors.marketActor.trigger_dispute}
+						/>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<Profile
+							isConnected={plug.isConnected}
+							user={plug.user}
+							updateUserInformation={updateUserInformation}
+						/>
+					}
+				/>
+			</Routes>
+		</PageLayout>
 	);
 }
 
