@@ -1,120 +1,130 @@
 import Answer from "./Answer";
 
-import { checkIfCaseTrue } from "../services/cases";
-
 const AnswerWrapper = ({
+	answers,
 	currentStatus,
 	currentUserRole,
-	answer,
-	avatar,
+	cachedAvatars,
 	pickedWinnerId,
-	setWinnerId,
-	winnerByChoice,
-	finalWinner,
+	setWinner,
+	winnerByChoiceId,
+	finalWinnerId,
 }: any) => {
-	if (checkIfCaseTrue("OPEN", "any", currentStatus, currentUserRole)) {
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-			/>
-		);
-	} else if (
-		checkIfCaseTrue(
-			"PICKANSWER",
-			"questionAuthor",
-			currentStatus,
-			currentUserRole
-		)
-	) {
-		return (
-			<div onClick={() => setWinnerId(answer.id)}>
-				<Answer
-					content={answer.content}
-					date={answer.creation_date}
-					authorName={answer.author.name}
-					avatar={avatar}
-					isChoice={pickedWinnerId === answer.id}
-					choiceBorder={"border-2 border-colorLines"}
-					isHover={true}
-					hoverBorder={
-						"hover:hover:border-colorLines border-2 border-colorBackgroundComponents"
-					}
-				/>
-			</div>
-		);
-	} else if (
-		checkIfCaseTrue(
-			"PICKANSWER",
-			"answerAuthor",
-			currentStatus,
-			currentUserRole
-		) ||
-		checkIfCaseTrue("PICKANSWER", "none", currentStatus, currentUserRole)
-	) {
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-			/>
-		);
-	} else if (
-		checkIfCaseTrue("DISPUTABLE", "any", currentStatus, currentUserRole)
-	) {
-		// TODO: Add who the picked winner actually was
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-				isChoice={winnerByChoice.id === answer.id}
-				choiceBorder={"border-2 border-colorLines"}
-				isHover={false}
-				hoverBorder={
-					"hover:hover:border-colorLines border-2 border-colorBackgroundComponents"
-				}
-			/>
-		);
-	} else if (
-		checkIfCaseTrue("DISPUTED", "any", currentStatus, currentUserRole)
-	) {
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-			/>
-		);
-	} else if (checkIfCaseTrue("CLOSED", "any", currentStatus, currentUserRole)) {
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-				isChoice={finalWinner.id === answer.id}
-				choiceBorder={"border-2 border-colorLines"}
-				isHover={false}
-				hoverBorder={
-					"hover:hover:border-colorLines border-2 border-colorBackgroundComponents"
-				}
-			/>
-		);
-	} else {
-		return (
-			<Answer
-				content={answer.content}
-				date={answer.creation_date}
-				authorName={answer.author.name}
-				avatar={avatar}
-			/>
-		);
+	const currentCase = currentStatus + "." + currentUserRole;
+
+	switch (currentCase) {
+		case "OPEN.isQuestionAuthor":
+		case "OPEN.isAnswerAuthor":
+		case "OPEN.isNone":
+		case "OPEN.isNotLoggedIn":
+			return answers.map((answer) => {
+				return (
+					<div key={answer.id} data-cy="Answer">
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={"normal"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+
+		case "PICKANSWER.isQuestionAuthor":
+			return answers.map((answer) => {
+				return (
+					<div
+						key={answer.id}
+						data-cy="Answer"
+						onClick={() => setWinner(answer)}
+					>
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={pickedWinnerId === answer.id ? "winner" : "hover"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+		case "PICKANSWER.isAnswerAuthor":
+		case "PICKANSWER.isNone":
+		case "PICKANSWER.isNotLoggedIn":
+			return answers.map((answer) => {
+				return (
+					<div key={answer.id} data-cy="Answer">
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={"normal"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+
+		case "DISPUTABLE.isQuestionAuthor":
+		case "DISPUTABLE.isAnswerAuthor":
+		case "DISPUTABLE.isNone":
+		case "DISPUTABLE.isNotLoggedIn":
+			return answers.map((answer) => {
+				return (
+					<div key={answer.id} data-cy="Answer">
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={winnerByChoiceId === answer.id ? "winner" : "normal"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+		case "DISPUTED.isQuestionAuthor":
+		case "DISPUTED.isAnswerAuthor":
+		case "DISPUTED.isNone":
+		case "DISPUTED.isNotLoggedIn":
+			return answers.map((answer) => {
+				return (
+					<div key={answer.id} data-cy="Answer">
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={"normal"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+		case "CLOSED.isQuestionAuthor":
+		case "CLOSED.isAnswerAuthor":
+		case "CLOSED.isNone":
+		case "CLOSED.isNotLoggedIn":
+			return answers.map((answer) => {
+				return (
+					<div key={answer.id} data-cy="Answer">
+						<Answer
+							content={answer.content}
+							date={answer.creation_date}
+							authorName={answer.author.name}
+							avatar={cachedAvatars.get(answer.author.id)}
+							effect={finalWinnerId === answer.id ? "winner" : "normal"}
+							id={answer.id}
+						/>
+					</div>
+				);
+			});
+		default:
+			return;
 	}
 };
 
