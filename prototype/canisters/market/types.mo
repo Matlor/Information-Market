@@ -1,4 +1,5 @@
-import InvoiceTypes "../invoice/types";
+import InvoiceTypes "../invoice/Types";
+
 
 // TO DO: paste directly the types used from the invoice canister here
 // TO DO: check if it makes more sense to have more detailed errors, or one
@@ -7,6 +8,7 @@ module {
 
     public type InstallMarketArguments = {
         invoice_canister: Principal;
+        graphql_canister: Principal;
         coin_symbol: Text;
         min_reward_e8s: Nat;
         transfer_fee_e8s: Nat;

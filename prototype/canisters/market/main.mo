@@ -1,4 +1,9 @@
-import InvoiceTypes "../invoice/types";
+// Following synthax does not work in actor classes (on mainnet?)
+// import GraphQL      "canister:graphql";
+
+import InvoiceTypes "../invoice/Types";
+import GraphQL "../graphql/graphqlTypes";
+
 import Types        "types";
 import Utils        "utils";
 
@@ -13,13 +18,13 @@ import Principal    "mo:base/Principal";
 import Result       "mo:base/Result";
 import Time         "mo:base/Time";
 
-import GraphQL      "canister:graphql";
-
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
-    // Members
     private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(arguments.invoice_canister));
+    private let graphql_canister_ : GraphQL.Interface = actor (Principal.toText(arguments.graphql_canister));
+
+
     private let coin_symbol_ : Text = arguments.coin_symbol;
     private let min_reward_ : Nat = arguments.min_reward_e8s;
     private let fee_ : Nat = arguments.transfer_fee_e8s;
@@ -55,12 +60,12 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     // ------------------------- Create User -------------------------
 
     public shared ({caller}) func create_user(user_id: Text, name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await GraphQL.get_user(user_id)){
+        switch (await graphql_canister_.get_user(user_id)){
             case(?user){
                 return #err(#UserExists);
             };
             case(null){
-                switch (await GraphQL.create_user(user_id, name, Utils.time_minutes_now(), avatar)){
+                switch (await graphql_canister_.create_user(user_id, name, Utils.time_minutes_now(), avatar)){
                     case(null) {
                         return #err(#GraphQLError);
                     };
@@ -76,12 +81,12 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     // ------------------------- Update User -------------------------
 
     public shared ({caller}) func update_user(user_id: Text, name: Text, avatar: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await GraphQL.get_user(user_id)){
+        switch (await graphql_canister_.get_user(user_id)){
             case(null){
                 return #err(#UserNotFound);
             };
             case(?user){
-                switch (await GraphQL.update_user(user_id, name, avatar)){
+                switch (await graphql_canister_.update_user(user_id, name, avatar)){
                     case(null) {
                         return #err(#GraphQLError);
                     };
@@ -112,7 +117,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     symbol = coin_symbol_;
                 };
             };
-            switch (await GraphQL.get_user(Principal.toText(caller))){
+            switch (await graphql_canister_.get_user(Principal.toText(caller))){
                 case(null){
                     let invoice_error : InvoiceTypes.CreateInvoiceErr = {
                         kind = #Other;
@@ -126,7 +131,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             return #err(create_invoice_err);
                         };
                         case (#ok create_invoice_success) {
-                            switch (await GraphQL.create_invoice(
+                            switch (await graphql_canister_.create_invoice(
                                 Nat.toText(create_invoice_success.invoice.id),
                                 user.id
                             )){
@@ -158,7 +163,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     ) : async Result.Result<GraphQL.QuestionType, Types.Error> {
         let author = Principal.toText(caller);
         // Verify that the invoice exists in database
-        switch (await GraphQL.get_invoice(Nat.toText(invoice_id))){
+        switch (await graphql_canister_.get_invoice(Nat.toText(invoice_id))){
             case (null) {
                 return #err(#NotFound);
             };
@@ -179,7 +184,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                 case(#AlreadyVerified verified){
                                     // If it has already been verified, check that no
                                     // question already exists for this invoice
-                                    switch(await GraphQL.get_question_by_invoice(Nat.toText(invoice_id))){
+                                    switch(await graphql_canister_.get_question_by_invoice(Nat.toText(invoice_id))){
                                         case(?question){
                                             return #err(#NotAllowed);
                                         };
@@ -194,7 +199,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             };
                             // Finally create the question
                             let now = Utils.time_minutes_now();
-                            switch (await GraphQL.create_question(
+                            switch (await graphql_canister_.create_question(
                                 author,
                                 Nat.toText(invoice_id),
                                 now,
@@ -226,13 +231,13 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         content: Text
     ): async Result.Result<GraphQL.AnswerType, Types.Error> {
         // Check the user is registred
-        switch (await GraphQL.get_user(Principal.toText(caller))){
+        switch (await graphql_canister_.get_user(Principal.toText(caller))){
             case(null){
                 return #err(#UserNotFound);
             };
             case(?user){
                 // Check the question exists
-                switch(await GraphQL.get_question(question_id)){
+                switch(await graphql_canister_.get_question(question_id)){
                     case(null){
                         return #err(#NotFound);
                     };
@@ -244,7 +249,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                         } else if (question.status != #OPEN) {
                             return #err(#WrongStatus);
                         } else {
-                            switch(await GraphQL.create_answer(
+                            switch(await graphql_canister_.create_answer(
                                 question_id,
                                 user.id,
                                 Utils.time_minutes_now(),
@@ -272,7 +277,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         question_id: Text,
         answer_id: Text
         ) : async Result.Result<(), Types.Error> {
-        switch(await GraphQL.get_question(question_id)){
+        switch(await graphql_canister_.get_question(question_id)){
              case(null){
                 return #err(#NotFound);
             };
@@ -282,9 +287,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     return #err(#NotAllowed);
                 } else if (question.status != #PICKANSWER) {
                     return #err(#WrongStatus);
-                } else if ((await GraphQL.get_answer(question_id, answer_id)) == null) {
+                } else if ((await graphql_canister_.get_answer(question_id, answer_id)) == null) {
                     return #err(#NotFound);
-                } else if (not (await GraphQL.pick_winner(question_id, answer_id, now, now + duration_disputable_))){
+                } else if (not (await graphql_canister_.pick_winner(question_id, answer_id, now, now + duration_disputable_))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -299,7 +304,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     public shared ({caller}) func trigger_dispute(
         question_id: Text
     ): async Result.Result<(), Types.Error> {
-        switch(await GraphQL.get_question(question_id)){
+        switch(await graphql_canister_.get_question(question_id)){
              case(null){
                 return #err(#NotFound);
             };
@@ -307,9 +312,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                 let now = Utils.time_minutes_now();
                 if (question.status != #DISPUTABLE) {
                     return #err(#WrongStatus);
-                } else if (not(await GraphQL.has_answered(question_id, Principal.toText(caller)))) {
+                } else if (not(await graphql_canister_.has_answered(question_id, Principal.toText(caller)))) {
                     return #err(#NotAllowed);
-                } else if (not (await GraphQL.open_dispute(question_id, now))){
+                } else if (not (await graphql_canister_.open_dispute(question_id, now))){
                     return #err(#GraphQLError);
                 } else {
                     return #ok();
@@ -329,7 +334,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         if (caller != initializer){
             return #err(#NotAllowed);
         };
-        switch(await GraphQL.get_question(question_id)){
+        switch(await graphql_canister_.get_question(question_id)){
              case(null){
                 return #err(#NotFound);
             };
@@ -337,7 +342,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                 if (question.status != #DISPUTED) {
                     return #err(#WrongStatus);
                 } else {
-                    switch (await GraphQL.get_answer(question_id, answer_id)) {
+                    switch (await graphql_canister_.get_answer(question_id, answer_id)) {
                         case (null) {
                             return #err(#NotFound);
                         };
@@ -352,7 +357,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                     // multiple transfers for the same question
                                     // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                     // in motoko, to be able to ensure that the question has not already been paid
-                                    if(await GraphQL.solve_dispute(
+                                    if(await graphql_canister_.solve_dispute(
                                         question_id,
                                         answer_id,
                                         Nat64.toText(block_height),
@@ -376,16 +381,16 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
     public func update_status() : async () {
         let now = Utils.time_minutes_now();
-        let questions : [GraphQL.QuestionType] = await GraphQL.get_questions();
+        let questions : [GraphQL.QuestionType] = await graphql_canister_.get_questions();
         for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
         {
             switch(question.status){
                 case(#OPEN){
                     if (now >= question.status_end_date) {
-                        if (await GraphQL.has_answers(question.id)){
+                        if (await graphql_canister_.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
-                            ignore await GraphQL.must_pick_answer(question.id, now, now + duration_pick_answer_);
+                            ignore await graphql_canister_.must_pick_answer(question.id, now, now + duration_pick_answer_);
                         } else {
                             // Refund the author if no answer has been given
                             switch(await transfer(Principal.fromText(question.author.id), question.reward)){
@@ -396,7 +401,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                     // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                     // in motoko, to be able to ensure that the question has not already been paid
                                     Debug.print("Update question \"" # question.id # "\" status to CLOSE");
-                                    ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
+                                    ignore await graphql_canister_.close_question(question.id, Nat64.toText(block_height), now);
                                 };
                                 case(_){
                                     Debug.print("Failed to reward the author for question \"" # question.id # "\"");
@@ -409,7 +414,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     if (now >= question.status_end_date) {
                         Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
-                        ignore await GraphQL.open_dispute(question.id, now);
+                        ignore await graphql_canister_.open_dispute(question.id, now);
                     };
                 };
                 case(#DISPUTABLE){
@@ -431,7 +436,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                         // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
                                         // in motoko, to be able to ensure that the question has not already been paid
                                         Debug.print("Update question \"" # question.id # "\" status to CLOSED");
-                                        ignore await GraphQL.close_question(question.id, Nat64.toText(block_height), now);
+                                        ignore await graphql_canister_.close_question(question.id, Nat64.toText(block_height), now);
                                     };
                                     case(_){
                                         Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
