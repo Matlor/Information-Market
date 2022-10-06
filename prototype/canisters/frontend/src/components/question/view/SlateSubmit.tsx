@@ -1,8 +1,6 @@
 import SlateEditor from "../../addQuestion/view/SlateEditor";
 import ButtonSmall from "../../core/view/ButtonSmall";
 
-import { checkIfCaseTrue } from "../services/cases";
-
 // TODO: Add error and loading handling
 const SlateSubmit = ({
 	currentStatus,
