@@ -4,7 +4,7 @@ import { useState } from "react";
 const Button = ({
 	propFunction,
 	text,
-	font = "heading1-20x-stretch",
+	font = "heading1-stretch",
 	loading = false,
 }: any) => {
 	const [isClicked, setIsClicked] = useState(false);

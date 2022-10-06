@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 const ButtonSmall = ({
 	propFunction,
 	text,
-	font = "heading-3-18px",
+	font = "heading3",
 	loading = false,
 }: any) => {
 	const [isClicked, setIsClicked] = useState(false);
