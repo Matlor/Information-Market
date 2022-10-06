@@ -4,9 +4,15 @@ import ButtonSmall from "../components/core/view/ButtonSmall";
 const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	const [userName, setUserName] = useState<string>(user.userName);
 	const [avatar, setAvatar] = useState<any>("");
+	const [isError, setIsError] = useState<any>(false);
 
 	const handleImageChange = (event: any) => {
 		const file = event.target.files[0];
+		setIsError(false);
+		if (file.size > 500000) {
+			setIsError(true);
+			return;
+		}
 		var reader = new FileReader();
 		reader.readAsDataURL(file);
 		reader.onloadend = async function () {
@@ -23,6 +29,7 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 		if (avatar) {
 			currentAvatar = avatar;
 		}
+
 		updateUserInformation(userName, currentAvatar);
 	};
 
@@ -31,7 +38,7 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	return (
 		<>
 			{isConnected ? (
-				<div className="flex flex-col gap-[20px]  ">
+				<div className="flex flex-col gap-[20px] ">
 					<label
 						className="p-6 flex w-60 h-60 rounded-full bg-colorBackgroundComponents shadow-md relative hover:cursor-pointer "
 						onMouseEnter={() => {
@@ -43,6 +50,7 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 					>
 						<input
 							type="file"
+							max-size="500000" // 500kb
 							style={{ display: "none" }}
 							onChange={handleImageChange}
 						/>
@@ -71,14 +79,14 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 						</div>
 					</label>
 
-					<div className="flex flex-col gap-[3px] items-center heading3-18px">
+					<div className="flex flex-col gap-[3px] items-center heading3">
 						<input
 							type="text"
-							className="w-30  p-2.5 text-center outline-none placeholder:heading3-18px rounded-md shadow-md bg-colorBackgroundComponents border-none"
+							className="w-30  p-2.5 text-center outline-none placeholder:heading3 rounded-md shadow-md bg-colorBackgroundComponents border-none"
 							onChange={handleNameChange}
 							placeholder={user.userName}
 						/>
-						<div className="text-14px">Joined: {user.joinedDate}</div>
+						<div className="text-normal">Joined: {user.joinedDate}</div>
 					</div>
 
 					<div className="self-center">
@@ -87,10 +95,17 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 							text={"Save"}
 							loading={true}
 						/>
+						{isError ? (
+							<div className="w-max text-normal mt-2 text-colorRed flex justify-center absolute   left-1/2 transform -translate-x-1/2 -translate-y-2/2">
+								{"File has to be < 500kb"}
+							</div>
+						) : (
+							<></>
+						)}
 					</div>
 				</div>
 			) : (
-				<div className=" heading3-18px ">Not connected</div>
+				<div className="heading3">Not connected</div>
 			)}
 		</>
 	);
