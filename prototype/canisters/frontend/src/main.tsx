@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./screens/App";
+import { HashRouter } from "react-router-dom";
 
 // to fix decoder of agent-js
 window.global = window;
@@ -11,6 +12,9 @@ declare global {
 		ic: any;
 	}
 }
-let ic = window.ic;
 
-ReactDOM.createRoot(document.getElementById("root")!).render(<App />);
+ReactDOM.createRoot(document.getElementById("root")!).render(
+	<HashRouter>
+		<App />
+	</HashRouter>
+);

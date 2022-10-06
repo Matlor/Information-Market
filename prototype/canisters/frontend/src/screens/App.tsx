@@ -1,4 +1,5 @@
 import "../index.css";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import PageLayout from "../components/app/view/PageLayout";
@@ -29,6 +30,7 @@ function App() {
 			avatar: "",
 		},
 	});
+	const navigate = useNavigate();
 
 	const refreshUser = async () => {
 		try {
@@ -157,6 +159,7 @@ function App() {
 				avatar: "",
 			},
 		});
+		navigate("/");
 	};
 
 	/* SCENARIO */
