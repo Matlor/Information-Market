@@ -6,27 +6,36 @@
 @tailwind utilities;
 
 @layer components {
-	.heading1-20x-stretch {
-		@apply text-colorText font-OpenSans font-normal tracking-widest text-20 leading-27;
-	}
-	.heading2-20px {
-		@apply text-colorText font-OpenSans font-normal tracking-normal text-20 leading-27;
+	.heading1-stretch {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-widest text-20 leading-28;
 	}
 
-	.heading3-18px {
-		@apply text-colorText font-OpenSans font-normal tracking-normal text-18 leading-25;
+	.heading2 {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-22 leading-38;
 	}
 
-	.text-14px {
-		@apply text-colorText font-OpenSans font-normal tracking-normal text-14 leading-19;
+	.heading3 {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-18 leading-28;
 	}
 
-	.text-small-12px {
-		@apply text-colorText font-OpenSans font-normal tracking-normal text-12 leading-16;
+	.heading-light {
+		@apply text-colorText font-OpenSans font-light antialiased tracking-normal text-18 leading-28;
+	}
+
+	.heading-question-menu {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-25 leading-38;
+	}
+
+	.text-normal {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-14 leading-28;
+	}
+
+	.text-small {
+		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-12 leading-16;
 	}
 
 	.editor-wrapper {
-		@apply heading3-18px;
+		@apply text-normal;
 	}
 
 	.editor-wrapper blockquote {
@@ -42,10 +51,10 @@
 	}
 
 	.editor-wrapper h2 {
-		@apply heading2-20px;
+		@apply heading2;
 	}
 
 	.editor-wrapper h3 {
-		@apply heading3-18px;
+		@apply heading3;
 	}
 }
