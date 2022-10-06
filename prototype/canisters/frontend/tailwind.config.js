@@ -3,7 +3,7 @@ module.exports = {
 	content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
 	theme: {
 		colors: {
-			colorBackground: "#F4FAFF",
+			colorBackground: "#EBF2ED",
 			colorBackgroundComponents: "#FFFFFC",
 			colorText: "#605E5D",
 			colorIcon: "#969696",
@@ -18,6 +18,8 @@ module.exports = {
 
 		fontSize: {
 			48: "48px",
+			25: "25px",
+			22: "22px",
 			20: "20px",
 			18: "18px",
 			14: "14px",
@@ -31,22 +33,22 @@ module.exports = {
 		},
 
 		lineHeight: {
-			27: "27px",
-			25: "25px",
-			19: "19px",
+			38: "38px",
+			28: "28px",
 			16: "16px",
 		},
 
 		boxShadow: {
 			md: "0px 2px 4px rgba(0, 0, 0, 0.04)",
 			lg: "0px 4px 8px rgba(0, 0, 0, 0.04)",
+			effect: "0px 0px 15px rgba(209, 253, 210, 0.6)",
 		},
 
 		borderRadius: {
 			none: "0",
 			sm: "2px",
-			md: "10px",
-			lg: "25px",
+			md: "15px",
+			lg: "30px",
 			full: "9999px",
 		},
 
