@@ -101,7 +101,7 @@ function App() {
 	// 5 steSate
 	const login = async () => {
 		// 1 connect to plug
-		const plugObject = await plugApi.establishConnection();
+		const plugObject = await plugApi.establishConnection(logout, login);
 		if (Object.keys(plugObject).length === 0) {
 			return;
 		}
