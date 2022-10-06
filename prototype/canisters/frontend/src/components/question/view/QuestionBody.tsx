@@ -14,7 +14,10 @@ const QuestionBody = ({
 	date,
 }: any) => {
 	return (
-		<div className="flex flex-col items-start gap-[20px] py-[30px] pr-[48px] pl-[35px] bg-colorBackgroundComponents shadow-md rounded-lg">
+		<div
+			className="flex flex-col items-start gap-[20px] py-[30px] pr-[48px] pl-[35px] bg-colorBackgroundComponents shadow-md rounded-lg"
+			data-cy="QuestionBody"
+		>
 			<div className="heading2">{title}</div>
 
 			<div className="editor-wrapper text-justify">{parse(content)}</div>

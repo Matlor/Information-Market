@@ -40,7 +40,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 		for (let i = 0; i < blocks.length; i++) {
 			var format = blocks[i];
 			if (isBlockActive(editor, format)) {
-				console.log(format, "active format");
 				someIsActive = true;
 			}
 		}
@@ -70,9 +69,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	};
 
 	const toggleBlock = (editor, format) => {
-		console.log(format);
 		const isActive = isBlockActive(editor, format);
-		console.log(isActive);
 		// if block is not active, toggle all others.
 		// only one block can be active.
 		if (!isActive) {
@@ -95,9 +92,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 			type: isActive ? "paragraph" : isList ? "list-item" : format,
 		};
 
-		console.log(newProperties, "newProperties");
 		Transforms.setNodes(editor, newProperties);
-		console.log(editor, "editor");
 
 		if (!isActive && isList) {
 			const block = { type: format, children: [] };
@@ -266,7 +261,10 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 	];
 
 	return (
-		<div className="flex flex-col gap-[37px] py-[36px] pr-[100px] pl-[61px]  items-start bg-colorBackgroundComponents self-stretch h-[319px] shadow-md rounded-md w-full  editor-wrapper">
+		<div
+			className="flex flex-col gap-[37px] py-[30px] pr-[48px] pl-[35px]  items-start bg-colorBackgroundComponents self-stretch h-[338px] shadow-md rounded-lg w-full  editor-wrapper"
+			data-cy="SlateEditor"
+		>
 			<IconContext.Provider
 				value={{
 					color: "#969696",
@@ -282,7 +280,6 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 							(op) => "set_selection" !== op.type
 						);
 						if (isAstChange) {
-							console.log("hit");
 							// Save the value to Local Storage.
 							// const content = JSON.stringify(value);
 							setInputValue(serialize(editor));
@@ -311,7 +308,7 @@ const SlateEditor = ({ inputValue, setInputValue }) => {
 					</Toolbar>
 
 					<Editable
-						className="overflow-y-scroll overflow-x-hidden self-stretch h-full"
+						className="p-0 overflow-y-scroll overflow-x-hidden self-stretch h-full"
 						renderElement={renderElement}
 						renderLeaf={renderLeaf}
 						placeholder={placeholder}
