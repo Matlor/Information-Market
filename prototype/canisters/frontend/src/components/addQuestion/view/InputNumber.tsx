@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FieldWrapper from "../../core/view/FieldWrapper";
 
 const Input = ({ value, setValue, isError, minValue, maxValue, unit }) => {
 	const [isEmpty, setIsEmpty] = useState<boolean>(false);
@@ -14,27 +15,27 @@ const Input = ({ value, setValue, isError, minValue, maxValue, unit }) => {
 	};
 
 	return (
-		<>
-			<div className="flex relative justify-between gap-[24px] items-center self-stretch py-[10px] px-[15px] shadow-md rounded-md bg-colorBackgroundComponents">
+		<div className="relative ">
+			<FieldWrapper>
 				<input
-					className="outline-none placeholder:heading3-18px heading3-18px p-0"
+					className="w-full outline-none placeholder:heading3 heading3 p-0 "
 					type="number"
 					onChange={handler}
 					value={isEmpty ? "" : value}
 				/>
 
 				<div className="border-colorLines self-stretch border-l-[1px] w-0"></div>
-				<div className="heading3-18px">{unit} </div>
+				<div className="heading3">{unit} </div>
 
 				{isError ? (
-					<div className="text-14px text-colorRed  flex justify-center w-max absolute bottom-12 ">
+					<div className="text text-colorRed  flex justify-center w-max absolute bottom-12 ">
 						The value has to be between {minValue} and {maxValue}
 					</div>
 				) : (
 					<></>
 				)}
-			</div>
-		</>
+			</FieldWrapper>
+		</div>
 	);
 };
 

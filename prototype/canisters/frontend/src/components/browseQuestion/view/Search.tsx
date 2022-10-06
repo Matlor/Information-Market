@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FieldWrapper from "../../core/view/FieldWrapper";
 
 const Search = ({ setSearchedText }) => {
 	const [input, setInput] = useState<string>("");
@@ -8,7 +9,7 @@ const Search = ({ setSearchedText }) => {
 	};
 
 	return (
-		<div className="w-[490px] px-[15px] py-[10px] flex items-center gap-[30px] shadow-md rounded-md bg-colorBackgroundComponents">
+		<FieldWrapper>
 			<svg
 				width="20"
 				height="19"
@@ -23,13 +24,13 @@ const Search = ({ setSearchedText }) => {
 			</svg>
 
 			<input
-				className="w-full outline-none placeholder:heading3-18px heading3-18px p-0"
+				className="w-[490px] outline-none placeholder:heading3 heading3 p-0"
 				type="text"
 				placeholder="Search..."
 				value={input}
 				onChange={handler}
 			/>
-		</div>
+		</FieldWrapper>
 	);
 };
 
