@@ -35,7 +35,7 @@ const Pagination = ({
 	};
 
 	return (
-		<div className="flex gap-[33px] justify-between items-center px-[66px] py-[31px] bg-colorBackgroundComponents w-min shadow-md rounded-md">
+		<div className="flex gap-[33px] justify-between items-center px-[35px] py-[30px] bg-colorBackgroundComponents w-min shadow-md rounded-lg">
 			<div className={`flex gap-[17px] ${previousOpacity}`}>
 				<button onClick={decreaseIndex}>
 					<svg
@@ -53,13 +53,13 @@ const Pagination = ({
 						/>
 					</svg>
 				</button>
-				<div className="heading3-18px">Next</div>
+				<div className="heading3">Next</div>
 			</div>
 
-			<div className="heading3-18px">{pageIndex + 1}</div>
+			<div className="heading3">{pageIndex + 1}</div>
 
 			<div className={`flex gap-[17px] ${nextOpacity}`}>
-				<div className="heading3-18px ">Prev</div>
+				<div className="heading3 ">Prev</div>
 
 				<button onClick={increaseIndex}>
 					<svg

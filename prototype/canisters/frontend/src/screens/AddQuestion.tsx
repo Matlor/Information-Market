@@ -197,11 +197,11 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 							/>
 						</div>
 					) : (
-						<div className="heading3-18px">Fill out the form correctly</div>
+						<div className="heading3">Fill out the form correctly</div>
 					)}
 				</>
 			) : (
-				<div className="heading3-18px"> Login to Submit</div>
+				<div className="heading3"> Login to Submit</div>
 			)}
 		</ListWrapper>
 	);

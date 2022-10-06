@@ -49,8 +49,8 @@ const Sort = ({
 	};
 
 	return (
-		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
-			<div className="flex justify-between items-center gap-[79px] py-[10px] px-[15px] ">
+		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
+			<div className="flex justify-between items-center gap-[79px] py-[8px] px-[15px] ">
 				Sort
 				<button
 					onClick={(e) => {

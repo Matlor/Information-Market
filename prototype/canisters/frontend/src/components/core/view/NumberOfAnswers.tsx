@@ -14,7 +14,7 @@ const NumberOfAnswers = ({ answers }) => {
 				/>
 			</svg>
 
-			<div className="text-small-12px">{answers} answers</div>
+			<div className="text-small">{answers} answers</div>
 		</div>
 	);
 };

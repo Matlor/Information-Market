@@ -30,17 +30,17 @@ const QuestionPreview = ({
 	};
 
 	return (
-		<div className="flex justify-start items-start  py-[23px] pr-[48px] pl-[27px] gap-[46px] bg-colorBackgroundComponents shadow-md rounded-md">
+		<div className="flex justify-start items-start  py-[23px] pr-[48px] pl-[27px] gap-[46px] bg-colorBackgroundComponents shadow-md rounded-lg">
 			<div className="w-[95px] flex-none flex flex-col gap-[12px]">
-				<div className="heading3-18px">{reward} ICP</div>
-				<div className="text-14px ">{smallLetterConversion(status)}</div>
+				<div className="heading3">{reward} ICP</div>
+				<div className="text-normal ">{smallLetterConversion(status)}</div>
 				<StagesBar status={status} />
 			</div>
 
-			<div className="border-colorLines border-l-[2px] w-0 self-stretch "></div>
-			<div className="flex flex-col gap-[15px]">
+			<div className="border-colorBackground border-l-[3px] w-0 self-stretch "></div>
+			<div className="flex flex-col gap-[10px]">
 				<Link to={`/question/${id}`}>
-					<div className="heading3-18px">
+					<div className="heading3">
 						{title} erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh
 						erbvuerzbvurh jh ej jhre ejfh rejh jrej jrhe ejh erbvuerzbvurh jh ej
 						jhre ejfh rejh jrej jrhe ejh erb

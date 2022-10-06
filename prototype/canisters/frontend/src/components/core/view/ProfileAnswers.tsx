@@ -3,7 +3,7 @@ import Answer from "./NumberOfAnswers";
 
 const ProfileAnswers = ({ name, answers, avatar }: any) => {
 	return (
-		<div className="flex items-center gap-5 w-max">
+		<div className="flex items-center gap-[30px] w-max">
 			<Profile name={name} avatar={avatar} />
 			<Answer answers={answers} />
 		</div>

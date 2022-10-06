@@ -33,10 +33,10 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 			</Link>
 			<div className="p-0 flex justify-between items-center gap-[90px] ">
 				<Link to="/">
-					<div className="heading1-20x-stretch">Browse Question</div>
+					<div className="heading1-stretch">Browse Question</div>
 				</Link>
 				<Link to="/add-question">
-					<div className="heading1-20x-stretch">Add Question</div>
+					<div className="heading1-stretch">Add Question</div>
 				</Link>
 				{buttonOrProfile()}
 			</div>
