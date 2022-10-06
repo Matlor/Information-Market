@@ -22,25 +22,98 @@ async function getNumberQuestions(): Promise<number> {
 	}
 }
 
-async function getUser(user_name: String): Promise<Array<string>> {
-	const result = await sudographActor.query(gql`
-		query ($user_name: String!) {
-			readUser (search: {name: {eq: $user_name} }){
-				id
+// for debugging
+const get_question = async (questionId) => {
+	var res: any = await sudographActor.query(
+		gql`
+			query ($question_id: ID!) {
+				readQuestion(search: { id: { eq: $question_id } }) {
+					id
+					author {
+						id
+						name
+						joined_date
+					}
+					author_invoice {
+						id
+						buyer {
+							id
+							name
+							joined_date
+						}
+					}
+					creation_date
+					status
+					status_update_date
+					status_end_date
+					open_duration
+					title
+					answers {
+						id
+						author {
+							id
+						}
+					}
+					content
+					reward
+					winner {
+						id
+						author {
+							id
+							name
+							joined_date
+						}
+						creation_date
+						content
+					}
+					close_transaction_block_height
+				}
 			}
-		}
-	`, {user_name});
+		`,
+		{ question_id: `${questionId}` }
+	);
+	return JSON.stringify(res);
+};
+
+async function getUser(user_name: String): Promise<Array<string>> {
+	const result = await sudographActor.query(
+		gql`
+			query ($user_name: String!) {
+				readUser(search: { name: { eq: $user_name } }) {
+					id
+				}
+			}
+		`,
+		{ user_name }
+	);
 	return result.data.readUser;
 }
 
-async function createUser(user_id: String, name: String, joined_date: number, avatar: String): Promise<String> {
+async function createUser(
+	user_id: String,
+	name: String,
+	joined_date: number,
+	avatar: String
+): Promise<String> {
 	const result = await sudographActor.mutation(
 		gql`
-		mutation ($user_id: ID!, $name: String!, $joined_date: Int!, $avatar: Blob!) {
-			createUser(input: {id: $user_id, name: $name, joined_date: $joined_date, avatar: $avatar}) {
-				id
+			mutation (
+				$user_id: ID!
+				$name: String!
+				$joined_date: Int!
+				$avatar: Blob!
+			) {
+				createUser(
+					input: {
+						id: $user_id
+						name: $name
+						joined_date: $joined_date
+						avatar: $avatar
+					}
+				) {
+					id
+				}
 			}
-		}
 		`,
 		{ user_id, name, joined_date, avatar }
 	);
@@ -52,12 +125,12 @@ async function createInvoice(buyer_id: String): Promise<String> {
 	const result = await sudographActor.mutation(
 		gql`
 			mutation ($buyer_id: ID!) {
-				createInvoice(input: {buyer: {connect: $buyer_id}}) {
+				createInvoice(input: { buyer: { connect: $buyer_id } }) {
 					id
 				}
 			}
 		`,
-		{buyer_id}
+		{ buyer_id }
 	);
 	console.debug("Create invoice: " + JSON.stringify(result));
 	return result.data.createInvoice[0].id;
@@ -72,9 +145,8 @@ async function createQuestion(
 	content: String,
 	reward: number
 ): Promise<String> {
+	let status_end_date: number = creation_date + open_duration;
 
-	let status_end_date : number = creation_date + open_duration;
-	
 	const result = await sudographActor.mutation(
 		gql`
 			mutation (
@@ -89,7 +161,7 @@ async function createQuestion(
 			) {
 				createQuestion(
 					input: {
-						author: {connect: $author_id}
+						author: { connect: $author_id }
 						author_invoice: { connect: $invoice_id }
 						creation_date: $creation_date
 						status: OPEN
@@ -105,7 +177,16 @@ async function createQuestion(
 				}
 			}
 		`,
-		{ author_id, invoice_id, creation_date, status_end_date, open_duration, title, content, reward }
+		{
+			author_id,
+			invoice_id,
+			creation_date,
+			status_end_date,
+			open_duration,
+			title,
+			content,
+			reward,
+		}
 	);
 	console.debug("Create question: " + JSON.stringify(result));
 	return result.data.createQuestion[0].id;
@@ -174,7 +255,7 @@ async function setStatus(
 			mutation (
 				$question_id: ID!
 				$status_update_date: Int!
-				$status_end_date: Int! 
+				$status_end_date: Int!
 				$status: QuestionStatus!
 			) {
 				updateQuestion(
@@ -195,19 +276,26 @@ async function setStatus(
 	return result.data.updateQuestion[0].id;
 }
 
-async function generateUsers(names: Array<String>, minutesFromNow: number, avatar: string) {
+async function generateUsers(
+	names: Array<String>,
+	minutesFromNow: number,
+	avatar: string
+) {
 	var array: Array<String> = new Array();
 	for (var i = 0; i < names.length; ++i) {
 		let user = await getUser(names[i]);
-		if (user.length != 0){
-			let actual_user : any = user[0];
+		if (user.length != 0) {
+			let actual_user: any = user[0];
 			array.push(actual_user.id);
 		} else {
-			array.push(await createUser(
-				Ed25519KeyIdentity.generate().getPrincipal().toString(),
-				names[i],
-				getRandomPastDate(minutesFromNow),
-				avatar));
+			array.push(
+				await createUser(
+					Ed25519KeyIdentity.generate().getPrincipal().toString(),
+					names[i],
+					getRandomPastDate(minutesFromNow),
+					avatar
+				)
+			);
 		}
 	}
 	return array;
@@ -251,10 +339,14 @@ const loadScenario = async (
 
 	console.debug("Start loading scenario...");
 
-	let generated_users = await generateUsers(names, minutesInPast, default_avatar);
+	let generated_users = await generateUsers(
+		names,
+		minutesInPast,
+		default_avatar
+	);
 
 	let numToCreate = Math.max(questionNumber - (await getNumberQuestions()), 0);
-	if (numToCreate > 0){
+	if (numToCreate > 0) {
 		console.debug(
 			"Add " + numToCreate + " question(s) from " + names.length + " users."
 		);
@@ -266,8 +358,7 @@ const loadScenario = async (
 		var users = generated_users.slice();
 		let creationDate = getRandomPastDate(minutesInPast);
 
-		let user_id = users.splice(
-			Math.floor(Math.random() * users.length), 1)[0];
+		let user_id = users.splice(Math.floor(Math.random() * users.length), 1)[0];
 
 		let question = await createQuestion(
 			user_id,
@@ -282,7 +373,10 @@ const loadScenario = async (
 
 		let answerSet = new Set<String>();
 		while (users.length > 0) {
-			let author_id = users.splice(Math.floor(Math.random() * users.length), 1)[0];
+			let author_id = users.splice(
+				Math.floor(Math.random() * users.length),
+				1
+			)[0];
 
 			// Half pourcentage of chance to give an answer
 			if (Math.floor(Math.random() * 2)) {
@@ -312,38 +406,88 @@ const loadScenario = async (
 			continue;
 		} else if (rand < 55) {
 			// 15% of questions will be PICKANSWER
-			await setStatus(question, "PICKANSWER", status_update_date, status_end_date);
+			await setStatus(
+				question,
+				"PICKANSWER",
+				status_update_date,
+				status_end_date
+			);
 		} else if (rand < 75) {
 			// 20% (max) of questions will be DISPUTABLE
 			if (answers.size == 0) {
-				await setStatus(question, "CLOSED", status_update_date, status_end_date);
+				// no winner has to be set
+				await setStatus(
+					question,
+					"CLOSED",
+					status_update_date,
+					status_end_date
+				);
 			} else {
+				// there were answers and the author is now picking a winner
 				await setWinner(question, [...answers][0]);
 				await setStatus(
 					question,
 					"DISPUTABLE",
-					status_update_date, 
-					status_end_date);
+					status_update_date,
+					status_end_date
+				);
 			}
 		} else if (rand < 90) {
 			// 15% (max) of questions will be DISPUTED
+
+			// directly created as Disputed, we have to check for 0 answers again
 			if (answers.size == 0) {
-				await setStatus(question, "CLOSED", status_update_date, status_end_date);
+				await setStatus(
+					question,
+					"CLOSED",
+					status_update_date,
+					status_end_date
+				);
+
+				// has received answers
 			} else {
 				// Half of the disputed questions won't have a picked winner,
 				// to simulate when the question's author didn't pick any winner
+
+				// There were answers
+				// Now we simulate that for some of them
+				// The author picked a winner and for some not
+				// And then set the State to DISPUTED.
+				// That makes it ready for us to do the arbitration with the terminal.
 				if (Math.floor(Math.random() * 2)) {
 					// This will pick a winning answer randomly, since it's based on the answer identifier
 					await setWinner(question, [...answers][0]);
 				}
-				await setStatus(question, "DISPUTED", status_update_date, status_end_date);
+
+				// Now we are entering the Arbitration state.
+				// I have to do arbitration with the terminal!
+				await setStatus(
+					question,
+					"DISPUTED",
+					status_update_date,
+					status_end_date
+				);
 			}
 		} else {
 			// 10% (min) of questions will be CLOSED
-			await setStatus(question, "CLOSED", status_update_date, status_end_date);
+
+			// In the closed state a winner should always be set
+			// If the number of answer is 0, we'd need to trigger a refund, which is not yet supported.
+			if (answers.size === 0) {
+				// The user should be refunded here but the backend does not allow for this yet
+				// Instead we do not set the status to closed
+			} else {
+				// Before we set winner and status question is in "OPEN" and contain answers
+				await setWinner(question, [...answers][0]);
+				await setStatus(
+					question,
+					"CLOSED",
+					status_update_date,
+					status_end_date
+				);
+			}
 		}
 	}
-
 	console.debug("Loading scenario finished!");
 };
 
