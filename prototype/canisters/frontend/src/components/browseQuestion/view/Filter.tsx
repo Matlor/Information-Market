@@ -96,8 +96,8 @@ const Filter = ({
 	};
 
 	return (
-		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3-18px">
-			<div className="flex justify-between items-center py-[10px] px-[15px] ">
+		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
+			<div className="flex justify-between items-center py-[8px] px-[15px] ">
 				Filter
 				<button
 					onClick={(e) => {
@@ -148,7 +148,12 @@ const Filter = ({
 					{checkbox(4, checkBoxState, setCheckBoxState)}
 					Closed
 				</div>
-				<div className="h-[1px] bg-colorLines"></div>
+
+				<div
+					className={`${
+						isConnected ? "visible" : "hidden"
+					} h-[1px] bg-colorBackground`}
+				></div>
 
 				<div
 					className={`${
