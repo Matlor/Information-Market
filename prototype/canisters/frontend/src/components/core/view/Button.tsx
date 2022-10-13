@@ -1,5 +1,5 @@
 import Loading from "./Loading";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Button = ({
 	propFunction,
@@ -15,6 +15,12 @@ const Button = ({
 		propFunction();
 	};
 
+	useEffect(() => {
+		if (isClicked) {
+			setIsClicked(false);
+		}
+	}, [propFunction]);
+
 	return (
 		<div className="flex h-[47px] max-w-max">
 			<div className="relative">
@@ -28,7 +34,7 @@ const Button = ({
 				<div
 					className={`${
 						loading && isClicked ? "visible" : "hidden"
-					} flex items-center px-[15px] py-[10px]`}
+					} flex items-center px-[15px] py-[10px] absolute  top-1/2 left-[100%] transform  -translate-y-1/2 `}
 				>
 					<Loading />
 				</div>

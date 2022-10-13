@@ -8,7 +8,7 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 
 	const buttonOrProfile = () => {
 		if (!isConnected) {
-			return <Button propFunction={login} text={"Login"} />;
+			return <Button propFunction={login} text={"Login"} loading={true} />;
 		} else if (isConnected && pathname === "/profile") {
 			return <Button propFunction={logout} text={"Logout"} />;
 		} else {
