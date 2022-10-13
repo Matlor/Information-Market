@@ -2,7 +2,7 @@ import { useState } from "react";
 import ButtonSmall from "../components/core/view/ButtonSmall";
 
 const Profile = ({ isConnected, user, updateUserInformation }: any) => {
-	const [userName, setUserName] = useState<string>(user.userName);
+	const [userName, setUserName] = useState<any>(user.userName);
 	const [avatar, setAvatar] = useState<any>("");
 	const [isError, setIsError] = useState<any>(false);
 
@@ -29,7 +29,6 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 		if (avatar) {
 			currentAvatar = avatar;
 		}
-
 		updateUserInformation(userName, currentAvatar);
 	};
 
@@ -84,9 +83,10 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 							type="text"
 							className="w-30  p-2.5 text-center outline-none placeholder:heading3 rounded-md shadow-md bg-colorBackgroundComponents border-none"
 							onChange={handleNameChange}
-							placeholder={user.userName}
+							value={userName}
+							maxLength={30}
 						/>
-						<div className="text-normal">Joined: {user.joinedDate}</div>
+						<div className="text-normal">Joined: {user.joinedDate} CET</div>
 					</div>
 
 					<div className="self-center">
