@@ -81,3 +81,6 @@ dfx deploy --network ic --wallet $WALLET_PRINCIPAL frontend --with-cycles 100000
 
 # 2. Add cycles to the canister:
 #    dfx canister --network ic --wallet $WALLET_PRINCIPAL deposit-cycles 1000000000000 <CANISTER_NAME>
+
+# MINNET CANDID UI
+# https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/
