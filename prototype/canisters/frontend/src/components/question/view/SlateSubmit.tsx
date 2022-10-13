@@ -14,8 +14,12 @@ const SlateSubmit = ({
 	const wrapper = (child) => {
 		return (
 			<div data-cy="SlateSubmit">
-				<SlateEditor inputValue={slateInput} setInputValue={setSlateInput} />
-				<div>{child}</div>
+				<SlateEditor
+					inputValue={slateInput}
+					setInputValue={setSlateInput}
+					placeholder="Answer here..."
+				/>
+				<div className="mt-[17px]">{child}</div>
 			</div>
 		);
 	};
@@ -40,9 +44,7 @@ const SlateSubmit = ({
 				/>
 			);
 		case "OPEN.isNotLoggedIn":
-			return wrapper(
-				<div className="heading3 mt-5 mb-5 ">Log in to answer</div>
-			);
+			return wrapper(<div className="heading3 mb-5 ">Log in to answer</div>);
 
 		case "PICKANSWER.isQuestionAuthor":
 			break;

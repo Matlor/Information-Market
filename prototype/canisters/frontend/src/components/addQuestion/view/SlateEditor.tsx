@@ -30,9 +30,7 @@ const HOTKEYS = {
 };
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const SlateEditor = ({ inputValue, setInputValue }) => {
-	const placeholder = "Ask your question here";
-
+const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 	const isSomeBlockActive = () => {
 		const blocks = ["block-quote", "numbered-list", "bulleted-list"];
 

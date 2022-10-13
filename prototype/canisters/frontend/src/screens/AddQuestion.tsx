@@ -183,7 +183,11 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 				minTitle={titleSpecification.minTitle}
 				maxTitle={titleSpecification.maxTitle}
 			/>
-			<SlateEditor inputValue={content} setInputValue={setContent} />
+			<SlateEditor
+				inputValue={content}
+				setInputValue={setContent}
+				placeholder="Add your question here..."
+			/>
 
 			{isConnected ? (
 				<>
@@ -192,7 +196,6 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 							<ButtonSmall
 								propFunction={submit}
 								text={"Submit"}
-								font={""}
 								loading={true}
 							/>
 						</div>
