@@ -30,6 +30,7 @@ function App() {
 			avatar: "",
 		},
 	});
+
 	const navigate = useNavigate();
 
 	const refreshUser = async () => {
@@ -42,7 +43,6 @@ function App() {
 
 			// fetch user
 			const fetchedUser = await sudograph.fetchUser(plug.principal);
-
 			// if return is ok and above is ok
 			if (fetchedUser.data === null || fetchedUser.data.readUser.length === 0) {
 				logout();
@@ -54,7 +54,7 @@ function App() {
 				user: {
 					...plug.user,
 					avatar: blobToBase64Str(fetchedUser.data.readUser[0].avatar),
-					username: fetchedUser.data.readUser[0].name,
+					userName: fetchedUser.data.readUser[0].name,
 				},
 			});
 		} catch (error) {
@@ -89,7 +89,6 @@ function App() {
 			let motoko_image = await fetch(motokoPath);
 			var reader = new FileReader();
 			reader.readAsDataURL(await motoko_image.blob());
-			console.log(reader, "reader");
 			reader.onload = () => {
 				resolve(reader.result);
 			};
@@ -172,11 +171,12 @@ function App() {
 				return;
 			}
 			const loadScenario = async () => {
+				console.log("loading scnearios");
 				try {
 					const result = await createDefaultAvatar();
 					Scenario.loadScenario(
 						["Alice", "Bob", "Charlie", "Dan", "Edgar"],
-						6,
+						15,
 						60,
 						60,
 						result
