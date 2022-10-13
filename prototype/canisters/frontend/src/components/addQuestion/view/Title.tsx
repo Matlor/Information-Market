@@ -27,8 +27,8 @@ const Title = ({
 					{value.length}/{maxValue}
 				</div>
 				{isError ? (
-					<div className="text-normal text-colorRed  flex justify-center w-max absolute bottom-12 ">
-						The value has to be between {minValue} and {maxValue}
+					<div className="text-normal text-colorRed  flex justify-center w-max absolute bottom-9 ">
+						Between {minValue} and {maxValue}
 					</div>
 				) : (
 					<></>

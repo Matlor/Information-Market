@@ -8,7 +8,7 @@ module.exports = {
 			colorText: "#605E5D",
 			colorIcon: "#969696",
 			colorLines: "#D8E0E5",
-			colorRed: "#FF5757",
+			colorRed: "#CA3737",
 		},
 
 		fontFamily: {

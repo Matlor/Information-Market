@@ -15,8 +15,8 @@ const Input = ({ value, setValue, isError, minValue, maxValue, unit }) => {
 	};
 
 	return (
-		<div className="relative ">
-			<FieldWrapper>
+		<FieldWrapper>
+			<div className="flex gap-[25px] items-center relative">
 				<input
 					className="w-full outline-none placeholder:heading3 heading3 p-0 "
 					type="number"
@@ -24,18 +24,18 @@ const Input = ({ value, setValue, isError, minValue, maxValue, unit }) => {
 					value={isEmpty ? "" : value}
 				/>
 
-				<div className="border-colorLines self-stretch border-l-[1px] w-0"></div>
+				<div className="border-colorBackground rounded-full self-stretch border-l-[3px] w-0"></div>
 				<div className="heading3">{unit} </div>
 
 				{isError ? (
-					<div className="text text-colorRed  flex justify-center w-max absolute bottom-12 ">
-						The value has to be between {minValue} and {maxValue}
+					<div className="text-normal text-colorRed  flex justify-center w-max absolute bottom-9 ">
+						Between {minValue} and {maxValue}
 					</div>
 				) : (
 					<></>
 				)}
-			</FieldWrapper>
-		</div>
+			</div>
+		</FieldWrapper>
 	);
 };
 
