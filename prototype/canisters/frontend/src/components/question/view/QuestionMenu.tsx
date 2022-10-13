@@ -1,37 +1,21 @@
 import FieldWrapper from "../../core/view/FieldWrapper";
 import Profile from "../../core/view/Profile";
 import { useState, useEffect } from "react";
+import { RiContactsBookLine } from "react-icons/ri";
 
 const QuestionMenu = ({
 	currentStatus,
 	currentUserRole,
-	timeLeftMin,
+	endDateSec,
 	reward,
 	submitWinner,
 	submitDispute,
 	pickedWinner,
 	finalWinner,
 }) => {
-	const makePositive = (number) => {
-		if (number > 0) {
-			return number;
-		} else {
-			return 0;
-		}
-	};
+	const showTimeLeft = (totalSeconds) => {
+		const totalMinutes = Math.max(0, totalSeconds) / 60;
 
-	const [timeLeft, setTimeLeft] = useState<number>(
-		makePositive(timeLeftMin * 60 - Date.now() / 1000) / 60
-	);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setTimeLeft((timeLeftMin * 60 - Date.now() / 1000) / 60);
-		}, 5000);
-		return () => clearInterval(interval);
-	}, [timeLeft]);
-
-	const showTimeLeft = (totalMinutes) => {
 		const floatDays = totalMinutes / 60 / 24;
 		const days = Math.floor(totalMinutes / 60 / 24);
 		const dayRemainder = floatDays - days;
@@ -46,22 +30,24 @@ const QuestionMenu = ({
 		return (
 			<div className="flex gap-[4px]">
 				<div className="relative ">
-					<div> {days} </div>
+					<div>{String(days).padStart(2, "0")} </div>
 				</div>
 				:
 				<div className="relative ">
-					<div> {hours} </div>
+					<div> {String(hours).padStart(2, "0")} </div>
 				</div>
 				:
 				<div className="relative ">
-					<div> {minutes} </div>
+					<div> {String(minutes).padStart(2, "0")} </div>
 				</div>
 			</div>
 		);
 	};
+	const now = Date.now() / 1000;
+	const timeLeft = endDateSec - now;
 
 	const Divider = (
-		<div className="bg-colorBackground w-[12px] h-[9.5px] rounded-full"></div>
+		<div className="border-colorBackground border-l-[2px] border-r-[2px] w-0 self-stretch rounded-full"></div>
 	);
 
 	const FieldWithDivider = (description, variable) => {
@@ -276,7 +262,7 @@ const QuestionMenu = ({
 			<div className="flex justify-between items-center" data-cy="QuestionMenu">
 				<div className="flex gap-[12px] items-center">
 					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
+					<div>{FieldWithDivider("Time Left", "Within 1 Day")}</div>
 				</div>
 				<div className="flex gap-[12px] items-center"></div>
 			</div>
