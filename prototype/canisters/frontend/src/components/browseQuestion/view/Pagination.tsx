@@ -34,8 +34,12 @@ const Pagination = ({
 		}
 	};
 
+	if (totalQuestions <= questionsPerPage) {
+		return <div></div>;
+	}
+
 	return (
-		<div className="flex gap-[33px] justify-between items-center px-[35px] py-[30px] bg-colorBackgroundComponents w-min shadow-md rounded-lg">
+		<div className="flex mt-[17px] gap-[33px] justify-between items-center px-[30px] py-[20px] bg-colorBackgroundComponents w-min shadow-md rounded-lg">
 			<div className={`flex gap-[17px] ${previousOpacity}`}>
 				<button onClick={decreaseIndex}>
 					<svg
