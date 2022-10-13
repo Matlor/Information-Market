@@ -29,13 +29,43 @@ const Question = ({
 		question: {},
 		answers: [],
 	});
+	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
-	console.log(questionState, "questionState");
 	const [pickedWinner, setWinner] = useState<any>("");
-
-	useEffect(() => {
-		fetch_data();
-	}, []);
+	console.log(questionState);
+	const loadAvatars = async (
+		questionState: any,
+		cachedAvatars: any,
+		setCachedAvatars: any
+	) => {
+		if (!questionState.hasData) {
+			return;
+		}
+		try {
+			if (!cachedAvatars.has(questionState.question.author.id)) {
+				const res = await sudograph.query_avatar(
+					questionState.question.author.id
+				);
+				const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+				setCachedAvatars(
+					(prev: any) =>
+						new Map([...prev, [questionState.question.author.id, loadedAvatar]])
+				);
+			}
+			for (var j = 0; j < questionState.answers.length; j++) {
+				let answer: any = questionState.answers[j];
+				if (!cachedAvatars.has(answer.author.id)) {
+					const res = await sudograph.query_avatar(answer.author.id);
+					const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+					setCachedAvatars(
+						(prev: any) => new Map([...prev, [answer.author.id, loadedAvatar]])
+					);
+				}
+			}
+		} catch (error) {
+			console.error(error, "Failed to load avatars!");
+		}
+	};
 
 	const fetch_data = async () => {
 		try {
@@ -55,7 +85,15 @@ const Question = ({
 						return a.creation_date - b.creation_date;
 					});
 				}
-
+				await loadAvatars(
+					{
+						question: readQuestion[0],
+						hasData: true,
+						answers: sortedAnswers,
+					},
+					cachedAvatars,
+					setCachedAvatars
+				);
 				setQuestionState({
 					question: readQuestion[0],
 					hasData: true,
@@ -67,48 +105,18 @@ const Question = ({
 		}
 	};
 
-	/* FETCHING AVATARS */
-	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
+	// due to this interval we do not use an interval for time left
+	// in the questionMenu component.
 	useEffect(() => {
-		const loadAvatars = async function (
-			questionState: any,
-			cachedAvatars: any,
-			setCachedAvatars: any
-		) {
-			if (!questionState.hasData) {
-				return;
-			}
-			try {
-				if (!cachedAvatars.has(questionState.question.author.id)) {
-					const res = await sudograph.query_avatar(
-						questionState.question.author.id
-					);
-					const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
-					setCachedAvatars(
-						(prev: any) =>
-							new Map([
-								...prev,
-								[questionState.question.author.id, loadedAvatar],
-							])
-					);
-				}
-				for (var j = 0; j < questionState.answers.length; j++) {
-					let answer: any = questionState.answers[j];
-					if (!cachedAvatars.has(answer.author.id)) {
-						const res = await sudograph.query_avatar(answer.author.id);
-						const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
-						setCachedAvatars(
-							(prev: any) =>
-								new Map([...prev, [answer.author.id, loadedAvatar]])
-						);
-					}
-				}
-			} catch (error) {
-				console.error(error, "Failed to load avatars!");
-			}
-		};
-		loadAvatars(questionState, cachedAvatars, setCachedAvatars);
-	}, [questionState]);
+		var interval;
+		if (!interval) {
+			fetch_data();
+		}
+		interval = setInterval(() => {
+			fetch_data();
+		}, 5000);
+		return () => clearInterval(interval);
+	}, []);
 
 	const submitAnswer = async () => {
 		try {
@@ -185,7 +193,7 @@ const Question = ({
 			<QuestionMenu
 				currentStatus={questionState.question.status}
 				currentUserRole={currentUserRole}
-				timeLeftMin={questionState.question.status_end_date}
+				endDateSec={questionState.question.status_end_date * 60}
 				reward={questionState.question.reward}
 				pickedWinner={pickedWinner}
 				submitWinner={submitWinner}

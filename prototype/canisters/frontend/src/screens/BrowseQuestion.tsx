@@ -10,7 +10,6 @@ import sudograph from "../components/core/services/sudograph";
 import { blobToBase64Str } from "../components/core/services/utils/conversions";
 
 const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
-	/* FETCHING DATA */
 	type Status = { value: string; label: string };
 	type JSONValue = string | number | boolean | JSONObject | JSONArray;
 	interface JSONObject {
@@ -35,48 +34,52 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [totalQuestions, setTotalQuestions] = useState<number>(0);
+	const [loading, setLoading] = useState<boolean>(false);
 
-	/* FETCHING QUESTIONS */
-	// Fetch the list of questions every 10 seconds if no
-	// fetch has been triggered in between
-	useEffect(() => {
-		const interval = setInterval(async () => {
-			if (Date.now() - fetchQuestionsDate > 10000) {
-				const result = await getQuestions(
-					orderField,
-					orderIsAscending,
-					searchedText,
-					statusMap,
-					myInteractions,
-					userPrincipal,
-					questionsPerPage,
-					pageIndex
-				);
+	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
-				setFetchQuestionsDate(result.timestamp);
-				setTotalQuestions(result.totalQuestions);
-				setQuestions(result.questions);
+	const loadAvatars = async (questions: any, cachedAvatars) => {
+		try {
+			for (var i = 0; i < questions.length; i++) {
+				let question: any = questions[i];
+				if (!cachedAvatars.has(question.author.id)) {
+					const res = await sudograph.query_avatar(question.author.id);
+					const loadedAvatar = await blobToBase64Str(
+						res.data.readUser[0].avatar
+					);
+					setCachedAvatars(
+						(prev: any) =>
+							new Map([...prev, [question.author.id, loadedAvatar]])
+					);
+				}
 			}
-		}, 1000);
-		return () => clearInterval(interval);
-	}, [fetchQuestionsDate]);
+		} catch (error) {
+			console.error("Failed to load avatars!");
+		}
+	};
 
+	const fetch_data = async () => {
+		setLoading(true);
+		const result = await getQuestions(
+			orderField,
+			orderIsAscending,
+			searchedText,
+			statusMap,
+			myInteractions,
+			userPrincipal,
+			questionsPerPage,
+			pageIndex
+		);
+		await loadAvatars(result.questions, cachedAvatars);
+		setFetchQuestionsDate(result.timestamp);
+		setTotalQuestions(result.totalQuestions);
+		setQuestions(result.questions);
+		setLoading(false);
+	};
+
+	// Only needed because interval does not start directly
 	useEffect(() => {
-		(async () => {
-			const result = await getQuestions(
-				orderField,
-				orderIsAscending,
-				searchedText,
-				statusMap,
-				myInteractions,
-				userPrincipal,
-				questionsPerPage,
-				pageIndex
-			);
-			setFetchQuestionsDate(result.timestamp);
-			setTotalQuestions(result.totalQuestions);
-			setQuestions(result.questions);
-		})();
+		fetch_data();
 	}, [
 		orderField,
 		orderIsAscending,
@@ -86,34 +89,14 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 		myInteractions,
 	]);
 
-	/* FETCHING AVATARS */
-	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
-
-	// Load the list of avatars in the cache
 	useEffect(() => {
-		const loadAvatars = async function (
-			questions: any,
-			cachedAvatars,
-			setCachedAvatars
-		) {
-			try {
-				for (var i = 0; i < questions.length; i++) {
-					let question: any = questions[i];
-					if (!cachedAvatars.has(question.author.id)) {
-						const res = await sudograph.query_avatar(question.author.id);
-						const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
-						setCachedAvatars(
-							(prev: any) =>
-								new Map([...prev, [question.author.id, loadedAvatar]])
-						);
-					}
-				}
-			} catch (error) {
-				console.error("Failed to load avatars!");
+		var interval = setInterval(async () => {
+			if (Date.now() - fetchQuestionsDate > 10000) {
+				fetch_data();
 			}
-		};
-		loadAvatars(questions, cachedAvatars, setCachedAvatars);
-	}, [questions]);
+		}, 1000);
+		return () => clearInterval(interval);
+	}, [fetchQuestionsDate]);
 
 	return (
 		<>
@@ -130,7 +113,9 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 					setMyInteractions={setMyInteractions}
 					isConnected={isConnected}
 				/>
-				{totalQuestions === 0 ? (
+				{loading ? (
+					<></>
+				) : totalQuestions === 0 ? (
 					<></>
 				) : (
 					<>
@@ -142,6 +127,7 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 								title={question.title}
 								authorName={question.author.name}
 								numAnswers={question.answers.length}
+								date={question.date}
 								avatar={cachedAvatars.get(question.author.id)}
 								key={index}
 							/>
