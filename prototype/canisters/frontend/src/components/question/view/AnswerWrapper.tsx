@@ -17,6 +17,11 @@ const AnswerWrapper = ({
 		case "OPEN.isAnswerAuthor":
 		case "OPEN.isNone":
 		case "OPEN.isNotLoggedIn":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div key={answer.id} data-cy="Answer">
@@ -33,6 +38,11 @@ const AnswerWrapper = ({
 			});
 
 		case "PICKANSWER.isQuestionAuthor":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div
@@ -54,6 +64,11 @@ const AnswerWrapper = ({
 		case "PICKANSWER.isAnswerAuthor":
 		case "PICKANSWER.isNone":
 		case "PICKANSWER.isNotLoggedIn":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div key={answer.id} data-cy="Answer">
@@ -73,6 +88,11 @@ const AnswerWrapper = ({
 		case "DISPUTABLE.isAnswerAuthor":
 		case "DISPUTABLE.isNone":
 		case "DISPUTABLE.isNotLoggedIn":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div key={answer.id} data-cy="Answer">
@@ -91,6 +111,11 @@ const AnswerWrapper = ({
 		case "DISPUTED.isAnswerAuthor":
 		case "DISPUTED.isNone":
 		case "DISPUTED.isNotLoggedIn":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div key={answer.id} data-cy="Answer">
@@ -109,6 +134,11 @@ const AnswerWrapper = ({
 		case "CLOSED.isAnswerAuthor":
 		case "CLOSED.isNone":
 		case "CLOSED.isNotLoggedIn":
+			if (answers.length === 0) {
+				return (
+					<div className="h-[100px] flex flex-col justify-center italic heading3"></div>
+				);
+			}
 			return answers.map((answer) => {
 				return (
 					<div key={answer.id} data-cy="Answer">

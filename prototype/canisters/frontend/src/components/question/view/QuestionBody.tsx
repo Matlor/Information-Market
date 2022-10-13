@@ -15,14 +15,14 @@ const QuestionBody = ({
 }: any) => {
 	return (
 		<div
-			className="flex flex-col items-start gap-[20px] py-[30px] pr-[48px] pl-[35px] bg-colorBackgroundComponents shadow-md rounded-lg"
+			className="flex flex-col items-start gap-[5px] px-[20px] py-[15px] bg-colorBackgroundComponents shadow-md rounded-lg"
 			data-cy="QuestionBody"
 		>
 			<div className="heading2">{title}</div>
 
 			<div className="editor-wrapper text-justify">{parse(content)}</div>
 
-			<div className="flex items-center self-stretch gap-[30px] px-[0px] py-[10px]">
+			<div className="flex items-center self-stretch gap-[30px] pt-[35px] px-[0px] py-[0px]">
 				<ProfileAnswers
 					name={authorName}
 					answers={numberOfAnswers}
