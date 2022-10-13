@@ -13,7 +13,7 @@ const Title = ({ currentStatus, currentUserRole, pickedWinner }) => {
 		if (!pickedWinner) {
 			return TitleWrapper("Winner Selection 2/5", "Select a Winner");
 		} else {
-			return TitleWrapper("Winner Selection 2/5", "Confirm your Choice");
+			return TitleWrapper("Winner Selection 2/5", "Confirm Your Choice");
 		}
 	};
 
@@ -21,24 +21,24 @@ const Title = ({ currentStatus, currentUserRole, pickedWinner }) => {
 		case "OPEN.isQuestionAuthor":
 			return TitleWrapper(
 				"Open 1/5",
-				"Other Users can now Answer your Question"
+				"Other Users Can Now Answer Your Question"
 			);
 		case "OPEN.isAnswerAuthor":
 		case "OPEN.isNone":
 		case "OPEN.isNotLoggedIn":
-			return TitleWrapper("Open 1/5", "Answer the Question to win the Reward");
+			return TitleWrapper("Open 1/5", "Answer the Question to Win the Reward");
 
 		case "PICKANSWER.isQuestionAuthor":
 			return PickAnswer_Question(pickedWinner);
 		case "PICKANSWER.isAnswerAuthor":
 		case "PICKANSWER.isNone":
 		case "PICKANSWER.isNotLoggedIn":
-			return TitleWrapper("Winner Selection 2/5", "A Winner is being Selected");
+			return TitleWrapper("Winner Selection 2/5", "A Winner Is Being Selected");
 
 		case "DISPUTABLE.isQuestionAuthor":
 			return TitleWrapper(
 				"Dispute 3/5",
-				"If you answered the Question you can dispute the choice of the Author"
+				"If You Answered the Question You Can Dispute the Choice of the Author"
 			);
 		case "DISPUTABLE.isAnswerAuthor":
 			return TitleWrapper(
@@ -48,7 +48,7 @@ const Title = ({ currentStatus, currentUserRole, pickedWinner }) => {
 		case "DISPUTABLE.isNone":
 			return TitleWrapper(
 				"Dispute 3/5",
-				"If you answered the Question you can dispute the choice of the Author"
+				"If You Answered the Question You Can Dispute the Choice of the Author"
 			);
 		case "DISPUTABLE.isNotLoggedIn":
 			return TitleWrapper(
@@ -60,7 +60,7 @@ const Title = ({ currentStatus, currentUserRole, pickedWinner }) => {
 		case "DISPUTED.isAnswerAuthor":
 		case "DISPUTED.isNone":
 		case "DISPUTED.isNotLoggedIn":
-			return TitleWrapper("Arbitration 4/5", "Arbitration is ongoing");
+			return TitleWrapper("Arbitration 4/5", "Arbitration Is Ongoing");
 
 		case "CLOSED.isQuestionAuthor":
 		case "CLOSED.isAnswerAuthor":
@@ -68,7 +68,7 @@ const Title = ({ currentStatus, currentUserRole, pickedWinner }) => {
 		case "CLOSED.isNotLoggedIn":
 			return TitleWrapper(
 				"Payout 5/5",
-				"The Reward has been paid to the Winner"
+				"The Reward Has Been Paid to the Winner"
 			);
 
 		default:
