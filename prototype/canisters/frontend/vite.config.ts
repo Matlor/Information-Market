@@ -16,6 +16,11 @@ try {
 	);
 } catch (e) {}
 
+if (!isDev) {
+	// hard-coded ledger canister id
+	canisterIds.ledger = { ic: "ryjl3-tyaaa-aaaaa-aaaba-cai" };
+}
+
 const canisterDefinitions = Object.entries(canisterIds).reduce(
 	(acc, [key, val]: any) => {
 		// Examples:
@@ -27,16 +32,13 @@ const canisterDefinitions = Object.entries(canisterIds).reduce(
 			...acc,
 			[`process.env.${key.toUpperCase()}_CANISTER_ID`]: isDev
 				? JSON.stringify(val.local)
-				: key.toUpperCase() === "LEDGER"
-				? // prettier-ignore
-				  "\"ryjl3-tyaaa-aaaaa-aaaba-cai\""
 				: JSON.stringify(val.ic),
 		};
 	},
 	{}
 );
 
-//throw new Error(JSON.stringify(canisterDefinitions));
+// throw new Error(JSON.stringify(canisterDefinitions));
 
 const DFX_PORT = 8000;
 
