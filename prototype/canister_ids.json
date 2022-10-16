@@ -1,0 +1,14 @@
+{
+  "frontend": {
+    "ic": "g2qhw-oqaaa-aaaak-acz6a-cai"
+  },
+  "graphql": {
+    "ic": "hfyub-niaaa-aaaak-acz2q-cai"
+  },
+  "invoice": {
+    "ic": "hczsv-aqaaa-aaaak-acz2a-cai"
+  },
+  "market": {
+    "ic": "hm375-3aaaa-aaaak-acz3a-cai"
+  }
+}
