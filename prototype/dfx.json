@@ -45,6 +45,10 @@
 		"playground": {
 			"type": "assets",
 			"source": ["canisters/playground/build"]
+		},
+		"utilities": {
+			"type": "motoko",
+			"main": "tests/utilities/utilities.mo"
 		}
 	},
 	"networks": {
