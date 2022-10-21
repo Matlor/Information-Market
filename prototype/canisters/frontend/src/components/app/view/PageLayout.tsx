@@ -3,7 +3,7 @@ import Header from "./Header";
 
 const PageLayout = ({ isConnected, login, logout, avatar, children }) => {
 	return (
-		<div className="pt-[47px] pb-[78px] px-[131px] min-h-screen flex flex-col justify-between bg-colorBackground overflow-y-visible ">
+		<div className="pt-[47px] pb-[78px] px-[8.5vw] min-h-screen flex flex-col justify-between bg-colorBackground overflow-y-visible ">
 			<Header
 				isConnected={isConnected}
 				login={login}

@@ -31,7 +31,7 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 			<Link to="/">
 				<Logo />
 			</Link>
-			<div className="p-0 flex justify-between items-center gap-[90px] ">
+			<div className="p-0 flex justify-between items-center gap-[6vw] ">
 				<Link to="/">
 					<div className="heading1-stretch">Browse Question</div>
 				</Link>

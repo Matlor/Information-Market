@@ -286,7 +286,7 @@ const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 					}}
 				>
 					<Toolbar>
-						<div className="flex justify-between w-72">
+						<div className="flex justify-between w-[19vw]">
 							{/* MARKS */}
 							<MarkButton format="bold" icon={<AiOutlineBold />} />
 							<MarkButton format="italic" icon={<AiOutlineItalic />} />

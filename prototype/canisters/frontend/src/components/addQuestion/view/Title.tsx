@@ -14,7 +14,7 @@ const Title = ({
 
 	return (
 		<FieldWrapper>
-			<div className="w-[500px] flex justify-between items-center relative">
+			<div className="w-[33vw] flex justify-between items-center relative">
 				<input
 					className="outline-none placeholder:heading3 heading3 p-0 w-full"
 					type="text"
