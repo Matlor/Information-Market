@@ -5,6 +5,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+	.scrollbar::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.scrollbar::-webkit-scrollbar-thumb {
+		@apply bg-colorIcon;
+		border-radius: 100vh;
+	}
+}
+
 @layer components {
 	.heading1-stretch {
 		@apply text-colorText font-OpenSans font-normal antialiased tracking-widest text-20 leading-28;

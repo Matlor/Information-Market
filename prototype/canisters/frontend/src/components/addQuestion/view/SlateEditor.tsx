@@ -260,7 +260,7 @@ const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 
 	return (
 		<div
-			className="flex flex-col gap-[37px] py-[30px] pr-[48px] pl-[35px]  items-start bg-colorBackgroundComponents self-stretch h-[338px] shadow-md rounded-lg w-full  editor-wrapper"
+			className="h-[400px] dbg-colorBackgroundComponents flex flex-col gap-[37px] px-[35px] py-[30px] items-start shadow-md rounded-lg"
 			data-cy="SlateEditor"
 		>
 			<IconContext.Provider
@@ -306,7 +306,7 @@ const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 					</Toolbar>
 
 					<Editable
-						className="p-0 overflow-y-scroll overflow-x-hidden self-stretch h-full"
+						className="w-full h-full scrollbar overflow-y-scroll editor-wrapper"
 						renderElement={renderElement}
 						renderLeaf={renderLeaf}
 						placeholder={placeholder}
