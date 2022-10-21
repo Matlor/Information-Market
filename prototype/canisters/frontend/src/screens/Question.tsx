@@ -182,7 +182,6 @@ const Question = ({
 		currentUserRole = "isNotLoggedIn";
 	}
 
-	// TODO: Final Winner might be assumed to be of wrong structure
 	return (
 		<ListWrapper>
 			<Title
@@ -199,6 +198,8 @@ const Question = ({
 				submitWinner={submitWinner}
 				submitDispute={submitDispute}
 				finalWinner={questionState.question.winner}
+				authorName={questionState.question.author.name}
+				authorAvatar={cachedAvatars.get(questionState.question.author.id)}
 			/>
 			<QuestionBody
 				title={questionState.question.title}

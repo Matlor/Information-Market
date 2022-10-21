@@ -1,7 +1,6 @@
 import FieldWrapper from "../../core/view/FieldWrapper";
 import Profile from "../../core/view/Profile";
 import { useState, useEffect } from "react";
-import { RiContactsBookLine } from "react-icons/ri";
 
 const QuestionMenu = ({
 	currentStatus,
@@ -12,6 +11,8 @@ const QuestionMenu = ({
 	submitDispute,
 	pickedWinner,
 	finalWinner,
+	authorName,
+	authorAvatar,
 }) => {
 	const showTimeLeft = (totalSeconds) => {
 		const totalMinutes = Math.max(0, totalSeconds) / 60;
@@ -278,7 +279,10 @@ const QuestionMenu = ({
 					<div>
 						{FieldWithDivider(
 							"Final Winner",
-							<Profile name={finalWinner.name} avatar={finalWinner.avatar} />
+							<Profile
+								name={finalWinner ? finalWinner.name : authorName}
+								avatar={finalWinner ? finalWinner.avatar : authorAvatar}
+							/>
 						)}
 					</div>
 				</div>
