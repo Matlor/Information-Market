@@ -52,7 +52,7 @@ service : {
     "create_answer": (text, text, int32, text) -> (opt AnswerType);
     "create_invoice": (text, text) -> (opt InvoiceType);
     "create_question": (text, text, int32, int32, int32, text, text, int32) -> (opt QuestionType);
-    "create_user": (text, text, int32, text) -> (opt UserType);
+    "create_user": (text, text, int32) -> (opt UserType);
     "get_admin": () -> (opt AdminType) query;
     "get_answer": (text, text) -> (opt AnswerType) query;
     "get_invoice": (text) -> (opt InvoiceType) query;
@@ -67,5 +67,5 @@ service : {
     "pick_winner": (text, text, int32, int32) -> (bool);
     "set_admin": (principal) -> ();
     "solve_dispute": (text, text, text, int32) -> (bool);
-    "update_user": (text, text, text) -> (opt UserType);
+    "update_user": (text, text, opt text) -> (opt UserType);
 }
