@@ -140,7 +140,7 @@ async fn check_admin() -> () {
 }
 
 #[update]
-async fn create_user(user_id: String, name: String, joined_date: i32, avatar: String) -> Option<UserType> {
+async fn create_user(user_id: String, name: String, joined_date: i32) -> Option<UserType> {
     check_admin().await;
     let json_str = graphql_mutation(
         queries::create_user::macros::mutation!().to_string(),
@@ -148,8 +148,7 @@ async fn create_user(user_id: String, name: String, joined_date: i32, avatar: St
             queries::create_user::macros::args!(),
             user_id,
             name,
-            joined_date,
-            avatar)).await;
+            joined_date)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::create_user::macros::response!()].as_array();
     if json_response != None {
@@ -162,15 +161,24 @@ async fn create_user(user_id: String, name: String, joined_date: i32, avatar: St
 }
 
 #[update]
-async fn update_user(user_id: String, name: String, avatar: String) -> Option<UserType> {
+async fn update_user(user_id: String, name: String, opt_avatar: Option<String>) -> Option<UserType> {
     check_admin().await;
+    let args = match opt_avatar {
+        Some(avatar) => 
+            format!(
+                queries::update_user::macros::args_with_avatar!(),
+                user_id,
+                name,
+                avatar),
+        None =>
+            format!(
+                queries::update_user::macros::args_without_avatar!(),
+                user_id,
+                name),
+    };
     let json_str = graphql_mutation(
         queries::update_user::macros::mutation!().to_string(),
-        format!(
-            queries::update_user::macros::args!(),
-            user_id,
-            name,
-            avatar)).await;
+        args).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::update_user::macros::response!()].as_array();
     if json_response != None {

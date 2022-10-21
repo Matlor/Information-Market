@@ -54,8 +54,8 @@ module {
         create_answer: (Text, Text, Int32, Text) -> async (?AnswerType);
         create_invoice: (Text, Text) -> async (?InvoiceType);
         create_question: (Text, Text, Int32, Int32, Int32, Text, Text, Int32) ->async (?QuestionType);
-        create_user: (Text, Text, Int32, Text) ->async (?UserType);
-         get_admin: query () -> async(?AdminType);
+        create_user: (Text, Text, Int32) ->async (?UserType);
+        get_admin: query () -> async(?AdminType);
         get_answer: query (Text, Text) -> async(?AnswerType) ;
         get_invoice: query (Text) -> async(?InvoiceType) ;
         get_question_by_invoice:query (Text) -> async(?QuestionType) ;
@@ -69,7 +69,7 @@ module {
         pick_winner: (Text, Text, Int32, Int32) -> async(Bool);
         set_admin: (Principal) -> async();
         solve_dispute: (Text, Text, Text, Int32) ->async (Bool);
-        update_user: (Text, Text, Text) -> async(?UserType);
+        update_user: (Text, Text, ?Text) -> async(?UserType);
     };
 
 

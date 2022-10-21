@@ -2,9 +2,9 @@
 pub mod macros {
     macro_rules! mutation{
         () => {
-            r#"mutation ($user_id: ID!, $name: String!, $joined_date: Int!, $avatar: Blob!) {
+            r#"mutation ($user_id: ID!, $name: String!, $joined_date: Int!) {
               createUser(
-                input: {id: $user_id, name: $name, joined_date: $joined_date, avatar: $avatar}
+                input: {id: $user_id, name: $name, joined_date: $joined_date}
               ) {
                 id
                 name
@@ -18,8 +18,7 @@ pub mod macros {
             r#"{{
               "user_id": "{}",
               "name": "{}",
-              "joined_date": {},
-              "avatar": "{}"
+              "joined_date": {}
             }}"#
         }
     }
