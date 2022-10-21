@@ -8,6 +8,7 @@ import getQuestions from "../components/browseQuestion/services/getQuestions";
 
 import sudograph from "../components/core/services/sudograph";
 import { blobToBase64Str } from "../components/core/services/utils/conversions";
+import Loading from "../components/core/view/Loading";
 
 const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	type Status = { value: string; label: string };
@@ -17,11 +18,10 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	}
 	interface JSONArray extends Array<JSONValue> {}
 
+	// TODO: This could potentially be 1 object
 	const questionsPerPage: number = 10;
-	const [orderField, setOrderField] = useState<string>("reward");
-	const [orderIsAscending, setOrderIsAscending] = useState<boolean>(false);
+
 	const [searchedText, setSearchedText] = useState<string>("");
-	const [pageIndex, setPageIndex] = useState<number>(0);
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
 	const [statusMap, setStatusMap] = useState<Array<Status>>([
 		{ value: "OPEN", label: "Open" },
@@ -30,11 +30,18 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 		{ value: "DISPUTED", label: "Arbitration" },
 		{ value: "CLOSED", label: "Closed" },
 	]);
+	const [orderField, setOrderField] = useState<string>("reward");
+	const [orderIsAscending, setOrderIsAscending] = useState<boolean>(false);
+
+	const [pageIndex, setPageIndex] = useState<number>(0);
 
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
+
 	const [questions, setQuestions] = useState<JSONArray>([]);
-	const [totalQuestions, setTotalQuestions] = useState<number>(0);
+	const [totalQuestions, setTotalQuestions] = useState<any>(null);
 	const [loading, setLoading] = useState<boolean>(false);
+	const [filterLoading, setFilterLoading] = useState<boolean>(false);
+	const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
 	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
@@ -59,7 +66,6 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	};
 
 	const fetch_data = async () => {
-		setLoading(true);
 		const result = await getQuestions(
 			orderField,
 			orderIsAscending,
@@ -70,31 +76,83 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 			questionsPerPage,
 			pageIndex
 		);
+		return result;
+	};
+
+	const set_data = async (result) => {
 		await loadAvatars(result.questions, cachedAvatars);
 		setFetchQuestionsDate(result.timestamp);
 		setTotalQuestions(result.totalQuestions);
 		setQuestions(result.questions);
-		setLoading(false);
 	};
 
-	// Only needed because interval does not start directly
 	useEffect(() => {
-		fetch_data();
-	}, [
-		orderField,
-		orderIsAscending,
-		searchedText,
-		statusMap,
-		pageIndex,
-		myInteractions,
-	]);
+		let isCancelled = false;
+
+		const get_data = async () => {
+			setSearchLoading(true);
+
+			let result = await fetch_data();
+			if (!isCancelled) {
+				await set_data(result);
+				setSearchLoading(false);
+			}
+		};
+		if (totalQuestions !== null) {
+			get_data();
+		}
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [searchedText]);
+
+	useEffect(() => {
+		let isCancelled = false;
+
+		const get_data = async () => {
+			setFilterLoading(true);
+
+			let result = await fetch_data();
+
+			if (!isCancelled) {
+				await set_data(result);
+				setFilterLoading(false);
+			}
+		};
+		if (totalQuestions !== null) {
+			get_data();
+		}
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [statusMap]);
+
+	useEffect(() => {
+		let isCancelled = false;
+
+		const get_data = async () => {
+			setLoading(true);
+			let result = await fetch_data();
+			if (!isCancelled) {
+				await set_data(result);
+				setLoading(false);
+			}
+		};
+		get_data();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [pageIndex, orderField, orderIsAscending, myInteractions]);
 
 	useEffect(() => {
 		var interval = setInterval(async () => {
 			if (Date.now() - fetchQuestionsDate > 10000) {
-				fetch_data();
+				await set_data(await fetch_data());
 			}
-		}, 1000);
+		}, 5000);
 		return () => clearInterval(interval);
 	}, [fetchQuestionsDate]);
 
@@ -112,11 +170,18 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 					myInteractions={myInteractions}
 					setMyInteractions={setMyInteractions}
 					isConnected={isConnected}
+					filterLoading={filterLoading}
+					setFilterLoading={setFilterLoading}
+					searchLoading={searchLoading}
 				/>
 				{loading ? (
-					<></>
+					<div className="w-full h-40 items-center flex justify-center">
+						<Loading />
+					</div>
 				) : totalQuestions === 0 ? (
-					<></>
+					<div className="w-full h-40 items-center flex justify-center heading3">
+						No Questions
+					</div>
 				) : (
 					<>
 						{questions.map((question: any, index) => (

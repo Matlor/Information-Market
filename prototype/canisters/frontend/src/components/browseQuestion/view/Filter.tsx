@@ -1,6 +1,6 @@
 import { useState } from "react";
 import RoundedCheckox from "../..//core/view/RoundedCheckbox";
-
+import Loading from "../../core/view/Loading";
 // TO DO: Simplify and style checkbox/dropdown
 
 const Filter = ({
@@ -9,6 +9,8 @@ const Filter = ({
 	myInteractions,
 	setMyInteractions,
 	isConnected,
+	filterLoading,
+	setFilterLoading,
 }) => {
 	window.addEventListener("click", () => {
 		if (display === "visible") {
@@ -70,6 +72,7 @@ const Filter = ({
 			const newStatusMap = [...statusMap];
 			if (newCheckBoxState[num] === true) {
 				newStatusMap.push(options[num]);
+				setFilterLoading(true);
 				setStatusMap(newStatusMap);
 			} else {
 				const val = options[num];
@@ -78,6 +81,7 @@ const Filter = ({
 						newStatusMap.splice(i, 1);
 					}
 				}
+				setFilterLoading(true);
 				setStatusMap(newStatusMap);
 			}
 		};
@@ -96,8 +100,15 @@ const Filter = ({
 	};
 
 	return (
-		<div className="w-[200px] relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
-			<div className="flex justify-between items-center py-[8px] px-[15px] ">
+		<div className="min-w-[100px] w-[13.2vw] relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
+			<div className="flex justify-between items-center py-[8px] px-[15px]">
+				{filterLoading ? (
+					<div className="absolute right-[100%] mr-4">
+						<Loading />
+					</div>
+				) : (
+					<></>
+				)}
 				Filter
 				<button
 					onClick={(e) => {

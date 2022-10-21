@@ -12,10 +12,13 @@ const FilterBar = ({
 	myInteractions,
 	setMyInteractions,
 	isConnected,
+	filterLoading,
+	setFilterLoading,
+	searchLoading,
 }: any) => {
 	return (
-		<div className="flex justify-between items-center p-0 ">
-			<Search setSearchedText={setSearchedText} />
+		<div className="flex justify-between gap-[17px] items-center p-0 ">
+			<Search setSearchedText={setSearchedText} searchLoading={searchLoading} />
 			<div className="flex items-center p-0 gap-[17px]">
 				<Filter
 					statusMap={statusMap}
@@ -23,6 +26,8 @@ const FilterBar = ({
 					myInteractions={myInteractions}
 					setMyInteractions={setMyInteractions}
 					isConnected={isConnected}
+					filterLoading={filterLoading}
+					setFilterLoading={setFilterLoading}
 				/>
 				<Sort
 					setOrderIsAscending={setOrderIsAscending}

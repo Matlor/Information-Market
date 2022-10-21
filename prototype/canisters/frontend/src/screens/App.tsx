@@ -104,9 +104,10 @@ function App() {
 		// 1 connect to plug
 		const plugObject = await plugApi.establishConnection(logout, login);
 		if (Object.keys(plugObject).length === 0) {
+			// refresh page with deep copy to stop loading
+			setPlug(JSON.parse(JSON.stringify(plug)));
 			return;
 		}
-
 		// 2 the principal is added to the window object when user signed in
 		let principal_id = window.ic.plug.principalId;
 		if (!principal_id) {
