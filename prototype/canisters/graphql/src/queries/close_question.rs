@@ -4,7 +4,7 @@ pub mod macros{
         () => {
             r#"mutation ($question_id: ID!, $close_transaction_block_height: String!, $status_update_date: Int!) {
               updateQuestion(
-                input: {id: $question_id, close_transaction_block_height: $close_transaction_block_height, status_update_date: $status_update_date, status: CLOSED}
+                input: {id: $question_id, close_transaction_block_height: $close_transaction_block_height, status_update_date: $status_update_date, status: 4}
               ) {
                 id
                 author {

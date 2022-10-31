@@ -1,18 +1,11 @@
 type SudographSettings {
     exportGeneratedMutationFunction: true
+    exportGeneratedPostUpgradeFunction: false
 }
 
 type Admin {
     id: ID! # Auto-generated
     principal: String!
-}
-
-enum QuestionStatus {
-    OPEN
-    PICKANSWER
-    DISPUTABLE
-    DISPUTED
-    CLOSED
 }
 
 type User {
@@ -35,7 +28,7 @@ type Question {
     author: User! @relation(name: "User:questions::Question:author")
     author_invoice: Invoice!
     creation_date: Int!
-    status: QuestionStatus!
+    status: Int!
     status_update_date: Int!
     status_end_date: Int!
     open_duration: Int!

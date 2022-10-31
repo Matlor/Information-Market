@@ -4,7 +4,7 @@ pub mod macros {
         () => {
             r#"mutation ($author_id: ID!, $invoice_id: ID!, $creation_date: Int!, $status_end_date: Int!, $open_duration: Int!, $title: String!, $content: String!, $reward: Int!) {
               createQuestion(
-                input: {author: {connect: $author_id}, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: OPEN, status_update_date: $creation_date, status_end_date: $status_end_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
+                input: {author: {connect: $author_id}, author_invoice: {connect: $invoice_id}, creation_date: $creation_date, status: 0, status_update_date: $creation_date, status_end_date: $status_end_date, open_duration: $open_duration, title: $title, content: $content, reward: $reward}
               ) {
                 id
                 author {
