@@ -2,13 +2,22 @@
 module.exports = {
 	content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
 	theme: {
+		screens: {
+			sm: "480px",
+			md: "768px",
+			lg: "976px",
+			xl: "1440px",
+		},
+
 		colors: {
 			colorBackground: "#EBF2ED",
+			colorBackgroundDark: "#DFE7E1",
 			colorBackgroundComponents: "#FFFFFC",
 			colorText: "#605E5D",
 			colorIcon: "#969696",
 			colorLines: "#D8E0E5",
-			colorRed: "#CA3737",
+			colorRed: "#F6A5A5",
+			colorEffect: "#F3F8F7",
 		},
 
 		fontFamily: {
@@ -37,17 +46,18 @@ module.exports = {
 			28: "28px",
 			16: "16px",
 		},
+		// offset-x | offset-y | blur-radius (adds to it) | spread-radius | color
 
 		boxShadow: {
 			md: "0px 2px 4px rgba(0, 0, 0, 0.04)",
 			lg: "0px 4px 8px rgba(0, 0, 0, 0.04)",
-			effect: "0px 0px 15px rgba(209, 253, 210, 0.6)",
+			choice: "0px 0px 4px 6px #F3F8F7",
 		},
 
 		borderRadius: {
 			none: "0",
 			sm: "2px",
-			md: "15px",
+			md: "17px",
 			lg: "30px",
 			full: "9999px",
 		},

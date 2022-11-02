@@ -19,17 +19,21 @@ const TitleBar = ({
 	isTitleError,
 	minTitle,
 	maxTitle,
+	titlePlaceholder,
 }) => {
 	return (
-		<div className="flex justify-between gap-[17px] p-0">
-			<Title
-				value={title}
-				setValue={setTitle}
-				isError={isTitleError}
-				minValue={minTitle}
-				maxValue={maxTitle}
-			/>
-			<div className="flex justify-between gap-[17px]">
+		<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
+			<div className="border-10 border-r-colorText sm:w-1/2">
+				<Title
+					value={title}
+					setValue={setTitle}
+					isError={isTitleError}
+					minValue={minTitle}
+					maxValue={maxTitle}
+					placeholder={titlePlaceholder}
+				/>
+			</div>
+			<div className="flex justify-between w-full sm:w-1/2  sm:justify-end  gap-[17px] ">
 				<Input
 					value={duration}
 					setValue={setDuration}

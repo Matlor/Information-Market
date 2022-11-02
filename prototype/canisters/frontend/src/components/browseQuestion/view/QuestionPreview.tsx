@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
-
-import ProfileAnswers from "../../core/view/ProfileAnswers";
+import Profile from "../../core/view/Profile";
 import StagesBar from "./StagesBar";
+import Date from "../../core/view/Date";
+import { graphQlToStrDate } from "../../core/services/utils/conversions";
+import { questionStatusToString } from "../../core/services/utils/conversions";
+import QuestionMetaData from "../../question/view/QuestionMetaData";
 
 const QuestionPreview = ({
 	reward,
@@ -13,49 +16,96 @@ const QuestionPreview = ({
 	avatar,
 	date,
 }) => {
-	const smallLetterConversion = (status) => {
-		switch (status) {
-			case "OPEN":
-				return "Open";
-			case "PICKANSWER":
-				return "Pick a Winner";
-			case "DISPUTABLE":
-				return "Disputable";
-			case "DISPUTED":
-				return "Arbitration";
-			case "CLOSED":
-				return "Closed";
-			default:
-				return 0;
-		}
-	};
+	const metaInformationLargeScreen = (
+		<div className="w-[120px] flex flex-col gap-normal items-end">
+			<div className="heading3">{reward} ICP</div>
 
-	return (
-		<div className="flex px-[20px] py-[15px] gap-[46px] bg-colorBackgroundComponents shadow-md rounded-lg">
-			<div className="w-[95px] flex flex-col gap-[12px]">
-				<div className="heading3">{reward} ICP</div>
-
-				<div className="text-normal">
-					{smallLetterConversion(status)}
-					<StagesBar status={status} />
+			<div>
+				<div className="float-right text-normal mb-2">
+					{questionStatusToString(status)}
 				</div>
-			</div>
-
-			<div className="border-colorBackground border-l-[4px] w-0 self-stretch rounded-full "></div>
-			<div className="flex h-max flex-col gap-[12px] self-stretch">
-				<Link to={`/question/${id}`}>
-					<div className="heading3">{title}</div>
-				</Link>
-				<div className="flex self-stretch mt-[5px]">
-					<ProfileAnswers
-						name={authorName}
-						answers={numAnswers}
-						avatar={avatar}
-					/>
+				<div className="float-right">
+					<StagesBar status={status} />
 				</div>
 			</div>
 		</div>
 	);
+
+	const content = (
+		<>
+			<div className="flex-1 min-h-full flex flex-col justify-between">
+				<Link to={`/question/${id}`}>
+					<div className="heading3">
+						{title.charAt(0).toUpperCase() + title.slice(1)}
+					</div>
+				</Link>
+				<div className="flex self-stretch mt-[20px]">
+					<Profile name={authorName} avatar={avatar} />
+					<div className="self-center">
+						<Date date={graphQlToStrDate(date)} />
+					</div>
+				</div>
+			</div>
+		</>
+	);
+
+	return (
+		<>
+			<div className="visible md:hidden">
+				<div className="p-content bg-colorBackgroundComponents shadow-md rounded-lg">
+					<div className="mb-10  ">
+						<QuestionMetaData
+							status={status}
+							reward={reward}
+							isTimeShown={false}
+						/>
+					</div>
+					{content}
+				</div>
+			</div>
+			<div className="hidden md:block">
+				<div className="w-full min-h-[150px] flex justify-between p-content  gap-[45px] bg-colorBackgroundComponents shadow-md rounded-lg">
+					{content}
+					<div className="border-colorBackground border-l-[2px] w-0 self-stretch rounded-full "></div>
+					{metaInformationLargeScreen}
+				</div>
+			</div>
+		</>
+	);
 };
 
 export default QuestionPreview;
+
+/* 
+		<div className="grid grid-cols-[100px_min-content_auto]  min-h-[140px]  w-full  px-[20px] py-[15px]  bg-colorBackgroundComponents shadow-md rounded-lg">
+			<div className="flex w-max heading3">{reward} ICP</div>
+			<div className="row-span-2 mx-[20px] md:mx-[40px] justify-self-center self-center w-[2px] h-full bg-colorBackground rounded-md"></div>
+			<div className="">
+				<Link to={`/question/${id}`}>
+					<div className="heading3 flex w-fit">
+						{title.charAt(0).toUpperCase() + title.slice(1)}
+					</div>
+				</Link>
+			</div>
+
+			<div className="text-normal w-max flex flex-col self-end gap-[6px] mb-[3px]">
+				<div className="self-start">{questionStatusToString(status)}</div>
+				<StagesBar status={status} />
+			</div>
+
+			<div className="flex self-end mt-[5px] ">
+				<ProfileAnswers
+					name={authorName}
+					answers={numAnswers}
+					avatar={avatar}
+				/>
+				<div className="ml-[30px] self-center">
+					<Date date={graphQlToStrDate(date)} />
+				</div>
+			</div>
+		</div>
+
+
+
+
+*/
