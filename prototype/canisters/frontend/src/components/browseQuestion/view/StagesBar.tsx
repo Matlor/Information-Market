@@ -17,7 +17,7 @@ const StagesBar = ({ status }) => {
 			}
 		};
 
-		var backgroundColor = "bg-colorIcon";
+		var backgroundColor = "bg-colorBackground";
 		var arr: any = [];
 		for (let i = 0; i < 5; i++) {
 			var x = statusToNumber(status);
@@ -28,7 +28,7 @@ const StagesBar = ({ status }) => {
 			arr.push(
 				<div
 					key={i}
-					className={`${backgroundColor} w-[11px] h-[3px] border-[0.2px] border-colorIcon rounded-[7px]`}
+					className={`${backgroundColor} small-ball-dimension border-[2.5px] border-colorBackground rounded-full`}
 				></div>
 			);
 		}
@@ -36,7 +36,7 @@ const StagesBar = ({ status }) => {
 	};
 
 	return (
-		<div className="flex justify-between items-center gap-[4px] w-max">
+		<div className={`flex justify-between items-center gap-[6px] w-max`}>
 			{createBars().map((item) => {
 				return item;
 			})}
