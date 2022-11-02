@@ -1,333 +1,155 @@
-import FieldWrapper from "../../core/view/FieldWrapper";
 import Profile from "../../core/view/Profile";
-import { useState, useEffect } from "react";
+import Button from "../../core/view/Button";
 
 const QuestionMenu = ({
 	currentStatus,
 	currentUserRole,
-	endDateSec,
-	reward,
+	unsubmittedChoice,
 	submitWinner,
+	winner,
 	submitDispute,
-	pickedWinner,
-	finalWinner,
-	authorName,
-	authorAvatar,
+	cachedAvatars,
 }) => {
-	const showTimeLeft = (totalSeconds) => {
-		const totalMinutes = Math.max(0, totalSeconds) / 60;
-
-		const floatDays = totalMinutes / 60 / 24;
-		const days = Math.floor(totalMinutes / 60 / 24);
-		const dayRemainder = floatDays - days;
-
-		const floatHours = dayRemainder * 24;
-		const hours = Math.floor(floatHours);
-
-		const hourRemainder = floatHours - hours;
-		const floatMinutes = hourRemainder * 60;
-		const minutes = Math.round(floatMinutes);
-
+	const selectedUser = (winner) => {
 		return (
-			<div className="flex gap-[4px]">
-				<div className="relative ">
-					<div>{String(days).padStart(2, "0")} </div>
-				</div>
-				:
-				<div className="relative ">
-					<div> {String(hours).padStart(2, "0")} </div>
-				</div>
-				:
-				<div className="relative ">
-					<div> {String(minutes).padStart(2, "0")} </div>
-				</div>
+			<div className=" heading3 flex justify-between w-[500px] h-[44px]  px-field bg-colorBackgroundComponents rounded-md items-center shadow-md">
+				<div className="heading3">Selected User</div>
+
+				{winner ? (
+					<Profile
+						name={winner.author.name}
+						avatar={cachedAvatars.get(winner.author.id)}
+					/>
+				) : (
+					<div className="italic heading3">None Selected</div>
+				)}
 			</div>
 		);
 	};
-	const now = Date.now() / 1000;
-	const timeLeft = endDateSec - now;
-
-	const Divider = (
-		<div className="border-colorBackground border-l-[2px] border-r-[2px] w-0 self-stretch rounded-full"></div>
-	);
-
-	const FieldWithDivider = (description, variable) => {
-		return (
-			<FieldWrapper>
-				<div className="heading3">{description}</div>
-				{Divider}
-				<div className="heading3">{variable}</div>
-			</FieldWrapper>
-		);
-	};
-
-	const FieldWithEffect = (description, hasEffect = false) => {
-		return (
-			<div className={`heading3 ${hasEffect ? "shadow-effect" : "shadow-md"}`}>
-				<FieldWrapper>{description}</FieldWrapper>
-			</div>
-		);
-	};
-
-	const ArrowButton = (enabled = false) => {
-		return (
-			<div
-				className={`w-[44px] h-[44px] bg-colorBackgroundComponents rounded-full items-center ${
-					enabled ? "shadow-effect" : "shadow-md"
-				} relative`}
-				data-cy="ArrowButton"
-			>
-				<div
-					className={`${
-						enabled ? "" : "opacity-[0.5]"
-					} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}
-				>
-					<svg
-						width="13"
-						height="20"
-						viewBox="0 0 13 20"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
-							stroke="#969696"
-							strokeWidth="5"
-							strokeLinecap="round"
-						/>
-					</svg>
-				</div>
-			</div>
-		);
-	};
-	const ArrowButtonEnabled = ArrowButton(true);
-	const ArrowButtonDisabled = ArrowButton(false);
-
-	const CheckMark = () => {
-		return (
-			<div className="w-[44px] h-[44px] rounded-full shadow-md bg-colorBackgroundComponents relative">
-				<div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ">
-					<svg
-						width="24"
-						height="16"
-						viewBox="0 0 24 16"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<line
-							x1="2.42564"
-							y1="7.38867"
-							x2="9.29182"
-							y2="14.2549"
-							stroke="#969696"
-							strokeWidth="2.32"
-							strokeLinecap="round"
-						/>
-						<line
-							x1="10.0192"
-							y1="14.2546"
-							x2="22.3436"
-							y2="1.24552"
-							stroke="#969696"
-							strokeWidth="2.32"
-							strokeLinecap="round"
-						/>
-					</svg>
-				</div>
-			</div>
-		);
-	};
-
-	// -------------------------- MENUS ----------------------------
-	const Open = (reward) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center"></div>
-			</div>
-		);
-	};
-
-	const PickWinner_Answer_None_NotLoggedIn = (reward) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center"></div>
-			</div>
-		);
-	};
-
-	const PickWinner_Question_NotSelected = (reward) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center">
-					{FieldWithDivider(
-						"Selected User",
-						<div className="italic">None Selected</div>
-					)}
-					{ArrowButtonDisabled}
-				</div>
-			</div>
-		);
-	};
-
-	const PickWinner_Question_Selected = (reward, pickedWinner, submitWinner) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center">
-					<div>
-						{FieldWithDivider(
-							"Selected User",
-							<Profile name={pickedWinner.name} avatar={pickedWinner.avatar} />
-						)}
-					</div>
-					<button
-						className="flex gap-[12px] items-center"
-						onClick={submitWinner}
-					>
-						{FieldWithEffect("Confirm", true)}
-						{ArrowButtonEnabled}
-					</button>
-				</div>
-			</div>
-		);
-	};
-
-	const PickWinner_Question = (reward, pickedWinner, submitWinner) => {
-		if (!pickedWinner) {
-			return PickWinner_Question_NotSelected(reward);
-		} else {
-			return PickWinner_Question_Selected(reward, pickedWinner, submitWinner);
-		}
-	};
-
-	const Dispute_Answer = (reward, pickedWinner, submitDispute) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center">
-					<div>
-						{FieldWithDivider(
-							"Selected User",
-							<Profile name={pickedWinner.name} avatar={pickedWinner.avatar} />
-						)}
-					</div>
-					<button
-						className="flex gap-[12px] items-center"
-						onClick={submitDispute}
-					>
-						{FieldWithEffect("Dispute", true)}
-						{ArrowButtonEnabled}
-					</button>
-				</div>
-			</div>
-		);
-	};
-
-	const Dispute_Question_None_NotLoggedIn = (reward, pickedWinner) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", showTimeLeft(timeLeft))}</div>
-				</div>
-				<div className="flex gap-[12px] items-center">
-					{FieldWithDivider(
-						"Selected User",
-						<Profile name={pickedWinner.name} avatar={pickedWinner.avatar} />
-					)}
-				</div>
-			</div>
-		);
-	};
-
-	const Arbitration = (reward) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					<div>{FieldWithDivider("Time Left", "Within 1 Day")}</div>
-				</div>
-				<div className="flex gap-[12px] items-center"></div>
-			</div>
-		);
-	};
-
-	const Payout = (reward, finalWinner) => {
-		return (
-			<div className="flex justify-between items-center" data-cy="QuestionMenu">
-				<div className="flex gap-[12px] items-center">
-					<div>{FieldWithDivider("Reward", `${reward.toFixed(2)} ICP`)}</div>
-					{CheckMark()}
-					<div>
-						{FieldWithDivider(
-							"Final Winner",
-							<Profile
-								name={finalWinner ? finalWinner.name : authorName}
-								avatar={finalWinner ? finalWinner.avatar : authorAvatar}
-							/>
-						)}
-					</div>
-				</div>
-				<div className="flex gap-[12px] items-center"></div>
-			</div>
-		);
-	};
-
-	// -------------------------- Cases ----------------------------
 
 	const currentCase = currentStatus + "." + currentUserRole;
+
 	switch (currentCase) {
 		case "OPEN.isQuestionAuthor":
 		case "OPEN.isAnswerAuthor":
 		case "OPEN.isNone":
 		case "OPEN.isNotLoggedIn":
-			return Open(reward);
+			return;
 
 		case "PICKANSWER.isQuestionAuthor":
-			return PickWinner_Question(reward, pickedWinner, submitWinner);
+			return (
+				<div className="w-full flex gap-[17px] justify-between items-center">
+					<div>{selectedUser(unsubmittedChoice)}</div>
+					<div>
+						<Button
+							propFunction={
+								unsubmittedChoice
+									? submitWinner
+									: async () => {
+											return;
+									  }
+							}
+							text={"Confirm"}
+							CustomButton={() => {
+								return (
+									<div
+										data-cy="ArrowButton"
+										className={`w-[200px] h-[44px] px-[20px] flex justify-between relative bg-colorBackgroundComponents rounded-md items-center `}
+									>
+										<div
+											className={`heading3 ${
+												unsubmittedChoice ? "" : "opacity-[0.5]"
+											}`}
+										>
+											Confirm
+										</div>
+										<div
+											className={`${unsubmittedChoice ? "" : "opacity-[0.5]"}`}
+										>
+											<svg
+												width="13"
+												height="20"
+												viewBox="0 0 13 20"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+											>
+												<path
+													d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
+													stroke="#969696"
+													strokeWidth="5"
+													strokeLinecap="round"
+												/>
+											</svg>
+										</div>
+									</div>
+								);
+							}}
+						/>
+					</div>
+				</div>
+			);
 		case "PICKANSWER.isAnswerAuthor":
 		case "PICKANSWER.isNone":
 		case "PICKANSWER.isNotLoggedIn":
-			return PickWinner_Answer_None_NotLoggedIn(reward);
+			return;
 
 		case "DISPUTABLE.isQuestionAuthor":
-			return Dispute_Question_None_NotLoggedIn(reward, pickedWinner);
+			return (
+				<div className="w-full flex gap-[17px] justify-between items-center">
+					<div>{selectedUser(winner)}</div>
+				</div>
+			);
 		case "DISPUTABLE.isAnswerAuthor":
-			return Dispute_Answer(reward, pickedWinner, submitDispute);
+			return (
+				<div className="w-full flex gap-[17px] justify-between items-center">
+					<div>{selectedUser(winner)}</div>
+					<Button
+						propFunction={submitDispute}
+						text={"Dispute"}
+						CustomButton={() => {
+							return (
+								<div
+									data-cy="ArrowButton"
+									className={`w-[200px] h-[44px] px-[20px] flex justify-between relative bg-colorBackgroundComponents rounded-md items-center `}
+								>
+									<div className={`heading3`}>Dispute</div>
+									<div className={``}>
+										<svg
+											width="13"
+											height="20"
+											viewBox="0 0 13 20"
+											fill="none"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path
+												d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
+												stroke="#969696"
+												strokeWidth="5"
+												strokeLinecap="round"
+											/>
+										</svg>
+									</div>
+								</div>
+							);
+						}}
+					/>
+				</div>
+			);
 		case "DISPUTABLE.isNone":
-			return Dispute_Question_None_NotLoggedIn(reward, pickedWinner);
 		case "DISPUTABLE.isNotLoggedIn":
-			return Dispute_Question_None_NotLoggedIn(reward, pickedWinner);
+			return;
 
 		case "DISPUTED.isQuestionAuthor":
 		case "DISPUTED.isAnswerAuthor":
 		case "DISPUTED.isNone":
 		case "DISPUTED.isNotLoggedIn":
-			return Arbitration(reward);
+			return;
 
 		case "CLOSED.isQuestionAuthor":
 		case "CLOSED.isAnswerAuthor":
 		case "CLOSED.isNone":
 		case "CLOSED.isNotLoggedIn":
-			return Payout(reward, finalWinner);
+			return;
 		default:
 			return;
 	}
