@@ -59,13 +59,13 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
     // ------------------------- Create User -------------------------
 
-    public shared ({caller}) func create_user(user_id: Text, name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(user_id)){
+    public shared ({caller}) func create_user(name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
+        switch (await graphql_canister_.get_user(Principal.toText(caller))){
             case(?user){
                 return #err(#UserExists);
             };
             case(null){
-                switch (await graphql_canister_.create_user(user_id, name, Utils.time_minutes_now())){
+                switch (await graphql_canister_.create_user(Principal.toText(caller), name, Utils.time_minutes_now())){
                     case(null) {
                         return #err(#GraphQLError);
                     };
@@ -80,13 +80,13 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
     // ------------------------- Update User -------------------------
 
-    public shared ({caller}) func update_user(user_id: Text, name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(user_id)){
+    public shared ({caller}) func update_user(name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
+        switch (await graphql_canister_.get_user(Principal.toText(caller))){
             case(null){
                 return #err(#UserNotFound);
             };
             case(?user){
-                switch (await graphql_canister_.update_user(user_id, name, avatar)){
+                switch (await graphql_canister_.update_user(Principal.toText(caller), name, avatar)){
                     case(null) {
                         return #err(#GraphQLError);
                     };
