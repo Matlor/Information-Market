@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react";
-
 import ListWrapper from "../components/core/view/ListWrapper";
 import TitleBar from "../components/addQuestion/view/TitleBar";
 import SlateEditor from "../components/addQuestion/view/SlateEditor";
-import ButtonSmall from "../components/core/view/ButtonSmall";
-
+import Button from "../components/core/view/Button";
 import plugApi from "../components/core/services/plug";
 import { icpToE8s } from "../components/core/services/utils/conversions";
 import { Principal } from "@dfinity/principal";
-
 import { getMinReward } from "../components/addQuestion/services/market";
 import { e8sToIcp } from "../components/core/services/utils/conversions";
+import Loading from "../components/core/view/Loading";
 
 const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
+	const titlePlaceholder = "Add your Title here...";
+
 	const [titleSpecification, setTitleSpecification] = useState({
-		title: "Add your title here...",
+		title: titlePlaceholder,
 		minTitle: 20,
 		maxTitle: 300,
 	});
+
 	const [durationSpecification, setDurationSpecification] = useState<any>({
-		duration: 60,
-		minDuration: 60,
+		duration: 0,
+		minDuration: 0,
 		maxDuration: 7200,
 	});
 	const [rewardSpecification, setRewardSpecification] = useState<any>({
 		reward: 0,
 		minReward: 0,
+		minRewardIsFetched: false,
 		maxReward: 500,
 	});
 
@@ -35,11 +37,11 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 	useEffect(() => {
 		(async () => {
 			const fetchedMin = await getMinReward();
-
 			setRewardSpecification({
 				...rewardSpecification,
 				minReward: e8sToIcp(fetchedMin),
 				reward: e8sToIcp(fetchedMin),
+				minRewardIsFetched: true,
 			});
 		})();
 	}, []);
@@ -50,12 +52,13 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 
 	useEffect(() => {
 		if (
-			titleSpecification.minTitle <= titleSpecification.title.length &&
-			titleSpecification.title.length <= titleSpecification.maxTitle &&
-			durationSpecification.duration >= durationSpecification.minDuration &&
-			durationSpecification.maxDuration >= durationSpecification.duration &&
-			rewardSpecification.reward >= rewardSpecification.minReward &&
-			rewardSpecification.maxReward >= rewardSpecification.reward
+			(titleSpecification.minTitle <= titleSpecification.title.length &&
+				titleSpecification.title.length <= titleSpecification.maxTitle &&
+				durationSpecification.duration >= durationSpecification.minDuration &&
+				durationSpecification.maxDuration >= durationSpecification.duration &&
+				rewardSpecification.reward >= rewardSpecification.minReward &&
+				rewardSpecification.maxReward >= rewardSpecification.reward,
+			rewardSpecification.minRewardIsFetched)
 		) {
 			setIsValidated(true);
 		} else {
@@ -65,12 +68,17 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 
 	// TODO: round number if ICP
 	const submit = async () => {
+		setSubmitStagesWrapper("invoice");
+
 		if (!isValidated) {
+			setSubmitStagesWrapper("error");
 			return;
 		}
 
 		// TODO: Structure of app is confusing if that is imported from plug directly
 		if (!(await plugApi.verifyConnection())) {
+			setSubmitStagesWrapper("error");
+
 			return;
 		}
 		// TODO: Add error handling
@@ -79,6 +87,8 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 			const invoiceResponse = await createInvoice(
 				icpToE8s(rewardSpecification.reward)
 			);
+			setSubmitStagesWrapper("transfer");
+
 			console.log(invoiceResponse, "invoice response");
 			// 2. Perform the transfer
 			const transferResponse = await transfer({
@@ -93,11 +103,10 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 				created_at_time: [],
 				amount: { e8s: invoiceResponse.ok.invoice.amount },
 			});
+			setSubmitStagesWrapper("submit");
 			console.log(transferResponse, "transfer response");
 			if (transferResponse?.Err !== undefined) {
-				if (transferResponse?.Err?.InsufficientFunds !== undefined) {
-				} else {
-				}
+				setSubmitStagesWrapper("error");
 				return;
 			}
 
@@ -115,7 +124,7 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 					"market canister ask_question call returned the error: " +
 						openQuestionResponse.err
 				);
-
+				setSubmitStagesWrapper("error");
 				return;
 			}
 
@@ -128,6 +137,51 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 			window.location.href = "#/question/" + openQuestionResponse.ok.id;
 		} catch (e) {
 		} finally {
+		}
+	};
+
+	const [submitStages, setSubmitStages] = useState("invoice");
+	const setSubmitStagesWrapper = (submitStage) => {
+		if (
+			submitStage === "invoice" ||
+			"transfer" ||
+			"submit" ||
+			"success" ||
+			"error"
+		) {
+			setSubmitStages(submitStage);
+		} else throw new Error("Invalid submit stage");
+	};
+
+	const ShowSubmitStages = (props) => {
+		const loaders = (styles, text) => {
+			return (
+				<>
+					<div className="flex gap-[17px]">
+						<Loading color="colorBackgroundComponents" style={styles[0]} />
+						<Loading color="colorBackgroundComponents" style={styles[1]} />
+						<Loading color="colorBackgroundComponents" style={styles[2]} />
+					</div>
+					<div className="heading3 ml-4">{text}</div>
+				</>
+			);
+		};
+
+		switch (props.stages) {
+			case "":
+				return loaders(["empty", "empty", "empty"], "");
+			case "invoice":
+				return loaders(["loading", "empty", "empty"], "Waiting for invoice");
+			case "transfer":
+				return loaders(["filled", "loading", "empty"], "Transfer Ongoing");
+			case "submit":
+				return loaders(["filled", "filled", "loading"], "Opening Question");
+			case "success":
+				return loaders(["filled", "filled", "filled"], "Success!");
+			case "error":
+				return loaders(["empty", "empty", "empty"], "Something went wrong");
+			default:
+				return loaders(["empty", "empty", "empty"], "");
 		}
 	};
 
@@ -182,6 +236,7 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 				}
 				minTitle={titleSpecification.minTitle}
 				maxTitle={titleSpecification.maxTitle}
+				titlePlaceholder={titlePlaceholder}
 			/>
 			<SlateEditor
 				inputValue={content}
@@ -190,19 +245,19 @@ const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
 			/>
 
 			{isConnected ? (
-				<>
+				<div className="h-[48px] flex ">
 					{isValidated ? (
-						<div>
-							<ButtonSmall
-								propFunction={submit}
-								text={"Submit"}
-								loading={true}
-							/>
-						</div>
+						<Button
+							propFunction={submit}
+							text={"Submit"}
+							CustomLoader={<ShowSubmitStages stages={submitStages} />}
+						/>
 					) : (
-						<div className="heading3">Fill out the form correctly</div>
+						<div className="heading3  self-center ml-6">
+							Fill out the form correctly
+						</div>
 					)}
-				</>
+				</div>
 			) : (
 				<div className="heading3"> Login to Submit</div>
 			)}
