@@ -71,11 +71,9 @@ function App() {
 		}
 
 		// update inforamtion
-		let updateUser = await plug.actors.marketActor.update_user(
-			window.ic.plug.principalId,
-			newUserName,
-			newAvatar
-		);
+		let updateUser = await plug.actors.marketActor.update_user(newUserName, [
+			newAvatar,
+		]);
 
 		if (!updateUser.ok) {
 			console.error("Failed to update user: " + updateUser.err);
@@ -105,6 +103,7 @@ function App() {
 		const plugObject = await plugApi.establishConnection(logout, login);
 		if (Object.keys(plugObject).length === 0) {
 			// refresh page with deep copy to stop loading
+			// TODO: Get rid of this hack
 			setPlug(JSON.parse(JSON.stringify(plug)));
 			return;
 		}
@@ -119,12 +118,7 @@ function App() {
 		var resFetchUser = await sudograph.fetchUser(principal_id);
 		if (resFetchUser.data === null || resFetchUser.data.readUser.length === 0) {
 			// 4 create user
-			const result = await createDefaultAvatar();
-			let createUser = await plugObject.market.create_user(
-				principal_id,
-				"New User",
-				result
-			);
+			let createUser = await plugObject.market.create_user("New User");
 			if (!createUser.ok) {
 				return;
 			}
@@ -134,7 +128,9 @@ function App() {
 		user.joinedDate = graphQlToStrDate(
 			resFetchUser.data.readUser[0].joined_date
 		);
-		user.avatar = blobToBase64Str(resFetchUser.data.readUser[0].avatar);
+		user.avatar = resFetchUser.data.readUser[0].avatar
+			? blobToBase64Str(resFetchUser.data.readUser[0].avatar)
+			: await createDefaultAvatar();
 
 		// 5
 		setPlug({
@@ -174,13 +170,11 @@ function App() {
 			const loadScenario = async () => {
 				console.log("loading scnearios");
 				try {
-					const result = await createDefaultAvatar();
 					Scenario.loadScenario(
 						["Alice", "Bob", "Charlie", "Dan", "Edgar"],
 						15,
 						60,
-						60,
-						result
+						60
 					);
 				} catch (error) {
 					console.error("Failed to load scenario: " + error);
@@ -205,6 +199,7 @@ function App() {
 						<BrowseQuestion
 							isConnected={plug.isConnected}
 							userPrincipal={plug.principal}
+							createDefaultAvatar={createDefaultAvatar}
 						/>
 					}
 				/>
@@ -228,6 +223,7 @@ function App() {
 							answerQuestion={plug.actors.marketActor.answer_question}
 							pickWinner={plug.actors.marketActor.pick_winner}
 							triggerDispute={plug.actors.marketActor.trigger_dispute}
+							createDefaultAvatar={createDefaultAvatar}
 						/>
 					}
 				/>

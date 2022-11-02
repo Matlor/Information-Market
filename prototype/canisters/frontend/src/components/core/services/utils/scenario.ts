@@ -92,30 +92,19 @@ async function getUser(user_name: String): Promise<Array<string>> {
 async function createUser(
 	user_id: String,
 	name: String,
-	joined_date: number,
-	avatar: String
+	joined_date: number
 ): Promise<String> {
 	const result = await sudographActor.mutation(
 		gql`
-			mutation (
-				$user_id: ID!
-				$name: String!
-				$joined_date: Int!
-				$avatar: Blob!
-			) {
+			mutation ($user_id: ID!, $name: String!, $joined_date: Int!) {
 				createUser(
-					input: {
-						id: $user_id
-						name: $name
-						joined_date: $joined_date
-						avatar: $avatar
-					}
+					input: { id: $user_id, name: $name, joined_date: $joined_date }
 				) {
 					id
 				}
 			}
 		`,
-		{ user_id, name, joined_date, avatar }
+		{ user_id, name, joined_date }
 	);
 	console.debug("Create user: " + JSON.stringify(result));
 	return result.data.createUser[0].id;
@@ -276,11 +265,7 @@ async function setStatus(
 	return result.data.updateQuestion[0].id;
 }
 
-async function generateUsers(
-	names: Array<String>,
-	minutesFromNow: number,
-	avatar: string
-) {
+async function generateUsers(names: Array<String>, minutesFromNow: number) {
 	var array: Array<String> = new Array();
 	for (var i = 0; i < names.length; ++i) {
 		let user = await getUser(names[i]);
@@ -292,8 +277,7 @@ async function generateUsers(
 				await createUser(
 					Ed25519KeyIdentity.generate().getPrincipal().toString(),
 					names[i],
-					getRandomPastDate(minutesFromNow),
-					avatar
+					getRandomPastDate(minutesFromNow)
 				)
 			);
 		}
@@ -321,8 +305,7 @@ const loadScenario = async (
 	names: Array<String>,
 	questionNumber: number,
 	minutesInPast: number,
-	minutesToGo: number,
-	default_avatar: string
+	minutesToGo: number
 ) => {
 	const lorem = new LoremIpsum({
 		sentencesPerParagraph: {
@@ -339,11 +322,7 @@ const loadScenario = async (
 
 	console.debug("Start loading scenario...");
 
-	let generated_users = await generateUsers(
-		names,
-		minutesInPast,
-		default_avatar
-	);
+	let generated_users = await generateUsers(names, minutesInPast);
 
 	let numToCreate = Math.max(questionNumber - (await getNumberQuestions()), 0);
 	if (numToCreate > 0) {

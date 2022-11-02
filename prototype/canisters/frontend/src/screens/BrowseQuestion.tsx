@@ -10,7 +10,11 @@ import sudograph from "../components/core/services/sudograph";
 import { blobToBase64Str } from "../components/core/services/utils/conversions";
 import Loading from "../components/core/view/Loading";
 
-const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
+const BrowseQuestion = ({
+	userPrincipal,
+	isConnected,
+	createDefaultAvatar,
+}: any) => {
 	type Status = { value: string; label: string };
 	type JSONValue = string | number | boolean | JSONObject | JSONArray;
 	interface JSONObject {
@@ -20,7 +24,6 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 
 	// TODO: This could potentially be 1 object
 	const questionsPerPage: number = 10;
-
 	const [searchedText, setSearchedText] = useState<string>("");
 	const [myInteractions, setMyInteractions] = useState<boolean>(false);
 	const [statusMap, setStatusMap] = useState<Array<Status>>([
@@ -32,17 +35,14 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	]);
 	const [orderField, setOrderField] = useState<string>("reward");
 	const [orderIsAscending, setOrderIsAscending] = useState<boolean>(false);
-
 	const [pageIndex, setPageIndex] = useState<number>(0);
-
 	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
-
 	const [questions, setQuestions] = useState<JSONArray>([]);
 	const [totalQuestions, setTotalQuestions] = useState<any>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [filterLoading, setFilterLoading] = useState<boolean>(false);
 	const [searchLoading, setSearchLoading] = useState<boolean>(false);
-
+	const [sortLoading, setSortLoading] = useState<boolean>(false);
 	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
 	const loadAvatars = async (questions: any, cachedAvatars) => {
@@ -51,9 +51,11 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 				let question: any = questions[i];
 				if (!cachedAvatars.has(question.author.id)) {
 					const res = await sudograph.query_avatar(question.author.id);
-					const loadedAvatar = await blobToBase64Str(
-						res.data.readUser[0].avatar
-					);
+
+					const loadedAvatar = res.data.readUser[0].avatar
+						? await blobToBase64Str(res.data.readUser[0].avatar)
+						: await createDefaultAvatar();
+
 					setCachedAvatars(
 						(prev: any) =>
 							new Map([...prev, [question.author.id, loadedAvatar]])
@@ -80,7 +82,6 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	};
 
 	const set_data = async (result) => {
-		await loadAvatars(result.questions, cachedAvatars);
 		setFetchQuestionsDate(result.timestamp);
 		setTotalQuestions(result.totalQuestions);
 		setQuestions(result.questions);
@@ -96,6 +97,7 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 			if (!isCancelled) {
 				await set_data(result);
 				setSearchLoading(false);
+				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
 		if (totalQuestions !== null) {
@@ -116,8 +118,9 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 			let result = await fetch_data();
 
 			if (!isCancelled) {
-				await set_data(result);
+				set_data(result);
 				setFilterLoading(false);
+				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
 		if (totalQuestions !== null) {
@@ -133,11 +136,35 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 		let isCancelled = false;
 
 		const get_data = async () => {
+			setSortLoading(true);
+
+			let result = await fetch_data();
+
+			if (!isCancelled) {
+				await set_data(result);
+				setSortLoading(false);
+				await loadAvatars(result.questions, cachedAvatars);
+			}
+		};
+		if (totalQuestions !== null) {
+			get_data();
+		}
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [orderField, orderIsAscending]);
+
+	useEffect(() => {
+		let isCancelled = false;
+
+		const get_data = async () => {
 			setLoading(true);
 			let result = await fetch_data();
 			if (!isCancelled) {
 				await set_data(result);
 				setLoading(false);
+				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
 		get_data();
@@ -150,7 +177,9 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	useEffect(() => {
 		var interval = setInterval(async () => {
 			if (Date.now() - fetchQuestionsDate > 10000) {
-				await set_data(await fetch_data());
+				let result = await fetch_data();
+				await set_data(result);
+				await loadAvatars(result.questions, cachedAvatars);
 			}
 		}, 5000);
 		return () => clearInterval(interval);
@@ -159,7 +188,6 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 	return (
 		<>
 			<ListWrapper>
-				{" "}
 				<FilterBar
 					setSearchedText={setSearchedText}
 					statusMap={statusMap}
@@ -173,6 +201,9 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 					filterLoading={filterLoading}
 					setFilterLoading={setFilterLoading}
 					searchLoading={searchLoading}
+					setSearchLoading={setSearchLoading}
+					sortLoading={sortLoading}
+					setSortLoading={setSortLoading}
 				/>
 				{loading ? (
 					<div className="w-full h-40 items-center flex justify-center">
@@ -192,7 +223,7 @@ const BrowseQuestion = ({ userPrincipal, isConnected }: any) => {
 								title={question.title}
 								authorName={question.author.name}
 								numAnswers={question.answers.length}
-								date={question.date}
+								date={question.creation_date}
 								avatar={cachedAvatars.get(question.author.id)}
 								key={index}
 							/>

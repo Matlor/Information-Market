@@ -1,25 +1,21 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
-
+import { blobToBase64Str } from "../components/core/services/utils/conversions";
 import ListWrapper from "../components/core/view/ListWrapper";
 import AnswerWrapper from "../components/question/view/AnswerWrapper";
 import QuestionBody from "../components/question/view/QuestionBody";
 import SlateSubmit from "../components/question/view/SlateSubmit";
-
 import sudograph from "../components/core/services/sudograph";
-
-import { blobToBase64Str } from "../components/core/services/utils/conversions";
-
 import Loading from "../components/core/view/Loading";
-
 import QuestionMenu from "../components/question/view/QuestionMenu";
-import Title from "../components/question/view/Title";
+import { e3sToIcp } from "../components/core/services/utils/conversions";
 
 const Question = ({
 	userPrincipal,
 	answerQuestion,
 	pickWinner,
 	triggerDispute,
+	createDefaultAvatar,
 }: any) => {
 	let { id } = useParams();
 
@@ -30,9 +26,10 @@ const Question = ({
 		answers: [],
 	});
 	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
+	const [unsubmittedChoice, setUnsubmittedChoice] = useState<any>("");
 
-	const [pickedWinner, setWinner] = useState<any>("");
 	console.log(questionState);
+
 	const loadAvatars = async (
 		questionState: any,
 		cachedAvatars: any,
@@ -46,7 +43,9 @@ const Question = ({
 				const res = await sudograph.query_avatar(
 					questionState.question.author.id
 				);
-				const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+				const loadedAvatar = res.data.readUser[0].avatar
+					? await blobToBase64Str(res.data.readUser[0].avatar)
+					: await createDefaultAvatar();
 				setCachedAvatars(
 					(prev: any) =>
 						new Map([...prev, [questionState.question.author.id, loadedAvatar]])
@@ -56,7 +55,9 @@ const Question = ({
 				let answer: any = questionState.answers[j];
 				if (!cachedAvatars.has(answer.author.id)) {
 					const res = await sudograph.query_avatar(answer.author.id);
-					const loadedAvatar = blobToBase64Str(res.data.readUser[0].avatar);
+					const loadedAvatar = res.data.readUser[0].avatar
+						? await blobToBase64Str(res.data.readUser[0].avatar)
+						: await createDefaultAvatar();
 					setCachedAvatars(
 						(prev: any) => new Map([...prev, [answer.author.id, loadedAvatar]])
 					);
@@ -73,6 +74,11 @@ const Question = ({
 				data: { readQuestion },
 			} = await sudograph.get_question(id);
 
+			if (readQuestion[0]) {
+				var transformedData = readQuestion[0];
+				transformedData.reward = e3sToIcp(readQuestion[0].reward);
+			}
+
 			const {
 				data: { readAnswer },
 			} = await sudograph.get_question_answers(id);
@@ -85,28 +91,28 @@ const Question = ({
 						return a.creation_date - b.creation_date;
 					});
 				}
+
+				setQuestionState({
+					question: transformedData,
+					hasData: true,
+					answers: sortedAnswers,
+				});
+
 				await loadAvatars(
 					{
-						question: readQuestion[0],
+						question: transformedData,
 						hasData: true,
 						answers: sortedAnswers,
 					},
 					cachedAvatars,
 					setCachedAvatars
 				);
-				setQuestionState({
-					question: readQuestion[0],
-					hasData: true,
-					answers: sortedAnswers,
-				});
 			}
 		} catch (err) {
 			console.debug(err);
 		}
 	};
 
-	// due to this interval we do not use an interval for time left
-	// in the questionMenu component.
 	useEffect(() => {
 		var interval;
 		if (!interval) {
@@ -133,8 +139,12 @@ const Question = ({
 
 	const submitWinner = async () => {
 		try {
-			const res = await pickWinner(questionState.question.id, pickedWinner);
+			const res = await pickWinner(
+				questionState.question.id,
+				unsubmittedChoice.id
+			);
 			if (res.err) {
+				console.log(res.err);
 			} else {
 				await fetch_data();
 			}
@@ -147,6 +157,7 @@ const Question = ({
 		try {
 			const res = await triggerDispute(questionState.question.id);
 			if (res.err) {
+				console.log(res.err);
 			} else {
 				await fetch_data();
 			}
@@ -173,7 +184,6 @@ const Question = ({
 	}
 
 	var currentUserRole = "isNone";
-
 	if (questionState.question.author.id === userPrincipal) {
 		currentUserRole = "isQuestionAuthor";
 	} else if (isAnswerAuthor()) {
@@ -184,30 +194,27 @@ const Question = ({
 
 	return (
 		<ListWrapper>
-			<Title
-				currentStatus={questionState.question.status}
-				currentUserRole={currentUserRole}
-				pickedWinner={pickedWinner}
-			/>
 			<QuestionMenu
 				currentStatus={questionState.question.status}
 				currentUserRole={currentUserRole}
-				endDateSec={questionState.question.status_end_date * 60}
-				reward={questionState.question.reward}
-				pickedWinner={pickedWinner}
+				unsubmittedChoice={unsubmittedChoice}
 				submitWinner={submitWinner}
+				winner={questionState.question.winner}
 				submitDispute={submitDispute}
-				finalWinner={questionState.question.winner}
-				authorName={questionState.question.author.name}
-				authorAvatar={cachedAvatars.get(questionState.question.author.id)}
+				cachedAvatars={cachedAvatars}
 			/>
 			<QuestionBody
+				status={questionState.question.status}
+				endDateSec={questionState.question.status_end_date * 60}
+				reward={questionState.question.reward}
 				title={questionState.question.title}
 				content={questionState.question.content}
-				authorName={questionState.question.author.name}
+				initiator={questionState.question.author}
 				avatar={cachedAvatars.get(questionState.question.author.id)}
+				cachedAvatars={cachedAvatars}
 				numberOfAnswers={questionState.answers.length}
 				date={questionState.question.creation_date}
+				winner={questionState.question.winner}
 			/>
 			<SlateSubmit
 				currentStatus={questionState.question.status}
@@ -222,8 +229,10 @@ const Question = ({
 				currentStatus={questionState.question.status}
 				currentUserRole={currentUserRole}
 				cachedAvatars={cachedAvatars}
-				pickedWinnerId={pickedWinner && pickedWinner.id ? pickedWinner.id : ""}
-				setWinner={setWinner}
+				unsubmittedChoice={
+					unsubmittedChoice && unsubmittedChoice.id ? unsubmittedChoice.id : ""
+				}
+				setUnsubmittedChoice={setUnsubmittedChoice}
 				winnerByChoiceId={
 					questionState.question.winner ? questionState.question.winner.id : ""
 				}
