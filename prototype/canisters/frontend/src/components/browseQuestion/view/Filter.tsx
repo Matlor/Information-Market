@@ -1,8 +1,6 @@
 import { useState } from "react";
-import RoundedCheckox from "../..//core/view/RoundedCheckbox";
+import RoundedCheckbox from "../../core/view/RoundedCheckbox";
 import Loading from "../../core/view/Loading";
-// TO DO: Simplify and style checkbox/dropdown
-
 const Filter = ({
 	statusMap,
 	setStatusMap,
@@ -10,41 +8,14 @@ const Filter = ({
 	setMyInteractions,
 	isConnected,
 	filterLoading,
-	setFilterLoading,
 }) => {
+	const [display, setDisplay] = useState<any>("hidden");
+
 	window.addEventListener("click", () => {
 		if (display === "visible") {
 			setDisplay("hidden");
 		}
 	});
-
-	const options = [
-		{ value: "OPEN", label: "Open" },
-		{ value: "PICKANSWER", label: "Winner Selection" },
-		{ value: "DISPUTABLE", label: "Open for disputes" },
-		{ value: "DISPUTED", label: "Arbitration" },
-		{ value: "CLOSED", label: "Closed" },
-	];
-
-	const checkIfStatusIsSelected = (specificStatus) => {
-		for (let i = 0; i < statusMap.length; i++) {
-			if (statusMap[i].value === specificStatus.value) {
-				return true;
-			}
-		}
-
-		return false;
-	};
-
-	const [checkBoxState, setCheckBoxState] = useState<any>([
-		checkIfStatusIsSelected(options[0]),
-		checkIfStatusIsSelected(options[1]),
-		checkIfStatusIsSelected(options[2]),
-		checkIfStatusIsSelected(options[3]),
-		checkIfStatusIsSelected(options[4]),
-	]);
-
-	const [display, setDisplay] = useState<any>("hidden");
 
 	const rotateIconHandler = () => {
 		if (display === "hidden") {
@@ -62,36 +33,56 @@ const Filter = ({
 		}
 	};
 
-	const checkbox = (num, checkBoxState, setCheckBoxState) => {
-		const clickHandler = (num, checkBoxState, setCheckBoxState) => {
-			const newCheckBoxState = [...checkBoxState];
-			newCheckBoxState[num] = !newCheckBoxState[num];
-			setCheckBoxState(newCheckBoxState);
+	const options = [
+		{ value: "OPEN", label: "Open" },
+		{ value: "PICKANSWER", label: "Winner Selection" },
+		{ value: "DISPUTABLE", label: "Open for disputes" },
+		{ value: "DISPUTED", label: "Arbitration" },
+		{ value: "CLOSED", label: "Closed" },
+	];
 
-			// Modify status map
-			const newStatusMap = [...statusMap];
-			if (newCheckBoxState[num] === true) {
-				newStatusMap.push(options[num]);
-				setFilterLoading(true);
-				setStatusMap(newStatusMap);
-			} else {
-				const val = options[num];
-				for (let i = 0; i < newStatusMap.length; i++) {
-					if (newStatusMap[i].value === val.value) {
-						newStatusMap.splice(i, 1);
-					}
-				}
-				setFilterLoading(true);
-				setStatusMap(newStatusMap);
+	const checkIfStatusIsSelected = (specificStatus) => {
+		for (let i = 0; i < statusMap.length; i++) {
+			if (statusMap[i].value === specificStatus.value) {
+				return true;
 			}
-		};
+		}
+		return false;
+	};
 
+	const [checkBoxState, setCheckBoxState] = useState<any>([
+		checkIfStatusIsSelected(options[0]),
+		checkIfStatusIsSelected(options[1]),
+		checkIfStatusIsSelected(options[2]),
+		checkIfStatusIsSelected(options[3]),
+		checkIfStatusIsSelected(options[4]),
+	]);
+
+	const checkBoxClickHandler = (num) => {
+		const newCheckBoxState = [...checkBoxState];
+		newCheckBoxState[num] = !newCheckBoxState[num];
+		setCheckBoxState(newCheckBoxState);
+
+		const newStatusMap = [...statusMap];
+		if (newCheckBoxState[num] === true) {
+			newStatusMap.push(options[num]);
+			setStatusMap(newStatusMap);
+		} else {
+			const val = options[num];
+			for (let i = 0; i < newStatusMap.length; i++) {
+				if (newStatusMap[i].value === val.value) {
+					newStatusMap.splice(i, 1);
+				}
+			}
+			setStatusMap(newStatusMap);
+		}
+	};
+
+	const checkbox = (num) => {
 		return (
-			<>
-				<div onClick={() => clickHandler(num, checkBoxState, setCheckBoxState)}>
-					<RoundedCheckox isChecked={checkBoxState[num]} />
-				</div>
-			</>
+			<div className="">
+				<RoundedCheckbox isChecked={checkBoxState[num]} />
+			</div>
 		);
 	};
 
@@ -100,63 +91,79 @@ const Filter = ({
 	};
 
 	return (
-		<div className="min-w-[100px] w-[13.2vw] relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
-			<div className="flex justify-between items-center py-[8px] px-[15px]">
-				{filterLoading ? (
-					<div className="absolute right-[100%] mr-4">
-						<Loading />
-					</div>
-				) : (
-					<></>
-				)}
-				Filter
-				<button
-					onClick={(e) => {
-						rotateIconHandler();
-						e.stopPropagation();
-					}}
-				>
-					<div className={rotateIcon()}>
-						<svg
-							width="14"
-							height="9"
-							viewBox="0 0 14 9"
-							fill="none"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								d="M0.101701 0.742969L6.63212 8.82646C6.81904 9.05785 7.17897 9.05785 7.36788 8.82646L13.8983 0.742969C14.1409 0.441536 13.9222 0 13.5304 0H0.469584C0.0778387 0 -0.140902 0.441536 0.101701 0.742969Z"
-								fill="#969696"
-							/>
-						</svg>
-					</div>
-				</button>
-			</div>
+		<div className="max-w-[220px] w-full  relative heading3 shadow-md rounded-md bg-colorBackgroundComponents ">
+			<button
+				onClick={(e) => {
+					rotateIconHandler();
+					e.stopPropagation();
+				}}
+				className="w-full flex justify-between items-center py-[8px] px-[15px]"
+			>
+				<div>
+					{filterLoading ? (
+						<div className="absolute right-[100%] mr-4">
+							<Loading />
+						</div>
+					) : (
+						<></>
+					)}
+					Filter
+				</div>
 
+				<div className={rotateIcon()}>
+					<svg
+						width="14"
+						height="9"
+						viewBox="0 0 14 9"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M0.101701 0.742969L6.63212 8.82646C6.81904 9.05785 7.17897 9.05785 7.36788 8.82646L13.8983 0.742969C14.1409 0.441536 13.9222 0 13.5304 0H0.469584C0.0778387 0 -0.140902 0.441536 0.101701 0.742969Z"
+							fill="#969696"
+						/>
+					</svg>
+				</div>
+			</button>
 			<div
-				className={`${display} absolute w-full mt-[5px] py-[10px] shadow-lg  flex flex-col gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
+				className={`${display} absolute w-full flex flex-col gap-[13px] mt-[5px] py-[10px] text-12px rounded-md shadow-lg  bg-colorBackgroundComponents `}
 				onClick={(e) => {
 					e.stopPropagation();
 				}}
 			>
-				<div className=" w-max z-10 flex items-center gap-[18px] px-[15px]">
-					{checkbox(0, checkBoxState, setCheckBoxState)}
+				<div
+					className="w-full z-10 flex items-center gap-[18px] px-[15px]"
+					onClick={() => checkBoxClickHandler(0)}
+				>
+					{checkbox(0)}
 					Open
 				</div>
-				<div className="w-max z-10 flex items-center gap-[18px] px-[15px]">
-					{checkbox(1, checkBoxState, setCheckBoxState)}
+				<div
+					className="w-full z-10 flex items-center gap-[18px] px-[15px]"
+					onClick={() => checkBoxClickHandler(1)}
+				>
+					{checkbox(1)}
 					Winner Selection
 				</div>
-				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
-					{checkbox(2, checkBoxState, setCheckBoxState)}
+				<div
+					className="w-full z-10 flex  items-center gap-[18px] px-[15px]"
+					onClick={() => checkBoxClickHandler(2)}
+				>
+					{checkbox(2)}
 					Open for Dispute
 				</div>
-				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
-					{checkbox(3, checkBoxState, setCheckBoxState)}
+				<div
+					className="w-full z-10 flex  items-center gap-[18px] px-[15px]"
+					onClick={() => checkBoxClickHandler(3)}
+				>
+					{checkbox(3)}
 					Arbitration
 				</div>
-				<div className="w-max z-10 flex  items-center gap-[18px] px-[15px]">
-					{checkbox(4, checkBoxState, setCheckBoxState)}
+				<div
+					className="w-full z-10 flex  items-center gap-[18px] px-[15px]"
+					onClick={() => checkBoxClickHandler(4)}
+				>
+					{checkbox(4)}
 					Closed
 				</div>
 
@@ -169,10 +176,10 @@ const Filter = ({
 				<div
 					className={`${
 						isConnected ? "visible" : "hidden"
-					} w-max z-10 flex items-center gap-[18px] px-[15px]`}
+					} w-full z-10 flex items-center gap-[18px] px-[15px]`}
 					onClick={myInteractionsHandler}
 				>
-					<RoundedCheckox isChecked={myInteractions} />
+					<RoundedCheckbox isChecked={myInteractions} />
 					My Interactions
 				</div>
 			</div>

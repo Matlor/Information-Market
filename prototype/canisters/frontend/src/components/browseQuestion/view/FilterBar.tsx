@@ -13,13 +13,18 @@ const FilterBar = ({
 	setMyInteractions,
 	isConnected,
 	filterLoading,
-	setFilterLoading,
 	searchLoading,
+	sortLoading,
 }: any) => {
 	return (
-		<div className="flex justify-between gap-[17px] items-center p-0 ">
-			<Search setSearchedText={setSearchedText} searchLoading={searchLoading} />
-			<div className="flex items-center p-0 gap-[17px]">
+		<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
+			<div className="sm:w-1/2">
+				<Search
+					setSearchedText={setSearchedText}
+					searchLoading={searchLoading}
+				/>
+			</div>
+			<div className="sm:w-1/2 flex justify-betwee items-center p-0 gap-[17px] sm:justify-end">
 				<Filter
 					statusMap={statusMap}
 					setStatusMap={setStatusMap}
@@ -27,12 +32,12 @@ const FilterBar = ({
 					setMyInteractions={setMyInteractions}
 					isConnected={isConnected}
 					filterLoading={filterLoading}
-					setFilterLoading={setFilterLoading}
 				/>
 				<Sort
 					setOrderIsAscending={setOrderIsAscending}
 					orderIsAscending={orderIsAscending}
 					setOrderField={setOrderField}
+					sortLoading={sortLoading}
 				/>
 			</div>
 		</div>
