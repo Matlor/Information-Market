@@ -5,3 +5,5 @@ dist/
 build/
 declarations/
 .DS_Store
+
+graphql.old.did
