@@ -75,37 +75,3 @@ const QuestionPreview = ({
 };
 
 export default QuestionPreview;
-
-/* 
-		<div className="grid grid-cols-[100px_min-content_auto]  min-h-[140px]  w-full  px-[20px] py-[15px]  bg-colorBackgroundComponents shadow-md rounded-lg">
-			<div className="flex w-max heading3">{reward} ICP</div>
-			<div className="row-span-2 mx-[20px] md:mx-[40px] justify-self-center self-center w-[2px] h-full bg-colorBackground rounded-md"></div>
-			<div className="">
-				<Link to={`/question/${id}`}>
-					<div className="heading3 flex w-fit">
-						{title.charAt(0).toUpperCase() + title.slice(1)}
-					</div>
-				</Link>
-			</div>
-
-			<div className="text-normal w-max flex flex-col self-end gap-[6px] mb-[3px]">
-				<div className="self-start">{questionStatusToString(status)}</div>
-				<StagesBar status={status} />
-			</div>
-
-			<div className="flex self-end mt-[5px] ">
-				<ProfileAnswers
-					name={authorName}
-					answers={numAnswers}
-					avatar={avatar}
-				/>
-				<div className="ml-[30px] self-center">
-					<Date date={graphQlToStrDate(date)} />
-				</div>
-			</div>
-		</div>
-
-
-
-
-*/
