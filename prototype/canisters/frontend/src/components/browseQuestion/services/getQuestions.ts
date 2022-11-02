@@ -1,5 +1,5 @@
-//import sudograph from "../../api/sudograph";
 import { gql, sudograph } from "sudograph";
+import { e3sToIcp } from "../../core/services/utils/conversions";
 
 type Status = { value: string; label: string };
 
@@ -81,6 +81,7 @@ const getQuestions = async (
                     id
                     name
                 }
+				creation_date
                 title
                 answers {
                     id
@@ -96,6 +97,10 @@ const getQuestions = async (
     `
 	);
 
+	var questions = pageResults.data.readQuestion;
+	for (var i = 0; i < questions.length; i++) {
+		questions[i].reward = e3sToIcp(questions[i].reward);
+	}
 	questionData.totalQuestions = allResults.data.readQuestion.length;
 	questionData.questions = pageResults.data.readQuestion;
 	questionData.timestamp = Date.now();
