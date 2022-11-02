@@ -26,10 +26,6 @@ const Footer = () => {
 					</a>
 				</div>
 			</div>
-
-			<a href="https://github.com/Matlor/Information-Market">
-				<img src={Github} alt="github" />
-			</a>
 		</div>
 	);
 };
