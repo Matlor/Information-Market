@@ -13,13 +13,13 @@ const Answer = ({
 }: any) => {
 	const effectTemplate = {
 		normal: "shadow-md",
-		winner: "shadow-effect",
-		hover: "shadow-md hover:shadow-effect",
+		winner: "winner",
+		hover: "shadow-md hover:winner",
 	};
 
 	return (
 		<div
-			className={`${effectTemplate[effect]} flex flex-col gap-[5px] px-[20px] py-[15px] shadow-md rounded-lg bg-colorBackgroundComponents  text-justify`}
+			className={`${effectTemplate[effect]} flex flex-col gap-[5px] p-content rounded-lg bg-colorBackgroundComponents  text-justify`}
 			data-cy={`Answer-${id}`}
 		>
 			<div className="text-justify editor-wrapper">{parse(content)}</div>
