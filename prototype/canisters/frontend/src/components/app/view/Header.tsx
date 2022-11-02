@@ -35,6 +35,12 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 		setIsOpen(!isOpen);
 	};
 
+	window.addEventListener("click", () => {
+		if (isOpen) {
+			setIsOpen(false);
+		}
+	});
+
 	return (
 		<div className="flex flex-row p-0 ">
 			<div className="flex-1 ">
@@ -45,8 +51,13 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 				</div>
 			</div>
 
-			{/* HIDDEN */}
-			<div className="self-center">
+			{/* RESPONSIVE */}
+			<div
+				className="self-center"
+				onClick={(e) => {
+					e.stopPropagation();
+				}}
+			>
 				<div
 					className="w-[200px] px-[8px] flex justify-end items-center self-center heading1-stretch lg:hidden"
 					onClick={toggleMenu}
@@ -57,7 +68,6 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 						<div className="w-8 h-0.5 bg-colorText"></div>
 					</div>
 				</div>
-
 				<div className="hidden lg:flex w-fit flex-row items-center gap-[5.2vw] p-[10px] m-0">
 					<Link to="/">
 						<div className="heading1-stretch w-max">Browse Question</div>
@@ -70,7 +80,7 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 				<div className="visible lg:hidden">
 					<div
 						className={`${
-							isOpen ? "visible" : "invisible"
+							isOpen ? "visible" : "hidden"
 						} lg:visible z-10 w-[200px] h-full  p-[10px] absolute flex flex-col  items-start gap-[10px] mt-[10px] bg-colorBackground`}
 					>
 						<Link to="/">
