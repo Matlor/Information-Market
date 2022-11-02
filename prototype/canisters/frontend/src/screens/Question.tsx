@@ -10,6 +10,8 @@ import Loading from "../components/core/view/Loading";
 import QuestionMenu from "../components/question/view/QuestionMenu";
 import { e3sToIcp } from "../components/core/services/utils/conversions";
 
+import { valueToStatus } from "../components/core/services/utils/conversions";
+
 const Question = ({
 	userPrincipal,
 	answerQuestion,
@@ -77,6 +79,7 @@ const Question = ({
 			if (readQuestion[0]) {
 				var transformedData = readQuestion[0];
 				transformedData.reward = e3sToIcp(readQuestion[0].reward);
+				transformedData.status = valueToStatus(readQuestion[0].status);
 			}
 
 			const {

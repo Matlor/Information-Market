@@ -38,6 +38,41 @@ export const questionStatusToString = (status) => {
 	}
 };
 
+export const statusToValue = (status) => {
+	console.log(status);
+	switch (status.value) {
+		case "OPEN":
+			return 0;
+		case "PICKANSWER":
+			return 1;
+		case "DISPUTABLE":
+			return 2;
+		case "DISPUTED":
+			return 3;
+		case "CLOSED":
+			return 4;
+		default:
+			return 10;
+	}
+};
+
+export const valueToStatus = (value) => {
+	switch (value) {
+		case 0:
+			return "OPEN";
+		case 1:
+			return "PICKANSWER";
+		case 2:
+			return "DISPUTABLE";
+		case 3:
+			return "DISPUTED";
+		case 4:
+			return "CLOSED";
+		default:
+			return 10;
+	}
+};
+
 export const graphQlToJsDate = (minutes) => {
 	// Date is in milliseconds
 	return new Date(minutes * 60 * 1000);

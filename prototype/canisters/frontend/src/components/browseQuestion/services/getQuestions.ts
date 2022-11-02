@@ -1,5 +1,9 @@
 import { gql, sudograph } from "sudograph";
-import { e3sToIcp } from "../../core/services/utils/conversions";
+import {
+	e3sToIcp,
+	statusToValue,
+	valueToStatus,
+} from "../../core/services/utils/conversions";
 
 type Status = { value: string; label: string };
 
@@ -13,6 +17,7 @@ const getQuestions = async (
 	questionsPerPage,
 	pageIndex
 ) => {
+	console.log(statusMap);
 	let sudographActor = sudograph({
 		canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 	});
@@ -30,27 +35,36 @@ const getQuestions = async (
 	// Filter the search on key-words (currently hard-coded on question title and content)
 	// and selected status
 	queryInputs +=
-		'search: {and: [{or: [{title: {contains: "' +
+		' search: {and: [{or: [{title: {contains: "' +
 		searchedText +
 		'"}}, {content: {contains: "' +
 		searchedText +
-		'"}}]}, {or: [';
+		'"}}]}';
 
+	// Query part for the status filter
+	queryInputs += "," + "{or: [";
+
+	// if none selected it does not need to fetch
 	if (statusMap.length === 0) {
 		return questionData;
 	}
+
 	if (statusMap.length > 0) {
 		statusMap.map((status: Status, index: number) => {
 			if (index != 0) {
 				queryInputs += ", ";
 			}
-			queryInputs += '{status: {eq: "' + status.value + '"}}';
+			queryInputs += "{status: {eq: " + statusToValue(status) + "}}";
 		});
 	}
 	queryInputs += "]}";
+
+	// self contained query
 	if (myInteractions) {
 		queryInputs += `,{or: [{answers: {author: {id: {eq:"${userPrincipal}"}}}}, {author: {id: {eq: "${userPrincipal}"}}}]}`;
 	}
+
+	// final query close
 	queryInputs += "]}";
 
 	const allResults = await sudographActor.query(
@@ -66,9 +80,9 @@ const getQuestions = async (
 	);
 
 	// Limit the number of questions per page
-	queryInputs += "limit: " + questionsPerPage;
+	queryInputs += " limit: " + questionsPerPage;
 	// Offset from page index
-	queryInputs += "offset: " + pageIndex * questionsPerPage;
+	queryInputs += " offset: " + pageIndex * questionsPerPage;
 
 	const pageResults = await sudographActor.query(
 		gql`
@@ -100,6 +114,7 @@ const getQuestions = async (
 	var questions = pageResults.data.readQuestion;
 	for (var i = 0; i < questions.length; i++) {
 		questions[i].reward = e3sToIcp(questions[i].reward);
+		questions[i].status = valueToStatus(questions[i].status);
 	}
 	questionData.totalQuestions = allResults.data.readQuestion.length;
 	questionData.questions = pageResults.data.readQuestion;
