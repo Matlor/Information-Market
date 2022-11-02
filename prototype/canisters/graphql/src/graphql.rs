@@ -26,6 +26,24 @@ use sudograph::graphql_database;
 
 graphql_database!("canisters/graphql/src/schema.graphql");
 
+#[sudograph::ic_cdk_macros::pre_upgrade]
+fn pre_upgrade_custom() {
+    let object_type_store = sudograph::ic_cdk::storage::get::<ObjectTypeStore>();
+
+    sudograph::ic_cdk::storage::stable_save((object_type_store,));
+}
+
+#[sudograph::ic_cdk_macros::post_upgrade]
+fn post_upgrade_custom() {
+    let (stable_object_type_store,): (ObjectTypeStore,) = sudograph::ic_cdk::storage::stable_restore().expect("ObjectTypeStore should be in stable memory");
+
+    let object_type_store = sudograph::ic_cdk::storage::get_mut::<ObjectTypeStore>();
+
+    for (key, value) in stable_object_type_store.into_iter() {
+        object_type_store.insert(key, value);
+    }
+}
+
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 enum QuestionStatusEnum {
     OPEN,
@@ -56,6 +74,23 @@ struct InvoiceType {
 }
 
 #[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
+struct InternalQuestionType {
+    id: String,
+    author: UserType,
+    author_invoice: InvoiceType,
+    creation_date: i32,
+    status: i32,
+    status_update_date: i32,
+    status_end_date: i32,
+    open_duration: i32,
+    title: String,
+    content: String,
+    reward: i32,
+    winner: Option<AnswerType>,
+    close_transaction_block_height: Option<String>
+}
+
+#[derive(ic_cdk::export::candid::CandidType, serde::Deserialize, Debug, Clone)]
 struct QuestionType {
     id: String,
     author: UserType,
@@ -80,16 +115,59 @@ struct AnswerType {
     content: String
 }
 
-impl std::fmt::Display for QuestionStatusEnum {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-       match *self {
-            QuestionStatusEnum::OPEN => write!(f, "OPEN"),
-            QuestionStatusEnum::PICKANSWER => write!(f, "PICKANSWER"),
-            QuestionStatusEnum::DISPUTABLE => write!(f, "DISPUTABLE"),
-            QuestionStatusEnum::DISPUTED => write!(f, "DISPUTED"),
-            QuestionStatusEnum::CLOSED => write!(f, "CLOSED"),
-       }
+fn to_internal_status(status: QuestionStatusEnum) -> i32 {
+    match status {
+        QuestionStatusEnum::OPEN => { return 0; },
+        QuestionStatusEnum::PICKANSWER => { return 1; },
+        QuestionStatusEnum::DISPUTABLE => { return 2; },
+        QuestionStatusEnum::DISPUTED => { return 3; },
+        QuestionStatusEnum::CLOSED => { return 4; }
     }
+}
+
+fn to_readable_status(status: i32) -> QuestionStatusEnum {
+    if status == 0 { return QuestionStatusEnum::OPEN; }
+    if status == 1 { return QuestionStatusEnum::PICKANSWER; }
+    if status == 2 { return QuestionStatusEnum::DISPUTABLE; }
+    if status == 3 { return QuestionStatusEnum::DISPUTED; }
+    if status == 4 { return QuestionStatusEnum::CLOSED; }
+    panic!("Status is not supported");
+}
+
+fn to_internal_question_type(question: QuestionType) -> InternalQuestionType {
+    return InternalQuestionType {
+        id: question.id,
+        author: question.author,
+        author_invoice: question.author_invoice,
+        creation_date: question.creation_date,
+        status: to_internal_status(question.status),
+        status_update_date: question.status_update_date,
+        status_end_date: question.status_end_date,
+        open_duration: question.open_duration,
+        title: question.title,
+        content: question.content,
+        reward: question.reward,
+        winner: question.winner,
+        close_transaction_block_height: question.close_transaction_block_height,
+    };
+}
+
+fn to_question_type(question: InternalQuestionType) -> QuestionType {
+    return QuestionType {
+        id: question.id,
+        author: question.author,
+        author_invoice: question.author_invoice,
+        creation_date: question.creation_date,
+        status: to_readable_status(question.status),
+        status_update_date: question.status_update_date,
+        status_end_date: question.status_end_date,
+        open_duration: question.open_duration,
+        title: question.title,
+        content: question.content,
+        reward: question.reward,
+        winner: question.winner,
+        close_transaction_block_height: question.close_transaction_block_height,
+    };
 }
 
 #[update]
@@ -238,7 +316,7 @@ async fn create_question(
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+            return Some(to_question_type(serde_json::from_value(vec_values[0].clone()).unwrap()));
         }
     }
     return None;
@@ -285,7 +363,7 @@ async fn must_pick_answer(question_id: String, status_update_date: i32, status_e
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            let question : InternalQuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -306,7 +384,7 @@ async fn open_dispute(question_id: String, status_update_date: i32) -> bool {
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            let question : InternalQuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -333,7 +411,7 @@ async fn solve_dispute(
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            let question : InternalQuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -356,7 +434,7 @@ async fn pick_winner(question_id: String, answer_id: String, status_update_date:
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            let question : InternalQuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -381,7 +459,7 @@ async fn close_question(
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            let question : QuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
+            let question : InternalQuestionType = serde_json::from_value(vec_values[0].clone()).unwrap();
             return question.status_update_date == status_update_date;
         }
     }
@@ -430,7 +508,7 @@ async fn get_question(question_id: String) -> Option<QuestionType> {
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+            return Some(to_question_type(serde_json::from_value(vec_values[0].clone()).unwrap()));
         }
     }
     return None;
@@ -446,7 +524,7 @@ async fn get_question_by_invoice(invoice_id: String) -> Option<QuestionType> {
     if json_response != None {
         let vec_values = json_response.unwrap();
         if vec_values.len() == 1 {
-            return Some(serde_json::from_value(vec_values[0].clone()).unwrap());
+            return Some(to_question_type(serde_json::from_value(vec_values[0].clone()).unwrap()));
         }
     }
     return None;
@@ -460,7 +538,8 @@ async fn get_questions() -> Vec<QuestionType> {
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::get_questions::macros::response!()].as_array();
     if json_response != None {
-        return serde_json::from_value(serde_json::Value::Array(json_response.unwrap().clone())).unwrap();
+        let vec_questions : Vec<InternalQuestionType> = serde_json::from_value(serde_json::Value::Array(json_response.unwrap().clone())).unwrap();
+        return vec_questions.iter().map(|q| to_question_type(q.clone())).collect();
     }
     return Vec::<QuestionType>::new();
 }

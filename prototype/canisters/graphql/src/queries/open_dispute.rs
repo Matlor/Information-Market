@@ -4,7 +4,7 @@ pub mod macros{
         () => {
             r#"mutation ($question_id: ID!, $status_update_date: Int!) {
               updateQuestion(
-                input: {id: $question_id, status_update_date: $status_update_date, status: DISPUTED}
+                input: {id: $question_id, status_update_date: $status_update_date, status: 3}
               ) {
                 id
                 author {
