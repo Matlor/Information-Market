@@ -260,7 +260,7 @@ const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 
 	return (
 		<div
-			className="h-[400px] dbg-colorBackgroundComponents flex flex-col gap-[37px] px-[35px] py-[30px] items-start shadow-md rounded-lg"
+			className="h-[400px] flex flex-col gap-[37px] p-content items-start bg-colorBackgroundComponents shadow-md rounded-lg"
 			data-cy="SlateEditor"
 		>
 			<IconContext.Provider
@@ -286,7 +286,7 @@ const SlateEditor = ({ inputValue, setInputValue, placeholder }) => {
 					}}
 				>
 					<Toolbar>
-						<div className="flex justify-between w-[19vw]">
+						<div className="flex justify-between w-[250px]">
 							{/* MARKS */}
 							<MarkButton format="bold" icon={<AiOutlineBold />} />
 							<MarkButton format="italic" icon={<AiOutlineItalic />} />

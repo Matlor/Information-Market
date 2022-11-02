@@ -46,7 +46,7 @@
 	}
 
 	.editor-wrapper {
-		@apply text-normal;
+		@apply heading3;
 	}
 
 	.editor-wrapper blockquote {
@@ -67,5 +67,40 @@
 
 	.editor-wrapper h3 {
 		@apply heading3;
+	}
+
+	.px-field {
+		@apply px-[40px] md:px-[40px];
+	}
+
+	.p-content {
+		@apply px-field py-[40px];
+	}
+
+	.gap-small {
+		@apply gap-[6px];
+	}
+
+	.gap-normal {
+		@apply gap-[17px];
+	}
+
+	.small-ball-dimension {
+		@apply w-[15px] h-[15px];
+	}
+	.ball-dimension {
+		@apply w-[21px] h-[21px];
+	}
+
+	.height-menu {
+		@apply h-[45px];
+	}
+
+	.winner {
+		@apply rounded-lg shadow-choice;
+	}
+
+	.center {
+		@apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
 	}
 }
