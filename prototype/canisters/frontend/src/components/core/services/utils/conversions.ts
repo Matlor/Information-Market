@@ -30,7 +30,7 @@ export const questionStatusToString = (status) => {
 		case "PICKANSWER":
 			return "Winner Selection";
 		case "DISPUTABLE":
-			return "Open for disputes";
+			return "Open for Disputes";
 		case "DISPUTED":
 			return "Arbitration";
 		case "CLOSED":
