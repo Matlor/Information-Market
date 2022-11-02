@@ -1,44 +1,65 @@
 import Loading from "./Loading";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const Button = ({
 	propFunction,
-	text,
-	font = "heading1-stretch",
-	loading = false,
+	text = "",
+	font = "heading3",
+	CustomButton,
+	CustomLoader,
 }: any) => {
 	const [isClicked, setIsClicked] = useState(false);
 
 	const clickHandler = (event: any) => {
 		event.preventDefault();
 		setIsClicked(true);
-		propFunction();
+		propFunction().then(() => {
+			setIsClicked(false);
+		});
 	};
 
-	useEffect(() => {
-		if (isClicked) {
-			setIsClicked(false);
-		}
-	}, [propFunction]);
-
-	return (
-		<div className="flex h-[47px] max-w-max">
-			<div className="relative">
+	const Button = () => {
+		return (
+			<>
 				<button
-					className={`${font} flex justify-center items-center px-[25px] py-[10px] bg-colorBackgroundComponents shadow-md rounded-lg`}
+					className={`${font} ${isClicked ? "hidden" : "visible"}  `}
 					onClick={clickHandler}
 				>
-					{text}
+					{CustomButton ? (
+						<CustomButton />
+					) : (
+						<div className="flex justify-center items-center px-[25px] py-[10px] bg-colorBackgroundComponents shadow-md rounded-lg">
+							{text}
+						</div>
+					)}
 				</button>
+			</>
+		);
+	};
 
-				<div
-					className={`${
-						loading && isClicked ? "visible" : "hidden"
-					} flex items-center px-[15px] py-[10px] absolute  top-1/2 left-[100%] transform  -translate-y-1/2 `}
-				>
-					<Loading />
-				</div>
+	const LoadingSpinner = () => {
+		return (
+			<div
+				className={`
+				${isClicked ? "visible" : "hidden"} `}
+			>
+				{CustomLoader ? (
+					<div className="flex items-center px-[15px] py-[10px]">
+						{CustomLoader}
+					</div>
+				) : (
+					<div className="flex items-center px-[15px] py-[10px]">
+						<Loading color="colorBackgroundComponents" />
+					</div>
+				)}
 			</div>
+		);
+	};
+
+	return (
+		<div className="flex h-[45px] max-w-max relative">
+			{Button()}
+			{LoadingSpinner()}
 		</div>
 	);
 };

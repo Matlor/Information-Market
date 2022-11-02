@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ButtonSmall from "../components/core/view/ButtonSmall";
+import Button from "../components/core/view/Button";
 
 const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	const [userName, setUserName] = useState<any>(user.userName);
@@ -37,7 +37,7 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	return (
 		<>
 			{isConnected ? (
-				<div className="flex flex-col gap-[20px] ">
+				<div className="flex flex-col gap-[20px]">
 					<label
 						className="p-6 flex w-60 h-60 rounded-full bg-colorBackgroundComponents shadow-md relative hover:cursor-pointer "
 						onMouseEnter={() => {
@@ -90,11 +90,7 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 					</div>
 
 					<div className="self-center">
-						<ButtonSmall
-							propFunction={updateProfile}
-							text={"Save"}
-							loading={true}
-						/>
+						<Button propFunction={updateProfile} text={"Save"} />
 						{isError ? (
 							<div className="w-max text-normal mt-2 text-colorRed flex justify-center absolute   left-1/2 transform -translate-x-1/2 -translate-y-2/2">
 								{"File has to be < 500kb"}
