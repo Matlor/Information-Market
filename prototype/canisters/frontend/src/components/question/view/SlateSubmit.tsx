@@ -1,5 +1,5 @@
 import SlateEditor from "../../addQuestion/view/SlateEditor";
-import ButtonSmall from "../../core/view/ButtonSmall";
+import Button from "../../core/view/Button";
 
 // TODO: Add error and loading handling
 const SlateSubmit = ({
@@ -11,40 +11,28 @@ const SlateSubmit = ({
 }) => {
 	const currentCase = currentStatus + "." + currentUserRole;
 
-	const wrapper = (child) => {
-		return (
-			<div data-cy="SlateSubmit">
-				<SlateEditor
-					inputValue={slateInput}
-					setInputValue={setSlateInput}
-					placeholder="Answer here..."
-				/>
-				<div className="mt-[17px]">{child}</div>
+	const showEditor = (
+		<div data-cy="SlateSubmit">
+			<SlateEditor
+				inputValue={slateInput}
+				setInputValue={setSlateInput}
+				placeholder="Answer here..."
+			/>
+			<div className="mt-[17px]">
+				<Button text={"Submit"} propFunction={propFunction} />
 			</div>
-		);
-	};
+		</div>
+	);
 
 	switch (currentCase) {
 		case "OPEN.isQuestionAuthor":
 			break;
 		case "OPEN.isAnswerAuthor":
-			return wrapper(
-				<ButtonSmall
-					text={"Submit"}
-					propFunction={propFunction}
-					loading={true}
-				/>
-			);
+			return showEditor;
 		case "OPEN.isNone":
-			return wrapper(
-				<ButtonSmall
-					text={"Submit"}
-					propFunction={propFunction}
-					loading={true}
-				/>
-			);
+			return showEditor;
 		case "OPEN.isNotLoggedIn":
-			return wrapper(<div className="heading3 mb-5 ">Log in to answer</div>);
+			return;
 
 		case "PICKANSWER.isQuestionAuthor":
 			break;
