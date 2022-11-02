@@ -21,13 +21,22 @@ dfx deploy invoice  --argument='(principal "'${LEDGER_PRINCIPAL}'")'
 dfx generate invoice
 
 # 3. Deploy the graphql canister
-dfx deploy graphql
+dfx canister create graphql
+# Running these commands twice is the simplest solution when the graphql-optimized file does not exist yet.
+# The first build will run into an error that can be ignored.
+# TODO: Understand how to create an empty "graphql-optimized.wasm" file instead.
+dfx build graphql
+./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
+dfx build graphql
+./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
+
+dfx canister install graphql
 dfx generate graphql
 
 # 4. Deploy the market canister
 export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 export GRAPHQL_PRINCIPAL=$(dfx canister id graphql)
-dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 1440; disputable_duration_minutes = 2880; update_status_on_heartbeat = true; })'
+dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 2; disputable_duration_minutes = 2; update_status_on_heartbeat = true; })'
 dfx generate market
 
 # 5. Deploy the frontend canister
