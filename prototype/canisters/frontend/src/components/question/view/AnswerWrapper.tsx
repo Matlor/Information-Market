@@ -5,8 +5,8 @@ const AnswerWrapper = ({
 	currentStatus,
 	currentUserRole,
 	cachedAvatars,
-	pickedWinnerId,
-	setWinner,
+	unsubmittedChoice,
+	setUnsubmittedChoice,
 	winnerByChoiceId,
 	finalWinnerId,
 }: any) => {
@@ -48,14 +48,14 @@ const AnswerWrapper = ({
 					<div
 						key={answer.id}
 						data-cy="Answer"
-						onClick={() => setWinner(answer)}
+						onClick={() => setUnsubmittedChoice(answer)}
 					>
 						<Answer
 							content={answer.content}
 							date={answer.creation_date}
 							authorName={answer.author.name}
 							avatar={cachedAvatars.get(answer.author.id)}
-							effect={pickedWinnerId === answer.id ? "winner" : "hover"}
+							effect={unsubmittedChoice === answer.id ? "winner" : "hover"}
 							id={answer.id}
 						/>
 					</div>

@@ -63,7 +63,7 @@ const QuestionMetaData = ({ status, endDateSec, reward, isTimeShown }) => {
 		const hourRemainder = floatHours - hours;
 		const floatMinutes = hourRemainder * 60;
 		const minutes = Math.round(floatMinutes);
-		// {`${isTimeShown ? "flex" : "hidden"}`}
+
 		if (status === "CLOSED") {
 			return;
 		} else {
