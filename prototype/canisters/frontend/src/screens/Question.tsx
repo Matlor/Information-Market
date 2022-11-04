@@ -169,15 +169,6 @@ const Question = ({
 		}
 	};
 
-	const isAnswerAuthor = () => {
-		for (var i = 0; i < questionState.question.answers.length; i++) {
-			if (questionState.question.answers[i].author.id === userPrincipal) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	};
 	if (!questionState.hasData) {
 		return (
 			<div className="mt-[78px]">
@@ -185,6 +176,15 @@ const Question = ({
 			</div>
 		);
 	}
+
+	const isAnswerAuthor = () => {
+		for (let i = 0; i < questionState.question.answers.length; i++) {
+			if (questionState.question.answers[i].author.id === userPrincipal) {
+				return true;
+			}
+		}
+		return false;
+	};
 
 	var currentUserRole = "isNone";
 	if (questionState.question.author.id === userPrincipal) {

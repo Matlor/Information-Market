@@ -94,11 +94,7 @@ const QuestionMenu = ({
 			return;
 
 		case "DISPUTABLE.isQuestionAuthor":
-			return (
-				<div className="w-full flex gap-[17px] justify-between items-center">
-					<div>{selectedUser(winner)}</div>
-				</div>
-			);
+			return;
 		case "DISPUTABLE.isAnswerAuthor":
 			return (
 				<div className="w-full flex gap-[17px] justify-between items-center">
