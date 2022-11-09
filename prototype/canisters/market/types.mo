@@ -29,5 +29,7 @@ module {
         #TransferError: InvoiceTypes.TransferError;
         #UserNotFound;
         #UserExists;
+        #WrongPrincipal;
+        #UnpaidReward;
     };
 }

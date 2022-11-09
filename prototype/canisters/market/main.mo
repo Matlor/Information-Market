@@ -6,6 +6,7 @@ import GraphQL "../graphql/graphqlTypes";
 
 import Types        "types";
 import Utils        "utils";
+import Text         "mo:base/Text";
 
 import Debug        "mo:base/Debug";
 import Int          "mo:base/Int";
@@ -17,6 +18,8 @@ import Nat64        "mo:base/Nat64";
 import Principal    "mo:base/Principal";
 import Result       "mo:base/Result";
 import Time         "mo:base/Time";
+import Trie         "mo:base/Trie";
+import Error        "mo:base/Error";
 
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
@@ -56,9 +59,27 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         return update_status_on_heartbeat_;
     };
 
+    // ------------------------- Transactions -------------------------
+    // These transactions are needed to sync the state between the ledger and graphql temporarily
+    // Otherwise, during some, time graphql would not be updated yet but the trnasfers would be already done
+    // This would lead to payouts being done several times
+    // When graphql has correctly updated the question status to CLOSE the transactions are deleted 
+    private let transactions_ : Trie.Trie<Text, (Principal, Nat64)> =  Trie.empty<Text, (Principal, Nat64)>();
+
+    private func getTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal, Nat64)>): ?(Principal, Nat64) {
+        return Trie.get(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
+
+    private func putTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal, Nat64)>, principal:Principal, blockHeight:Nat64): () {
+        ignore Trie.put(transactions_, {key=id; hash=Text.hash(id)}, Text.equal, (principal, blockHeight));
+    };
+
+    private func removeTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal,Nat64)>): () {
+        ignore Trie.remove(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
 
     // ------------------------- Create User -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_user(name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
         switch (await graphql_canister_.get_user(Principal.toText(caller))){
             case(?user){
@@ -79,7 +100,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
 
     // ------------------------- Update User -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func update_user(name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
         switch (await graphql_canister_.get_user(Principal.toText(caller))){
             case(null){
@@ -100,7 +121,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
 
 
     // ------------------------- Create Invoice -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
         if(reward < min_reward_) {
             let invoice_error : InvoiceTypes.CreateInvoiceErr = {
@@ -154,7 +175,8 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Ask Question -------------------------
-
+    // TO DO: does this function need to store paid invoices locally as well?
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func ask_question (
         invoice_id: Nat,
         duration_minutes: Nat,
@@ -225,7 +247,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     
 
     // ------------------------- Answer Question -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func answer_question(
         question_id: Text,
         content: Text
@@ -270,7 +292,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Pick Winner -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     // TO DO: (optimisation) ideally one could have spare the call to GraphQL.get_question if a variable
     // question: QuestionType is added to the AnswerType inside the graphql.rs canister
     public shared ({caller}) func pick_winner(
@@ -299,7 +321,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Trigger Dispute -------------------------
-
+    // TO DO: does this function need blockers as well to not be called several times?
     // TO DO: opening a dispute shall cost a fee. This fee shall reward the arbitrator.
     public shared ({caller}) func trigger_dispute(
         question_id: Text
@@ -324,9 +346,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Arbitrate -------------------------
-
     // Centralised version: the contract deployer is the arbitrator
     // TO DO: the case is not handled that the arbitrator never does it's job.
+    // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func arbitrate(
         question_id: Text,
         answer_id: Text
@@ -347,25 +369,31 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             return #err(#NotFound);
                         };
                         case (?answer) {
-                            switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
-                                case(#err err){
-                                    return #err(err);
+                            // -------------- Payout & Close --------------
+                            // Pay if not paid already
+                            await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
+                                  
+                            // Close
+                            switch(getTransaction(question.id, transactions_)){
+                                case(null){
+                                    return #err(#UnpaidReward);
                                 };
-                                case(#ok block_height){
-                                    // Here there is in theory a severe risk that the transfer worked 
-                                    // but the question is not closed, hence it would be possible to have
-                                    // multiple transfers for the same question
-                                    // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
-                                    // in motoko, to be able to ensure that the question has not already been paid
+                                case(?transaction){
+                                    // Checks that winner on graphql == reward receiver (if paid already)
+                                    if(Principal.fromText(answer.author.id) != transaction.0){
+                                        Debug.print("Arbitration: Principal of answer does not match paid winner: \"" # question.id # "\"");
+                                        return #err(#WrongPrincipal)
+                                    };
                                     if(await graphql_canister_.solve_dispute(
-                                        question_id,
-                                        answer_id,
-                                        Nat64.toText(block_height),
+                                        question_id, 
+                                        answer_id, 
+                                        Nat64.toText(transaction.1), 
                                         Utils.time_minutes_now()
                                     )){
+                                        removeTransaction(question.id, transactions_);
                                         return #ok();
                                     } else {
-                                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
+                                        Debug.print("Arbitration: Could not solve_dispute for the question with id: \"" # question.id # "\"");
                                         return #err(#GraphQLError);
                                     };
                                 };
@@ -378,9 +406,19 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Update status -------------------------
+    // TO DO: What happens during upgrades?
+    var blocker:Bool = false;
 
     public func update_status() : async () {
+        // ensure function only runs once at a time
+        if(blocker){
+            return;
+        } else {
+            blocker := true;
+        };
+      
         let now = Utils.time_minutes_now();
+        // It might be a small risk that this is a query
         let questions : [GraphQL.QuestionType] = await graphql_canister_.get_questions();
         for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
         {
@@ -391,21 +429,34 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             // Update the question's state, the author must pick an answer
                             Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
                             ignore await graphql_canister_.must_pick_answer(question.id, now, now + duration_pick_answer_);
+
+                            blocker:=false;
                         } else {
-                            // Refund the author if no answer has been given
-                            switch(await transfer(Principal.fromText(question.author.id), question.reward)){
-                                case(#ok block_height){
-                                    // Here there is in theory a severe risk that the transfer worked 
-                                    // but the question is not closed, hence it would be possible to have
-                                    // multiple transfers for the same question
-                                    // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
-                                    // in motoko, to be able to ensure that the question has not already been paid
-                                    Debug.print("Update question \"" # question.id # "\" status to CLOSE");
-                                    ignore await graphql_canister_.close_question(question.id, Nat64.toText(block_height), now);
+                            // ------------------ REFUND - Payout & Close ------------------ 
+                            // Pay if not paid already
+                            await satisfyPayout(question.id, question.reward, Principal.fromText(question.author.id));
+
+                            // Close
+                            switch(getTransaction(question.id, transactions_)){
+                                case(null){
+                                    blocker:=false;
+                                    return;
                                 };
-                                case(_){
-                                    Debug.print("Failed to reward the author for question \"" # question.id # "\"");
-                                };
+                                case(?transaction){
+                                    if(await graphql_canister_.close_question(
+                                        question.id, 
+                                        Nat64.toText(transaction.1), 
+                                        now
+                                    )){
+                                        removeTransaction(question.id, transactions_);
+                                        blocker:=false;
+                                        return;
+                                    } else {
+                                        Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
+                                        blocker:=false;
+                                        return;
+                                    };
+                                }; 
                             };
                         };
                     };
@@ -415,6 +466,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                         Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
                         ignore await graphql_canister_.open_dispute(question.id, now);
+                        blocker:=false;
                     };
                 };
                 case(#DISPUTABLE){
@@ -423,37 +475,71 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                         // and close the question
                         switch (question.winner) {
                             case (null){
-                                // Nothing to do, it will never happen if we make sure the question 
+                                // This should never happen if we make sure the question 
                                 // is never put in DISPUTABLE state without having a winner
+                                blocker:=false;
+                                throw Error.reject("DISPUTABLE status without a winner, this should never happen!");
                             };
                             case (?answer){
-                                // Pay the winner
-                                switch(await transfer(Principal.fromText(answer.author.id), question.reward)){
-                                    case(#ok block_height){
-                                        // Here there is in theory a severe risk that the transfer worked 
-                                        // but the question is not closed, hence it would be possible to have
-                                        // multiple transfers for the same question
-                                        // TO DO: use a hashmap <question_id, blockHeight> to store the transfer
-                                        // in motoko, to be able to ensure that the question has not already been paid
-                                        Debug.print("Update question \"" # question.id # "\" status to CLOSED");
-                                        ignore await graphql_canister_.close_question(question.id, Nat64.toText(block_height), now);
+                                // ------------------ UNDISPUTED WINNER - Payout & Close ------------------
+                                // Pay if not paid already
+                                await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
+                                
+                                // Close
+                                switch(getTransaction(question.id, transactions_)){
+                                    case(null){
+                                        blocker:=false;
+                                        return;
                                     };
-                                    case(_){
-                                        Debug.print("Failed to reward the winner for question \"" # question.id # "\"");
-                                    };
+                                    case(?transaction){
+                                        if(await graphql_canister_.close_question(
+                                            question.id, 
+                                            Nat64.toText(transaction.1), 
+                                            now
+                                        )){
+                                            removeTransaction(question.id, transactions_);
+                                            blocker:=false;
+                                            return;            
+                                        } else {
+                                            Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
+                                            blocker:=false;
+                                            return;
+                                        };   
+                                    }; 
                                 };
                             };
                         };
                     };
                 };
                 case(_){
+
+                    blocker:=false;
                 };
             };
         };
     };
 
-    // ------------------------- Transfer -------------------------
     
+    // ------------------------- Satisfy Payout -------------------------
+    private func satisfyPayout (question_id:Text, reward:Int32, principal: Principal): async (){
+        switch(getTransaction(question_id, transactions_)){
+            case(null){
+                switch(await transfer(principal, reward)){
+                    case(#ok block_height){
+                        putTransaction(question_id, transactions_, principal, block_height);
+                    };
+                    case(_){
+                        Debug.print("Failed to reward the author for question \"" # question_id # "\"");
+                        return;
+                    };
+                };
+            };
+            case(_){return};
+        };
+    };
+
+    // ------------------------- Transfer -------------------------
+
     private func transfer(to: Principal, amount_e3s: Int32) : async Result.Result<Nat64, Types.Error> {
         switch(Utils.getDefaultAccountIdentifier(to)){
             case (null) {
@@ -479,7 +565,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
     
     // ------------------------- Heartbeat -------------------------
-
     /// TO DO: investigate if the heartbeat function makes sense to update
     /// questions' status or if it should be triggered by something else
     system func heartbeat() : async () {
