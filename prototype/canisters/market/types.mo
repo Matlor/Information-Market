@@ -17,6 +17,13 @@ module {
         update_status_on_heartbeat: Bool;
     };
 
+    public type UpdateMarketParams = {
+        min_reward_e8s: ?Nat;
+        transfer_fee_e8s: ?Nat;
+        pick_answer_duration_minutes: ?Int32;
+        disputable_duration_minutes: ?Int32;
+    };
+
     public type Error = {
         #NotFound;
         #NotAllowed;

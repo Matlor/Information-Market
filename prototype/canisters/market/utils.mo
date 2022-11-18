@@ -12,6 +12,14 @@ module {
         Int32.fromInt(Time.now() / 60000000000);
     };
 
+    public func round_up_to_e3s(amount: Nat): Nat{
+        if(amount % 100000 == 0){
+            return amount;
+        } else {
+            return (amount/100000 + 1)*100000;
+        }
+    };
+
     public func e8s_to_e3s(amount: Nat) : Int32 {
         let amount_e3s = amount / 100000;
         // max integer is 2147483647
