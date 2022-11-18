@@ -1,6 +1,8 @@
-const Date = ({ date }) => {
+import { graphQlToStrDate } from "../../core/services/utils/conversions";
+
+const Date = ({ date, text = "text-small" }) => {
 	return (
-		<div className="flex gap-[12px] text-small">
+		<div className={`flex gap-[12px] ${text} items-center`}>
 			<svg
 				width="15"
 				height="15"
@@ -29,7 +31,7 @@ const Date = ({ date }) => {
 				</defs>
 			</svg>
 
-			<div>{date}</div>
+			<div className="w-max">{graphQlToStrDate(date)}</div>
 		</div>
 	);
 };

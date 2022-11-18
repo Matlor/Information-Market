@@ -1,7 +1,14 @@
 import { questionStatusToString } from "../../core/services/utils/conversions";
 import StagesBar from "../../browseQuestion/view/StagesBar";
 
-const QuestionMetaData = ({ status, endDateSec, reward, isTimeShown }) => {
+const QuestionMetaData = ({
+	status,
+	endDateSec,
+	reward,
+	isTimeShown,
+	isPayoutShown,
+	winner,
+}) => {
 	const gapDescription = "h-[55px]";
 
 	const divider = (
@@ -97,11 +104,40 @@ const QuestionMetaData = ({ status, endDateSec, reward, isTimeShown }) => {
 		}
 	};
 
+	const showPayout = () => {
+		const checkIfRefund = () => {
+			if (!winner) {
+				return true;
+			} else {
+				false;
+			}
+		};
+
+		if (status === "CLOSED" && isPayoutShown) {
+			return (
+				<>
+					<div className={`w-[90px]`}>{divider}</div>
+					<div className={`flex-col ${gapDescription} justify-between `}>
+						<div className="text-normal w-max">Payout</div>
+						<div className="flex gap-[14px] items-center">
+							{checkIfRefund() ? (
+								<div className="w-max text-normal">Refund of Author </div>
+							) : (
+								<div className="w-max text-normal">Paid to Winner</div>
+							)}
+						</div>
+					</div>
+				</>
+			);
+		}
+	};
+
 	return (
 		<div className="flex">
 			{showStatus()}
 			{showReward()}
 			{showTime()}
+			{showPayout()}
 		</div>
 	);
 };

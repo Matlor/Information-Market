@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "../components/core/view/Button";
+import Date from "../components/core/view/Date";
 
 const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	const [userName, setUserName] = useState<any>(user.userName);
@@ -86,7 +87,9 @@ const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 							value={userName}
 							maxLength={30}
 						/>
-						<div className="text-normal">Joined: {user.joinedDate} CET</div>
+						<div className="text-normal mt-4 flex items-center gap-2">
+							<Date date={user.joinedDate} text="text-normal" />
+						</div>
 					</div>
 
 					<div className="self-center">

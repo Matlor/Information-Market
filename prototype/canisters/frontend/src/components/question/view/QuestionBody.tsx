@@ -1,6 +1,5 @@
 import ProfileAnswers from "../../core/view/ProfileAnswers";
 import parse from "html-react-parser";
-import { graphQlToStrDate } from "../../core/services/utils/conversions";
 import PostDate from "../../core/view/Date";
 
 import Profile from "../../core/view/Profile";
@@ -30,6 +29,8 @@ const QuestionBody = ({
 					endDateSec={endDateSec}
 					reward={reward}
 					isTimeShown={true}
+					isPayoutShown={true}
+					winner={winner}
 				/>
 			</div>
 
@@ -44,7 +45,7 @@ const QuestionBody = ({
 					name={initiator.name}
 					avatar={cachedAvatars.get(initiator.id)}
 				/>
-				<PostDate date={graphQlToStrDate(date)} />
+				<PostDate date={date} />
 			</div>
 		</div>
 	);

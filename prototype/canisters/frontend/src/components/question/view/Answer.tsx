@@ -1,6 +1,5 @@
 import parse from "html-react-parser";
 import Profile from "../../core/view/Profile";
-import { graphQlToStrDate } from "../../core/services/utils/conversions";
 import Date from "../../core/view/Date";
 
 const Answer = ({
@@ -26,7 +25,7 @@ const Answer = ({
 
 			<div className="flex items-center self-stretch gap-[30px] pt-[35px] px-[0px] py-[0px]">
 				<Profile name={authorName} avatar={avatar} />
-				<Date date={graphQlToStrDate(date)} />
+				<Date date={date} />
 			</div>
 		</div>
 	);

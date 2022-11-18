@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import Profile from "../../core/view/Profile";
 import StagesBar from "./StagesBar";
 import Date from "../../core/view/Date";
-import { graphQlToStrDate } from "../../core/services/utils/conversions";
 import { questionStatusToString } from "../../core/services/utils/conversions";
 import QuestionMetaData from "../../question/view/QuestionMetaData";
 
@@ -42,7 +41,7 @@ const QuestionPreview = ({
 				<div className="flex self-stretch mt-[20px]">
 					<Profile name={authorName} avatar={avatar} />
 					<div className="self-center">
-						<Date date={graphQlToStrDate(date)} />
+						<Date date={date} />
 					</div>
 				</div>
 			</div>

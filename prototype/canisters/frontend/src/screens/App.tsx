@@ -125,9 +125,7 @@ function App() {
 			resFetchUser = await sudograph.fetchUser(principal_id);
 		}
 		user.userName = resFetchUser.data.readUser[0].name;
-		user.joinedDate = graphQlToStrDate(
-			resFetchUser.data.readUser[0].joined_date
-		);
+		user.joinedDate = resFetchUser.data.readUser[0].joined_date;
 		user.avatar = resFetchUser.data.readUser[0].avatar
 			? blobToBase64Str(resFetchUser.data.readUser[0].avatar)
 			: await createDefaultAvatar();
