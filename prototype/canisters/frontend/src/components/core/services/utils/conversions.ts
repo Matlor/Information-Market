@@ -39,7 +39,6 @@ export const questionStatusToString = (status) => {
 };
 
 export const statusToValue = (status) => {
-	console.log(status);
 	switch (status.value) {
 		case "OPEN":
 			return 0;

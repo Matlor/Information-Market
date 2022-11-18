@@ -17,7 +17,6 @@ const getQuestions = async (
 	questionsPerPage,
 	pageIndex
 ) => {
-	console.log(statusMap);
 	let sudographActor = sudograph({
 		canisterId: `${process.env.GRAPHQL_CANISTER_ID}`,
 	});
