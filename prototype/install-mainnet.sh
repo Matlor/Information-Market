@@ -37,7 +37,7 @@ dfx generate graphql
 # 5. Deploy the market canister
 export INVOICE_PRINCIPAL=$(dfx canister --network ic id invoice)
 export GRAPHQL_PRINCIPAL=$(dfx canister --network ic id graphql)
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 1440; disputable_duration_minutes = 2880; update_status_on_heartbeat = true; })'  --with-cycles 1000000000000
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 30; disputable_duration_minutes = 30; update_status_on_heartbeat = true; })'  --with-cycles 1000000000000
 dfx generate market
 
 # 6. Set the admin of the graphql canister
@@ -83,7 +83,6 @@ dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --with-cycles 1000
 
 # 1. Get your wallet principal:
 #    export WALLET_PRINCIPAL=$(dfx identity --network ic get-wallet)  
- export WALLET_PRINCIPAL=$(dfx identity --network ic get-wallet) 
 
 
 # 2. Exchange ICP to cycles:
@@ -100,3 +99,8 @@ dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --with-cycles 1000
 
 # MINNET CANDID UI
 # https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.ic0.app/  
+
+
+# CHECKING CYCLE BALANCE
+
+# dfx canister --network ic --wallet "$WALLET_PRINCIPAL" status <CANISTER NAME> 
