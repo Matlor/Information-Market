@@ -27,6 +27,55 @@ const QuestionMenu = ({
 		);
 	};
 
+	const Icon = () => {
+		return (
+			<svg
+				width="13"
+				height="20"
+				viewBox="0 0 13 20"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
+					stroke="#969696"
+					strokeWidth="5"
+					strokeLinecap="round"
+				/>
+			</svg>
+		);
+	};
+
+	const ConfirmButton = () => {
+		return (
+			<div
+				data-cy="ArrowButton"
+				className={`w-[200px] h-[44px] px-[20px] flex justify-between items-center relative bg-colorBackgroundComponents rounded-md`}
+			>
+				<div className={`heading3 ${unsubmittedChoice ? "" : "opacity-[0.5]"}`}>
+					Confirm
+				</div>
+				<div className={`${unsubmittedChoice ? "" : "opacity-[0.5]"}`}>
+					<Icon />
+				</div>
+			</div>
+		);
+	};
+
+	const DisputeButton = () => {
+		return (
+			<div
+				data-cy="ArrowButton"
+				className={`w-[200px] h-[44px] px-[20px] flex justify-between relative bg-colorBackgroundComponents rounded-md items-center `}
+			>
+				<div className={`heading3`}>Dispute</div>
+				<div>
+					<Icon />
+				</div>
+			</div>
+		);
+	};
+
 	const currentCase = currentStatus + "." + currentUserRole;
 
 	switch (currentCase) {
@@ -49,41 +98,7 @@ const QuestionMenu = ({
 											return;
 									  }
 							}
-							text={"Confirm"}
-							CustomButton={() => {
-								return (
-									<div
-										data-cy="ArrowButton"
-										className={`w-[200px] h-[44px] px-[20px] flex justify-between relative bg-colorBackgroundComponents rounded-md items-center `}
-									>
-										<div
-											className={`heading3 ${
-												unsubmittedChoice ? "" : "opacity-[0.5]"
-											}`}
-										>
-											Confirm
-										</div>
-										<div
-											className={`${unsubmittedChoice ? "" : "opacity-[0.5]"}`}
-										>
-											<svg
-												width="13"
-												height="20"
-												viewBox="0 0 13 20"
-												fill="none"
-												xmlns="http://www.w3.org/2000/svg"
-											>
-												<path
-													d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
-													stroke="#969696"
-													strokeWidth="5"
-													strokeLinecap="round"
-												/>
-											</svg>
-										</div>
-									</div>
-								);
-							}}
+							CustomButton={() => ConfirmButton()}
 						/>
 					</div>
 				</div>
@@ -102,32 +117,7 @@ const QuestionMenu = ({
 					<Button
 						propFunction={submitDispute}
 						text={"Dispute"}
-						CustomButton={() => {
-							return (
-								<div
-									data-cy="ArrowButton"
-									className={`w-[200px] h-[44px] px-[20px] flex justify-between relative bg-colorBackgroundComponents rounded-md items-center `}
-								>
-									<div className={`heading3`}>Dispute</div>
-									<div className={``}>
-										<svg
-											width="13"
-											height="20"
-											viewBox="0 0 13 20"
-											fill="none"
-											xmlns="http://www.w3.org/2000/svg"
-										>
-											<path
-												d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
-												stroke="#969696"
-												strokeWidth="5"
-												strokeLinecap="round"
-											/>
-										</svg>
-									</div>
-								</div>
-							);
-						}}
+						CustomButton={() => DisputeButton()}
 					/>
 				</div>
 			);
