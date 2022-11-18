@@ -1,14 +1,9 @@
-// Following synthax does not work in actor classes (on mainnet?)
-// import GraphQL      "canister:graphql";
-
 import InvoiceTypes "../invoice/Types";
-import GraphQL "../graphql/graphqlTypes";
-
+import GraphQL      "../graphql/graphqlTypes";
 import Types        "types";
+
 import Utils        "utils";
 import Text         "mo:base/Text";
-
-import Debug        "mo:base/Debug";
 import Int          "mo:base/Int";
 import Int32        "mo:base/Int32";
 import Iter         "mo:base/Iter";
@@ -20,20 +15,29 @@ import Result       "mo:base/Result";
 import Time         "mo:base/Time";
 import Trie         "mo:base/Trie";
 import Error        "mo:base/Error";
-
+import Bool         "mo:base/Bool";
+import Debug        "mo:base/Debug";
+import Option       "mo:base/Option";
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
-    private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(arguments.invoice_canister));
-    private let graphql_canister_ : GraphQL.Interface = actor (Principal.toText(arguments.graphql_canister));
+    // ------------------------- Configutations -------------------------
+    
+    // Principals
+    stable let invoice_principal: Principal = arguments.invoice_canister;
+    stable let graphql_principal: Principal = arguments.graphql_canister;
 
+    // Actors
+    private let invoice_canister_ : InvoiceTypes.Interface = actor (Principal.toText(invoice_principal));
+    private let graphql_canister_ : GraphQL.Interface = actor (Principal.toText(graphql_principal));
 
-    private let coin_symbol_ : Text = arguments.coin_symbol;
-    private let min_reward_ : Nat = arguments.min_reward_e8s;
-    private let fee_ : Nat = arguments.transfer_fee_e8s;
-    private let duration_pick_answer_ : Int32 = Int32.fromInt(arguments.pick_answer_duration_minutes);
-    private let duration_disputable_ : Int32 = Int32.fromInt(arguments.disputable_duration_minutes);
-    private let update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
+    // Settings
+    private stable var coin_symbol_ : Text = arguments.coin_symbol;
+    private stable var min_reward_ : Nat = arguments.min_reward_e8s;
+    private stable var fee_ : Nat = arguments.transfer_fee_e8s;
+    private stable var duration_pick_answer_ : Int32 = Int32.fromInt(arguments.pick_answer_duration_minutes);
+    private stable var duration_disputable_ : Int32 = Int32.fromInt(arguments.disputable_duration_minutes);
+    private stable var update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
 
     public shared func get_coin_symbol() : async Text {
         return coin_symbol_;
@@ -59,26 +63,45 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         return update_status_on_heartbeat_;
     };
 
+    // ------------------------- Update market params -------------------------
+
+    public shared({caller}) func update_market_params(params: Types.UpdateMarketParams) : async Result.Result<(), Types.Error>{
+        if (caller != initializer){
+            return #err(#NotAllowed);
+        };
+        min_reward_ := Option.get(params.min_reward_e8s, min_reward_);
+        fee_ := Option.get(params.transfer_fee_e8s, fee_);
+        duration_pick_answer_ := Option.get(params.pick_answer_duration_minutes, duration_pick_answer_);
+        duration_disputable_ := Option.get(params.disputable_duration_minutes, duration_disputable_);
+        return #ok;
+    };
+
     // ------------------------- Transactions -------------------------
     // These transactions are needed to sync the state between the ledger and graphql temporarily
-    // Otherwise, during some, time graphql would not be updated yet but the trnasfers would be already done
+    // Otherwise, during some time, graphql would not be updated yet but the transfers would be already done
     // This would lead to payouts being done several times
     // When graphql has correctly updated the question status to CLOSE the transactions are deleted 
-    private let transactions_ : Trie.Trie<Text, (Principal, Nat64)> =  Trie.empty<Text, (Principal, Nat64)>();
+    var transactions_ : Trie.Trie<Text, (Principal, Nat64)> =  Trie.empty<Text, (Principal, Nat64)>();
 
-    private func getTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal, Nat64)>): ?(Principal, Nat64) {
+    func getTransaction(id:Text): ?(Principal, Nat64) {
         return Trie.get(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
     };
 
-    private func putTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal, Nat64)>, principal:Principal, blockHeight:Nat64): () {
-        ignore Trie.put(transactions_, {key=id; hash=Text.hash(id)}, Text.equal, (principal, blockHeight));
+    func putTransaction(id:Text, principal:Principal, blockHeight:Nat64): () {
+        let (latestTransactions, previousTransactions) : (Trie.Trie<Text, (Principal, Nat64)>, ?(Principal, Nat64)) = Trie.put(transactions_, {key=id; hash=Text.hash(id)}, Text.equal, (principal, blockHeight));
+        transactions_ := latestTransactions;
     };
 
-    private func removeTransaction(id:Text, transactionsTrie: Trie.Trie<Text, (Principal,Nat64)>): () {
-        ignore Trie.remove(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
+    func removeTransaction(id:Text): () {
+        let (latestTransactions, previousTransactions) : (Trie.Trie<Text, (Principal, Nat64)>, ?(Principal, Nat64)) =  Trie.remove(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
+        transactions_ := latestTransactions;
     };
 
-    // ------------------------- Create User -------------------------
+    public func getTransactions() : async Trie.Trie<Text, (Principal, Nat64)> {
+        return transactions_;
+    };
+
+    // ------------------------- User Management -------------------------
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_user(name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
         switch (await graphql_canister_.get_user(Principal.toText(caller))){
@@ -98,8 +121,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         };
     };
 
-
-    // ------------------------- Update User -------------------------
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func update_user(name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
         switch (await graphql_canister_.get_user(Principal.toText(caller))){
@@ -119,7 +140,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         };
     };
 
-
     // ------------------------- Create Invoice -------------------------
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
@@ -131,7 +151,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
             return #err(invoice_error);
         } else {
             let create_invoice_args : InvoiceTypes.CreateInvoiceArgs = {
-                amount = reward + fee_;
+                // rounding up as graphql is using e3s
+                // the difference is low enough to be irrelevant for the user
+                amount = Utils.round_up_to_e3s(reward) + fee_;
                 details = null;
                 permissions = null;
                 token = { 
@@ -245,7 +267,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         };
     };
     
-
     // ------------------------- Answer Question -------------------------
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func answer_question(
@@ -374,7 +395,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
                                   
                             // Close
-                            switch(getTransaction(question.id, transactions_)){
+                            switch(getTransaction(question.id)){
                                 case(null){
                                     return #err(#UnpaidReward);
                                 };
@@ -390,7 +411,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                         Nat64.toText(transaction.1), 
                                         Utils.time_minutes_now()
                                     )){
-                                        removeTransaction(question.id, transactions_);
+                                        removeTransaction(question.id);
                                         return #ok();
                                     } else {
                                         Debug.print("Arbitration: Could not solve_dispute for the question with id: \"" # question.id # "\"");
@@ -409,6 +430,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     // TO DO: What happens during upgrades?
     var blocker:Bool = false;
 
+    // TODO: Should only iterate over question that are not CLOSED
     public func update_status() : async () {
         // ensure function only runs once at a time
         if(blocker){
@@ -416,31 +438,26 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         } else {
             blocker := true;
         };
-      
+
         let now = Utils.time_minutes_now();
         // It might be a small risk that this is a query
         let questions : [GraphQL.QuestionType] = await graphql_canister_.get_questions();
-        for (question in Iter.fromArray<GraphQL.QuestionType>(questions))
-        {
+        label questionsLoop for (question in Iter.fromArray<GraphQL.QuestionType>(questions)) {
             switch(question.status){
                 case(#OPEN){
                     if (now >= question.status_end_date) {
                         if (await graphql_canister_.has_answers(question.id)){
                             // Update the question's state, the author must pick an answer
-                            Debug.print("Update question \"" # question.id # "\" status to PICKANSWER");
                             ignore await graphql_canister_.must_pick_answer(question.id, now, now + duration_pick_answer_);
-
-                            blocker:=false;
+                            continue questionsLoop;
                         } else {
                             // ------------------ REFUND - Payout & Close ------------------ 
                             // Pay if not paid already
                             await satisfyPayout(question.id, question.reward, Principal.fromText(question.author.id));
-
                             // Close
-                            switch(getTransaction(question.id, transactions_)){
+                            switch(getTransaction(question.id)){
                                 case(null){
-                                    blocker:=false;
-                                    return;
+                                    continue questionsLoop;
                                 };
                                 case(?transaction){
                                     if(await graphql_canister_.close_question(
@@ -448,13 +465,11 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                         Nat64.toText(transaction.1), 
                                         now
                                     )){
-                                        removeTransaction(question.id, transactions_);
-                                        blocker:=false;
-                                        return;
+                                        removeTransaction(question.id);
+                                        continue questionsLoop;
                                     } else {
                                         Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
-                                        blocker:=false;
-                                        return;
+                                        continue questionsLoop;
                                     };
                                 }; 
                             };
@@ -463,10 +478,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                 };
                 case(#PICKANSWER){
                     if (now >= question.status_end_date) {
-                        Debug.print("Update question \"" # question.id # "\" status to DISPUTED");
                         // Automatically trigger a dispute if the author did not pick a winner
                         ignore await graphql_canister_.open_dispute(question.id, now);
-                        blocker:=false;
+                        continue questionsLoop;
                     };
                 };
                 case(#DISPUTABLE){
@@ -477,8 +491,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                             case (null){
                                 // This should never happen if we make sure the question 
                                 // is never put in DISPUTABLE state without having a winner
-                                blocker:=false;
-                                throw Error.reject("DISPUTABLE status without a winner, this should never happen!");
+                                continue questionsLoop;
                             };
                             case (?answer){
                                 // ------------------ UNDISPUTED WINNER - Payout & Close ------------------
@@ -486,10 +499,9 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                 await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
                                 
                                 // Close
-                                switch(getTransaction(question.id, transactions_)){
+                                switch(getTransaction(question.id)){
                                     case(null){
-                                        blocker:=false;
-                                        return;
+                                        continue questionsLoop;
                                     };
                                     case(?transaction){
                                         if(await graphql_canister_.close_question(
@@ -497,13 +509,11 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                                             Nat64.toText(transaction.1), 
                                             now
                                         )){
-                                            removeTransaction(question.id, transactions_);
-                                            blocker:=false;
-                                            return;            
+                                            removeTransaction(question.id);
+                                            continue questionsLoop;
+                                        
                                         } else {
-                                            Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
-                                            blocker:=false;
-                                            return;
+                                            continue questionsLoop;
                                         };   
                                     }; 
                                 };
@@ -512,34 +522,32 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     };
                 };
                 case(_){
-
-                    blocker:=false;
+                    continue questionsLoop;
+    
                 };
             };
         };
+        blocker:=false;
     };
 
-    
     // ------------------------- Satisfy Payout -------------------------
-    private func satisfyPayout (question_id:Text, reward:Int32, principal: Principal): async (){
-        switch(getTransaction(question_id, transactions_)){
+    private func satisfyPayout (question_id:Text, reward:Int32, principal: Principal): async () {
+        switch(getTransaction(question_id)){
             case(null){
                 switch(await transfer(principal, reward)){
                     case(#ok block_height){
-                        putTransaction(question_id, transactions_, principal, block_height);
+                        putTransaction(question_id, principal, block_height);
                     };
-                    case(_){
-                        Debug.print("Failed to reward the author for question \"" # question_id # "\"");
-                        return;
+                    case(#err _){
                     };
                 };
             };
-            case(_){return};
+            case(?transaction){
+            };
         };
     };
 
     // ------------------------- Transfer -------------------------
-
     private func transfer(to: Principal, amount_e3s: Int32) : async Result.Result<Nat64, Types.Error> {
         switch(Utils.getDefaultAccountIdentifier(to)){
             case (null) {
