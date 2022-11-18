@@ -153,7 +153,7 @@ async function createQuestion(
 						author: { connect: $author_id }
 						author_invoice: { connect: $invoice_id }
 						creation_date: $creation_date
-						status: OPEN
+						status: 0
 						status_update_date: $creation_date
 						status_end_date: $status_end_date
 						open_duration: $open_duration
