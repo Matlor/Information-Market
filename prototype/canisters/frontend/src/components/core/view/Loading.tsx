@@ -52,6 +52,8 @@ const Loading = ({ color = "colorLines", style = "loading" }) => {
 			</div>
 		);
 	}
+
+	return <div></div>;
 };
 
 export default Loading;
