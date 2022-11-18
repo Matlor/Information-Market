@@ -1,5 +1,6 @@
 import SlateEditor from "../../addQuestion/view/SlateEditor";
 import Button from "../../core/view/Button";
+import { Mail } from "../../addQuestion/services/mail";
 
 // TODO: Add error and loading handling
 const SlateSubmit = ({
@@ -11,6 +12,12 @@ const SlateSubmit = ({
 }) => {
 	const currentCase = currentStatus + "." + currentUserRole;
 
+	// Just to send mail, otherwise I'd pass the propFunction directly
+	const submitHandler = async () => {
+		await propFunction();
+		await Mail("new answer");
+	};
+
 	const showEditor = (
 		<div data-cy="SlateSubmit">
 			<SlateEditor
@@ -19,7 +26,7 @@ const SlateSubmit = ({
 				placeholder="Answer here..."
 			/>
 			<div className="mt-[17px]">
-				<Button text={"Submit"} propFunction={propFunction} />
+				<Button text={"Submit"} propFunction={submitHandler} />
 			</div>
 		</div>
 	);
