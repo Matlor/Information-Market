@@ -42,7 +42,6 @@ const BrowseQuestion = ({
 	const [loading, setLoading] = useState<boolean>(false);
 	const [filterLoading, setFilterLoading] = useState<boolean>(false);
 	const [searchLoading, setSearchLoading] = useState<boolean>(false);
-	const [sortLoading, setSortLoading] = useState<boolean>(false);
 	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
 
 	const loadAvatars = async (questions: any, cachedAvatars) => {
@@ -67,7 +66,7 @@ const BrowseQuestion = ({
 		}
 	};
 
-	const fetch_data = async () => {
+	const fetch_data = async (index = 0) => {
 		const result = await getQuestions(
 			orderField,
 			orderIsAscending,
@@ -76,7 +75,7 @@ const BrowseQuestion = ({
 			myInteractions,
 			userPrincipal,
 			questionsPerPage,
-			pageIndex
+			index
 		);
 		return result;
 	};
@@ -97,6 +96,7 @@ const BrowseQuestion = ({
 			if (!isCancelled) {
 				await set_data(result);
 				setSearchLoading(false);
+				setPageIndex(0);
 				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
@@ -120,6 +120,7 @@ const BrowseQuestion = ({
 			if (!isCancelled) {
 				set_data(result);
 				setFilterLoading(false);
+				setPageIndex(0);
 				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
@@ -136,13 +137,11 @@ const BrowseQuestion = ({
 		let isCancelled = false;
 
 		const get_data = async () => {
-			setSortLoading(true);
-
 			let result = await fetch_data();
 
 			if (!isCancelled) {
 				await set_data(result);
-				setSortLoading(false);
+				setPageIndex(0);
 				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
@@ -164,6 +163,7 @@ const BrowseQuestion = ({
 			if (!isCancelled) {
 				await set_data(result);
 				setLoading(false);
+				setPageIndex(0);
 				await loadAvatars(result.questions, cachedAvatars);
 			}
 		};
@@ -172,12 +172,31 @@ const BrowseQuestion = ({
 		return () => {
 			isCancelled = true;
 		};
-	}, [pageIndex, orderField, orderIsAscending, myInteractions]);
+	}, [orderField, orderIsAscending, myInteractions]);
+
+	useEffect(() => {
+		let isCancelled = false;
+
+		const get_data = async () => {
+			setLoading(true);
+			let result = await fetch_data(pageIndex);
+			if (!isCancelled) {
+				await set_data(result);
+				setLoading(false);
+				await loadAvatars(result.questions, cachedAvatars);
+			}
+		};
+		get_data();
+
+		return () => {
+			isCancelled = true;
+		};
+	}, [pageIndex]);
 
 	useEffect(() => {
 		var interval = setInterval(async () => {
 			if (Date.now() - fetchQuestionsDate > 10000) {
-				let result = await fetch_data();
+				let result = await fetch_data(pageIndex);
 				await set_data(result);
 				await loadAvatars(result.questions, cachedAvatars);
 			}
@@ -202,8 +221,6 @@ const BrowseQuestion = ({
 					setFilterLoading={setFilterLoading}
 					searchLoading={searchLoading}
 					setSearchLoading={setSearchLoading}
-					sortLoading={sortLoading}
-					setSortLoading={setSortLoading}
 				/>
 				{loading ? (
 					<div className="w-full h-40 items-center flex justify-center">

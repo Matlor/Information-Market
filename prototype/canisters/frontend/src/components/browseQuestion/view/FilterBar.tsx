@@ -14,7 +14,6 @@ const FilterBar = ({
 	isConnected,
 	filterLoading,
 	searchLoading,
-	sortLoading,
 }: any) => {
 	return (
 		<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
@@ -37,7 +36,6 @@ const FilterBar = ({
 					setOrderIsAscending={setOrderIsAscending}
 					orderIsAscending={orderIsAscending}
 					setOrderField={setOrderField}
-					sortLoading={sortLoading}
 				/>
 			</div>
 		</div>

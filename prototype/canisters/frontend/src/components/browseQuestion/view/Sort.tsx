@@ -5,7 +5,6 @@ const Sort = ({
 	setOrderIsAscending,
 	setOrderField,
 	orderIsAscending,
-	sortLoading,
 }: any) => {
 	const [display, setDisplay] = useState<any>("hidden");
 	const [selected, setSelected] = useState<any>({
@@ -80,16 +79,7 @@ const Sort = ({
 				}}
 				className="w-full flex justify-between items-center py-[8px] px-[15px]"
 			>
-				<div>
-					{sortLoading ? (
-						<div className="absolute left-[100%] ml-4">
-							<Loading />
-						</div>
-					) : (
-						<></>
-					)}
-					Sort
-				</div>
+				<div>Sort</div>
 
 				<div className={rotateIcon()}>
 					<svg
