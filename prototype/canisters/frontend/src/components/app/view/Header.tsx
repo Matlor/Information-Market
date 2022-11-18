@@ -89,7 +89,9 @@ const Header = ({ isConnected, login, logout, avatar }) => {
 						<Link to="/add-question">
 							<div className="heading1-stretch w-max">Add Question</div>
 						</Link>
-						{buttonOrProfile()}
+						<div className="heading1-stretch italic mt-6">
+							Mobile Coming Soon
+						</div>
 					</div>
 				</div>
 			</div>
