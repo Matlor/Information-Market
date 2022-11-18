@@ -11,7 +11,7 @@ let utilities = installUtilities();
 let ledger = installLedger();
 
 // Install the invoice canister
-let invoice = installInvoice();
+let invoice = installInvoice(ledger);
 
 // Install the graphql canister
 let graphql = installGraphql();
@@ -19,11 +19,13 @@ let graphql = installGraphql();
 // Install the market canister
 let market_arguments = record {
   invoice_canister = invoice;
+  graphql_canister = graphql;
   coin_symbol = "ICP";
   min_reward_e8s = (1_250_000 : nat);
   transfer_fee_e8s = (10_000 : nat);
-  pick_answer_duration_minutes = (60 : int32); // Let time for bob to pick an answer
-  disputable_duration_minutes = (0 : int32); // To be able to test the update the status to close right away
+  pick_answer_duration_minutes = (60 : nat);
+  disputable_duration_minutes = (0 : nat);
+  update_status_on_heartbeat = (false : bool);
 };
 let market = installMarket(market_arguments);
 
@@ -40,9 +42,10 @@ call market.create_invoice(2_000_000);
 assert _ ~= variant { ok = record { invoice = record { id = 0 : nat; } } };
 call invoice.accountIdentifierToBlob(_.ok.invoice.destination);
 let invoice_account = _.ok;
+
 // Mint tokens to bob
 let bob_account = call utilities.getDefaultAccountIdentifierAsBlob(bob);
-identity default "~/.config/dfx/identity/default/identity.pem";
+identity minter "~/.config/dfx/identity/minter/identity.pem";
 call ledger.transfer(record { 
   memo = 0 : nat64;
   amount = record { e8s = 10_000_000 : nat64 };
@@ -51,6 +54,7 @@ call ledger.transfer(record {
   from_subaccount = null;
   created_at_time = null;
 });
+
 // Bob pays the invoice
 identity bob;
 call ledger.transfer(record { 
@@ -61,6 +65,7 @@ call ledger.transfer(record {
   from_subaccount = null;
   created_at_time = null;
 });
+
 // Finally calls ask_question
 call market.ask_question(0, 0, "Who was the first president of the United-States?", "");
 assert _ ~= variant { ok = record { 
@@ -72,11 +77,14 @@ assert _ ~= variant { ok = record {
   open_duration = (0 : int32);
 }};
 let question_id = _.ok.id;
-// Answers
+
+// Alice answers
 identity alice;
 call market.answer_question(question_id, "July 28, 1914");
 assert _ ~= variant { ok = record { content = "July 28, 1914"; } };
 let alice_answer = _.ok.id;
+
+// Carlos answers
 identity carlos;
 call market.answer_question(question_id, "Summer 1914");
 assert _ ~= variant { ok = record { content = "Summer 1914"; } };
@@ -98,5 +106,6 @@ call graphql.get_question(question_id);
 assert _ ~= opt (record { id = question_id; status = variant {CLOSED} });
 let alice_account = call utilities.getDefaultAccountIdentifierAsBlob(alice);
 call ledger.account_balance(record { account = alice_account });
-// 1 one fee is deduced
+
+// 1x one fee is deduced
 assert _ ~= record { e8s = 1_990_000 : nat64 };

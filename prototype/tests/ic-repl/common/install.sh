@@ -27,13 +27,15 @@ function installLedger() {
 // the only way to make it work when a canister is imported via
 // "import Canister "canister:name"" in the motoko code (see markets main.mo)
 function installGraphql(){
-  import graphql = "rkp4c-7iaaa-aaaaa-aaaca-cai";
-  graphql;
+  import interface = "2vxsx-fae" as "../../.dfx/local/canisters/graphql/graphql.did";
+  let args = encode interface.__init_args();
+  let wasm = file("../../.dfx/local/canisters/graphql/graphql.wasm");
+  install(wasm, args, 0);
 };
 
 
 function installInvoice(arguments){
-  import interface = "2vxsx-fae" as "../../canisters/invoice/invoice.did";
+  import interface = "2vxsx-fae" as "../../.dfx/local/canisters/invoice/invoice.did";
   let args = encode interface.__init_args(arguments);
   let wasm = file("../../.dfx/local/canisters/invoice/invoice.wasm");
   install(wasm, args, 0);

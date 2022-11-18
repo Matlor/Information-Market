@@ -11,7 +11,7 @@ let utilities = installUtilities();
 let ledger = installLedger();
 
 // Install the invoice canister
-let invoice = installInvoice();
+let invoice = installInvoice(ledger);
 
 // Install the graphql canister
 let graphql = installGraphql();
@@ -19,11 +19,13 @@ let graphql = installGraphql();
 // Install the market canister
 let market_arguments = record {
   invoice_canister = invoice;
+  graphql_canister = graphql;
   coin_symbol = "ICP";
   min_reward_e8s = (1_250_000 : nat);
   transfer_fee_e8s = (10_000 : nat);
-  pick_answer_duration_minutes = (1_440 : int32);
-  disputable_duration_minutes = (2_880 : int32);
+  pick_answer_duration_minutes = (1_440 : nat);
+  disputable_duration_minutes = (2_880 : nat);
+  update_status_on_heartbeat = (false : bool);
 };
 let market = installMarket(market_arguments);
 
@@ -47,11 +49,11 @@ assert _ == variant { err = variant { NotAllowed } };
 // 3. Asking a question with an unpaid invoice shall fail
 identity bob;
 call market.ask_question(0, 120, "Who was the first president of the United-States?", "");
-assert _ ~= variant { err = variant { VerifyInvoiceError = record { kind = variant { NotYetPaid }; } } };
+assert _ ~= variant { err = variant { VerifyInvoiceError } };
 
 // Mint tokens to bob
 let bob_account = call utilities.getDefaultAccountIdentifierAsBlob(bob);
-identity default "~/.config/dfx/identity/default/identity.pem";
+identity minter "~/.config/dfx/identity/minter/identity.pem";
 call ledger.transfer(record { 
   memo = 0 : nat64;
   amount = record { e8s = 10_000_000 : nat64 };
@@ -74,7 +76,7 @@ call ledger.transfer(record {
 
 // 4. Asking a question refering an invoice half paid should not work
 call market.ask_question(0, 120, "Who was the first president of the United-States?", "");
-assert _ ~= variant { err = variant { VerifyInvoiceError = record { kind = variant { NotYetPaid }; } } };
+assert _ ~= variant { err = variant { VerifyInvoiceError } };
 
 // Bob pays the rest of the invoice
 identity bob;

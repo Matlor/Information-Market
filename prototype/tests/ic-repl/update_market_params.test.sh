@@ -8,19 +8,24 @@ identity default;
 let utilities = installUtilities();
 
 // Install the ledger
-let ledger = installLedger(default, utilities, 0);
+let ledger = installLedger();
 
 // Install the invoice canister
-let invoice = installInvoice();
+let invoice = installInvoice(ledger);
+
+// Install the graphql canister
+let graphql = installGraphql();
 
 // Install the market canister
 let market_arguments = record {
   invoice_canister = invoice;
+  graphql_canister = graphql;
   coin_symbol = "ICP";
   min_reward_e8s = (1_250_000 : nat);
   transfer_fee_e8s = (10_000 : nat);
-  pick_answer_duration_minutes = (1_440 : int32);
-  disputable_duration_minutes = (2_880 : int32);
+  pick_answer_duration_minutes = (1_440 : nat);
+  disputable_duration_minutes = (2_880 : nat);
+  update_status_on_heartbeat = (false : bool);
 };
 let market = installMarket(market_arguments);
 
