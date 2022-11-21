@@ -1,5 +1,3 @@
-import Github from "../../../../assets/GithubIcon.png";
-
 const Footer = () => {
 	return (
 		<div className="flex justify-between items-center p-0 self-stretch">

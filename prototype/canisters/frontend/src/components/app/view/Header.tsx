@@ -1,8 +1,6 @@
 import Button from "../../../components/core/view/Button";
 import Logo from "./Logo";
-
 import { Link, useLocation } from "react-router-dom";
-
 import { useState } from "react";
 
 const Header = ({ isConnected, login, logout, avatar }) => {
