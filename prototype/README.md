@@ -108,6 +108,17 @@ All in all we do two things:
 
 I think we can:
 
-- delete ledger did files -> we need to deploy with the private one due to minter
 - ignore candid files for graphql
 - delete invoice.did
+
+ledger:
+
+- dfx calls the ledger using the candid file specified in dfx.json
+- to deploy the canister we therefore need to switch out the private and public did files.
+
+## Tests
+
+dfx deploy utilities
+
+run a test:
+./pick_winner.test.sh -r http://localhost:8000

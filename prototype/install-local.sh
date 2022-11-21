@@ -7,6 +7,7 @@ dfx identity new minter
 dfx identity use minter
 export MINT_ACC=$(dfx ledger account-id)
 # Switch back to default identity
+# To define the mint account we need the private ledger.did file
 dfx identity use default
 rm canisters/ledger/ledger.did
 cp canisters/ledger/ledger.private.did canisters/ledger/ledger.did
