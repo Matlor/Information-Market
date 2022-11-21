@@ -5,7 +5,6 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"test": "tape ./test-canisters/**test.cjs",
 		"preview": "vite preview"
 	},
 	"dependencies": {
