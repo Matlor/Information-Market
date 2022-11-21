@@ -1,4 +1,4 @@
-import InvoiceTypes "../invoice/Types";
+import InvoiceTypes "../invoice/types";
 import GraphQL      "../graphql/graphqlTypes";
 import Types        "types";
 
@@ -150,16 +150,6 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
             };
             return #err(invoice_error);
         } else {
-            let create_invoice_args : InvoiceTypes.CreateInvoiceArgs = {
-                // rounding up as graphql is using e3s
-                // the difference is low enough to be irrelevant for the user
-                amount = Utils.round_up_to_e3s(reward) + fee_;
-                details = null;
-                permissions = null;
-                token = { 
-                    symbol = coin_symbol_;
-                };
-            };
             switch (await graphql_canister_.get_user(Principal.toText(caller))){
                 case(null){
                     let invoice_error : InvoiceTypes.CreateInvoiceErr = {
@@ -169,6 +159,16 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
                     return #err(invoice_error);
                 };
                 case(?user){
+                    let create_invoice_args : InvoiceTypes.CreateInvoiceArgs = {
+                        // rounding up as graphql is using e3s
+                        // the difference is low enough to be irrelevant for the user
+                        amount = Utils.round_up_to_e3s(reward) + fee_;
+                        details = null;
+                        permissions = null;
+                        token = { 
+                            symbol = coin_symbol_;
+                        };
+                    };
                     switch (await invoice_canister_.create_invoice(create_invoice_args)){
                         case (#err create_invoice_err) {
                             return #err(create_invoice_err);
