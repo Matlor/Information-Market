@@ -1,3 +1,5 @@
+import React from "react";
+
 import Profile from "./Profile";
 import Answer from "./NumberOfAnswers";
 

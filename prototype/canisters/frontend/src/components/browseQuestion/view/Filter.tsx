@@ -1,3 +1,5 @@
+import React from "react";
+
 import { useState } from "react";
 import RoundedCheckbox from "../../core/view/RoundedCheckbox";
 import Loading from "../../core/view/Loading";

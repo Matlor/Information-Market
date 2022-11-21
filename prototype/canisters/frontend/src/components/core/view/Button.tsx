@@ -1,6 +1,7 @@
+import React from "react";
+
 import { useState } from "react";
 import Loading from "./Loading";
-import React from "react";
 
 const Button = ({
 	propFunction,
@@ -8,7 +9,7 @@ const Button = ({
 	font = "heading3",
 	CustomButton,
 	CustomLoader,
-}) => {
+}: any) => {
 	const [isClicked, setIsClicked] = useState(false);
 
 	const ClickWrapper = ({ children }) => {

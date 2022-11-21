@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { blobToBase64Str } from "../components/core/services/utils/conversions";
@@ -117,7 +118,7 @@ const Question = ({
 	};
 
 	useEffect(() => {
-		var interval;
+		var interval: any;
 		if (!interval) {
 			fetch_data();
 		}

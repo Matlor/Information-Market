@@ -1,3 +1,5 @@
+import React from "react";
+
 import { graphQlToStrDate } from "../../core/services/utils/conversions";
 
 const Date = ({ date, text = "text-small" }) => {

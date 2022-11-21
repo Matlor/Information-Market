@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 
 const Input = ({ value, setValue, isError, minValue, maxValue, unit }) => {

@@ -1,3 +1,5 @@
+import React from "react";
+
 const StagesBar = ({ status }) => {
 	const createBars = () => {
 		const statusToNumber = (status) => {

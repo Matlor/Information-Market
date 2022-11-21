@@ -1,3 +1,5 @@
+import React from "react";
+
 import ProfileAnswers from "../../core/view/ProfileAnswers";
 import parse from "html-react-parser";
 import PostDate from "../../core/view/Date";

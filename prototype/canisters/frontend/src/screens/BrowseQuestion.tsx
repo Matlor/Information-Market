@@ -1,3 +1,5 @@
+import React from "react";
+
 import ListWrapper from "../components/core/view/ListWrapper";
 import FilterBar from "../components/browseQuestion/view/FilterBar";
 import QuestionPreview from "../components/browseQuestion/view/QuestionPreview";
@@ -80,7 +82,7 @@ const BrowseQuestion = ({
 		return result;
 	};
 
-	const set_data = async (result) => {
+	const set_data = async (result: any) => {
 		setFetchQuestionsDate(result.timestamp);
 		setTotalQuestions(result.totalQuestions);
 		setQuestions(result.questions);

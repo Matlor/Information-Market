@@ -1,3 +1,5 @@
+import React from "react";
+
 import Button from "../../core/view/Button";
 import Loading from "../../core/view/Loading";
 

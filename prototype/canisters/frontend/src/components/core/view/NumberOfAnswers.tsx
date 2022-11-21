@@ -1,3 +1,5 @@
+import React from "react";
+
 const NumberOfAnswers = ({ answers }) => {
 	return (
 		<div className="flex justify-center items-center gap-2.5 w-max">

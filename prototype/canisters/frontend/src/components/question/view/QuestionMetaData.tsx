@@ -1,3 +1,5 @@
+import React from "react";
+
 import { questionStatusToString } from "../../core/services/utils/conversions";
 import StagesBar from "../../browseQuestion/view/StagesBar";
 
@@ -8,7 +10,7 @@ const QuestionMetaData = ({
 	isTimeShown,
 	isPayoutShown,
 	winner,
-}) => {
+}: any) => {
 	const gapDescription = "h-[55px]";
 
 	const divider = (

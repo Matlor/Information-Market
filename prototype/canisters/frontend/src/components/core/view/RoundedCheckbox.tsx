@@ -1,3 +1,5 @@
+import React from "react";
+
 const RoundedCheckox = ({ isChecked }) => {
 	var border = "border-2";
 	var test = "";

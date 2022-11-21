@@ -1,3 +1,5 @@
+import React from "react";
+
 import "../index.css";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -13,10 +15,7 @@ import sudograph from "../components/core/services/sudograph";
 
 import motokoPath from "../../assets/motoko.jpg";
 
-import {
-	graphQlToStrDate,
-	blobToBase64Str,
-} from "../components/core/services/utils/conversions";
+import { blobToBase64Str } from "../components/core/services/utils/conversions";
 import Scenario from "../components/core/services/utils/scenario";
 
 function App() {

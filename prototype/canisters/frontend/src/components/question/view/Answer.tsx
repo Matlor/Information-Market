@@ -1,3 +1,5 @@
+import React from "react";
+
 import parse from "html-react-parser";
 import Profile from "../../core/view/Profile";
 import Date from "../../core/view/Date";

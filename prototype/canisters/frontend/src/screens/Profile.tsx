@@ -1,3 +1,5 @@
+import React from "react";
+
 import { useState } from "react";
 import Button from "../components/core/view/Button";
 import Date from "../components/core/view/Date";

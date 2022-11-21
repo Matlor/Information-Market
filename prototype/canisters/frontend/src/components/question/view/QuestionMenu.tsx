@@ -1,3 +1,5 @@
+import React from "react";
+
 import Profile from "../../core/view/Profile";
 import Button from "../../core/view/Button";
 
@@ -83,7 +85,7 @@ const QuestionMenu = ({
 		case "OPEN.isAnswerAuthor":
 		case "OPEN.isNone":
 		case "OPEN.isNotLoggedIn":
-			return;
+			return <></>;
 
 		case "PICKANSWER.isQuestionAuthor":
 			return (
@@ -106,10 +108,10 @@ const QuestionMenu = ({
 		case "PICKANSWER.isAnswerAuthor":
 		case "PICKANSWER.isNone":
 		case "PICKANSWER.isNotLoggedIn":
-			return;
+			return <></>;
 
 		case "DISPUTABLE.isQuestionAuthor":
-			return;
+			return <></>;
 		case "DISPUTABLE.isAnswerAuthor":
 			return (
 				<div className="w-full flex gap-[17px] justify-between items-center">
@@ -123,21 +125,18 @@ const QuestionMenu = ({
 			);
 		case "DISPUTABLE.isNone":
 		case "DISPUTABLE.isNotLoggedIn":
-			return;
 
 		case "DISPUTED.isQuestionAuthor":
 		case "DISPUTED.isAnswerAuthor":
 		case "DISPUTED.isNone":
 		case "DISPUTED.isNotLoggedIn":
-			return;
 
 		case "CLOSED.isQuestionAuthor":
 		case "CLOSED.isAnswerAuthor":
 		case "CLOSED.isNone":
 		case "CLOSED.isNotLoggedIn":
-			return;
 		default:
-			return;
+			return <></>;
 	}
 };
 

@@ -1,3 +1,5 @@
+import React from "react";
+
 const Profile = ({ name, avatar }: any) => {
 	return (
 		<div className="flex items-center p-0 gap-2.5 w-max">

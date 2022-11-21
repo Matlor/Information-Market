@@ -1,3 +1,5 @@
+import React from "react";
+
 const Loading = ({ color = "colorLines", style = "loading" }) => {
 	const basicStyle = "w-[26px] h-[26px] rounded-full";
 	const borderWidth = "border-[4px]";
