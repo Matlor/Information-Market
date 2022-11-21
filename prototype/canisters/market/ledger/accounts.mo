@@ -1,5 +1,3 @@
-// This file comes from https://github.com/dfinity/invoice-canister
-
 import CRC32     "./CRC32";
 import SHA224    "./SHA224";
 

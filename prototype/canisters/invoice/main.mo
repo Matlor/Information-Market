@@ -1,7 +1,7 @@
 import A          "./Account";
 import Hex        "./Hex";
 import ICP        "./ICPLedger";
-import T          "./Types";
+import T          "./types";
 import U          "./Utils";
 
 import Array      "mo:base/Array";
@@ -16,7 +16,7 @@ import Principal  "mo:base/Principal";
 import Text       "mo:base/Text";
 import Time       "mo:base/Time";
 
-import LedgerTypes "./TypesLedger";
+import LedgerTypes "./ledgerTypes";
 
 
 

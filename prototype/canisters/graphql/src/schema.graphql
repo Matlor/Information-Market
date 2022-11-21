@@ -1,49 +1,49 @@
 type SudographSettings {
-    exportGeneratedMutationFunction: true
-    exportGeneratedPostUpgradeFunction: false
+	exportGeneratedMutationFunction: true
+	exportGeneratedPostUpgradeFunction: false
 }
 
 type Admin {
-    id: ID! # Auto-generated
-    principal: String!
+	id: ID! # Auto-generated
+	principal: String!
 }
 
 type User {
-    id: ID! # The user's principal
-    name: String!
-    joined_date: Int!
-    avatar: Blob
-    invoices: [Invoice!]! @relation(name: "User:invoices::Invoice:buyer")
-    questions: [Question!]! @relation(name: "User:questions::Question:author")
-    answers: [Answer!]! @relation(name: "User:answers::Answer:author")
+	id: ID! # The user's principal
+	name: String!
+	joined_date: Int!
+	avatar: Blob
+	invoices: [Invoice!]! @relation(name: "User:invoices::Invoice:buyer")
+	questions: [Question!]! @relation(name: "User:questions::Question:author")
+	answers: [Answer!]! @relation(name: "User:answers::Answer:author")
 }
 
 type Invoice {
-    id: ID! # From the invoice canister
-    buyer: User! @relation(name: "User:invoices::Invoice:buyer")
+	id: ID! # From the invoice canister
+	buyer: User! @relation(name: "User:invoices::Invoice:buyer")
 }
 
 type Question {
-    id: ID! # Auto-generated
-    author: User! @relation(name: "User:questions::Question:author")
-    author_invoice: Invoice!
-    creation_date: Int!
-    status: Int!
-    status_update_date: Int!
-    status_end_date: Int!
-    open_duration: Int!
-    title: String!
-    content: String!
-    reward: Int!
-    answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
-    winner: Answer
-    close_transaction_block_height: String
+	id: ID! # Auto-generated
+	author: User! @relation(name: "User:questions::Question:author")
+	author_invoice: Invoice!
+	creation_date: Int!
+	status: Int!
+	status_update_date: Int!
+	status_end_date: Int!
+	open_duration: Int!
+	title: String!
+	content: String!
+	reward: Int!
+	answers: [Answer!]! @relation(name: "Question:answers::Answer:question")
+	winner: Answer
+	close_transaction_block_height: String
 }
 
 type Answer {
-    id: ID! # Auto-generated
-    author: User! @relation(name: "User:answers::Answer:author")
-    creation_date: Int!
-    content: String!
-    question: Question! @relation(name: "Question:answers::Answer:question")
+	id: ID! # Auto-generated
+	author: User! @relation(name: "User:answers::Answer:author")
+	creation_date: Int!
+	content: String!
+	question: Question! @relation(name: "Question:answers::Answer:question")
 }

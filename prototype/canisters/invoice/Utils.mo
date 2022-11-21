@@ -2,7 +2,7 @@ import A          "./Account";
 import CRC32      "./CRC32";
 import Hex        "./Hex";
 import SHA224     "./SHA224";
-import T          "./Types";
+import T          "./types";
 
 import Array      "mo:base/Array";
 import Blob       "mo:base/Blob";

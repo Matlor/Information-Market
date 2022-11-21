@@ -1,11 +1,10 @@
-import LedgerTypes "./TypesLedger";
-
+import LedgerTypes "./ledgerTypes";
 
 import A          "./Account";
 import CRC32      "./CRC32";
 import Hex        "./Hex";
 import SHA224     "./SHA224";
-import T          "./Types";
+import T          "./types";
 import U          "./Utils";
 
 import Blob       "mo:base/Blob";

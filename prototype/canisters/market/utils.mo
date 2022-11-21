@@ -1,10 +1,10 @@
-import Debug "mo:base/Debug";
-import Int32 "mo:base/Int32";
-import Int "mo:base/Int";
-import Principal "mo:base/Principal";
-import Time "mo:base/Time";
+import Debug        "mo:base/Debug";
+import Int32        "mo:base/Int32";
+import Int          "mo:base/Int";
+import Principal    "mo:base/Principal";
+import Time         "mo:base/Time";
 
-import Accounts "ledger/accounts";
+import Accounts     "ledger/accounts";
 
 module {
 
