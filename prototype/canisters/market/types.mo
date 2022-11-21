@@ -1,4 +1,4 @@
-import InvoiceTypes "../invoice/Types";
+import InvoiceTypes "../invoice/types";
 
 
 // TO DO: paste directly the types used from the invoice canister here

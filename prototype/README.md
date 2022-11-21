@@ -122,3 +122,9 @@ dfx deploy utilities
 
 run a test:
 ./pick_winner.test.sh -r http://localhost:8000
+
+## Playground
+
+Just consist of the html file with the built js that gets imported.
+Assumes a certain sudograph version to be used.
+We have to manually insert into the html the canister ids of it.
