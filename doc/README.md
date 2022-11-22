@@ -1,9 +1,6 @@
 # Information-Market
 
-
-
 ## Overview
-
 
 ### Problem: Asking questions online is ridiculously hard!
 
@@ -37,12 +34,11 @@ Built on the ICP
 
 ### Vision
 
-A market for information that feels like an extended mind to the end-user. 
-
+A market for information that feels like an extended mind to the end-user.
 
 ## Core Mechanism
 
-The main user flow can be divided into the following 7 stages. 
+The main user flow can be divided into the following 7 stages.
 
 ### Login & Wallet
 
@@ -56,13 +52,13 @@ The user can ask a question by specifying 3 different things:
 - The duration/deadline of the question
 - The content of the question
 
-After doing so, the user is requested to pay the reward in ICP using the connected wallet. Here we could probably use something like [Quark](https://www.notion.so/Quark-Testnet-30980b5dd38b448eba25cd8aa6d20bb3) (departure labs) or the [invoice canister](https://forum.dfinity.org/t/payments-invoice-canister-design-review/9843/11). 
+After doing so, the user is requested to pay the reward in ICP using the connected wallet. Here we could probably use something like [Quark](https://www.notion.so/Quark-Testnet-30980b5dd38b448eba25cd8aa6d20bb3) (departure labs) or the [invoice canister](https://forum.dfinity.org/t/payments-invoice-canister-design-review/9843/11).
 
-As soon as the reward is transferred, the question is open to receive answers. The payment of the user will be locked until the payout stage is reached. 
+As soon as the reward is transferred, the question is open to receive answers. The payment of the user will be locked until the payout stage is reached.
 
 ### Answers
 
-As soon as the question is open people can answer it to become eligible for winning the reward. We’d most likely require them to log in to the application as well. What we certainly need from them is an account identifier to payout rewards. 
+As soon as the question is open people can answer it to become eligible for winning the reward. We’d most likely require them to log in to the application as well. What we certainly need from them is an account identifier to payout rewards.
 
 ### Picking the Winner
 
@@ -78,7 +74,7 @@ To incentivize the questioner for picking an answer we could require them to dep
 
 ### Dispute
 
-After the questioner got the opportunity to pick a winner, everyone that gave an answer to the question could start a dispute. If the questioner did not pick any answer, the dispute mechanism would be triggered automatically. 
+After the questioner got the opportunity to pick a winner, everyone that gave an answer to the question could start a dispute. If the questioner did not pick any answer, the dispute mechanism would be triggered automatically.
 
 To prevent spam, triggering the dispute mechanism could require a minor deposit as well that would be refunded in case they win the arbitration process.
 
@@ -98,14 +94,13 @@ This approach would require a sufficiently high number of jurors though for each
 
 ### Payout
 
-The reward for the best answer, the reward for the arbiter, and in some cases the deposit of the questioner should be paid out immediately after the arbitration process. 
+The reward for the best answer, the reward for the arbiter, and in some cases the deposit of the questioner should be paid out immediately after the arbitration process.
 
 ### Potential Challenges
 
 Generally, I would say a lot depends on how frictionless the whole payment process could work. The easier that is the more we can use small payments to solve a variety of issues.
 
 ## Supernova MVP
-
 
 To start we should radically reduce the complexity described above. We can still add more complexity later on. I’d begin with the following basic version:
 
@@ -136,7 +131,7 @@ Paying money for an answer ultimately is friction for a user. They will only be 
 - Quality: Get great answers
 - Diversity (eventually): Ask anything (no reputation needed)
 
-Personally, I think initially speed could be the easiest thing to give users a high assurance before they have even tried the service. Quality is something they would experience when using the application for a while. 
+Personally, I think initially speed could be the easiest thing to give users a high assurance before they have even tried the service. Quality is something they would experience when using the application for a while.
 
 ## The Long-Term Vision
 
@@ -144,7 +139,7 @@ The following is absolutely NOT relevant for the hackathon. It is nevertheless, 
 
 ### Services
 
-Everything that is not the core mechanism should be opened up to external parties, possibly involving micropayments. I consider everything to be a service that sits between the mind of the person asking a question and the minds of the ones answering. 
+Everything that is not the core mechanism should be opened up to external parties, possibly involving micropayments. I consider everything to be a service that sits between the mind of the person asking a question and the minds of the ones answering.
 
 One such service could be the routing of questions. A question should be brought to people that are most likely able to answer it (lowest costs). Third parties should therefore be allowed to filter specific questions from the entire pool. People answering could be following specific filtered lists and either paying the service provider for each question they see or, more complicated, paying them if they win a reward as a result of following that list.
 
@@ -155,7 +150,7 @@ Other services could include:
 - voice message transcription
 - integrations with web2 (pay with a credit card, use on Discord, Twitter, etc.)
 
-I think the IC allows these services to interact with each other and reduces issues around trust and platform risk. A vast network of services that are topic-specific and built on top of each other could be the result. 
+I think the IC allows these services to interact with each other and reduces issues around trust and platform risk. A vast network of services that are topic-specific and built on top of each other could be the result.
 
 ### Bootstrapping the platform
 
@@ -170,6 +165,6 @@ Bootstrapping a global platform around information exchange while competing agai
 - This design is the digital equivalent of a franchising model.
 - The global nature of the design makes it much more powerful though.
 
-I wrote about this topic [here](https://uxdesign.cc/50-million-partners-8082dc0b0b54?source=your_stories_page-------------------------------------). 
+I wrote about this topic [here](https://uxdesign.cc/50-million-partners-8082dc0b0b54?source=your_stories_page-------------------------------------).
 
 Such a design could allow a platform to attract users much more quickly. The design would require a lot more work though.
