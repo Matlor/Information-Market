@@ -128,3 +128,35 @@ run a test:
 Just consist of the html file with the built js that gets imported.
 Assumes a certain sudograph version to be used.
 We have to manually insert into the html the canister ids of it.
+
+## When freshly cloned
+
+- frontend: npm i
+- playground: npm i
+- cargo build (to install ic-cdk-optimizer: https://i67uk-hiaaa-aaaae-qaaka-cai.raw.ic0.app/wasm-binary-optimization.html)
+- ./target/bin/ic-cdk-optimizer: No such file or directory
+
+- graphql: cargo build
+
+- root:
+  cargo build
+  "cargo install ic-cdk-optimizer --root target" (installs the optimizer, I have to check how to version control it)
+
+- TODO: Check how I can add the ic-cdk-optimizer as a dependency for the repo && what I need to commit exactly
+- TODO: How can I have an empty wasm file to get rid of calling the optimizer twice
+
+local:
+
+- ./install-local.sh
+
+mainnet:
+
+- potential issue: optimizing the wasm for mainnet
+
+## ic-repl
+
+example how to run file:
+./pick_winner.test.sh -r http://localhost:8000
+
+ic-repl can't be run with bash
+to resolve access issues: chmod u+x your_script.sh
