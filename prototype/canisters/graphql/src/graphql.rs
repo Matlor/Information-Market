@@ -395,7 +395,6 @@ async fn open_dispute(question_id: String, status_update_date: i32) -> bool {
 async fn solve_dispute(
     question_id: String,
     answer_id: String,
-    close_transaction_block_height: String,
     status_update_date: i32) -> bool {
     check_admin().await;
     let json_str = graphql_mutation(
@@ -404,7 +403,6 @@ async fn solve_dispute(
             queries::solve_dispute::macros::args!(),
             question_id,
             answer_id,
-            close_transaction_block_height,
             status_update_date)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::solve_dispute::macros::response!()].as_array();
@@ -444,7 +442,6 @@ async fn pick_winner(question_id: String, answer_id: String, status_update_date:
 #[update]
 async fn close_question(
     question_id: String,
-    close_transaction_block_height: String,
     status_update_date: i32) -> bool {
     check_admin().await;
     let json_str = graphql_mutation(
@@ -452,7 +449,6 @@ async fn close_question(
         format!(
             queries::close_question::macros::args!(),
             question_id,
-            close_transaction_block_height,
             status_update_date)).await;
     let json_data : serde_json::Value = serde_json::from_str(&json_str).unwrap();
     let json_response = json_data["data"][queries::close_question::macros::response!()].as_array();

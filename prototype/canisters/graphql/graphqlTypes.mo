@@ -50,7 +50,7 @@ module {
     public type Interface = actor {
         graphql_query: (Text, Text) -> async (Text);
         graphql_mutation: (Text, Text) -> async (Text);
-        close_question: (Text, Text, Int32) -> async (Bool);
+        close_question: (Text, Int32) -> async (Bool);
         create_answer: (Text, Text, Int32, Text) -> async (?AnswerType);
         create_invoice: (Text, Text) -> async (?InvoiceType);
         create_question: (Text, Text, Int32, Int32, Int32, Text, Text, Int32) ->async (?QuestionType);
@@ -68,7 +68,7 @@ module {
         open_dispute: (Text, Int32) ->async (Bool);
         pick_winner: (Text, Text, Int32, Int32) -> async(Bool);
         set_admin: (Principal) -> async();
-        solve_dispute: (Text, Text, Text, Int32) ->async (Bool);
+        solve_dispute: (Text, Text, Int32) ->async (Bool);
         update_user: (Text, Text, ?Text) -> async(?UserType);
     };
 

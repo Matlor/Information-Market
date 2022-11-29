@@ -48,7 +48,7 @@ type AnswerType = record {
 service : {
     "graphql_query": (text, text) -> (text) query;
     "graphql_mutation": (text, text) -> (text);
-    "close_question": (text, text, int32) -> (bool);
+    "close_question": (text, int32) -> (bool);
     "create_answer": (text, text, int32, text) -> (opt AnswerType);
     "create_invoice": (text, text) -> (opt InvoiceType);
     "create_question": (text, text, int32, int32, int32, text, text, int32) -> (opt QuestionType);
@@ -66,6 +66,6 @@ service : {
     "open_dispute": (text, int32) -> (bool);
     "pick_winner": (text, text, int32, int32) -> (bool);
     "set_admin": (principal) -> ();
-    "solve_dispute": (text, text, text, int32) -> (bool);
+    "solve_dispute": (text, text, int32) -> (bool);
     "update_user": (text, text, opt text) -> (opt UserType);
 }

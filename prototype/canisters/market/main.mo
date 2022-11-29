@@ -1,4 +1,4 @@
-import InvoiceTypes "../invoice/types";
+import InvoiceTypes "../invoice/Types";
 import GraphQL      "../graphql/graphqlTypes";
 import Types        "types";
 
@@ -18,6 +18,8 @@ import Error        "mo:base/Error";
 import Bool         "mo:base/Bool";
 import Debug        "mo:base/Debug";
 import Option       "mo:base/Option";
+import Stack        "mo:base/Stack";
+import Array        "mo:base/Array";
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
@@ -73,70 +75,47 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         fee_ := Option.get(params.transfer_fee_e8s, fee_);
         duration_pick_answer_ := Option.get(params.pick_answer_duration_minutes, duration_pick_answer_);
         duration_disputable_ := Option.get(params.disputable_duration_minutes, duration_disputable_);
-        return #ok;
+        #ok;
     };
 
-    // ------------------------- Transactions -------------------------
-    // These transactions are needed to sync the state between the ledger and graphql temporarily
-    // Otherwise, during some time, graphql would not be updated yet but the transfers would be already done
-    // This would lead to payouts being done several times
-    // When graphql has correctly updated the question status to CLOSE the transactions are deleted 
-    var transactions_ : Trie.Trie<Text, (Principal, Nat64)> =  Trie.empty<Text, (Principal, Nat64)>();
-
-    func getTransaction(id:Text): ?(Principal, Nat64) {
-        return Trie.get(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
+    type PayoutRecord = {
+        reward: Int32;
+        to: Principal;
+        status: PayoutStatus;
     };
 
-    func putTransaction(id:Text, principal:Principal, blockHeight:Nat64): () {
-        let (latestTransactions, previousTransactions) : (Trie.Trie<Text, (Principal, Nat64)>, ?(Principal, Nat64)) = Trie.put(transactions_, {key=id; hash=Text.hash(id)}, Text.equal, (principal, blockHeight));
-        transactions_ := latestTransactions;
+    type PayoutStatus = {
+        #PENDING;
+        #ONGOING;
+        #DONE: Nat64; // Block height
     };
 
-    func removeTransaction(id:Text): () {
-        let (latestTransactions, previousTransactions) : (Trie.Trie<Text, (Principal, Nat64)>, ?(Principal, Nat64)) =  Trie.remove(transactions_, {key=id; hash=Text.hash(id)}, Text.equal);
-        transactions_ := latestTransactions;
-    };
-
-    public func getTransactions() : async Trie.Trie<Text, (Principal, Nat64)> {
-        return transactions_;
-    };
+    var payouts_ = Trie.empty<Text, PayoutRecord>();
 
     // ------------------------- User Management -------------------------
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_user(name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(Principal.toText(caller))){
-            case(?user){
-                return #err(#UserExists);
-            };
-            case(null){
-                switch (await graphql_canister_.create_user(Principal.toText(caller), name, Utils.time_minutes_now())){
-                    case(null) {
-                        return #err(#GraphQLError);
-                    };
-                    case (?user) {
-                        return #ok(user);
-                    };
-                };
-            };
+        if ((await graphql_canister_.get_user(Principal.toText(caller))) != null) {
+            return #err(#UserExists);
         };
+        Result.fromOption(
+            await graphql_canister_.create_user(Principal.toText(caller), name, Utils.time_minutes_now()),
+            #GraphQLError);
     };
 
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func update_user(name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(Principal.toText(caller))){
-            case(null){
-                return #err(#UserNotFound);
-            };
-            case(?user){
-                switch (await graphql_canister_.update_user(Principal.toText(caller), name, avatar)){
-                    case(null) {
-                        return #err(#GraphQLError);
-                    };
-                    case (?user) {
-                        return #ok(user);
-                    };
-                };
-            };
+        var result = Result.fromOption<GraphQL.UserType, Types.Error>(await graphql_canister_.get_user(Principal.toText(caller)), #UserNotFound);
+        await iterate<GraphQL.UserType, Types.Error>(result, func(user: GraphQL.UserType) : async() {
+            result := Result.fromOption(await graphql_canister_.update_user(Principal.toText(caller), name, avatar), #GraphQLError);
+        });
+        result;
+    };
+
+    func iterate<Ok, Err>(res: Result.Result<Ok, Err>, f : Ok -> async()) : async() {
+        switch(res){
+            case(#ok(ok)) { await f(ok);};
+            case(#err(_)) {};
         };
     };
 
@@ -144,50 +123,34 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     // TO DO: does this function need blockers as well to not be called several times?
     public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
         if(reward < min_reward_) {
-            let invoice_error : InvoiceTypes.CreateInvoiceErr = {
-                kind = #Other;
-                message = ?"Set reward is below minimum";
+            return #err({ kind = #Other; message = ?"Set reward is below minimum";});
+        };
+        switch (await graphql_canister_.get_user(Principal.toText(caller))){
+            case(null){
+                return #err({ kind = #Other; message = ?"Unknown user";});
             };
-            return #err(invoice_error);
-        } else {
-            switch (await graphql_canister_.get_user(Principal.toText(caller))){
-                case(null){
-                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
-                        kind = #Other;
-                        message = ?"Unknown user";
+            case(?user){
+                // rounding up as graphql is using e3s
+                // the difference is low enough to be irrelevant for the user
+                switch (await invoice_canister_.create_invoice({
+                    amount = Utils.round_up_to_e3s(reward) + fee_;
+                    details = null;
+                    permissions = null;
+                    token = { symbol = coin_symbol_; };
+                })){
+                    case (#err create_invoice_err) {
+                        return #err(create_invoice_err);
                     };
-                    return #err(invoice_error);
-                };
-                case(?user){
-                    let create_invoice_args : InvoiceTypes.CreateInvoiceArgs = {
-                        // rounding up as graphql is using e3s
-                        // the difference is low enough to be irrelevant for the user
-                        amount = Utils.round_up_to_e3s(reward) + fee_;
-                        details = null;
-                        permissions = null;
-                        token = { 
-                            symbol = coin_symbol_;
-                        };
-                    };
-                    switch (await invoice_canister_.create_invoice(create_invoice_args)){
-                        case (#err create_invoice_err) {
-                            return #err(create_invoice_err);
-                        };
-                        case (#ok create_invoice_success) {
-                            switch (await graphql_canister_.create_invoice(
-                                Nat.toText(create_invoice_success.invoice.id),
-                                user.id
-                            )){
-                                case (null) {
-                                    let invoice_error : InvoiceTypes.CreateInvoiceErr = {
-                                        kind = #Other;
-                                        message = ?"GraphQL error";
-                                    };
-                                    return #err(invoice_error);
-                                };
-                                case (?invoice) {
-                                    return #ok(create_invoice_success);
-                                };
+                    case (#ok create_invoice_success) {
+                        switch (await graphql_canister_.create_invoice(
+                            Nat.toText(create_invoice_success.invoice.id),
+                            user.id
+                        )){
+                            case (null) {
+                                return #err({ kind = #Other; message = ?"GraphQL error";});
+                            };
+                            case (?invoice) {
+                                return #ok(create_invoice_success);
                             };
                         };
                     };
@@ -207,6 +170,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     ) : async Result.Result<GraphQL.QuestionType, Types.Error> {
         let author = Principal.toText(caller);
         // Verify that the invoice exists in database
+        var result = Result.fromOption<GraphQL.UserType, Types.Error>(await graphql_canister_.get_user(Principal.toText(caller)), #UserNotFound);
         switch (await graphql_canister_.get_invoice(Nat.toText(invoice_id))){
             case (null) {
                 return #err(#NotFound);
@@ -384,41 +348,16 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
             case(?question){
                 if (question.status != #DISPUTED) {
                     return #err(#WrongStatus);
-                } else {
-                    switch (await graphql_canister_.get_answer(question_id, answer_id)) {
-                        case (null) {
-                            return #err(#NotFound);
-                        };
-                        case (?answer) {
-                            // -------------- Payout & Close --------------
-                            // Pay if not paid already
-                            await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
-                                  
-                            // Close
-                            switch(getTransaction(question.id)){
-                                case(null){
-                                    return #err(#UnpaidReward);
-                                };
-                                case(?transaction){
-                                    // Checks that winner on graphql == reward receiver (if paid already)
-                                    if(Principal.fromText(answer.author.id) != transaction.0){
-                                        Debug.print("Arbitration: Principal of answer does not match paid winner: \"" # question.id # "\"");
-                                        return #err(#WrongPrincipal)
-                                    };
-                                    if(await graphql_canister_.solve_dispute(
-                                        question_id, 
-                                        answer_id, 
-                                        Nat64.toText(transaction.1), 
-                                        Utils.time_minutes_now()
-                                    )){
-                                        removeTransaction(question.id);
-                                        return #ok();
-                                    } else {
-                                        Debug.print("Arbitration: Could not solve_dispute for the question with id: \"" # question.id # "\"");
-                                        return #err(#GraphQLError);
-                                    };
-                                };
-                            };
+                } else switch (await graphql_canister_.get_answer(question_id, answer_id)) {
+                    case(null) { return #err(#NotFound) };
+                    case(?answer) {
+                        if ((await graphql_canister_.solve_dispute(question_id, answer_id, Utils.time_minutes_now())) == false){
+                            Debug.print("Arbitration: Could not solve_dispute for the question with id: \"" # question.id # "\"");
+                            return #err(#GraphQLError);
+                        } else {
+                            let payout : PayoutRecord = { reward = question.reward; to = Principal.fromText(answer.author.id); status = #PENDING };
+                            payouts_ := Trie.put(payouts_, {key = question_id; hash = Text.hash(question_id)}, Text.equal, payout).0;
+                            return #ok();
                         };
                     };
                 };
@@ -427,122 +366,86 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- Update status -------------------------
-    // TO DO: What happens during upgrades?
-    var blocker:Bool = false;
+
+    var load_questions_ = false;
+    let stack_questions_ = Stack.Stack<GraphQL.QuestionType>();
 
     // TODO: Should only iterate over question that are not CLOSED
     public func update_status() : async () {
-        // ensure function only runs once at a time
-        if(blocker){
-            return;
-        } else {
-            blocker := true;
+        
+        if (stack_questions_.isEmpty() and not load_questions_){
+            load_questions_ := true;
+            let questions = await graphql_canister_.get_questions();
+            for (question in Array.vals(questions)){
+                stack_questions_.push(question)
+            };
+            load_questions_ := false;
         };
 
         let now = Utils.time_minutes_now();
-        // It might be a small risk that this is a query
-        let questions : [GraphQL.QuestionType] = await graphql_canister_.get_questions();
-        label questionsLoop for (question in Iter.fromArray<GraphQL.QuestionType>(questions)) {
-            switch(question.status){
-                case(#OPEN){
-                    if (now >= question.status_end_date) {
-                        if (await graphql_canister_.has_answers(question.id)){
-                            // Update the question's state, the author must pick an answer
-                            ignore await graphql_canister_.must_pick_answer(question.id, now, now + duration_pick_answer_);
-                            continue questionsLoop;
-                        } else {
-                            // ------------------ REFUND - Payout & Close ------------------ 
-                            // Pay if not paid already
-                            await satisfyPayout(question.id, question.reward, Principal.fromText(question.author.id));
-                            // Close
-                            switch(getTransaction(question.id)){
-                                case(null){
-                                    continue questionsLoop;
-                                };
-                                case(?transaction){
-                                    if(await graphql_canister_.close_question(
-                                        question.id, 
-                                        Nat64.toText(transaction.1), 
-                                        now
-                                    )){
-                                        removeTransaction(question.id);
-                                        continue questionsLoop;
-                                    } else {
-                                        Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
-                                        continue questionsLoop;
-                                    };
-                                }; 
+
+        loop switch(stack_questions_.pop()){
+            case(null) { return; };
+            case(?question){
+                if (now >= question.status_end_date) {
+                    switch(question.status){
+                        case(#OPEN){
+                            if (await graphql_canister_.has_answers(question.id)){
+                                // Update the question's state, the author must pick an answer
+                                ignore await graphql_canister_.must_pick_answer(question.id, now, now + duration_pick_answer_);
+                            } else if(await graphql_canister_.close_question(question.id, now)){
+                                let payout : PayoutRecord = { reward = question.reward; to = Principal.fromText(question.author.id); status = #PENDING };
+                                payouts_ := Trie.put(payouts_, {key = question.id; hash = Text.hash(question.id)}, Text.equal, payout).0;
+                            } else {
+                                Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
                             };
                         };
-                    };
-                };
-                case(#PICKANSWER){
-                    if (now >= question.status_end_date) {
-                        // Automatically trigger a dispute if the author did not pick a winner
-                        ignore await graphql_canister_.open_dispute(question.id, now);
-                        continue questionsLoop;
-                    };
-                };
-                case(#DISPUTABLE){
-                    if (now >= question.status_end_date) {
-                        // If nobody disputed the picked answer, payout the answer's author
-                        // and close the question
-                        switch (question.winner) {
-                            case (null){
-                                // This should never happen if we make sure the question 
-                                // is never put in DISPUTABLE state without having a winner
-                                continue questionsLoop;
-                            };
-                            case (?answer){
-                                // ------------------ UNDISPUTED WINNER - Payout & Close ------------------
-                                // Pay if not paid already
-                                await satisfyPayout(question.id, question.reward, Principal.fromText(answer.author.id));
-                                
-                                // Close
-                                switch(getTransaction(question.id)){
-                                    case(null){
-                                        continue questionsLoop;
-                                    };
-                                    case(?transaction){
-                                        if(await graphql_canister_.close_question(
-                                            question.id, 
-                                            Nat64.toText(transaction.1), 
-                                            now
-                                        )){
-                                            removeTransaction(question.id);
-                                            continue questionsLoop;
-                                        
-                                        } else {
-                                            continue questionsLoop;
-                                        };   
-                                    }; 
-                                };
+                        case(#PICKANSWER){
+                            // Automatically trigger a dispute if the author did not pick a winner
+                            ignore await graphql_canister_.open_dispute(question.id, now);
+                        };
+                        case(#DISPUTABLE){
+                            // If nobody disputed the picked answer, close the question
+                            // Watchout: this assumes that at this stage the question winner is not null
+                            if(await graphql_canister_.close_question(question.id, now)){
+                                Option.iterate(question.winner, func(answer: GraphQL.AnswerType){
+                                    let payout : PayoutRecord = { reward = question.reward; to = Principal.fromText(answer.author.id); status = #PENDING };
+                                    payouts_ := Trie.put(payouts_, {key = question.id; hash = Text.hash(question.id)}, Text.equal, payout).0;
+                                });
+                            } else {
+                                Debug.print("Update: Could not close the question with id: \"" # question.id # "\"");
                             };
                         };
+                        case(_){};
                     };
-                };
-                case(_){
-                    continue questionsLoop;
-    
                 };
             };
         };
-        blocker:=false;
     };
 
-    // ------------------------- Satisfy Payout -------------------------
-    private func satisfyPayout (question_id:Text, reward:Int32, principal: Principal): async () {
-        switch(getTransaction(question_id)){
-            case(null){
-                switch(await transfer(principal, reward)){
-                    case(#ok block_height){
-                        putTransaction(question_id, principal, block_height);
-                    };
-                    case(#err _){
+    private func payout() : async () {
+        for ((question_id, {reward; to; status;}) in Trie.iter(payouts_)){
+            switch(status){
+                case(#PENDING){
+                    // Proceed with the payout: put the status as ONGOING
+                    payouts_ := Trie.put(payouts_, {key = question_id; hash = Text.hash(question_id)}, Text.equal, {reward; to; status = #ONGOING;}).0;
+                    // Trigger the transfer
+                    switch(await transfer(to, reward)){
+                        case(#err(err)) {
+                            // Put back the payout as #PENDING
+                            payouts_ := Trie.put(payouts_, {key = question_id; hash = Text.hash(question_id)}, Text.equal, {reward; to; status = #PENDING;}).0;
+                        };
+                        case(#ok(block_height)) {
+                            // Put the payout as #DONE with the returned block height
+                            payouts_ := Trie.put(payouts_, {key = question_id; hash = Text.hash(question_id)}, Text.equal, {reward; to; status = #DONE(block_height);}).0;
+                        };
                     };
                 };
-            };
-            case(?transaction){
+                case(#ONGOING){}; // Nothing to do, the payout is being processed
+                case(#DONE(block_height)){
+                    // @todo: update the question's block height in graphql, remove payout from the trie only if the graphql update succeeded
+                    payouts_ := Trie.remove(payouts_, {key = question_id; hash = Text.hash(question_id)}, Text.equal).0;
+                };
             };
         };
     };
@@ -578,6 +481,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     system func heartbeat() : async () {
         if (update_status_on_heartbeat_){
             await update_status();
+            await payout();
         };
     };
 };
