@@ -160,3 +160,14 @@ example how to run file:
 
 ic-repl can't be run with bash
 to resolve access issues: chmod u+x your_script.sh
+
+## graphql
+
+- anything that does not need the return values to be serialised or can do it with an external tool
+- only interacts with the canister through the queries (query or update) by passing a string.
+- only canisters call the functions specifically exposed that are not graphql_query or graphql_mutation
+- they do so to get values in the candid format
+
+queries folder has to be called queries
+
+TODO: Candid does not change when the schema changes
