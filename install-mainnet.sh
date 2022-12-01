@@ -1,7 +1,3 @@
-# IMPORTANT: YOU NEED TO SET THE exportGeneratedMutationFunction TO false BEFORE
-# ACTUALLY DEPLOYING THE GRAPHQL CANISTER AND THEN CALL THE FOLLOWING set_admin
-# COMMAND TO FULLY PREVENT EXECUTION OF GRAPHQL MUTATIONS FROM OTHER SOURCES THAN
-# THE MARKET CANISTER
 
 # NOTE: 
 # if --with-cycles is not specified, default of 4tn cycles will be used. Use less to conduct experiments.
@@ -16,33 +12,12 @@ dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" invoice --argument='(princi
 dfx generate invoice
 export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 
-
-# 4. Deploy the graphql canister
-dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create --with-cycles 1000000000000 graphql
-# NOTE: To deploy to mainnet the graphql wasm needs to be optimised for size as indicated in the sudograph docs (Wasm binary optimization)
-# This command needs to be run that replaces the wasm file with an optimised file. 
-# This assumes we have installed the optimizer: cargo install ic-cdk-optimizer --root target
-# Running these commands twice is the simplest solution when the graphql-optimized file does not exist yet.
-# The first build will run into an error that can be ignored.
-# TODO: Understand how to create an empty "graphql-optimized.wasm" file instead
-dfx build graphql
-./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
-dfx build graphql
-./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
-
-dfx canister --network ic --wallet "$WALLET_PRINCIPAL" install --mode upgrade graphql
-dfx generate graphql
-
-
 # 5. Deploy the market canister
 export INVOICE_PRINCIPAL=$(dfx canister --network ic id invoice)
-export GRAPHQL_PRINCIPAL=$(dfx canister --network ic id graphql)
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 30; disputable_duration_minutes = 30; update_status_on_heartbeat = true; })'  --with-cycles 1000000000000
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 30; disputable_duration_minutes = 30; update_status_on_heartbeat = true; })'  --with-cycles 1000000000000
 dfx generate market
 
-# 6. Set the admin of the graphql canister
 export MARKET_PRINCIPAL=$(dfx canister --network ic id market)
-dfx canister --network ic call graphql set_admin '(principal "'${MARKET_PRINCIPAL}'")'
 
 # 7. Deploy the frontend canister
 dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --with-cycles 1000000000000

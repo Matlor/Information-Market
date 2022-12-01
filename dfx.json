@@ -15,15 +15,6 @@
 				"output": "canisters/frontend/declarations/invoice"
 			}
 		},
-		"graphql": {
-			"type": "custom",
-			"build": "cargo build --target wasm32-unknown-unknown --package graphql --release",
-			"candid": "canisters/graphql/src/graphql.did",
-			"wasm": "target/wasm32-unknown-unknown/release/graphql-optimized.wasm",
-			"declarations": {
-				"output": "canisters/frontend/declarations/graphql"
-			}
-		},
 		"market": {
 			"main": "canisters/market/main.mo",
 			"type": "motoko",
@@ -40,10 +31,6 @@
 			"declarations": {
 				"output": "declarations/frontend"
 			}
-		},
-		"playground": {
-			"type": "assets",
-			"source": ["canisters/playground/build"]
 		},
 		"utilities": {
 			"type": "motoko",

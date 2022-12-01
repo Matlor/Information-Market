@@ -1,14 +1,11 @@
 {
-  "frontend": {
-    "ic": "g2qhw-oqaaa-aaaak-acz6a-cai"
-  },
-  "graphql": {
-    "ic": "qsbdc-viaaa-aaaak-ac5za-cai"
-  },
-  "invoice": {
-    "ic": "qvafw-yqaaa-aaaak-ac5zq-cai"
-  },
-  "market": {
-    "ic": "hm375-3aaaa-aaaak-acz3a-cai"
-  }
+	"frontend": {
+		"ic": "g2qhw-oqaaa-aaaak-acz6a-cai"
+	},
+	"invoice": {
+		"ic": "qvafw-yqaaa-aaaak-ac5zq-cai"
+	},
+	"market": {
+		"ic": "hm375-3aaaa-aaaak-acz3a-cai"
+	}
 }

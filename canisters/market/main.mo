@@ -76,6 +76,42 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         return #ok;
     };
 
+    // ------------------------- Data Structures -------------------------
+   
+   
+    // User
+    type User = Types.User;
+    stable var users : Trie.Trie<Text, User> =  Trie.empty<Text, User>();
+    
+    public func getUser(id:Text): async ?User { 
+        Trie.get(users, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
+   
+
+    // Invoice
+    type Invoice = Types.Invoice;
+    stable var invoices : Trie.Trie<Text, Invoice> =  Trie.empty<Text, Invoice>();
+    public func getInvoice(id:Text): async ?Invoice { 
+        Trie.get(invoices, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
+
+    // Question
+    type Question = Types.Question;
+    stable var questions : Trie.Trie<Text, Question> =  Trie.empty<Text, Question>();
+    public func getQuestion(id:Text): async ?Question { 
+        Trie.get(questions, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
+
+    // Answer
+    type Answer = Types.Answer;
+    stable var answers : Trie.Trie<Text, Answer> =  Trie.empty<Text, Answer>();
+    public func getAnswers(id:Text): async ?Answer { 
+        Trie.get(answers, {key=id; hash=Text.hash(id)}, Text.equal);
+    };
+
+
+
+
     // ------------------------- Transactions -------------------------
     // These transactions are needed to sync the state between the ledger and graphql temporarily
     // Otherwise, during some time, graphql would not be updated yet but the transfers would be already done

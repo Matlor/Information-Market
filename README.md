@@ -133,14 +133,13 @@ We have to manually insert into the html the canister ids of it.
 
 - frontend: npm i
 - playground: npm i
-- cargo build (to install ic-cdk-optimizer: https://i67uk-hiaaa-aaaae-qaaka-cai.raw.ic0.app/wasm-binary-optimization.html)
-- ./target/bin/ic-cdk-optimizer: No such file or directory
-
-- graphql: cargo build
 
 - root:
   cargo build
-  "cargo install ic-cdk-optimizer --root target" (installs the optimizer, I have to check how to version control it)
+  cargo install ic-cdk-optimizer --root target
+  -> (installs the optimizer, I have to check how to version control it)
+
+- graphql: cargo build
 
 - TODO: Check how I can add the ic-cdk-optimizer as a dependency for the repo && what I need to commit exactly
 - TODO: How can I have an empty wasm file to get rid of calling the optimizer twice

@@ -21,40 +21,20 @@ export LEDGER_PRINCIPAL=$(dfx canister id ledger)
 dfx deploy invoice  --argument='(principal "'${LEDGER_PRINCIPAL}'")'
 dfx generate invoice
 
-# 3. Deploy the graphql canister
-dfx canister create graphql
-# Running these commands twice is the simplest solution when the graphql-optimized file does not exist yet.
-# The first build will run into an error that can be ignored.
-# TODO: Understand how to create an empty "graphql-optimized.wasm" file instead.
-dfx build graphql
-./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
-dfx build graphql
-./target/bin/ic-cdk-optimizer ./target/wasm32-unknown-unknown/release/graphql.wasm -o ./target/wasm32-unknown-unknown/release/graphql-optimized.wasm
-
-dfx canister install graphql
-dfx generate graphql
 
 # 4. Deploy the market canister
 export INVOICE_PRINCIPAL=$(dfx canister id invoice)
-export GRAPHQL_PRINCIPAL=$(dfx canister id graphql)
-dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; graphql_canister = principal "'${GRAPHQL_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 2; disputable_duration_minutes = 2; update_status_on_heartbeat = true; })'
+dfx deploy market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 2; disputable_duration_minutes = 2; update_status_on_heartbeat = true; })'
 dfx generate market
 
 # 5. Deploy the frontend canister
 dfx deploy frontend
 
-# 6. (dev-only) Deploy the playground canister
-dfx deploy playground
 
 # ------------------------- FOR PRODUCTION ENVIRONMENT -------------------------
 
-# IMPORTANT: YOU NEED TO SET THE exportGeneratedMutationFunction TO false BEFORE
-# ACTUALLY DEPLOYING THE GRAPHQL CANISTER AND THEN CALL THE FOLLOWING set_admin
-# COMMAND TO FULLY PREVENT EXECUTION OF GRAPHQL MUTATIONS FROM OTHER SOURCES THAN
-# THE MARKET CANISTER
 
 #export MARKET_PRINCIPAL=$(dfx canister id market)
-#dfx canister call graphql set_admin '(principal "'${MARKET_PRINCIPAL}'")'
 
 # You will also need to remove the call to loadScenario in App.tsx before actually
 # deploying the canisters
