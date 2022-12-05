@@ -5,20 +5,32 @@ import InvoiceTypes "../invoice/types";
 // TO DO: check if it makes more sense to have more detailed errors, or one
 // type of error per function
 module {
-   
-
-    // TODO: Should id be principal instead?
+    public type StateError = {
+        #UserExists;
+        #UserNotFound;
+        #UserIsInvalid;
+        #InvoiceExists;
+        #InvoiceNotFound;
+        #InvoiceIsInvalid;
+        #QuestionExists;
+        #QuestionNotFound;
+        #AnswerExists;
+        #AnswerNotFound;
+    };
+    
     public type User = {
-        id: Text;
+        id: Principal;
         name: Text;
-        joined_date: Int32;
+        joined_date: Int;
+        avatar: ?Blob;
+        invoices: [Text];  // relation to invoice
+        questions: [Text]; // relation to user
+        answers: [Text];   // relation to answer
     };
 
-    // TODO: should the buyer be linked only with the id?
-    // this is one by one I could have a copy
     public type Invoice = {
         id: Text;
-        buyer: User;
+        buyer_id: Principal; // relation to user
     };
 
     public type QuestionStatus =  {
@@ -29,29 +41,29 @@ module {
         #CLOSED;
     };
 
-    // I link the answers by ids only
+    // TODO: Changed from Int32 to int check if we have int32 due to graphql
     public type Question = {
         id: Text;
-        author: User;
-        author_invoice: Invoice;
-        creation_date: Int32;
+        author_id: Principal; // relation to user
+        invoice_id: Text; // relation to invoice
+        creation_date: Int;
         status: QuestionStatus;
-        status_update_date: Int32;
-        status_end_date: Int32;
-        open_duration: Int32;
+        status_update_date: Int;
+        status_end_date: Int;
+        open_duration: Int;
         title: Text;
         content: Text;
-        reward: Int32;
-        winner: ?Text;
+        reward: Int;
+        winner: ?Text; // relation to user
         close_transaction_block_height: ?Text;
-         
-        answer: [?Text];
+        answers: [Text]; // relation to answer
     };
 
     public type Answer = {
         id: Text;
-        author: User;
-        creation_date: Int32;
+        author_id: Principal; // relation to user
+        question_id: Text; // relation to question
+        creation_date: Int;
         content: Text;
     };
 

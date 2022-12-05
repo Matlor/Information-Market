@@ -1,6 +1,11 @@
 import InvoiceTypes "../invoice/types";
-import GraphQL      "../graphql/graphqlTypes";
+import GraphQL      "./graphqlTypes";
 import Types        "types";
+
+import Users       "./db/users";
+import Invoices    "./db/invoices";
+import Questions   "./db/questions";
+import Answers     "./db/answers";
 
 import Utils        "utils";
 import Text         "mo:base/Text";
@@ -18,6 +23,9 @@ import Error        "mo:base/Error";
 import Bool         "mo:base/Bool";
 import Debug        "mo:base/Debug";
 import Option       "mo:base/Option";
+import Blob         "mo:base/Blob";
+import Array        "mo:base/Array";
+import Buffer       "mo:base/Buffer";
 
 shared({ caller = initializer }) actor class Market(arguments: Types.InstallMarketArguments) = this {
 
@@ -76,42 +84,138 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
         return #ok;
     };
 
-    // ------------------------- Data Structures -------------------------
-   
-   
-    // User
-    type User = Types.User;
-    stable var users : Trie.Trie<Text, User> =  Trie.empty<Text, User>();
-    
-    public func getUser(id:Text): async ?User { 
-        Trie.get(users, {key=id; hash=Text.hash(id)}, Text.equal);
-    };
-   
+    // ------------------------- DB -------------------------
+    // TODO: Should db be an object, or functions be renamed to indicate db is used?
 
-    // Invoice
-    type Invoice = Types.Invoice;
-    stable var invoices : Trie.Trie<Text, Invoice> =  Trie.empty<Text, Invoice>();
-    public func getInvoice(id:Text): async ?Invoice { 
-        Trie.get(invoices, {key=id; hash=Text.hash(id)}, Text.equal);
-    };
-
-    // Question
     type Question = Types.Question;
-    stable var questions : Trie.Trie<Text, Question> =  Trie.empty<Text, Question>();
-    public func getQuestion(id:Text): async ?Question { 
-        Trie.get(questions, {key=id; hash=Text.hash(id)}, Text.equal);
-    };
-
-    // Answer
+    type User = Types.User;
+    type Invoice = Types.Invoice;
     type Answer = Types.Answer;
-    stable var answers : Trie.Trie<Text, Answer> =  Trie.empty<Text, Answer>();
-    public func getAnswers(id:Text): async ?Answer { 
-        Trie.get(answers, {key=id; hash=Text.hash(id)}, Text.equal);
+
+    var users: Users.Users = Users.Users();
+    var invoices: Invoices.Invoices = Invoices.Invoices();
+    var questions: Questions.Questions = Questions.Questions();
+    var answers: Answers.Answers = Answers.Answers();
+
+    /* 
+    Id generation:
+    - should happen here, because when add a question, I then need the id to pass to the other structures.
+    - maybe functions on each file "generate id" and a state id counter?
+
+    DONE:
+    Adding a user:
+    - generating a new id -> where does that happen?
+    - adding the user to users
+    */
+    // TODO: If I have to check whether user exists or not anyway, should I even do lower level?
+    // TODO: Should both be called "create_user"
+
+    func db_create_user(id:Principal, name:Text) : Result.Result<User, Types.StateError> {
+        if(not users.validate_key(id)){
+            return #err(#UserIsInvalid);
+        } else {
+            return #ok(users.create_user(id, name));
+        };
+    }; 
+
+     /* 
+     Adding an invoice:
+    - invoice is generated externally and passed in
+    - adding the invoice to invoices
+    - adding the invoice_id to the specific user as id 
+    */
+    // TODO: Maybe invoice_id should be Nat as it comes from the invoice canister?
+    func db_create_invoice(invoice:Invoice) : Result.Result<Invoice, Types.StateError> {
+        switch(users.get_user(invoice.buyer_id)){
+            case(null){return #err(#UserNotFound)};
+            case(?prevUser){
+                switch(Array.find<Text>(prevUser.invoices, func (key: Text) {return key == invoice.id;})){
+                    case(?key){return #err(#InvoiceExists)};
+                    case(null){
+                        if(not invoices.validate_key(invoice.id)){
+                            return #err(#InvoiceIsInvalid);
+                        } else {
+                            // add invoice to invoices
+                            let invoice: Invoice = invoices.create_invoice(invoice);
+
+                            // update invoice ids on the user
+                            // TODO: do I have to handle the failure case? Probably, think if it makes sense to have on object?
+                            ignore users.update_user(users.replace_invoice_ids(prevUser, invoice.id));
+                            return #ok(invoice);
+                        };
+                    };
+                };
+            };
+        };
+    };
+
+    /* 
+      Adding a question:
+    - generating a new id -> where does that happen?
+    - adding the q to questions
+    - adding question_id to specific user as id
+    */
+
+    // generate unique question id
+    // 1) does user exists
+    // 2) does invoice exist
+    // TODO: Question should point to invoice to check quickly if invoice has been used for question already
+    // TODO: Do I have to pass the reward? Should it be int or nat?
+    func db_create_question(user_id:Principal, invoice_id:Text, duration_minutes:Int, title:Text, content:Text, reward:Int) : Result.Result<Question, Types.StateError> {
+        // TODO: not null
+        if(invoices.get_invoice(invoice_id)==null){return #err(#InvoiceNotFound);};
+
+        switch(users.get_user(user_id)){
+            case(null){return #err(#UserNotFound)};
+            case(?prevUser){
+
+                // Add question to questions
+                let question: Question = questions.create_question(user_id:Principal, invoice_id:Text, duration_minutes:Int, title:Text, content:Text, reward:Int);
+
+                // Add id to the user
+                // TODO: do I have to handle the failure case? Probably, think if it makes sense to have on object?
+                ignore users.update_user(users.replace_question_ids(prevUser, question.id));
+                return #ok(question);
+            };
+        };
+    };
+
+    /* 
+    Adding an answer:
+    - does question exists
+    - does user exists
+    - generate new id
+    - add to the answer
+    - replace question to add id
+    - user question to add id
+    */
+
+    func db_create_answer(user_id:Principal, question_id:Text, content:Text) : Result.Result<Answer, Types.StateError> {
+        switch(users.get_user(user_id)){
+            case(null){return #err(#UserNotFound)};
+            case(?prevUser){
+                switch(questions.get_question(question_id)){
+                    case(null){ return #err(#AnswerNotFound);};
+                    case(?prevQuestion){
+                        // Add answer to answers
+                        let answer: Answer = answers.create_answer(user_id:Principal, question_id:Text, content:Text);
+
+                        // replace question
+                        // TODO: do I have to handle the failure case? Probably, think if it makes sense to have on object?
+                        ignore questions.update_question(questions.replace_answer_ids(prevQuestion, answer.id));
+
+                        // replace user
+                        // TODO: do I have to handle the failure case? Probably, think if it makes sense to have on object?
+                        ignore users.update_user(users.replace_answer_ids(prevUser, answer.id));
+                        return #ok(answer);
+                    };   
+                };
+            };
+        };
     };
 
 
-
-
+    
     // ------------------------- Transactions -------------------------
     // These transactions are needed to sync the state between the ledger and graphql temporarily
     // Otherwise, during some time, graphql would not be updated yet but the transfers would be already done
@@ -138,43 +242,7 @@ shared({ caller = initializer }) actor class Market(arguments: Types.InstallMark
     };
 
     // ------------------------- User Management -------------------------
-    // TO DO: does this function need blockers as well to not be called several times?
-    public shared ({caller}) func create_user(name: Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(Principal.toText(caller))){
-            case(?user){
-                return #err(#UserExists);
-            };
-            case(null){
-                switch (await graphql_canister_.create_user(Principal.toText(caller), name, Utils.time_minutes_now())){
-                    case(null) {
-                        return #err(#GraphQLError);
-                    };
-                    case (?user) {
-                        return #ok(user);
-                    };
-                };
-            };
-        };
-    };
 
-    // TO DO: does this function need blockers as well to not be called several times?
-    public shared ({caller}) func update_user(name: Text, avatar: ?Text) : async Result.Result<GraphQL.UserType, Types.Error> {
-        switch (await graphql_canister_.get_user(Principal.toText(caller))){
-            case(null){
-                return #err(#UserNotFound);
-            };
-            case(?user){
-                switch (await graphql_canister_.update_user(Principal.toText(caller), name, avatar)){
-                    case(null) {
-                        return #err(#GraphQLError);
-                    };
-                    case (?user) {
-                        return #ok(user);
-                    };
-                };
-            };
-        };
-    };
 
     // ------------------------- Create Invoice -------------------------
     // TO DO: does this function need blockers as well to not be called several times?

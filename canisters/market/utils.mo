@@ -8,8 +8,9 @@ import Accounts     "ledger/accounts";
 
 module {
 
-    public func time_minutes_now() : Int32 {
-        Int32.fromInt(Time.now() / 60000000000);
+    // TODO: Changed from Int32 to Int check of ok
+    public func time_minutes_now() : Int {
+        Time.now() / 60000000000
     };
 
     public func round_up_to_e3s(amount: Nat): Nat{
