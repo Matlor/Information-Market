@@ -13,6 +13,13 @@ module {
         Time.now() / 60000000000
     };
 
+    public func nat_to_int32(amount:Nat) : Int32 {
+        if (amount > 214748364700000) {
+            Debug.trap("Cannot convert Nat amount to Int32 value exceeds max integer size!");
+        };
+        return Int32.fromInt(amount);
+    };
+
     public func round_up_to_e3s(amount: Nat): Nat{
         if(amount % 100000 == 0){
             return amount;
