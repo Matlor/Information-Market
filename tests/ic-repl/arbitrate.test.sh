@@ -100,7 +100,7 @@ identity bob;
 call market.pick_winner(question_id, alice_answer);
 assert _ == variant { ok };
 
-// 1. Arbitrating a question shall fail if not the initializer of the canister
+// 1. Arbitrating a question shall fail if not the admin of the canister
 identity carlos;
 call market.arbitrate(question_id, alice_answer);
 assert _ == variant { err = variant { NotAllowed } };

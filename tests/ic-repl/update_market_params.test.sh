@@ -41,7 +41,7 @@ assert _ == (1_440 : int32);
 call market.get_duration_disputable();
 assert _ == (2_880 : int32);
 
-// Test that with another identity that the market initializer, updating the params fails
+// Test that with another identity that the market admin, updating the params fails
 identity alice;
 call market.update_market_params(record { min_reward_e8s = opt (1_500_000 : nat); });
 assert _ == variant { err = variant { NotAllowed } };
