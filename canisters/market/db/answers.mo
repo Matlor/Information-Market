@@ -10,6 +10,7 @@ import Utils        "../utils";
 
 module {
 
+    // for convenience
     type Answer = Types.Answer;
 
     public class Answers() {
@@ -25,13 +26,12 @@ module {
         // --------------------- CRUD ---------------------
         // get
         // create
-        // update: not needed
-        // delete: not needed
 
         public func get_answer(id:Text) : ?Answer{
             Trie.get(answers, {key=id; hash=Text.hash(id)}, Text.equal);
         };
 
+        // TODO: if I had the put function seperate (like the others) I could use it
         public func create_answer(user_id:Principal, question_id:Text, content:Text) : Answer {
             let answer_id: Text = generate_id();
             let newAnswer: Answer = {
@@ -47,6 +47,7 @@ module {
         };
 
         // --------------------- UPGRADE ---------------------
+        // TODO:
          public func share() : Trie.Trie<Text, Answer> {
             answers;
         };

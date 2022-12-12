@@ -7,10 +7,11 @@ import Blob         "mo:base/Blob";
 import Result       "mo:base/Result";
 import Utils        "../utils";
 import Buffer       "mo:base/Buffer";
-
+import Array       "mo:base/Array";
 
 module {
 
+    // for convenience
     type User = Types.User;
 
     public class Users() {
@@ -19,61 +20,31 @@ module {
         
         // --------------------- HELPER ---------------------
         public func validate_key(key:Principal) : Bool {
-            if(get_user(key) == null or Principal.isAnonymous(key)){return false}
+            if(get_user(key) != null or Principal.isAnonymous(key)){return false}
             else {return true};
         };
 
-        public func replace_invoice_ids(prevUser: User, id:Text) : User {
-    
-            let prev_ids: Buffer.Buffer<Text> = Buffer.fromArray(prevUser.invoices);
-            prev_ids.add(id);
+        public func replace_invoice_ids(prevUser: User, invoice_id:Nat) : User {
+            let prev_ids: Buffer.Buffer<Nat> = Buffer.fromArray(prevUser.invoices);
+            prev_ids.add(invoice_id);
             let new_ids = Buffer.toArray(prev_ids);
-
-            let newUser: User = {
-                id = prevUser.id; 
-                name = prevUser.name; 
-                joined_date = prevUser.joined_date;
-                avatar = prevUser.avatar;
-                invoices = new_ids; 
-                questions = prevUser.questions; 
-                answers = prevUser.answers;
-            };
+            let newUser: User = {prevUser with invoices = new_ids};
             return newUser;
         };
 
         public func replace_answer_ids(prevUser: User, id:Text) : User {
-    
             let prev_ids: Buffer.Buffer<Text> = Buffer.fromArray(prevUser.answers);
             prev_ids.add(id);
             let new_ids = Buffer.toArray(prev_ids);
-
-            let newUser: User = {
-                id = prevUser.id; 
-                name = prevUser.name; 
-                joined_date = prevUser.joined_date;
-                avatar = prevUser.avatar;
-                invoices = prevUser.invoices; 
-                questions = prevUser.questions;
-                answers = new_ids
-            };
+            let newUser: User = { prevUser with answers = new_ids };
             return newUser;
         };
 
          public func replace_question_ids(prevUser: User, id:Text) : User {
-    
             let prev_ids: Buffer.Buffer<Text> = Buffer.fromArray(prevUser.questions);
             prev_ids.add(id);
             let new_ids = Buffer.toArray(prev_ids);
-
-            let newUser: User = {
-                id = prevUser.id; 
-                name = prevUser.name; 
-                joined_date = prevUser.joined_date;
-                avatar = prevUser.avatar;
-                invoices = prevUser.invoices; 
-                questions = new_ids;
-                answers = prevUser.answers;
-            };
+            let newUser: User = { prevUser with questions = new_ids };
             return newUser;
         };
 
@@ -81,12 +52,12 @@ module {
         // get
         // create
         // update
-        // delete: not needed
 
         public func get_user(id:Principal) : ?User{
             Trie.get(users, {key=id; hash=Principal.hash(id)}, Principal.equal);
         };
 
+        // TODO: I could use the put_user func instead
         public func create_user(id:Principal, name:Text) : User {
             let newUser: User = {
                 id; 
@@ -102,20 +73,17 @@ module {
             return newUser;            
         };
 
-        public func update_user(user:User) : Result.Result<User, Types.StateError> {
-           switch(get_user(user.id)) {
-                case (null) { 
-                    return #err(#UserNotFound) 
-                };
-                case (?val) { 
-                    let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(users, {key=user.id; hash=Principal.hash(user.id)}, Principal.equal, user);
-                    users:= newTrie;
-                    return #ok(user);
-                };
-            };
+        public func put_user(user:User) : User {
+            let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(users, {key=user.id; hash=Principal.hash(user.id)}, Principal.equal, user);
+            users:= newTrie;
+            return user;
         };
 
+        // --------------------- QUERIES ---------------------
+
+
         // --------------------- UPGRADE ---------------------
+        // TODO:
         public func share() : Trie.Trie<Principal, User> {
             users;
         };
