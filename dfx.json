@@ -2,8 +2,14 @@
 	"canisters": {
 		"ledger": {
 			"type": "custom",
-			"candid": "canisters/ledger/ledger.did",
 			"wasm": "canisters/ledger/ledger.wasm",
+			"candid": "canisters/ledger/ledger.did",
+			"remote": {
+				"candid": "canisters/ledger/ledger.did",
+				"id": {
+					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+				}
+			},
 			"declarations": {
 				"output": "canisters/frontend/declarations/ledger"
 			}
