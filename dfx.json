@@ -35,6 +35,13 @@
 		"utilities": {
 			"type": "motoko",
 			"main": "tests/utilities/utilities.mo"
+		},
+		"test_runner": {
+			"main": "canisters/tests/test_runner.mo",
+			"type": "motoko",
+			"declarations": {
+				"output": "canisters/frontend/declarations/market"
+			}
 		}
 	},
 	"dfx": "0.12.1",
@@ -51,6 +58,9 @@
 	"defaults": {
 		"replica": {
 			"subnet_type": "system"
+		},
+		"build": {
+			"packtool": "vessel sources"
 		}
 	},
 	"version": 1

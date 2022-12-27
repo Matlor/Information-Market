@@ -15,15 +15,34 @@ module {
     type User = Types.User;
     type Invoice = Types.Invoice;
     type Answer = Types.Answer;
+    type State = Types.State;
+
+    // I might need this on the actor -> I create a new db within the func
+    // then I replace it's variables by calling a func on it. 
+   /*  public func set_db(state:State) : Result.Result<(), Types.StateError> {
+
+        ignore UsersModule.set(state.users_state);
+        ignore InvoicesModule.init_invoices(state.invoices_state);
+        ignore QuestionsModule.init_questions(state.questions_state);
+        ignore AnswersModule.init_answers(state.answers_state); 
+
+        return db;
+    }; */
 
     public class DB(){
         
         // --------------------------- STATE ---------------------------
-    
+        public func set_inner_state(state:State) : () {
+            users.set_state(state.users_state);
+            invoices.set_state(state.invoices_state);
+            questions.set_state(state.questions_state);
+            answers.set_state(state.answers_state);
+        };
+        
         private var users: UsersModule.Users = UsersModule.Users();
-        private let invoices: InvoicesModule.Invoices = InvoicesModule.Invoices();
-        private let questions: QuestionsModule.Questions = QuestionsModule.Questions();
-        private let answers: AnswersModule.Answers = AnswersModule.Answers();
+        private var invoices: InvoicesModule.Invoices = InvoicesModule.Invoices();
+        private var questions: QuestionsModule.Questions = QuestionsModule.Questions();
+        private var answers: AnswersModule.Answers = AnswersModule.Answers();
 
         // --------------------------- DB FUNCTIONS ---------------------------
         
@@ -89,7 +108,6 @@ module {
                         };
                     };
                 };
-                    
             };
         };
 
@@ -146,8 +164,16 @@ module {
                 };
             };
         };
-
-       
+        // --------------------------- QUERIES ---------------------------
+        // TODO: 
+        public func get_state(): State {
+            {
+                users_state = users.get_users();
+                invoices_state = invoices.get_invoices();
+                questions_state = questions.get_questions();
+                answers_state = answers.get_answers();
+            };
+        };
 
         // --------------------------- RE-EXPORT ---------------------------
         public let Users = object {
@@ -160,6 +186,7 @@ module {
 
         public let Questions = object {
             public let { get_question } = questions;
+            public let { get_unclosed_questions } = questions;
             public let { has_answers } = questions;
             public let { open_to_pickanswer } = questions;
             public let { pickanswer_to_disputable } = questions;
@@ -168,7 +195,6 @@ module {
             public let { pay_to_ongoing } = questions;
             public let { ongoing_to_pay } = questions;
             public let { ongoing_to_close } = questions;
-            public let { get_unclosed_question_ids } = questions;
         };
 
         public let Answers = object {

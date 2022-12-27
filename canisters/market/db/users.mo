@@ -8,6 +8,10 @@ import Result       "mo:base/Result";
 import Utils        "../utils";
 import Buffer       "mo:base/Buffer";
 import Array       "mo:base/Array";
+import Iter       "mo:base/Iter";
+import Debug       "mo:base/Debug";
+
+
 
 module {
 
@@ -17,6 +21,19 @@ module {
     public class Users() {
 
         var users: Trie.Trie<Principal, User> = Trie.empty<Principal, User>();
+
+        // overwrites the users var
+        public func set_state(initial_users:[User]) : () {
+            var newUsers: Trie.Trie<Principal, User> = Trie.empty<Principal, User>();
+
+            let initial_user_iter: Iter.Iter<User> = Iter.fromArray<User>(initial_users);
+            for (initial_user in initial_user_iter) {
+                let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(newUsers, {key=initial_user.id; hash=Principal.hash(initial_user.id)}, Principal.equal, initial_user);
+                newUsers:= newTrie;
+            };
+            users:= newUsers;
+        
+        };
         
         // --------------------- HELPER ---------------------
         public func validate_key(key:Principal) : Bool {
@@ -80,7 +97,9 @@ module {
         };
 
         // --------------------- QUERIES ---------------------
-
+        public func get_users() : [User] {
+            Trie.toArray<Principal, User, User>(users, func(pair:(Principal, User)): User { return pair.1 });
+        };
 
         // --------------------- UPGRADE ---------------------
         // TODO:

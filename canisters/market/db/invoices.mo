@@ -7,17 +7,40 @@ import Blob         "mo:base/Blob";
 import Result       "mo:base/Result";
 import Buffer         "mo:base/Buffer";
 import Hash         "mo:base/Hash";
-
-
+import Iter         "mo:base/Iter";
 
 module {
 
     // for convenience
     type Invoice = Types.Invoice;
 
+    public func init_invoices(initial_invoices:?[Invoice]) : Invoices {
+        let invoices: Invoices = Invoices();
+        switch(initial_invoices){
+            case(null){};
+            case(?initial_invoices){
+               let initial_invoice_iter: Iter.Iter<Invoice> = Iter.fromArray<Invoice>(initial_invoices);
+                for (initial_invoice in initial_invoice_iter) {
+                    ignore invoices.put_invoice(initial_invoice);
+                };
+            };
+        };
+        return invoices;
+    };
+
     public class Invoices() {
 
         var invoices: Trie.Trie<Nat, Invoice> = Trie.empty<Nat, Invoice>();
+
+         public func set_state(initial:[Invoice]) : (){
+            var newData: Trie.Trie<Nat, Invoice> = Trie.empty<Nat, Invoice>();
+            let initial_iter: Iter.Iter<Invoice> = Iter.fromArray<Invoice>(initial);
+            for (question in initial_iter) {
+                let (newTrie, prevValue) : (Trie.Trie<Nat, Invoice>, ?Invoice) = Trie.put(newData, {key=question.id; hash=Hash.hash(question.id)}, Nat.equal, question);
+                newData:= newTrie;
+            };
+            invoices:= newData;
+        };
        
        // --------------------- HELPER ---------------------
         
@@ -61,6 +84,11 @@ module {
             return invoice;
         };        
 
+        // --------------------- QUERIES ---------------------
+        public func get_invoices() : [Invoice] {
+            Trie.toArray<Nat, Invoice, Invoice>(invoices, func(pair:(Nat, Invoice)):Invoice { return pair.1 });
+        };
+        
         // --------------------- UPGRADE ---------------------
         // TODO: 
         public func share() : Trie.Trie<Nat, Invoice> {

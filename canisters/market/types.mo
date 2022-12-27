@@ -1,4 +1,5 @@
 import InvoiceTypes "../invoice/types";
+import Result       "mo:base/Result";
 
 
 // TO DO: paste directly the types used from the invoice canister here
@@ -6,6 +7,14 @@ import InvoiceTypes "../invoice/types";
 // TO DO: how should the errors be bubbled up from the invoice canister?
 // type of error per function
 module {
+
+    // TODO: rename (state for example)
+    public type State = {
+        users_state: [User];
+        invoices_state: [Invoice];
+        questions_state: [Question];
+        answers_state: [Answer];
+    };
 
     /*  public type Error = {
         #NotFound;
@@ -43,11 +52,14 @@ module {
 
         // TO DO: NotAllowed might be a bad error
         #NotAllowed;
-        #WrongStatus
+        #WrongStatus;
+
+        #Failed;
 
     };
     
     // TODO: always refer to as user_id instead of id across the app
+    // TODO: why should ids be text? due to hash?
     public type User = {
         id: Principal;
         name: Text;
@@ -135,6 +147,36 @@ module {
         transfer_fee_e8s: ?Nat;
         pick_answer_duration_minutes: ?Int;
         disputable_duration_minutes: ?Int;
+    };
+
+    // --------------- TODO: IMPROVE THIS------------------------   
+    // TODO: this needs to be manually changed atm
+    public type Interface = actor {
+        get_user: (Principal) -> async (?User);
+        answer_question: (Text, Text) -> async (Result.Result<Answer, StateError>);
+        arbitrate: (Text, FinalWinner) -> async (Result.Result<(), StateError>);
+        ask_question: (Nat, Nat, Text, Text) -> async (Result.Result<Question, StateError>);
+        create_invoice: (Nat) -> async (InvoiceTypes.CreateInvoiceResult);
+        create_user: (Text) -> async(Result.Result<User, StateError>);
+        dispute: (Text) -> async (Result.Result<(), StateError>);
+        get_coin_symbol: () ->  async (Text);
+        get_db: () -> async (State);
+        get_duration_disputable: () -> async (Int);
+        get_duration_pick_answer: () -> async (Int);
+        get_fee: () -> async (Nat);
+        get_min_reward: () -> async (Nat);
+        get_update_status_on_heartbeat: () -> async (Bool);
+        pick_answer: (Text, Text) -> async (Result.Result<(), StateError>);
+        set_db: (State) -> async (State);
+        update_disputable: (Text) -> async ();
+        update_market_params: (UpdateMarketParams) -> async (Result.Result<(), StateError>);
+        update_open: (Text) -> async ();
+        update_payout: (Text) -> async (Result.Result<Nat64, StateError>);
+        update_pick_answer: (Text) -> async ();
+
+        // TODO: delete this
+        who_am_i: () -> async ();
+        exp: () -> async (Text);
     };
 
     
