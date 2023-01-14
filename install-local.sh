@@ -87,6 +87,10 @@ dfx generate test_runner
 #dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "[USER_BLOB]" } )'
 #dfx canister call ledger account_balance '( record { account = blob "[USER_BLOB]" } )'
 
+# plug:
+# tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe
+# 7c233932aee8f5ca6de6cf9ccefc2d93f03f4975e9bd0bdccf30b758ff3281a7
+# |#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7
 
 # test runner: 
 # d245503f277e7f83fc326f1bfb7538c50b8dee8311be8c06437b9cd621afb365
