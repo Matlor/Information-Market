@@ -1,234 +1,204 @@
 import React from "react";
+import { useEffect, useState, useReducer, useContext } from "react";
+import ListWrapper from "../components/core/ListWrapper";
+import Submit from "../components/addQuestion/Submit";
+import Form from "../components/addQuestion/Form";
+import { e8sToIcp } from "../components/core/utils/conversions";
+import { ActorContext } from "../components/api/Context";
 
-import { useEffect, useState } from "react";
-import ListWrapper from "../components/core/view/ListWrapper";
-import TitleBar from "../components/addQuestion/view/TitleBar";
-import SlateEditor from "../components/addQuestion/view/SlateEditor";
-import Submit from "../components/addQuestion/view/Submit";
-import plugApi from "../components/core/services/plug";
-import { icpToE8s } from "../components/core/services/utils/conversions";
-import { Principal } from "@dfinity/principal";
-import { getMinReward } from "../components/addQuestion/services/market";
-import { e8sToIcp } from "../components/core/services/utils/conversions";
-import { Mail } from "../components/addQuestion/services/mail";
+const doValidation = (inputs, specifications) => {
+	const isBetween = (max, value, min) => {
+		return value >= min && value <= max;
+	};
+	var validation = {
+		validTitle: false,
+		validDuration: false,
+		validReward: false,
+	};
+	if (
+		isBetween(
+			specifications.title.max,
+			inputs.title.length,
+			specifications.title.min
+		)
+	) {
+		validation.validTitle = true;
+	}
+	if (
+		isBetween(
+			specifications.duration.max,
+			inputs.duration,
+			specifications.duration.min
+		)
+	) {
+		validation.validDuration = true;
+	}
+	if (
+		isBetween(
+			specifications.reward.max,
+			inputs.reward,
+			specifications.reward.min
+		) &&
+		inputs.reward
+	) {
+		validation.validReward = true;
+	}
+	return validation;
+};
 
-const AddQuestion = ({ isConnected, createInvoice, transfer, askQuestion }) => {
-	const titlePlaceholder = "Add your Title here...";
+const isValid = (validation: IInputs["validation"]) => {
+	return validation.validTitle &&
+		validation.validDuration &&
+		validation.validReward
+		? true
+		: false;
+};
 
-	const [titleSpecification, setTitleSpecification] = useState({
-		title: titlePlaceholder,
-		minTitle: 20,
-		maxTitle: 300,
+export interface IInputs {
+	validation: {
+		validTitle: boolean;
+		validDuration: boolean;
+		validReward: boolean;
+	};
+	title: string;
+	duration: number;
+	reward: number;
+	content: string;
+}
+
+export interface ISpecifications {
+	title: {
+		min: number;
+		max: number;
+	};
+	duration: {
+		min: number;
+		max: number;
+	};
+	reward: {
+		min: number | undefined;
+		max: number;
+	};
+}
+
+const AddQuestion = () => {
+	// --------------------  Context --------------------
+	const { user } = useContext(ActorContext);
+
+	// ------------------------------ Specifications -------------------------------
+	const [specifications, setSpecifications] = useState<ISpecifications>({
+		title: {
+			max: 300,
+			min: 20,
+		},
+		duration: {
+			max: 7200,
+			min: 0,
+		},
+		reward: {
+			max: 500,
+			min: undefined,
+		},
 	});
-
-	const [durationSpecification, setDurationSpecification] = useState<any>({
-		duration: 0,
-		minDuration: 0,
-		maxDuration: 7200,
-	});
-	const [rewardSpecification, setRewardSpecification] = useState<any>({
-		reward: 0,
-		minReward: 0,
-		minRewardIsFetched: false,
-		maxReward: 500,
-	});
-
-	const [content, setContent] = useState("");
-	const [isValidated, setIsValidated] = useState(false);
 
 	useEffect(() => {
 		(async () => {
-			const fetchedMin = await getMinReward();
-			setRewardSpecification({
-				...rewardSpecification,
-				minReward: e8sToIcp(fetchedMin),
-				reward: e8sToIcp(fetchedMin),
-				minRewardIsFetched: true,
+			const fetchedMin: number = Number(
+				e8sToIcp(await user.market.get_min_reward())
+			);
+			setSpecifications({
+				...specifications,
+				reward: { min: fetchedMin, max: specifications.reward.max },
 			});
 		})();
 	}, []);
 
-	// Only that state of submitStages resets on parent rerender
-	// TODO: replace with (possibly) useRender
-	useEffect(() => {
-		setSubmitStages("");
-	}, [isConnected, createInvoice, transfer, askQuestion]);
-
-	const isBetweenMinMax = (value, min, max) => {
-		return value >= min && value <= max;
+	// -------------- State --------------
+	const initialInput: IInputs = {
+		validation: {
+			validTitle: false,
+			validDuration: false,
+			validReward: false,
+		},
+		title: "",
+		content: "",
+		duration: 0,
+		reward: 0,
 	};
 
-	// TODO: This useEffect might be unnecessary I could derive this instead probably
-	// might or might not be due to the min reward being fetched
-	// but deriving could still be better
-	useEffect(() => {
-		if (
-			(titleSpecification.minTitle <= titleSpecification.title.length &&
-				titleSpecification.title.length <= titleSpecification.maxTitle &&
-				durationSpecification.duration >= durationSpecification.minDuration &&
-				durationSpecification.maxDuration >= durationSpecification.duration &&
-				rewardSpecification.reward >= rewardSpecification.minReward &&
-				rewardSpecification.maxReward >= rewardSpecification.reward,
-			rewardSpecification.minRewardIsFetched)
-		) {
-			setIsValidated(true);
-		} else {
-			setIsValidated(false);
-		}
-	}, [titleSpecification, durationSpecification, rewardSpecification]);
-
-	const roundReward = (num) => {
-		let rounded = Math.round(num * 1000) / 1000;
-		return rounded;
-	};
-
-	const submit = async () => {
-		setSubmitStagesWrapper("invoice");
-		if (!isValidated) {
-			setSubmitStagesWrapper("error");
-			return;
-		}
-		// TODO: Structure of app is confusing if that is imported from plug directly
-		if (!(await plugApi.verifyConnection())) {
-			setSubmitStagesWrapper("error");
-			return;
-		}
-		// TODO: Add error handling
-		try {
-			// 1. Create the invoice
-			const invoiceResponse = await createInvoice(
-				icpToE8s(roundReward(rewardSpecification.reward))
-			);
-			console.log(invoiceResponse, "invoice response");
-			setSubmitStagesWrapper("transfer");
-
-			// 2. Perform the transfer
-			const transferResponse = await transfer({
-				to: Array.from(
-					Principal.fromHex(
-						invoiceResponse.ok.invoice.destination.text
-					).toUint8Array()
-				),
-				fee: { e8s: BigInt(10000) },
-				memo: BigInt(0),
-				from_subaccount: [],
-				created_at_time: [],
-				amount: { e8s: invoiceResponse.ok.invoice.amount },
-			});
-			setSubmitStagesWrapper("submit");
-			console.log(transferResponse, "transfer response");
-			if (transferResponse?.Err !== undefined) {
-				setSubmitStagesWrapper("error");
-				return;
-			}
-
-			// 3. Create the question
-			const openQuestionResponse = await askQuestion(
-				invoiceResponse.ok.invoice.id,
-				durationSpecification.duration,
-				titleSpecification.title,
-				content
-			);
-			console.log(openQuestionResponse, "openQuestionResponse");
-
-			if (openQuestionResponse.err) {
-				console.error(
-					"market canister ask_question call returned the error: " +
-						openQuestionResponse.err
-				);
-				setSubmitStagesWrapper("error");
-				return;
-			}
-			Mail("New Question");
-
-			setTitleSpecification({ ...titleSpecification, title: "" });
-			setDurationSpecification({ ...durationSpecification, duration: 0 });
-			setRewardSpecification({ ...rewardSpecification, reward: 0 });
-			setContent("");
-
-			// Success! Redirect to question page
-			window.location.href = "#/question/" + openQuestionResponse.ok.id;
-		} catch (e) {
-		} finally {
+	const inputsReducer = (state: IInputs, action): IInputs => {
+		switch (action.type) {
+			case "reset":
+				return initialInput;
+			case "title":
+				return {
+					...state,
+					title: action.payload,
+					validation: doValidation(
+						{ ...state, title: action.payload },
+						specifications
+					),
+				};
+			case "duration":
+				return {
+					...state,
+					duration: action.payload,
+					validation: doValidation(
+						{ ...state, duration: action.payload },
+						specifications
+					),
+				};
+			case "reward":
+				return {
+					...state,
+					reward: action.payload,
+					validation: doValidation(
+						{ ...state, reward: action.payload },
+						specifications
+					),
+				};
+			case "content":
+				return {
+					...state,
+					content: action.payload,
+					validation: doValidation(
+						{ ...state, content: action.payload },
+						specifications
+					),
+				};
+			default:
+				return {
+					...state,
+				};
 		}
 	};
 
-	const [submitStages, setSubmitStages] = useState("");
-	const setSubmitStagesWrapper = (submitStage) => {
-		if (
-			submitStage === "invoice" ||
-			"transfer" ||
-			"submit" ||
-			"success" ||
-			"error"
-		) {
-			setSubmitStages(submitStage);
-		} else throw new Error("Invalid submit stage");
-	};
-
+	const [inputs, dispatch] = useReducer(inputsReducer, initialInput);
 	return (
 		<ListWrapper>
-			<TitleBar
-				duration={durationSpecification.duration}
-				setDuration={(newDuration) => {
-					setDurationSpecification({
-						...durationSpecification,
-						duration: newDuration,
-					});
+			<Form
+				dispatch={{
+					reward: (reward) => {
+						dispatch({ type: "reward", payload: reward });
+					},
+					duration: (duration) => {
+						dispatch({ type: "duration", payload: duration });
+					},
+					title: (title) => {
+						dispatch({ type: "title", payload: title });
+					},
+					content: (content) => {
+						dispatch({ type: "content", payload: content });
+					},
 				}}
-				isDurationError={
-					!isBetweenMinMax(
-						durationSpecification.duration,
-						durationSpecification.minDuration,
-						durationSpecification.maxDuration
-					)
-				}
-				minDuration={durationSpecification.minDuration}
-				maxDuration={durationSpecification.maxDuration}
-				reward={rewardSpecification.reward}
-				setReward={(newReward) => {
-					setRewardSpecification({
-						...rewardSpecification,
-						reward: newReward,
-					});
-				}}
-				isRewardError={
-					!isBetweenMinMax(
-						rewardSpecification.reward,
-						rewardSpecification.minReward,
-						rewardSpecification.maxReward
-					)
-				}
-				minReward={rewardSpecification.minReward}
-				maxReward={rewardSpecification.maxReward}
-				title={titleSpecification.title}
-				setTitle={(newTitle) =>
-					setTitleSpecification({
-						...titleSpecification,
-						title: newTitle,
-					})
-				}
-				isTitleError={
-					!isBetweenMinMax(
-						titleSpecification.title.length,
-						titleSpecification.minTitle,
-						titleSpecification.maxTitle
-					)
-				}
-				minTitle={titleSpecification.minTitle}
-				maxTitle={titleSpecification.maxTitle}
-				titlePlaceholder={titlePlaceholder}
+				titlePlaceholder={"Add your title here"}
+				inputs={inputs}
+				specifications={specifications}
 			/>
-			<SlateEditor
-				inputValue={content}
-				setInputValue={setContent}
-				placeholder="Add your question here..."
-			/>
-
-			{isConnected ? (
+			{user.principal && inputs ? (
 				<div className="h-[48px] flex ">
-					{isValidated ? (
-						<Submit submit={submit} submitStages={submitStages} />
+					{isValid(inputs.validation) ? (
+						<Submit inputs={inputs} />
 					) : (
 						<div className="heading3  self-center ml-6">
 							Fill out the form correctly

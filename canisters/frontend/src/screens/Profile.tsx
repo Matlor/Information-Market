@@ -1,8 +1,8 @@
 import React from "react";
 
 import { useState } from "react";
-import Button from "../components/core/view/Button";
-import Date from "../components/core/view/Date";
+import Button from "../components/core/Button";
+import Date from "../components/core/Date";
 
 const Profile = ({ isConnected, user, updateUserInformation }: any) => {
 	const [userName, setUserName] = useState<any>(user.userName);

@@ -1,249 +1,285 @@
-import React from "react";
+import React, { useState, useEffect, useReducer, useContext } from "react";
+import ListWrapper from "../components/core/ListWrapper";
+import Search from "../components/browseQuestion/Search";
+import Filter from "../components/browseQuestion/Filter";
+import Sort from "../components/browseQuestion/Sort";
+import QuestionPreview from "../components/browseQuestion/QuestionPreview";
+import Pagination from "../components/browseQuestion/Pagination";
+import Loading from "../components/core/Loading";
+import { Question as IQuestion } from "../../declarations/market/market.did.d";
+import { Principal } from "@dfinity/principal";
+import { toNullable } from "@dfinity/utils";
+import { ActorContext } from "../components/api/Context";
 
-import ListWrapper from "../components/core/view/ListWrapper";
-import FilterBar from "../components/browseQuestion/view/FilterBar";
-import QuestionPreview from "../components/browseQuestion/view/QuestionPreview";
-import Pagination from "../components/browseQuestion/view/Pagination";
+// ---------- Types ----------
+export interface IStatusMap {
+	open: boolean;
+	pickanswer: boolean;
+	disputable: boolean;
+	arbitration: boolean;
+	payout: boolean;
+	closed: boolean;
+}
+export type MyInteractions = Principal | undefined;
 
-import { useState, useEffect } from "react";
-import getQuestions from "../components/browseQuestion/services/getQuestions";
+export type OrderBy = "REWARD" | "TIME_LEFT";
+export type OrderDirection = "ASCD" | "DESCD";
+type Order = {
+	orderBy: OrderBy;
+	orderDirection: OrderDirection;
+};
 
-import sudograph from "../components/core/services/sudograph";
-import { blobToBase64Str } from "../components/core/services/utils/conversions";
-import Loading from "../components/core/view/Loading";
+interface IConditions {
+	status: IStatusMap;
+	searchedText: string;
+	myInteractions: MyInteractions;
+	order: Order;
+	pagination: {
+		pageIndex: number;
+		questionsPerPage: number;
+	};
+}
 
-const BrowseQuestion = ({
-	userPrincipal,
-	isConnected,
-	createDefaultAvatar,
-}: any) => {
-	type Status = { value: string; label: string };
-	type JSONValue = string | number | boolean | JSONObject | JSONArray;
-	interface JSONObject {
-		[x: string]: JSONValue;
-	}
-	interface JSONArray extends Array<JSONValue> {}
+interface IAction {
+	type: string;
+	[key: string]: any;
+}
 
-	// TODO: This could potentially be 1 object
-	const questionsPerPage: number = 10;
-	const [searchedText, setSearchedText] = useState<string>("");
-	const [myInteractions, setMyInteractions] = useState<boolean>(false);
-	const [statusMap, setStatusMap] = useState<Array<Status>>([
-		{ value: "OPEN", label: "Open" },
-		{ value: "PICKANSWER", label: "Winner Selection" },
-		{ value: "DISPUTABLE", label: "Open for disputes" },
-		{ value: "DISPUTED", label: "Arbitration" },
-		{ value: "CLOSED", label: "Closed" },
-	]);
-	const [orderField, setOrderField] = useState<string>("reward");
-	const [orderIsAscending, setOrderIsAscending] = useState<boolean>(false);
-	const [pageIndex, setPageIndex] = useState<number>(0);
-	const [fetchQuestionsDate, setFetchQuestionsDate] = useState<number>(0);
-	const [questions, setQuestions] = useState<JSONArray>([]);
-	const [totalQuestions, setTotalQuestions] = useState<any>(null);
-	const [loading, setLoading] = useState<boolean>(false);
-	const [filterLoading, setFilterLoading] = useState<boolean>(false);
-	const [searchLoading, setSearchLoading] = useState<boolean>(false);
-	const [cachedAvatars, setCachedAvatars] = useState<any>(() => new Map());
+interface IQuestionsData {
+	questions: { question: IQuestion }[];
+	totalQuestions: number;
+}
 
-	const loadAvatars = async (questions: any, cachedAvatars) => {
-		try {
-			for (var i = 0; i < questions.length; i++) {
-				let question: any = questions[i];
-				if (!cachedAvatars.has(question.author.id)) {
-					const res = await sudograph.query_avatar(question.author.id);
+const BrowseQuestion = () => {
+	// --------------------  Context --------------------
+	const { user } = useContext(ActorContext);
 
-					const loadedAvatar = res.data.readUser[0].avatar
-						? await blobToBase64Str(res.data.readUser[0].avatar)
-						: await createDefaultAvatar();
+	// --------------------  Conditions --------------------
+	const [loading, setLoading] = useState({
+		main: true,
+		search: false,
+		filter: false,
+	});
 
-					setCachedAvatars(
-						(prev: any) =>
-							new Map([...prev, [question.author.id, loadedAvatar]])
-					);
+	const conditionsReducer = (
+		state: IConditions,
+		action: IAction
+	): IConditions => {
+		switch (action.type) {
+			case "updateSearchedText":
+				setLoading({ main: false, search: true, filter: false });
+				return {
+					...state,
+					searchedText: action.searchedText,
+				};
+			case "updateMyInteractions":
+				setLoading({ main: false, search: false, filter: true });
+				return {
+					...state,
+					myInteractions: action.field,
+				};
+
+			case "updateStatusMap":
+				if (
+					action.field !== "open" &&
+					action.field !== "pickanswer" &&
+					action.field !== "disputable" &&
+					action.field !== "arbitration" &&
+					action.field !== "closed"
+				) {
+					return state;
 				}
-			}
-		} catch (error) {
-			console.error("Failed to load avatars!");
+				setLoading({ main: false, search: false, filter: true });
+				return {
+					...state,
+					status: {
+						...state.status,
+						[action.field]: !state.status[action.field],
+					},
+				};
+			case "updateOrder":
+				if (
+					action.field.orderBy != "TIME_LEFT" &&
+					action.field.orderBy != "REWARD" &&
+					action.field.orderDirection != "ASCD" &&
+					action.field.orderDirection != "DESCD"
+				) {
+					return state;
+				}
+
+				setLoading({ main: true, search: false, filter: false });
+				return {
+					...state,
+					order: {
+						orderBy: action.field.orderBy,
+						orderDirection: action.field.orderDirection,
+					},
+				};
+
+			case "updatePageIndex":
+				setLoading({ main: true, search: false, filter: false });
+				return {
+					...state,
+					pagination: {
+						...state.pagination,
+						pageIndex: action.field,
+					},
+				};
+			default:
+				return state;
 		}
 	};
 
-	const fetch_data = async (index = 0) => {
-		const result = await getQuestions(
-			orderField,
-			orderIsAscending,
-			searchedText,
-			statusMap,
-			myInteractions,
-			userPrincipal,
-			questionsPerPage,
-			index
+	const [conditions, dispatch] = useReducer(conditionsReducer, {
+		status: {
+			open: true,
+			pickanswer: true,
+			disputable: true,
+			arbitration: true,
+			payout: false,
+			closed: true,
+		},
+		searchedText: "",
+		myInteractions: undefined,
+		order: {
+			orderBy: "REWARD",
+			orderDirection: "ASCD",
+		},
+		pagination: {
+			pageIndex: 0,
+			questionsPerPage: 10,
+		},
+	});
+
+	// --------------------  Data --------------------
+	const [questionData, setQuestionData] = useState<IQuestionsData>({
+		questions: [],
+		totalQuestions: 0,
+	});
+
+	async function fetch_data() {
+		return await user.market.get_conditional_questions_with_authors(
+			conditions.status,
+			conditions.searchedText,
+			toNullable(conditions.myInteractions),
+			{
+				[conditions.order.orderBy]: {
+					[conditions.order.orderDirection]: null,
+				},
+			},
+			conditions.pagination.pageIndex * conditions.pagination.questionsPerPage,
+			conditions.pagination.questionsPerPage
 		);
-		return result;
-	};
-
-	const set_data = async (result: any) => {
-		setFetchQuestionsDate(result.timestamp);
-		setTotalQuestions(result.totalQuestions);
-		setQuestions(result.questions);
-	};
+	}
 
 	useEffect(() => {
 		let isCancelled = false;
 
-		const get_data = async () => {
-			setSearchLoading(true);
-
-			let result = await fetch_data();
+		(async () => {
+			const response = await fetch_data();
+			const { data, num_questions } = response;
 			if (!isCancelled) {
-				await set_data(result);
-				setSearchLoading(false);
-				setPageIndex(0);
-				await loadAvatars(result.questions, cachedAvatars);
+				setQuestionData({
+					questions: data,
+					totalQuestions: num_questions,
+				});
+				setLoading({ main: false, search: false, filter: false });
 			}
-		};
-		if (totalQuestions !== null) {
-			get_data();
-		}
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [searchedText]);
-
-	useEffect(() => {
-		let isCancelled = false;
-
-		const get_data = async () => {
-			setFilterLoading(true);
-
-			let result = await fetch_data();
-
-			if (!isCancelled) {
-				set_data(result);
-				setFilterLoading(false);
-				setPageIndex(0);
-				await loadAvatars(result.questions, cachedAvatars);
-			}
-		};
-		if (totalQuestions !== null) {
-			get_data();
-		}
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [statusMap]);
-
-	useEffect(() => {
-		let isCancelled = false;
-
-		const get_data = async () => {
-			let result = await fetch_data();
-
-			if (!isCancelled) {
-				await set_data(result);
-				setPageIndex(0);
-				await loadAvatars(result.questions, cachedAvatars);
-			}
-		};
-		if (totalQuestions !== null) {
-			get_data();
-		}
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [orderField, orderIsAscending]);
-
-	useEffect(() => {
-		let isCancelled = false;
-
-		const get_data = async () => {
-			setLoading(true);
-			let result = await fetch_data();
-			if (!isCancelled) {
-				await set_data(result);
-				setLoading(false);
-				setPageIndex(0);
-				await loadAvatars(result.questions, cachedAvatars);
-			}
-		};
-		get_data();
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [orderField, orderIsAscending, myInteractions]);
-
-	useEffect(() => {
-		let isCancelled = false;
-
-		const get_data = async () => {
-			setLoading(true);
-			let result = await fetch_data(pageIndex);
-			if (!isCancelled) {
-				await set_data(result);
-				setLoading(false);
-				await loadAvatars(result.questions, cachedAvatars);
-			}
-		};
-		get_data();
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [pageIndex]);
-
-	useEffect(() => {
+		})();
 		var interval = setInterval(async () => {
-			if (Date.now() - fetchQuestionsDate > 10000) {
-				let result = await fetch_data(pageIndex);
-				await set_data(result);
-				await loadAvatars(result.questions, cachedAvatars);
+			const response = await fetch_data();
+			const { data, num_questions } = response;
+			if (!isCancelled) {
+				setQuestionData({
+					questions: data,
+					totalQuestions: num_questions,
+				});
+				setLoading({ main: false, search: false, filter: false });
 			}
 		}, 5000);
-		return () => clearInterval(interval);
-	}, [fetchQuestionsDate]);
+		return () => {
+			isCancelled = true;
+			clearInterval(interval);
+		};
+	}, [conditions]);
+
+	// --------------------  Handlers --------------------
+	const toOrderAndPossiblyToggle = (orderBy: OrderBy) => {
+		const direction = () => {
+			if (conditions.order.orderBy == orderBy) {
+				return conditions.order.orderDirection == "ASCD" ? "DESCD" : "ASCD";
+			} else {
+				return conditions.order.orderDirection;
+			}
+		};
+		dispatch({
+			type: "updateOrder",
+			field: {
+				orderBy,
+				orderDirection: direction(),
+			},
+		});
+	};
+	const setSearchedText = (text) => {
+		dispatch({
+			type: "updateSearchedText",
+			searchedText: text,
+		});
+	};
+	const setStatus = (field) => {
+		dispatch({ type: "updateStatusMap", field });
+	};
+	const toggleMyInteractions = (principal) => {
+		dispatch({
+			type: "updateMyInteractions",
+			field: conditions.myInteractions == undefined ? principal : undefined,
+		});
+	};
+	const setSortOrder = (orderBy) => toOrderAndPossiblyToggle(orderBy);
+	const setPageIndex = (pageIndex: number) => {
+		dispatch({ type: "updatePageIndex", field: pageIndex });
+	};
 
 	return (
 		<>
 			<ListWrapper>
-				<FilterBar
-					setSearchedText={setSearchedText}
-					statusMap={statusMap}
-					setStatusMap={setStatusMap}
-					orderIsAscending={orderIsAscending}
-					setOrderIsAscending={setOrderIsAscending}
-					setOrderField={setOrderField}
-					myInteractions={myInteractions}
-					setMyInteractions={setMyInteractions}
-					isConnected={isConnected}
-					filterLoading={filterLoading}
-					setFilterLoading={setFilterLoading}
-					searchLoading={searchLoading}
-					setSearchLoading={setSearchLoading}
-				/>
-				{loading ? (
+				{/* QUESTION MENU */}
+				<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
+					<div className="sm:w-1/2">
+						<Search
+							searchLoading={loading.search}
+							setSearchedText={setSearchedText}
+						/>
+					</div>
+					<div className="sm:w-1/2 flex justify-between items-center p-0 gap-[17px] sm:justify-end">
+						<Filter
+							checks={{
+								status: conditions.status,
+								setStatus,
+								myInteractions: conditions.myInteractions,
+								toggleMyInteractions,
+							}}
+							isLoading={loading.filter}
+						/>
+						<Sort setSortOrder={setSortOrder} order={conditions.order} />
+					</div>
+				</div>
+
+				{/* QUESTION LIST */}
+				{loading.main ? (
 					<div className="w-full h-40 items-center flex justify-center">
 						<Loading />
 					</div>
-				) : totalQuestions === 0 ? (
+				) : questionData.totalQuestions === 0 ? (
 					<div className="w-full h-40 items-center flex justify-center heading3">
 						No Questions
 					</div>
 				) : (
 					<>
-						{questions.map((question: any, index) => (
+						{questionData.questions.map((questionAndAuthor: any, index) => (
 							<QuestionPreview
-								reward={question.reward}
-								status={question.status}
-								id={question.id}
-								title={question.title}
-								authorName={question.author.name}
-								numAnswers={question.answers.length}
-								date={question.creation_date}
-								avatar={cachedAvatars.get(question.author.id)}
+								question={questionAndAuthor.question}
+								author={questionAndAuthor.author}
 								key={index}
 							/>
 						))}
@@ -251,10 +287,12 @@ const BrowseQuestion = ({
 				)}
 			</ListWrapper>
 			<Pagination
-				pageIndex={pageIndex}
+				pagination={{
+					pageIndex: conditions.pagination.pageIndex,
+					questionsPerPage: conditions.pagination.questionsPerPage,
+				}}
+				totalQuestions={questionData.totalQuestions}
 				setPageIndex={setPageIndex}
-				totalQuestions={totalQuestions}
-				questionsPerPage={questionsPerPage}
 			/>
 		</>
 	);
