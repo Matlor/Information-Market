@@ -38,10 +38,6 @@
 				"output": "declarations/frontend"
 			}
 		},
-		"utilities": {
-			"type": "motoko",
-			"main": "tests/utilities/utilities.mo"
-		},
 		"test_runner": {
 			"main": "canisters/tests/test_runner.mo",
 			"type": "motoko",
