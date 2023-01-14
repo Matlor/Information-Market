@@ -3,8 +3,9 @@ import Time         "mo:base/Time";
 import Array        "mo:base/Array";
 import Blob         "mo:base/Blob";
 import Buffer       "mo:base/Buffer";
+import Int32        "mo:base/Int32";
 import Nat          "mo:base/Nat";
-import Bool          "mo:base/Bool";
+import Bool         "mo:base/Bool";
 import C            "mo:matchers/Canister";
 import M            "mo:matchers/Matchers";
 import T            "mo:matchers/Testable";
@@ -14,10 +15,9 @@ import Debug        "mo:base/Debug";
 import Result       "mo:base/Result";
 import MarketTypes  "../market/types";
 import Test_User    "./test_user";
-import Utils      "./test_utils";
 import Hex          "../invoice/Hex";
 
-// TODO: maybe ugly to imports
+// TODO: improve these imports
 import Account          "../market/ledger/accounts";
 import LedgerTypes      "../invoice/ledgerTypes";
 import LedgerTypes2      "../invoice/ledgerTypes2";
@@ -29,6 +29,8 @@ import Nat64            "mo:base/Nat64";
 
 
 shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Principal, invoice:Principal) = this {
+    // TODO: generally check that the state I set is as long as what I define, because if I add the same question id it will just overwrite the value there
+    // TODO: check that only one answer is related to one question and so on. The setState should check for these things possibly?
 
     // for convenience
     type Question = MarketTypes.Question;
@@ -274,7 +276,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         // ignoring joined_date
                         if( user.id == first_user_expectation.id and
                             user.answers == first_user_expectation.answers and
-                            user.avatar == first_user_expectation.avatar and
                             user.invoices == first_user_expectation.invoices and
                             user.name == first_user_expectation.name and
                             user.questions == first_user_expectation.questions  
@@ -304,7 +305,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         // ignoring joined_date
                         if( user.id == third_user_expectation.id and
                             user.answers == third_user_expectation.answers and
-                            user.avatar == third_user_expectation.avatar and
                             user.invoices == third_user_expectation.invoices and
                             user.name == third_user_expectation.name and
                             user.questions == third_user_expectation.questions 
@@ -338,7 +338,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date = Int32.fromInt(Time.now() / 60000000000);
                     name = "John"; 
                     questions = []
                 },
@@ -472,7 +472,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = []; 
                 avatar = null; 
                 invoices = []; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date = Int32.fromInt(Time.now() / 60000000000);
                 name = "John"; 
                 questions = []
             }];
@@ -651,7 +651,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = []; 
                 avatar = null; 
                 invoices = []; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
                 name = "John"; 
                 questions = []
             }];
@@ -669,14 +669,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id= "0";
                 author_id= Principal.fromActor(a_user);
                 invoice_id= 0; 
-                creation_date = (Time.now() / 60000000000) +1;
+                creation_date :Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #OPEN;
-                status_update_date= (Time.now() / 60000000000)+1;
-                status_end_date = (Time.now() / 60000000000)+2;
-                open_duration= 2;
+                status_update_date:Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                open_duration :Int32 = 2;
                 title = "test question";
                 content = "test description";
-                reward = 1_300_000:Int32;
+                reward:Int32 = 1_300_000:Int32;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -687,7 +687,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = []; 
                 avatar = null; 
                 invoices = []; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
                 name = "John"; 
                 questions = []
             }];
@@ -705,7 +705,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = []; 
                 avatar = null; 
                 invoices = []; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
                 name = "Tim"; 
                 questions = []
             }
@@ -749,13 +749,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let answer_submitted_state = await market_canister.get_db();
 
         // correct state transition to pickanswer
-        ignore await market_canister.set_db({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date = (Time.now()/60000000000) - 10 }]}: State);
+        ignore await market_canister.set_db({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000) - 10 }]}: State);
         let time_transition_to_pickanswer = await b_user.answer_question("0", "test answer");
         let time_transition_to_pickanswer_state = await market_canister.get_db();
         Debug.print("time_transition_to_pickanswer_state" # debug_show(time_transition_to_pickanswer_state));
         
         // correct state transition to payout
-        ignore await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = (Time.now()/60000000000) - 10 }] }: State);
+        ignore await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = Int32.fromInt(Time.now() / 60000000000) - 10 }] }: State);
         let time_transition_to_payout = await b_user.answer_question("0", "test answer");
         let time_transition_to_payout_state = await market_canister.get_db(); 
 
@@ -904,7 +904,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = "0";
                 author_id = Principal.fromActor(b_user);
                 question_id = "0";
-                creation_date = (Time.now() / 60000000000) +1;
+                creation_date:Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 content = "test answer";
             }];
             invoices_state = [{
@@ -921,10 +921,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id= "0";
                 author_id= Principal.fromActor(a_user);
                 invoice_id= 0; 
-                creation_date = (Time.now() / 60000000000) +1;
+                creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #PICKANSWER;
-                status_update_date= (Time.now() / 60000000000)+1;
-                status_end_date = (Time.now() / 60000000000)+2;
+                status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                 open_duration= 2;
                 title = "test question";
                 content = "test description";
@@ -938,10 +938,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id= "1";
                 author_id= Principal.fromActor(a_user);
                 invoice_id= 1; 
-                creation_date = (Time.now() / 60000000000) +1;
+                creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #PICKANSWER;
-                status_update_date= (Time.now() / 60000000000)+1;
-                status_end_date = (Time.now() / 60000000000)+2;
+                status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                 open_duration= 2;
                 title = "test question";
                 content = "test description";
@@ -956,7 +956,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = []; 
                 avatar = null; 
                 invoices = [0, 1]; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                 name = "John"; 
                 questions = ["0", "1"]
             },
@@ -965,7 +965,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 answers = ["0"]; 
                 avatar = null; 
                 invoices = []; 
-                joined_date = (Time.now() / 60000000000);
+                joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                 name = "Tim"; 
                 questions = []
             }];
@@ -1174,7 +1174,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = [0, 1]; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "John"; 
                     questions = ["0", "1"]
                 },
@@ -1183,7 +1183,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = ["0"]; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Tim"; 
                     questions = []
                 },
@@ -1192,7 +1192,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Steve"; 
                     questions = []
                 },
@@ -1201,7 +1201,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Mark"; 
                     questions = []
                 }
@@ -1224,15 +1224,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 0; 
                     author_id= Principal.fromActor(a_user);
 
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "test description";
                     reward = 1_300_000:Int32;
 
                     status= #DISPUTABLE;
-                    status_update_date= (Time.now() / 60000000000)+1;
-                    status_end_date = (Time.now() / 60000000000)+2;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
                     answers = ["0", "1"]; 
                     potentialWinner = ?"1";
@@ -1246,15 +1246,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id= Principal.fromActor(a_user);
                     invoice_id= 1; 
                     
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "test description";
                     reward = 1_300_000:Int32;
 
                     status= #DISPUTABLE;
-                    status_update_date= (Time.now() / 60000000000)+1;
-                    status_end_date = (Time.now() / 60000000000)+2;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
                     answers = []; 
                     potentialWinner = null;
@@ -1267,14 +1267,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "0";
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 }
             ];
@@ -1499,7 +1499,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = [0, 1]; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "John"; 
                     questions = ["0", "1"]
                 },
@@ -1508,7 +1508,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = ["0"]; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date : Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Tim"; 
                     questions = []
                 },
@@ -1517,7 +1517,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Steve"; 
                     questions = []
                 },
@@ -1535,15 +1535,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 0; 
                     author_id= Principal.fromActor(a_user);
 
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "test description";
                     reward = 1_300_000:Int32;
 
                     status= #ARBITRATION;
-                    status_update_date= (Time.now() / 60000000000)+1;
-                    status_end_date = (Time.now() / 60000000000)+2;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
                     answers = ["0", "1"]; 
                     potentialWinner = ?"1";
@@ -1556,14 +1556,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "0";
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 }
             ];
@@ -1740,7 +1740,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = [0, 1]; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "John"; 
                     questions = ["0", "1"]
                 },
@@ -1749,7 +1749,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = ["0"]; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Tim"; 
                     questions = []
                 },
@@ -1758,7 +1758,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date = (Time.now() / 60000000000);
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     name = "Steve"; 
                     questions = []
                 },
@@ -1776,15 +1776,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 0; 
                     author_id= Principal.fromActor(a_user);
 
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "test description";
                     reward = 1_300_000:Int32;
                             
                     status= #PAYOUT(#PAY);
-                    status_update_date= (Time.now() / 60000000000)+1;
-                    status_end_date = (Time.now() / 60000000000)+2;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
                     answers = ["0", "1"]; 
                     potentialWinner = ?"0";
@@ -1797,14 +1797,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "0";
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
-                    creation_date = (Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 }
             ];
@@ -1986,6 +1986,200 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
     // --------- ?mainnet ---------
 
+    public shared func testQueries() : async {#success; #fail : Text} {
+        let a_user: Test_User.test_user = await  create_test_user();
+        let b_user: Test_User.test_user = await  create_test_user();
+        let c_user: Test_User.test_user = await  create_test_user();
 
+
+        let base_state:State = {
+            users_state = [
+                {
+                    id = Principal.fromActor(a_user); 
+                    answers = []; 
+                    avatar = null; 
+                    invoices = [0, 1]; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "John"; 
+                    questions = ["0", "2", "3"]
+                },
+                {
+                    id = Principal.fromActor(b_user);
+                    answers = ["0"]; 
+                    avatar = null; 
+                    invoices = []; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "Tim"; 
+                    questions = []
+                },
+                 {
+                    id = Principal.fromActor(c_user); 
+                    answers = ["1"]; 
+                    avatar = null; 
+                    invoices = []; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "Steve"; 
+                    questions = []
+                },
+                {
+                    id =  Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+                    answers = ["1"]; 
+                    avatar = null; 
+                    invoices = []; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "Steve"; 
+                    questions = ["1"];
+                }
+            ];
+            invoices_state = [];
+            questions_state = [
+                {
+                    id= "0";
+                    invoice_id= 10; 
+                    author_id= Principal.fromActor(a_user);
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "test question";
+                    content = "test description";
+                    reward = 500:Int32;
+                            
+                    status= #OPEN;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+20;
+                    
+                    answers = ["0", "1"]; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height = null;
+                    // (#ANSWER({answer_id="0"}));
+                },
+                 {
+                    id= "1";
+                    invoice_id= 10; 
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "test question";
+                    content = "test description";
+                    reward = 600:Int32;
+                            
+                    status= #PICKANSWER;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+102;
+                    
+                    answers = ["0", "1"]; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                },
+                {
+                    id= "2";
+                    invoice_id= 20; 
+                    author_id= Principal.fromActor(c_user);
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "test question";
+                    content = "test description";
+                    reward = 700:Int32;
+                            
+                    status= #DISPUTABLE;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = ["0", "1"]; 
+                    potentialWinner = ?"0";
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                },
+                {
+                    id= "3";
+                    invoice_id= 30; 
+                    author_id= Principal.fromActor(b_user);
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "test question";
+                    content = "test description";
+                    reward = 500:Int32;
+                            
+                    status= #CLOSED;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = ["0", "1"]; 
+                    potentialWinner = ?"0";
+                    finalWinner = ?(#ANSWER({answer_id="0"}));
+                    close_transaction_block_height= null;
+                },
+            ];
+            answers_state = [
+                {
+                    id = "0";
+                    author_id = Principal.fromActor(b_user);
+                    question_id = "10";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+                {
+                    id = "1";
+                    author_id = Principal.fromActor(c_user);
+                    question_id = "10";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                }
+            ];
+        };
+
+        ignore await market_canister.set_db(base_state:State);
+        
+        /* let res = await market_canister.get_conditional_questions({
+            open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }
+        , #REWARD); */
+
+        
+        let res = await market_canister.get_users([]);
+        //Debug.print("empty data:     " # debug_show(res));
+
+        let res1 = await market_canister.get_users([Principal.fromActor(c_user)]);
+        //Debug.print("data:     " # debug_show(res1));
+
+        let res2 = await market_canister.get_question_data("10");
+        //Debug.print("question data:     " # debug_show(res2));
+
+        ignore await fund_principal(Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe"));
+
+        /* Debug.print("0 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 10 )));
+        Debug.print("1 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 1, 10 )));
+        Debug.print("2 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 2, 10 )));
+        Debug.print("3 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 3, 10 )));
+        Debug.print("4 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 4, 10 )));
+        Debug.print("5 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 5, 10 ))); */
+
+        /* Debug.print("0, 0 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 0 )));
+        Debug.print("0, 1 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 1 )));
+        Debug.print("0, 2 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 2 )));
+        Debug.print("0, 3 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 3 )));
+        Debug.print("0, 4 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 4 )));
+        Debug.print("0, 5 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 5 )));
+        Debug.print("0, 6 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 6 )));  */
+
+        //Debug.print("0, 10 :     " # debug_show(await market_canister.get_conditional_questions_with_authors({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 10 )));
+        //Debug.print("db :     " # debug_show((await market_canister.get_db())).questions_state);
+
+
+        let suite = S.suite("queries", [
+            S.test(
+                "",
+                "",
+                M.equals<Text>(T.text(""))
+            ),
+        ]);
+        
+        S.run(suite);
+        return #success;
+    };
 };
    

@@ -4,11 +4,10 @@ import Text         "mo:base/Text";
 import Nat          "mo:base/Nat";
 import Principal    "mo:base/Principal";
 import Blob         "mo:base/Blob";
-import Result       "mo:base/Result";
 import Utils        "../utils";
 import Buffer       "mo:base/Buffer";
-import Array       "mo:base/Array";
-import Iter       "mo:base/Iter";
+import Iter         "mo:base/Iter";
+import Debug        "mo:base/Debug";
 
 module {
 
@@ -33,6 +32,8 @@ module {
 
         var questions: Trie.Trie<Text, Question> = Trie.empty<Text, Question>();
 
+        // TODO: careful if I pass several questions with the same id it might overwrite them simply
+        // I should always assert the thing has the correct length
         public func set_state(initial:[Question]) :  () {
             var newData: Trie.Trie<Text, Question> = Trie.empty<Text, Question>();
             let initial_iter: Iter.Iter<Question> = Iter.fromArray<Question>(initial);
@@ -41,11 +42,8 @@ module {
                 newData:= newTrie;
             };
             questions:= newData;
-
         };
 
-
-    
         // TODO: should not start from 1
         // TODO: can't have stabel var here, this is a problem!
         var counter: Nat = 0;
@@ -83,7 +81,7 @@ module {
 
         // TODO: I can use the put_question function here
         // when id is generated 'put' will certainly work (no need to return result)
-        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int, title:Text, content:Text, reward:Int32) : Question {
+        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32) : Question {
             let now = Utils.time_minutes_now();
             let id: Text = generate_id();
             let newQuestion: Question = {
@@ -116,7 +114,7 @@ module {
 
         // --------------------- BUSINESS LOGIC ---------------------
   
-        public func open_to_pickanswer(prevQuestion:Question, duration_pick_answer_:Int) : Question {
+        public func open_to_pickanswer(prevQuestion:Question, duration_pick_answer_:Int32) : Question {
             let newQuestion:Question = { 
                 prevQuestion with status = #PICKANSWER; 
                 status_update_date= Utils.time_minutes_now();  
@@ -125,7 +123,7 @@ module {
             return put_question(newQuestion);
         };
 
-        public func pickanswer_to_disputable (prevQuestion:Question, duration_disputable_:Int, answer_id:Text) : Question {
+        public func pickanswer_to_disputable (prevQuestion:Question, duration_disputable_:Int32, answer_id:Text) : Question {
             let newQuestion:Question = { 
                 prevQuestion with status = #DISPUTABLE; 
                 status_update_date= Utils.time_minutes_now();  
@@ -140,7 +138,8 @@ module {
             let newQuestion:Question = { 
                 prevQuestion with status = #ARBITRATION; 
                 status_update_date = Utils.time_minutes_now();  
-                status_end_date = 0;
+                // TODO:
+                status_end_date:Int32 = 0;
             };
             return put_question(newQuestion);
         };
@@ -150,7 +149,8 @@ module {
             let newQuestion:Question = { 
                 prevQuestion with status = #PAYOUT(#PAY);
                 status_update_date = Utils.time_minutes_now(); 
-                status_end_date = 0;
+                // TODO:
+                status_end_date:Int32 = 0;
                 finalWinner = ?finalWinner;
             };
             return put_question(newQuestion);
@@ -184,7 +184,7 @@ module {
 
         // --------------------- QUERIES ---------------------
         
-        public func get_questions() : [Question] {
+        public func get_all_questions() : [Question] {
             Trie.toArray<Text, Question, Question>(questions, func(pair:(Text,Question)):Question { return pair.1 });
         };
 
@@ -195,13 +195,34 @@ module {
             Trie.toArray<Text, Question, Question>(filteredQuestions, func(pair:(Text, Question)):Question { pair.1 });
         };
 
-        // TODO: possibly delete (not used currently)
-        /* public func get_unclosed_question_ids () : [Text] {
-            let filteredQuestions: Trie.Trie<Text, Question> = Trie.filter<Text, Question>(questions, func(pair:(Text, Question)):Bool{
-                if(pair.1.status != #CLOSED){return true;} else {return false;}
-            });
-            Trie.toArray<Text, Question, Text>(filteredQuestions, func(pair:(Text, Question)):Text { pair.1.id });
-        }; */
+    
+        public func get_conditional_questions(filters:Types.Filter_Options,search:Text, sort_by:Types.Sort_Options,  start:Nat32, length:Nat32) : [Question] {
+            
+            let selected_questions_by_reward = Buffer.Buffer<Question>(20);   
+        
+            let questions_array = Trie.toArray<Text, Question, Question>(questions, func(pair:(Text, Question)):Question { return pair.1 });
+            let questions_iter = Iter.fromArray<Question>(questions_array);
+            label l for (question in questions_iter) {
+                var is_satisfied = false;
+                if(filters.open and question.status == #OPEN) { is_satisfied:=true; } else
+                if(filters.pickanswer and question.status == #PICKANSWER) { is_satisfied:=true; } else 
+                if(filters.disputable and question.status == #DISPUTABLE) { is_satisfied:=true; } else 
+                if(filters.arbitration and question.status == #ARBITRATION) { is_satisfied:=true; } else 
+                if(filters.payout and (question.status == #PAYOUT(#PAY) or question.status == #PAYOUT(#ONGOING))) { is_satisfied:=true; } else 
+                if(filters.closed and question.status == #CLOSED) { is_satisfied:=true; };
+                if(is_satisfied == false){continue l};
+                // TODO: check if empty string always satisfies
+                if(Text.contains(question.title, #text(search)) or Text.contains(question.content, #text(search))) {
+                    is_satisfied:=true;
+                } else {
+                    is_satisfied:=false;
+                };
+
+                if(is_satisfied){ selected_questions_by_reward.add(question) };
+            }; 
+
+            return Buffer.toArray(selected_questions_by_reward);
+        };
 
         // --------------------- UPGRADE ---------------------
         // TODO:

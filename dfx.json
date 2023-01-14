@@ -46,7 +46,7 @@
 			"main": "canisters/tests/test_runner.mo",
 			"type": "motoko",
 			"declarations": {
-				"output": "canisters/frontend/declarations/market"
+				"output": "canisters/frontend/declarations/test_runner"
 			}
 		}
 	},

@@ -7,8 +7,7 @@ import Blob         "mo:base/Blob";
 import Result       "mo:base/Result";
 import Utils        "../utils";
 import Iter         "mo:base/Iter";
-
-
+import Buffer        "mo:base/Buffer";
 
 module {
 
@@ -28,8 +27,6 @@ module {
         };
         return answers;
     };
-
-
 
     public class Answers() {
 
@@ -84,7 +81,25 @@ module {
         };  
 
         // --------------------- QUERIES ---------------------
-        public func get_answers() : [Answer] {
+        public func get_answers(answer_ids:[Text]) : [Answer] {
+            let selected_answers = Buffer.Buffer<Answer>(answer_ids.size());   
+                    
+            let answer_ids_iter = Iter.fromArray(answer_ids);
+            for (answer_id in answer_ids_iter) {
+                let answer = get_answer(answer_id);
+                switch(answer){
+                    case(null){};
+                    case(?answer){
+                        selected_answers.add(answer);
+                    };
+                };
+            };
+            return Buffer.toArray(selected_answers);
+        };
+
+
+        
+        public func get_all_answers() : [Answer] {
             Trie.toArray<Text, Answer, Answer>(answers, func(pair:(Text, Answer)):Answer { return pair.1 });
         };
 

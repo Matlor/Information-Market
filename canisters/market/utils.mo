@@ -8,9 +8,10 @@ import Accounts     "ledger/accounts";
 
 module {
 
-    // TODO: Changed from Int32 to Int check of ok
-    public func time_minutes_now() : Int {
-        Time.now() / 60000000000
+    // TODO: Should be safe but double check
+    public func time_minutes_now() : Int32 {
+        let time:Int = Time.now() / 60000000000;
+        return Int32.fromInt(time);
     };
 
     public func nat_to_int32(amount:Nat) : Int32 {

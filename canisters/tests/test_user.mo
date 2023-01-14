@@ -25,11 +25,11 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.get_fee();
     };
 
-    public shared func get_duration_pick_answer() : async Int {
+    public shared func get_duration_pick_answer() : async Int32 {
         return await market_canister.get_duration_pick_answer();
     };
 
-    public shared func get_duration_disputable() : async Int {
+    public shared func get_duration_disputable() : async Int32 {
         return await market_canister.get_duration_disputable();
     };
 

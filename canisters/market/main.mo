@@ -78,31 +78,31 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     private stable var coin_symbol_ : Text = arguments.coin_symbol;
     private stable var min_reward_ : Nat = arguments.min_reward_e8s;
     private stable var fee_ : Nat = arguments.transfer_fee_e8s;
-    private stable var duration_pick_answer_ : Int = arguments.pick_answer_duration_minutes;
-    private stable var duration_disputable_ : Int = arguments.disputable_duration_minutes;
+    private stable var duration_pick_answer_ : Int32 = arguments.pick_answer_duration_minutes;
+    private stable var duration_disputable_ : Int32 = arguments.disputable_duration_minutes;
     private stable var update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
 
-    public shared func get_coin_symbol() : async Text {
+    public query func get_coin_symbol() : async Text {
         return coin_symbol_;
     };
 
-    public shared func get_min_reward() : async Nat {
+    public query func get_min_reward() : async Nat {
         return min_reward_;
     };
 
-    public shared func get_fee() : async Nat {
+    public query func get_fee() : async Nat {
         return fee_;
     };
 
-    public shared func get_duration_pick_answer() : async Int {
+    public query func get_duration_pick_answer() : async Int32 {
         return duration_pick_answer_;
     };
 
-    public shared func get_duration_disputable() : async Int {
+    public query func get_duration_disputable() : async Int32 {
         return duration_disputable_;
     };
 
-    public shared func get_update_status_on_heartbeat() : async Bool {
+    public query func get_update_status_on_heartbeat() : async Bool {
         return update_status_on_heartbeat_;
     };
 
@@ -116,6 +116,7 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     };
 
     // ------------------------- DB -------------------------
+    // TODO: I could think if I should pass around Buffers internally and only for async actor turn it into array
     private var DB: DBModule.DB = DBModule.DB();
 
     // TODO: Add caller != admin again!
@@ -129,7 +130,7 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     
     // TODO: Add caller != admin again!
     // TODO: 
-    public shared({caller}) func get_db(): async Types.State {
+     public query({caller})  func get_db(): async Types.State {
         //if (not (await callerIsController(caller))){ return #err(#NotAllowed) };
         DB.get_state();
     };
@@ -139,16 +140,56 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
         Debug.print("on market, this is what I get called from: " # debug_show(caller));
     };
 
+    // ------------------------- Queries -------------------------
+
+    public query func get_conditional_questions(filters:Types.Filter_Options, search:Text, sort_by: Types.Sort_Options,  start:Nat32, length:Nat32 ): async [Types.Question] {
+        DB.Questions.get_conditional_questions(filters, search, sort_by,  start, length);
+    };
+
+    public query func get_conditional_questions_with_authors(filters:Types.Filter_Options, search:Text, myInteractions:?Principal, sort_by:Types.Sort_Options, start:Nat32, length:Nat32) : async {data:[{question:Types.Question; author:Types.User}]; num_questions:Nat32} {
+        DB.get_conditional_questions_with_authors(filters, search, myInteractions, sort_by, start, length);
+    };
+
+    public query func get_users(user_ids:[Principal]): async [Types.User] {
+        DB.Users.get_users(user_ids);
+    };
+
+    public query func get_question_data(question_id:Text): async ?{question:Types.Question; users:[Types.User]; answers:[Types.Answer]} {
+        DB.get_question_data(question_id);
+    };
+
     // ------------------- User Managment -------------------
+    // TODO: this is not good, who can call it, and why does it give this type? delete and replace
+    public query func get_user(user_id:Principal): async ?Types.User {
+        return DB.Users.get_user(user_id);
+    };
+   
     public shared({caller}) func create_user(name:Text): async Result.Result<Types.User, Types.StateError> {
         Debug.print(debug_show(caller));
         return DB.create_user(caller, name);
     };
 
-    // TODO: this is not good, who can call it, and why does it give this type? delete and replace
-    public func get_user(user_id:Principal): async ?Types.User {
-        return DB.Users.get_user(user_id);
+    public shared({caller}) func update_user(name:Text): async Result.Result<Types.User, Types.StateError> {
+        DB.Users.update_user(caller, name);
+        switch(DB.Users.get_user(caller)){
+            case (null){ return #err(#UserNotFound)};
+            case (?user){ return #ok(user)};
+        };
     };
+
+    // ---- Profile ----
+    public query func get_profile(user_id:Principal): async ?Types.Profile {
+        DB.Users.get_profile(user_id);
+    };
+
+    public shared({caller}) func update_profile(avatar:Blob): async Result.Result<?Blob, Types.StateError> {
+        DB.Users.update_profile(caller, avatar);
+        switch(DB.Users.get_profile(caller)){
+            case (null){ return #err(#UserNotFound)};
+            case (?user){ return #ok(user)};
+        };
+    };
+    
 
     // TODO: Update user
     // check if user exists already
@@ -221,7 +262,7 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     // ------------------------- Ask Question -------------------------
     public shared ({caller}) func ask_question (
         invoice_id: Nat,
-        duration_minutes: Nat,
+        duration_minutes: Int32,
         title: Text,
         content: Text
     ) : async Result.Result<Types.Question, Types.StateError> {
@@ -332,7 +373,7 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     // TODO: we are checking differently here if the user exists or not
     // TODO: is order of guards coherent?
     // TODO: maybe this should trap if the potentialWinner was never defined?
-    public shared ({caller}) func dispute (question_id: Text): async Result.Result<(), Types.StateError> {
+    public shared ({caller}) func dispute(question_id: Text): async Result.Result<(), Types.StateError> {
         // ----- time_trigger -----
         await update_disputable(question_id);
 
@@ -514,8 +555,8 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
 
     // ------------------------- Heartbeat -------------------------
     // Intuition: Heartbeat simply simulates a user. All the functions it calls are public.
-    system func heartbeat() : async () {
-        if (update_status_on_heartbeat_){
+    // TODO: run tests with this func existing
+    public func update_statuses () : async () {
             // this is rather inefficient as I get the questions only to pass the ids to get them again
             // in the time functions. Benefit is that I can check the status.
             let questions: [Types.Question] = DB.Questions.get_unclosed_questions();
@@ -531,11 +572,17 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
                         await update_disputable(question.id);
                     };
                     case(#PAYOUT(#PAY)){  
-                        ignore await update_payout(question.id);
+                        Debug.print(debug_show(await update_payout(question.id)));
                     };
                     case(_){ return };
                 };
             };
+      
+    };
+
+    system func heartbeat() : async () {
+        if (update_status_on_heartbeat_){
+            await update_statuses();
         };
     }; 
 };
