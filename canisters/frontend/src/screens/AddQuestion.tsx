@@ -194,7 +194,7 @@ const AddQuestion = () => {
 						dispatch({ type: "content", payload: content });
 					},
 				}}
-				titlePlaceholder={"Add your title here, PLACEHOLDER"}
+				titlePlaceholder={"Add your title here"}
 				inputs={inputs}
 				specifications={specifications}
 			/>

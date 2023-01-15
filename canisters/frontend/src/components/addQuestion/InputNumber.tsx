@@ -29,7 +29,7 @@ const Input = ({ setValue, Validity, unit }: IInput) => {
 				className="w-full outline-none placeholder:heading3 heading3 p-0 "
 				type="number"
 				onChange={handler}
-				placeholder={"666"}
+				placeholder={"0"}
 			/>
 
 			<div className="flex gap-6">
