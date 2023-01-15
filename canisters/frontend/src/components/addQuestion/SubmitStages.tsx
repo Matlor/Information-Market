@@ -1,7 +1,19 @@
 import React from "react";
 import Loading from "../core/Loading";
 
-const valuesPerSubmitStage = (stages) => {
+export type SubmitStages =
+	| ""
+	| "invoice"
+	| "transfer"
+	| "submit"
+	| "success"
+	| "error";
+
+type loader = "empty" | "loading" | "filled";
+
+const valuesPerSubmitStage = (
+	stages: SubmitStages
+): { style: [loader, loader, loader]; text: string } => {
 	switch (stages) {
 		case "":
 			return { style: ["empty", "empty", "empty"], text: "" };
@@ -56,6 +68,10 @@ export const SubmitStages = ({ stages }) => {
 
 export const SubmitStagesText = ({ stages }) => {
 	return (
-		<div className="heading3 ml-4">{valuesPerSubmitStage(stages).text}</div>
+		<div
+			className={`${stages === "error" ? "text-colorRed" : ""} heading3 ml-4`}
+		>
+			{valuesPerSubmitStage(stages).text}
+		</div>
 	);
 };

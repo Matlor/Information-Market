@@ -86,6 +86,7 @@ const AddQuestion = () => {
 	const { user } = useContext(ActorContext);
 
 	// ------------------------------ Specifications -------------------------------
+	// TODO: visually show that min reward is fetched
 	const [specifications, setSpecifications] = useState<ISpecifications>({
 		title: {
 			max: 300,
@@ -174,6 +175,8 @@ const AddQuestion = () => {
 	};
 
 	const [inputs, dispatch] = useReducer(inputsReducer, initialInput);
+	console.log(inputs, "inputs");
+
 	return (
 		<ListWrapper>
 			<Form
@@ -191,7 +194,7 @@ const AddQuestion = () => {
 						dispatch({ type: "content", payload: content });
 					},
 				}}
-				titlePlaceholder={"Add your title here"}
+				titlePlaceholder={"Add your title here, PLACEHOLDER"}
 				inputs={inputs}
 				specifications={specifications}
 			/>

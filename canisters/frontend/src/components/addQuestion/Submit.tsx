@@ -12,14 +12,6 @@ import { ActorContext } from "../api/Context";
 		setSubmitStages("");
 	}, [userPrincipal, create_invoice, transfer, ask_question]); */
 
-type SubmitStages =
-	| ""
-	| "invoice"
-	| "transfer"
-	| "submit"
-	| "success"
-	| "error";
-
 const Submit = ({ inputs }) => {
 	const [submitStages, setSubmitStages] = useState<SubmitStages>("");
 	// --------------------  Context --------------------

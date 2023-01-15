@@ -1,6 +1,6 @@
 import React from "react";
 
-const Title = ({ value, setValue, Error, placeholder, maxLength }) => {
+const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
 	const handler = (e) => {
 		setValue(e.target.value);
 	};
@@ -11,26 +11,18 @@ const Title = ({ value, setValue, Error, placeholder, maxLength }) => {
 			<input
 				className="w-full outline-none placeholder:heading3 heading3"
 				type="text"
-				value={value}
 				onChange={handler}
-				onFocus={() => {
-					if (value === placeholder) {
-						setValue("");
-					}
-				}}
-				onBlur={() => {
-					if (value === "") {
-						setValue(placeholder);
-					}
-				}}
+				placeholder={placeholder}
 			/>
 
 			<div className="w-max heading3 pl-[10px]">
-				{value.length}/{maxLength}
+				<div className="flex w-max">
+					{value ? value.length : 0} / {maxLength}
+				</div>
 			</div>
-			{Error.isError ? (
+			{!Validity.isValid && value ? (
 				<div className="w-max text-normal text-colorRed flex justify-center absolute bottom-11 ">
-					{Error.message}
+					{Validity.invalidMessage}
 				</div>
 			) : (
 				<></>

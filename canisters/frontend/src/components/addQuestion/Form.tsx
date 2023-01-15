@@ -29,32 +29,30 @@ const FormView = ({
 					<Title
 						value={inputs.title}
 						setValue={dispatch.title}
-						Error={{
-							isError: !inputs.validation.validTitle,
-							message: `Between  ${specifications.title.min} and ${specifications.title.max} letters`,
+						Validity={{
+							isValid: inputs.validation.validTitle,
+							invalidMessage: `Between  ${specifications.title.min} and ${specifications.title.max} letters`,
 						}}
-						maxLength={specifications.title.max}
 						placeholder={titlePlaceholder}
+						maxLength={specifications.title.max}
 					/>
 				</div>
 				<div className="flex justify-between w-full sm:w-1/2  sm:justify-end  gap-[17px] ">
 					<Input
-						value={inputs.duration}
 						setValue={dispatch.duration}
-						Error={{
-							isError: !inputs.validation.validDuration,
-							message: `Between ${specifications.duration.min} and ${specifications.duration.max} min`,
+						Validity={{
+							isValid: inputs.validation.validDuration,
+							invalidMessage: `Between ${specifications.duration.min} and ${specifications.duration.max} min`,
 						}}
 						unit={"Min"}
 						key="0"
 					/>
 
 					<Input
-						value={inputs.reward}
 						setValue={dispatch.reward}
-						Error={{
-							isError: !inputs.validation.validReward,
-							message: `Between ${specifications.reward.min} and ${specifications.reward.max} ICP`,
+						Validity={{
+							isValid: inputs.validation.validReward,
+							invalidMessage: `Between ${specifications.reward.min} and ${specifications.reward.max} ICP`,
 						}}
 						unit={"ICP"}
 						key="1"
