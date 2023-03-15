@@ -18,16 +18,11 @@ import Time       "mo:base/Time";
 
 import LedgerTypes "./ledgerTypes";
 
-
-
 actor class Invoice (ledgerId: Principal) = this {
 
 private let ledger_canister_: LedgerTypes.Interface = actor (Principal.toText(ledgerId));
 
 
-// ----------------- Original -----------------
-
-//actor Invoice {
 // #region Types
   type Details = T.Details;
   type Token = T.Token;

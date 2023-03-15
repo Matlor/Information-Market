@@ -96,8 +96,6 @@ module {
             };
             return Buffer.toArray(selected_answers);
         };
-
-
         
         public func get_all_answers() : [Answer] {
             Trie.toArray<Text, Answer, Answer>(answers, func(pair:(Text, Answer)):Answer { return pair.1 });

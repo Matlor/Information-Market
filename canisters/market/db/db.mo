@@ -173,6 +173,7 @@ module {
         };
 
         // TODO: improve this function massively and test it
+        // TODO: potentially replace with several specific queries
         public func get_question_data(question_id:Text): ?{question:Question; users:[User]; answers:[Answer]} {
             switch(questions.get_question(question_id)){
                 case(null){return null};

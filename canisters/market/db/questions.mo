@@ -156,7 +156,6 @@ module {
             return put_question(newQuestion);
         };
 
-
         public func pay_to_ongoing(prevQuestion:Question) : Question {
             let newQuestion: Question = { 
                 prevQuestion with status = #PAYOUT(#ONGOING); 
@@ -195,7 +194,7 @@ module {
             Trie.toArray<Text, Question, Question>(filteredQuestions, func(pair:(Text, Question)):Question { pair.1 });
         };
 
-    
+        // TODO: Test this function
         public func get_conditional_questions(filters:Types.Filter_Options,search:Text, sort_by:Types.Sort_Options,  start:Nat32, length:Nat32) : [Question] {
             
             let selected_questions_by_reward = Buffer.Buffer<Question>(20);   

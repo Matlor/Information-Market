@@ -101,8 +101,11 @@ module {
         #PICKANSWER;
         #DISPUTABLE;
         #ARBITRATION;
+
+        // final winner
         #PAYOUT: {#PAY; #ONGOING };
         #CLOSED;
+        // closed could contain more variables than open to reflect the decisions
     };
 
     public type FinalWinner = {
@@ -120,17 +123,21 @@ module {
         author_id: Principal; // relation to user
         invoice_id: Nat; // relation to invoice
         creation_date: Int32;
-        status: QuestionStatus;
-        status_update_date: Int32;
-        status_end_date: Int32;
-        open_duration: Int32;
         title: Text;
         content: Text;
         reward: Int32;
+
+        // Could be 1 type?
+        status_update_date: Int32;
+        status_end_date: Int32;
+        open_duration: Int32; // could be replaced by status_end_date
+        status: QuestionStatus;
+      
+        answers: [Text]; // relation to answer
         potentialWinner: ?Text; // relation to user -> TODO: should this be answer or to user?
+        
         finalWinner: ?FinalWinner;
         close_transaction_block_height: ?Nat64;
-        answers: [Text]; // relation to answer
     };
     
     // TODO: always refer to as answer_id instead of id across the app
@@ -206,7 +213,7 @@ module {
         update_user: (Text) -> async (Result.Result<User, StateError>);
         update_profile:(Blob) -> async (Result.Result<?Blob, StateError>);
 
-        update_statuses: () -> async ();
+        update_status: () -> async ();
         // TODO: delete this
         who_am_i: () -> async ();
         exp: () -> async (Text);
