@@ -45,6 +45,8 @@ dfx deploy --mode reinstall market --argument='(record {
     disputable_duration_minutes = 2; 
     update_status_on_heartbeat = false; 
 })'
+
+# I need to do dfx deploy in the frontend folder, why?
 dfx deploy frontend
 
 dfx deploy --mode reinstall test_runner --argument='(
@@ -86,6 +88,10 @@ dfx generate test_runner
 #dfx identity use minter
 #dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "[USER_BLOB]" } )'
 #dfx canister call ledger account_balance '( record { account = blob "[USER_BLOB]" } )'
+
+# or: dfx ledger balance 03e3d86f29a069c6f2c5c48e01bc084e4ea18ad02b0eec8fccadf4487183c223 --network ic
+
+
 
 # plug:
 # tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe

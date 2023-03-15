@@ -1,11 +1,14 @@
 {
-	"frontend": {
-		"ic": "g2qhw-oqaaa-aaaak-acz6a-cai"
-	},
-	"invoice": {
-		"ic": "qvafw-yqaaa-aaaak-ac5zq-cai"
-	},
-	"market": {
-		"ic": "hm375-3aaaa-aaaak-acz3a-cai"
-	}
+  "frontend": {
+    "ic": "g2qhw-oqaaa-aaaak-acz6a-cai"
+  },
+  "invoice": {
+    "ic": "qvafw-yqaaa-aaaak-ac5zq-cai"
+  },
+  "market": {
+    "ic": "hm375-3aaaa-aaaak-acz3a-cai"
+  },
+  "test_runner": {
+    "ic": "z34zf-uyaaa-aaaak-ad6qq-cai"
+  }
 }

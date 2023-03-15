@@ -22,6 +22,7 @@ import Blob         "mo:base/Blob";
 import Array        "mo:base/Array";
 import Buffer       "mo:base/Buffer";
 import Prelude      "mo:base/Prelude";
+import Prim "mo:prim";
 
 // admin might not be needed
 shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArguments) = this {
@@ -553,10 +554,8 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
         };
     }; 
 
-    // ------------------------- Heartbeat -------------------------
-    // Intuition: Heartbeat simply simulates a user. All the functions it calls are public.
-    // TODO: run tests with this func existing
-    public func update_statuses () : async () {
+    // TODO: run tests with Timer calling this func
+    public func update_status () : async () {
             // this is rather inefficient as I get the questions only to pass the ids to get them again
             // in the time functions. Benefit is that I can check the status.
             let questions: [Types.Question] = DB.Questions.get_unclosed_questions();
@@ -580,9 +579,24 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
       
     };
 
-    system func heartbeat() : async () {
-        if (update_status_on_heartbeat_){
-            await update_statuses();
-        };
-    }; 
+    // ------------------------- Timer -------------------------
+    // Intuition: Timer simply simulates a user. All the functions it calls are public.
+    // TODO: I need a func to set and to cancel the timer.
+    let timer_id = Prim.setTimer(5000000000:Nat64, true, func(): async() {
+        await update_status();
+    }); 
+
+    /* public func get_timer_id() : async Nat {
+        return timer_id;
+    };
+
+    public func cancelTimer() : async () {
+        Prim.cancelTimer(timer_id);
+    }; */
+
+    // setTimer : (delayNanos : Nat64, recurring : Bool, job : () -> async ()) -> (id : Nat)
+    // setTimer : (Duration, () -> async ()) -> TimerId
+    // recurringTimer : (Duration, () -> async ()) -> TimerId
+    // cancelTimer : TimerId -> ()
+
 };

@@ -1,29 +1,48 @@
 
-# NOTE: 
-# if --with-cycles is not specified, default of 4tn cycles will be used. Use less to conduct experiments.
 
 # 1. Get wallet
 export WALLET_PRINCIPAL=$(dfx identity --network ic get-wallet)
 
-# 2. Do NOT deploy the ledger canister
+dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create invoice --with-cycles 1000000000000
+dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create market --with-cycles 1000000000000
+dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create frontend --with-cycles 1000000000000
+dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create test_runner --with-cycles 1000000000000
 
-# 3. Deploy the invoice canister. "ryjl3-tyaaa-aaaaa-aaaba-cai" is the hard-coded mainnet ledger canister id.
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" invoice --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 1000000000000
-dfx generate invoice
-export INVOICE_PRINCIPAL=$(dfx canister id invoice)
-
-# 5. Deploy the market canister
+export LEDGER_PRINCIPAL=$(dfx canister --network ic  id ledger)
 export INVOICE_PRINCIPAL=$(dfx canister --network ic id invoice)
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; coin_symbol = "ICP"; min_reward_e8s = 1250000; transfer_fee_e8s = 10000; pick_answer_duration_minutes = 30; disputable_duration_minutes = 30; update_status_on_heartbeat = true; })'  --with-cycles 1000000000000
-dfx generate market
-
 export MARKET_PRINCIPAL=$(dfx canister --network ic id market)
+export TEST_RUNNER_ACCOUNT=$(dfx ledger account-id --of-principal $(dfx canister --network ic id test_runner))
 
-# 7. Deploy the frontend canister
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --with-cycles 1000000000000
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" invoice --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 500000000000
+
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {
+    invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; 
+    coin_symbol = "ICP"; 
+    min_reward_e8s = 1250000; 
+    transfer_fee_e8s = 10000; 
+    pick_answer_duration_minutes = 2; 
+    disputable_duration_minutes = 2; 
+    update_status_on_heartbeat = false; 
+})' --with-cycles 500000000000
+
+
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" test_runner --argument='(
+    principal "'${MARKET_PRINCIPAL}'", 
+    principal "'${LEDGER_PRINCIPAL}'",
+    principal "'${INVOICE_PRINCIPAL}'"
+)' --with-cycles 500000000000
+
+dfx generate ledger
+dfx generate invoice
+dfx generate market
+dfx generate test_runner 
+
+dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 500000000000
 
 
 # ------------------------ PREPARATION ------------------------
+# NOTE: 
+# if --with-cycles is not specified, default of 4tn cycles will be used. Use less to conduct experiments.
 
 # CREATE A WALLET
 
@@ -58,7 +77,6 @@ dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --with-cycles 1000
 
 # 1. Get your wallet principal:
 #    export WALLET_PRINCIPAL=$(dfx identity --network ic get-wallet)  
-
 
 # 2. Exchange ICP to cycles:
 #    dfx ledger --network ic top-up "$WALLET_PRINCIPAL" --amount 0.5
