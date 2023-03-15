@@ -7,6 +7,7 @@ import Date from "../core/Date";
 import {
 	moStatusToString,
 	capitalStatusToReadable,
+	e8sToIcp,
 } from "../core/utils/conversions";
 //import QuestionMetaData from "../question/QuestionMetaData";
 import {
@@ -20,7 +21,7 @@ interface IQuestionPreview {
 }
 
 const QuestionPreview = ({ question, author }: IQuestionPreview) => {
-	const reward = Number(question.reward);
+	const reward = e8sToIcp(question.reward);
 	const status = question.status;
 	const id = question.id;
 	const title = question.title;

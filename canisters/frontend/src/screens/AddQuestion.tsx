@@ -104,6 +104,7 @@ const AddQuestion = () => {
 
 	useEffect(() => {
 		(async () => {
+			// TODO:
 			const fetchedMin: number = Number(
 				e8sToIcp(await user.market.get_min_reward())
 			);
@@ -201,7 +202,7 @@ const AddQuestion = () => {
 			{user.principal && inputs ? (
 				<div className="h-[48px] flex ">
 					{isValid(inputs.validation) ? (
-						<Submit inputs={inputs} />
+						<Submit inputs={inputs} loggedInUser={user} />
 					) : (
 						<div className="heading3  self-center ml-6">
 							Fill out the form correctly
@@ -209,7 +210,7 @@ const AddQuestion = () => {
 					)}
 				</div>
 			) : (
-				<div className="heading3"> Login to Submit</div>
+				<div className="heading3 ml-6"> Login to Submit</div>
 			)}
 		</ListWrapper>
 	);

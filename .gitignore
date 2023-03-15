@@ -9,3 +9,10 @@ declarations/
 graphql.old.did
 
 .vessel
+
+
+canisters/frontend/src/components/question_new/*
+
+helpers/
+helpers/get_blob.sh
+

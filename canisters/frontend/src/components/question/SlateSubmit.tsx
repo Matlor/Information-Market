@@ -42,6 +42,7 @@ const SlateSubmit = ({ currentCase, Input }: ISlateSubmit) => {
 	);
 
 	// TODO: Completely restructure the user Role to be type sensitive
+	// TODO: answer author is not relevant for this stage here
 	switch (currentCase) {
 		case "OPEN.isAnswerAuthor":
 			return showEditor;

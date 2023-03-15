@@ -3,7 +3,7 @@ import {
 	Question as IQuestion,
 } from "../../../../declarations/market/market.did.d";
 // TODO: should rather import from type file
-import { FQuestion } from "../../../screens/Question";
+import { FQuestion } from "../../../screens/Question_old";
 import { fromNullable } from "@dfinity/utils";
 import { QuestionStatus } from "../../../../declarations/market/market.did.d";
 
@@ -39,7 +39,7 @@ export const icpToE3s = (icp: number): number => {
 	return icp * 1000;
 };
 
-export const e8sToIcp = (e8s: bigint): number => {
+export const e8sToIcp = (e8s: number): number => {
 	return Number(e8s) / 10 ** 8;
 };
 

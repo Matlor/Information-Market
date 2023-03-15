@@ -13,6 +13,7 @@ import { Principal } from "@dfinity/principal";
 import { establishConnection } from "../components/api/plug";
 import { IDefaultActor, defaultActor } from "../components/api/plug";
 import { ActorContext } from "../components/api/Context";
+import { fromNullable } from "@dfinity/utils";
 
 export interface ILoggedOutUser {
 	principal: undefined;
@@ -26,6 +27,54 @@ export interface ILoggedInUser {
 	ledger: ILedgerActor;
 }
 
+// -----------------  Question Sample Data (delete later) -----------------------
+
+// TODO: can the provisionary winner trigger a dispute on the backend?
+const question = {
+	id: 1,
+	status: "CLOSED",
+	reward: 100,
+	title: "This is the title of the question?",
+	content:
+		"This is the content of the question. It should span across multiple lines to be a good example.",
+	invoice_id: 1,
+	answers: [1, 2, 3],
+	status_end_date: 1000000000,
+	status_update_date: 1000000000,
+	finalWinner: 10,
+	// careful here is principal
+	author_id: 1,
+	close_transaction_block_height: null,
+	open_duration: 1000000000,
+	// id not author
+	potentialWinner: 10,
+	creation_date: 1000000000,
+};
+
+const answers = [
+	{
+		id: 10,
+		content: "This is the first answer.",
+		isWinner: true,
+		author_id: 2,
+	},
+	{
+		id: 20,
+		content: "This is the second answer.",
+		isWinner: false,
+		author_id: 3,
+	},
+	{
+		id: 30,
+		content: "This is the third answer.",
+		isWinner: false,
+		author_id: 4,
+	},
+];
+
+const user = 2;
+
+// ---------------------------------------------------
 /* useEffect(() => {
 		// async runing directly
 		(async () => {
@@ -47,34 +96,61 @@ function App() {
 		ledger: undefined,
 	});
 
-	const logout = () => {
-		setUser({
-			principal: undefined,
-			market: defaultActor,
-			ledger: undefined,
-		});
+	const checkIfUserExists = async (principal_id: Principal, get_user) => {
+		return fromNullable(await get_user(principal_id));
+	};
+
+	const createUserIfNotExists = async (
+		principal_id: Principal,
+		get_user,
+		create_user
+	) => {
+		let user = await checkIfUserExists(principal_id, get_user);
+		if (!user) {
+			await create_user("newUser");
+		}
 	};
 
 	const login = async () => {
 		let plugActor = await establishConnection(login, logout);
+		console.log(window.ic.plug.principalId, "window.ic.plug.principalId");
+		let res = await createUserIfNotExists(
+			Principal.fromText(window.ic.plug.principalId),
+			plugActor.market.get_user,
+			plugActor.market.create_user
+		);
+		console.log(res);
+
 		setUser({
 			principal: window.ic.plug.principalId,
 			// TODO: add ledger
 			market: plugActor?.market,
 			ledger: plugActor?.ledger,
 		});
+	};
+
+	const logout = () => {
+		setUser({
+			principal: undefined,
+			market: defaultActor,
+			ledger: undefined,
+		});
 		navigate("/");
 	};
 
-	// TODO: User Management - see below JSX
-
+	// in browser I need to do this: /#/question/1
 	return (
 		<ActorContext.Provider value={{ user, login, logout }}>
 			<PageLayout>
 				<Routes>
 					<Route path="/" element={<BrowseQuestion />} />
 					<Route path="/add-question" element={<AddQuestion />} />
-					<Route path="/question/:id" element={<Question />} />
+					<Route
+						path="/question/:id"
+						element={
+							<Question question={question} answers={answers} user={user} />
+						}
+					/>
 					{/* <Route
 						path="/profile"
 						element={<Profile updateUserInformation={updateUserInformation} />}

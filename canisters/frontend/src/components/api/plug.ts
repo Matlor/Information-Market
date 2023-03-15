@@ -47,8 +47,8 @@ const host = window.location.origin;
 export const establishConnection = async (logout, login) => {
 	const onConnectionUpdate = () => {
 		console.log(window.ic.plug.sessionManager.sessionData);
-		logout();
-		login();
+		/* logout();
+		login(); */
 	};
 
 	try {

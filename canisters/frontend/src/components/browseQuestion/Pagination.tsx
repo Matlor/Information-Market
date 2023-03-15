@@ -53,6 +53,8 @@ const Pagination = ({
 		}
 	};
 
+	if (pagination.questionsPerPage >= totalQuestions) return <></>;
+
 	return (
 		<div className="flex mt-[17px] gap-[33px] justify-between items-center px-[30px] py-[20px] bg-colorBackgroundComponents w-min shadow-md rounded-lg">
 			<button onClick={decreaseIndex}>

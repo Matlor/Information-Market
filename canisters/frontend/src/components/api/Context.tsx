@@ -5,19 +5,19 @@ import { Principal } from "@dfinity/principal";
 
 import { IDefaultActor, defaultActor } from "./plug";
 
-interface ILoggedOutUser {
+export interface ILoggedOutUser {
 	principal: undefined;
 	market: IDefaultActor;
 	ledger: undefined;
 }
 
-interface ILoggedInUser {
+export interface ILoggedInUser {
 	principal: Principal;
 	market: IMarketActor;
 	ledger: ILedgerActor;
 }
 
-interface IActorContext {
+export interface IActorContext {
 	user: ILoggedInUser | ILoggedOutUser;
 	login: React.Dispatch<React.SetStateAction<ILoggedInUser | ILoggedOutUser>>;
 	logout: React.Dispatch<React.SetStateAction<ILoggedInUser | ILoggedOutUser>>;

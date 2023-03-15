@@ -1,10 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import { useState, useEffect } from "react";
 import Button from "../core/Button";
 import { Principal } from "@dfinity/principal";
 import { SubmitStages, SubmitStagesText } from "./SubmitStages";
 import { Mail } from "../../components/addQuestion/mail";
-import { ActorContext } from "../api/Context";
+import { icpToE8s } from "../core/utils/conversions";
+import { IInputs } from "../../screens/AddQuestion";
+import { ILoggedInUser } from "../api/Context";
+// TODO: Entire component should return the specific error.
+// Only transfer error should happen I think.
 
 // TODO: should this not just reset by itself?
 // TODO: replace with (possibly) useRender. Only that state of submitStages resets on parent rerender
@@ -12,26 +16,37 @@ import { ActorContext } from "../api/Context";
 		setSubmitStages("");
 	}, [userPrincipal, create_invoice, transfer, ask_question]); */
 
-const Submit = ({ inputs }) => {
+// TODO: ensures that only logged in users can call this func
+// could I instead make this a func on the logged in user?
+// but that would mess with the setStages but think about it
+interface ISubmit {
+	inputs: IInputs;
+	loggedInUser: ILoggedInUser;
+}
+const Submit = ({ inputs, loggedInUser }: ISubmit) => {
 	const [submitStages, setSubmitStages] = useState<SubmitStages>("");
-	// --------------------  Context --------------------
-	const { user } = useContext(ActorContext);
+
+	// TODO: I have to check for it because I import the actor from useContext.
 
 	const submit = async () => {
 		try {
 			// ------- create the invoice -------
 			setSubmitStages("invoice");
 
-			const invoice_res = await user.market.create_invoice(inputs.reward);
+			const invoice_res = await loggedInUser.market.create_invoice(
+				icpToE8s(inputs.reward)
+			);
+			console.log(invoice_res, "invoice");
 			if ("err" in invoice_res) {
 				setSubmitStages("error");
 				return;
 			}
-			console.log(invoice_res, "invoice_res");
 
 			// -------  transfer -------
 			setSubmitStages("transfer");
-			const transfer_res = await user.ledger.transfer({
+			// TODO: assert that it's type text on the invoice res
+			// TODO: check what is wrong with "to"
+			const transfer_res = await loggedInUser.ledger.transfer({
 				to: Array.from(
 					Principal.fromHex(
 						invoice_res.ok.invoice.destination.text
@@ -43,15 +58,16 @@ const Submit = ({ inputs }) => {
 				created_at_time: [],
 				amount: { e8s: BigInt(invoice_res.ok.invoice.amount) },
 			});
-			if (transfer_res?.Err !== undefined) {
+			console.log(transfer_res, "transfer");
+
+			if ("Err" in transfer_res) {
 				setSubmitStages("error");
 				return;
 			}
-			console.log(transfer_res, "transfer response");
 
 			// -------  create the question ------
 			setSubmitStages("submit");
-			const question_res = await user.market.ask_question(
+			const question_res = await loggedInUser.market.ask_question(
 				invoice_res.ok.invoice.id,
 				inputs.duration,
 				inputs.title,

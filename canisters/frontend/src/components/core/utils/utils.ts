@@ -3,7 +3,7 @@ import {
 	Answer as IAnswer,
 	User as IUser,
 } from "../../../../declarations/market/market.did.d";
-import { FQuestion } from "../../../screens/Question";
+import { FQuestion } from "../../../screens/Question_old";
 
 export const user_from_answer_id = (
 	answer_id: string | undefined,
@@ -82,7 +82,7 @@ export const calcUserRole = (
 	} else if (isAnswerAuthor()) {
 		return "isAnswerAuthor";
 	} else {
-		return "none";
+		return "isNone";
 	}
 };
 

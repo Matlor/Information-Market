@@ -11,8 +11,9 @@ import { ActorContext } from "../api/Context";
 interface IQuestionMenuProps {
 	currentCase: string;
 	question_id: string;
-	currentSelection: string | undefined;
-	selectedUser: IUser | undefined;
+	currentWinner: string | undefined;
+	currentWinningUser: IUser | undefined;
+	potentialWinner: string | undefined;
 	potentiallyWinningUser: string | undefined;
 }
 
@@ -21,22 +22,12 @@ const QuestionMenu = ({
 	question_id,
 	currentWinner,
 	currentWinningUser,
-	potentialWinner,
 	potentiallyWinningUser,
 }: IQuestionMenuProps) => {
 	// --------------------  Context --------------------
 	const { user } = useContext(ActorContext);
 
-	interface IMenu {
-		profile: IUser | undefined;
-		isSelected: boolean;
-		text: string;
-		// TODO: fix this
-		propFunction: any;
-	}
-
-	// TODO: Make this non generic! Split it in two completely separate components
-	const Menu = ({ profile, text, propFunction }: IMenu) => {
+	const Menu = ({ children, profile }: { children: any; profile: IUser }) => {
 		return (
 			<div className="w-full flex gap-[17px] justify-between items-center">
 				<div>
@@ -49,34 +40,49 @@ const QuestionMenu = ({
 						)}
 					</div>
 				</div>
-				<div>
-					<Button propFunction={propFunction} text={text} font="heading3" />
-				</div>
+				<div>{children}</div>
 			</div>
 		);
 	};
 
 	switch (currentCase) {
+		// TODO: user roles should be type sensitive
 		case "PICKANSWER.isQuestionAuthor":
 			return (
-				<Menu
-					profile={selectedUser}
-					text="Confirm"
-					propFunction={
-						currentSelection
-							? () => user.market.pick_answer(question_id, currentSelection)
-							: async () => {}
-					}
-				/>
+				<Menu profile={currentWinningUser}>
+					<Button
+						CustomButton={
+							<ButtonArrow
+								text="Confirm"
+								isSelected={currentWinner ? true : false}
+							/>
+						}
+						propFunction={
+							currentWinner
+								? () => user.market.pick_answer(question_id, currentWinner)
+								: async () => {}
+						}
+						font="heading3"
+					/>
+				</Menu>
 			);
 
 		case "DISPUTABLE.isAnswerAuthor":
+			// TODO: user roles should be type sensitive
+			// TODO: status should be type sensitive
 			return (
-				<Menu
-					profile={potentiallyWinningUser}
-					text="Dispute"
-					propFunction={() => user.market.dispute(question_id)}
-				/>
+				<Menu profile={potentiallyWinningUser}>
+					<Button
+						CustomButton={
+							<ButtonArrow
+								text="Dispute"
+								isSelected={currentWinner ? true : false}
+							/>
+						}
+						propFunction={() => user.market.dispute(question_id)}
+						font="heading3"
+					/>
+				</Menu>
 			);
 		default:
 			return <></>;

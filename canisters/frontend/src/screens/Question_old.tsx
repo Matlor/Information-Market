@@ -24,14 +24,21 @@ import {
 	User as IUser,
 	Market as IMarketActor,
 	FinalWinner as IFinalWinner,
-} from "../../declarations/market/market.did.d";
+} from "../../declarations/market/market.did";
 import { Principal } from "@dfinity/principal";
-import PostDate from "../../src/components/core/Date";
-import Profile from "../../src/components/core/Profile";
-import Content from "../../src/components/Question/Content";
-import Title from "../../src/components/Question/Title";
-//import QuestionMetaData from "../components/question/QuestionMetaData";
+import PostDate from "../components/core/Date";
+import Profile from "../components/core/Profile";
+import Content from "../components/Question/Content";
+import Title from "../components/Question/Title";
 import { ActorContext } from "../components/api/Context";
+import {
+	Status,
+	Reward,
+	TimeLeft,
+	HowMuchTime,
+	Divider,
+	ShowPayout,
+} from "../components/question/QuestionMetaData";
 
 // ---------- Types ----------
 type Modify<T, K> = Pick<T, Exclude<keyof T, keyof K>> & K;
@@ -83,6 +90,17 @@ const Question = () => {
 
 	useEffect(() => {
 		let isCancelled = false;
+		(async () => {
+			const data = await fetch_data();
+			if (!isCancelled && data) {
+				setState({
+					question: toFrontendQuestion(data.question),
+					answers: data.answers,
+					users: data.users,
+				});
+			}
+		})();
+
 		var interval = setInterval(async () => {
 			const data = await fetch_data();
 			setLoading(false);
@@ -139,6 +157,27 @@ const Question = () => {
 								isTimeShown={true}
 								isPayoutShown={true}
 							/> */}
+
+							<div className={`flex w-max`}>
+								<Status status={state.question.status} />
+								<Divider />
+								<Reward reward={state.question.reward} />
+								<Divider />
+								{moStatusToString(state.question.status) === "CLOSED" ? (
+									<ShowPayout finalWinner={state.question.finalWinner} />
+								) : (
+									<TimeLeft status={state.question.status}>
+										{moStatusToString(state.question.status) ===
+										"ARBITRATION" ? (
+											<div>{"1 Day"}</div>
+										) : (
+											<HowMuchTime
+												endDateSec={state.question.status_end_date * 60}
+											/>
+										)}
+									</TimeLeft>
+								)}
+							</div>
 						</div>
 						<div className="my-[25px]">
 							<Content content={state.question.content} />

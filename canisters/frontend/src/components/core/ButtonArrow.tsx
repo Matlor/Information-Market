@@ -1,7 +1,7 @@
 import React from "react";
 import { IconButtonArrowRight } from "./Icons";
 
-const ButtonArrow = ({ isSelected = false, text = "something" }) => {
+const ButtonArrow = ({ isSelected = false, text }) => {
 	return (
 		<div
 			data-cy="ArrowButton"

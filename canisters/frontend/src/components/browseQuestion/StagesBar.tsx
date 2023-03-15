@@ -1,6 +1,6 @@
 import React from "react";
 import { moStatusToString } from "../core/utils/conversions";
-import { FQuestion } from "../../screens/Question";
+import { FQuestion } from "../../screens/Question_old";
 
 interface IStagesBar {
 	status: FQuestion["status"];

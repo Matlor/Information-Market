@@ -88,7 +88,7 @@ export const IconButtonArrowRight = (): ReactElement => {
 			<path
 				d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
 				stroke="#969696"
-				strokeWidth="5"
+				strokeWidth="3.5"
 				strokeLinecap="round"
 			/>
 		</svg>

@@ -6,7 +6,7 @@ export const calcUserRole = (
 	question: FQuestion | undefined,
 	answers: IAnswer[],
 	principal: Principal | undefined
-) => {
+): "isQuestionAuthor" | "isAnswerAuthor" | "isNone" | "isNotLoggedIn" => {
 	const isAnswerAuthor = () => {
 		for (let i = 0; i < answers.length; i++) {
 			if (answers[i].author_id === principal) {
@@ -25,6 +25,6 @@ export const calcUserRole = (
 	} else if (isAnswerAuthor()) {
 		return "isAnswerAuthor";
 	} else {
-		return "none";
+		return "isNone";
 	}
 };
