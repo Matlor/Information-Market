@@ -21,13 +21,13 @@ const Sort = ({ setSortOrder, order }: IProps) => {
 	});
 
 	return (
-		<div className="max-w-[220px] w-full relative shadow-md rounded-md bg-colorBackgroundComponents heading3">
+		<div className="w-full relative text-normal">
 			<button
 				onClick={(e) => {
 					display == "hidden" ? setDisplay("visible") : setDisplay("hidden");
 					e.stopPropagation();
 				}}
-				className="w-full flex justify-between items-center py-[8px] px-[15px]"
+				className="w-full bg-colorRed flex justify-between items-center py-[8px] px-[15px]"
 			>
 				<div>Sort</div>
 				<IconArrowUpDown
@@ -37,10 +37,10 @@ const Sort = ({ setSortOrder, order }: IProps) => {
 			</button>
 
 			<div
-				className={`${display} absolute w-full mt-[5px]  shadow-lg flex flex-col justify-center rounded-md bg-colorBackgroundComponents text-12px`}
+				className={`${display} absolute text-small w-full mt-[5px] shadow-lg flex flex-col rounded-md `}
 			>
 				<div
-					className={`${display} w-full  py-[10px]  flex flex-col justify-center gap-[13px] rounded-md bg-colorBackgroundComponents text-12px`}
+					className={`${display} w-full  py-[10px]  flex flex-col justify-center gap-[13px] rounded-md text-12px`}
 					onClick={(e) => {
 						e.stopPropagation();
 						setSortOrder("REWARD");

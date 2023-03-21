@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Button from "../core/Button";
 import { Principal } from "@dfinity/principal";
 import { SubmitStages, SubmitStagesText } from "./SubmitStages";
-import Mail from "../core/Mail";
+import { Mail } from "../../components/addQuestion/mail";
 import { icpToE8s } from "../core/utils/conversions";
 import { IInputs } from "../../screens/AddQuestion";
 import { ILoggedInUser } from "../api/Context";

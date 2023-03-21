@@ -6,7 +6,7 @@ interface IRoundedCheckox {
 
 const RoundedCheckox = ({ isChecked }: IRoundedCheckox) => {
 	return (
-		<div className="border-2  border-colorIcon rounded-full w-[16px] h-[16px] relative">
+		<div className="border-colorIcon rounded-full w-[16px] h-[16px] relative">
 			<div
 				className={`w-[8px] h-[8px] ${
 					isChecked ? "bg-colorIcon" : ""

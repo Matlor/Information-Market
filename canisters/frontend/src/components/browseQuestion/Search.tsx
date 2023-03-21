@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 
-import { useState } from "react";
 import Loading from "../core/Loading";
-import { SearchIcon } from "../core/Icons";
+import { SearchIcon, ClearIcon } from "../core/Icons";
 
 interface ISearch {
 	searchLoading: boolean;
@@ -11,21 +10,38 @@ interface ISearch {
 
 const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 	const [input, setInput] = useState<string>("");
+	const inputRef = useRef(null);
+
 	const handler = (e) => {
 		setInput(e.target.value);
 		setSearchedText(e.target.value);
 	};
 
+	const handleIconClick = () => {
+		inputRef.current.focus();
+	};
+
+	const handleClearClick = () => {
+		setInput("");
+		setSearchedText("");
+	};
+
 	return (
-		<div className="relative max-w-[600px] w-full flex gap-[25px] py-[8px] px-[15px] justify-center items-center shadow-md rounded-md bg-colorBackgroundComponents">
-			<SearchIcon />
+		<div className="relative max-w-[270px] w-full flex gap-[25px] justify-center items-center">
+			<div className="items-center cursor-pointer" onClick={handleIconClick}>
+				<SearchIcon />
+			</div>
 			<input
-				className="w-[100%] outline-none placeholder:heading3 heading3 p-0"
+				ref={inputRef}
+				className="w-[100%] outline-none placeholder:text-normal text-normal"
 				type="text"
-				placeholder="Search..."
+				placeholder=""
 				value={input}
 				onChange={handler}
 			/>
+
+			<div onClick={handleClearClick}>{input && <ClearIcon />}</div>
+
 			{searchLoading ? (
 				<div className="absolute left-[100%] ml-4">
 					<Loading />

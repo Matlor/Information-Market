@@ -8,20 +8,79 @@ interface IButton {
 	propFunction: any;
 	text?: string;
 	font?: string;
-	CustomButton?: any;
-	CustomLoader?: any;
+	customButton?: any;
+	customLoader?: any;
 }
 
 const Button = ({
 	propFunction,
 	text,
-	font = "heading3",
-	CustomButton,
-	CustomLoader = undefined,
+	font = "text-normal",
+	customButton,
+	customLoader = undefined,
 }: IButton) => {
 	const [isClicked, setIsClicked] = useState(false);
-	console.log(CustomButton);
-	/* const ClickWrapper = ({ children }) => {
+
+	const clickHandler = (event: any) => {
+		event.preventDefault();
+		setIsClicked(true);
+		propFunction().then(() => {
+			setIsClicked(false);
+		});
+	};
+
+	const DefaultButton = ({ text }) => {
+		return (
+			<div
+				className={`w-max h-[45px] ${font} flex justify-center items-center px-[25px] py-[10px] bg-colorBackgroundComponents  rounded-lg`}
+			>
+				{text}
+			</div>
+		);
+	};
+
+	const RenderButton = ({ children }) => {
+		return (
+			<div
+				onClick={clickHandler}
+				className={isClicked ? "invisible" : "visible"}
+			>
+				{children}
+			</div>
+		);
+	};
+
+	const RenderLoader = ({ children }) => {
+		return (
+			<div
+				className="absolute"
+				style={{ display: isClicked ? "block" : "none" }}
+			>
+				{children}
+			</div>
+		);
+	};
+
+	return (
+		<div className="flex justify-center items-center relative">
+			<RenderButton>
+				{customButton ? customButton : <DefaultButton text={text} />}
+			</RenderButton>
+			<RenderLoader>
+				{customLoader ? (
+					<customLoader />
+				) : (
+					<Loading color="colorBackgroundComponents" />
+				)}
+			</RenderLoader>
+		</div>
+	);
+};
+
+export default Button;
+
+// maybe this part was old already
+/* const ClickWrapper = ({ children }) => {
 		const clickHandler = (event: any) => {
 			event.preventDefault();
 			setIsClicked(true);
@@ -32,27 +91,19 @@ const Button = ({
 		return <button onClick={clickHandler}>{children}</button>;
 	}; */
 
-	/* if (CustomButton) {
+/* if (customButton) {
 			return (
 				<ClickWrapper>
-					<CustomButton />
+					<customButton />
 				</ClickWrapper>
 			);
 		} else { */
 
-	const clickHandler = (event: any) => {
-		event.preventDefault();
-		setIsClicked(true);
-		propFunction().then(() => {
-			setIsClicked(false);
-		});
-	};
-
-	const ShowButton = () => {
+/* const ShowButton = () => {
 		return (
 			<button onClick={clickHandler}>
-				{CustomButton ? (
-					CustomButton
+				{customButton ? (
+					customButton
 				) : (
 					<div
 						className={`w-max h-[45px] ${font} flex justify-center items-center px-[25px] py-[10px] bg-colorBackgroundComponents shadow-md rounded-lg`}
@@ -65,8 +116,8 @@ const Button = ({
 	};
 
 	const ShowLoadingSpinner = () => {
-		if (CustomLoader) {
-			return <CustomLoader />;
+		if (customLoader) {
+			return <customLoader />;
 		} else {
 			return <Loading color="colorBackgroundComponents" />;
 		}
@@ -76,7 +127,4 @@ const Button = ({
 		<div>{ShowLoadingSpinner()}</div>
 	) : (
 		<div>{ShowButton()}</div>
-	);
-};
-
-export default Button;
+	); */

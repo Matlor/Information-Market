@@ -1,8 +1,219 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import escapeHtml from "escape-html";
+
 import { jsx } from "slate-hyperscript";
-import { Text, Element as SlateElement } from "slate";
+import { Text, Element as SlateElement, Editor, Transforms } from "slate";
+import { useSlate } from "slate-react";
+// ------------------------------------
+
+// ---------------------------------------------- Marks  ----------------------------------------------
+
+// ---------------------------------------------- Element  ----------------------------------------------
+
+// KEY SHORTCUTS
+export const HOTKEYS = {
+	"mod+b": "bold",
+	"mod+i": "italic",
+	"mod+u": "underline",
+	"mod+Enter": "softbreak",
+};
+export const LIST_TYPES = ["numbered-list", "bulleted-list"];
+
+export const resetBlocks = (excluding, editor) => {
+	const blocks = ["block-quote", "numbered-list", "bulleted-list"];
+	if (excluding) {
+		for (let i = 0; i < excluding.length; i++) {
+			for (let j = 0; j < blocks.length; j++) {
+				if (excluding[i] === blocks[j]) {
+					blocks.splice(j, 1);
+				}
+			}
+		}
+	}
+
+	for (let i = 0; i < blocks.length; i++) {
+		var format = blocks[i];
+		if (isBlockActive(editor, format)) {
+			toggleBlock(editor, format);
+		}
+	}
+};
+
+export const toggleBlock = (editor, format) => {
+	const isActive = isBlockActive(editor, format);
+	// if block is not active, toggle all others.
+	// only one block can be active.
+	if (!isActive) {
+		resetBlocks([format], editor);
+	}
+
+	const isList = LIST_TYPES.includes(format);
+
+	Transforms.unwrapNodes(editor, {
+		match: (n) =>
+			!Editor.isEditor(n) &&
+			SlateElement.isElement(n) &&
+			LIST_TYPES.includes(n.type),
+		split: true,
+	});
+
+	let newProperties;
+
+	newProperties = {
+		type: isActive ? "paragraph" : isList ? "list-item" : format,
+	};
+
+	Transforms.setNodes(editor, newProperties);
+
+	if (!isActive && isList) {
+		const block = { type: format, children: [] };
+		Transforms.wrapNodes(editor, block);
+	}
+};
+
+export const isBlockActive = (editor, format, blockType = "type") => {
+	const { selection } = editor;
+	if (!selection) return false;
+
+	const [match] = Array.from(
+		Editor.nodes(editor, {
+			at: Editor.unhangRange(editor, selection),
+			match: (n) =>
+				!Editor.isEditor(n) &&
+				SlateElement.isElement(n) &&
+				n[blockType] === format,
+		})
+	);
+
+	return !!match;
+};
+
+export const BlockButton = ({ format, icon, editor }) => {
+	return (
+		<Button
+			active={isBlockActive(editor, format)}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				toggleBlock(editor, format);
+			}}
+		>
+			<Icon>{icon}</Icon>
+		</Button>
+	);
+};
+
+export const isSomeMarkActive = () => {
+	const marks = ["bold", "italic", "underline"];
+
+	var someIsActive = false;
+	for (let i = 0; i < marks.length; i++) {
+		var format = marks[i];
+		if (isMarkActive(editor, format)) {
+			someIsActive = true;
+		}
+	}
+
+	return someIsActive;
+};
+
+export const resetMarks = (editor) => {
+	const marks = ["bold", "italic", "underline"];
+
+	for (let i = 0; i < marks.length; i++) {
+		var format = marks[i];
+
+		if (isMarkActive(editor, format)) {
+			toggleMark(editor, format);
+		}
+	}
+};
+
+export const isMarkActive = (editor, format) => {
+	const marks = Editor.marks(editor);
+	return marks ? marks[format] === true : false;
+};
+
+export const toggleMark = (editor, format) => {
+	const isActive = isMarkActive(editor, format);
+
+	if (isActive) {
+		Editor.removeMark(editor, format);
+	} else {
+		Editor.addMark(editor, format, true);
+	}
+};
+
+export const MarkButton = ({ editor, format, icon }) => {
+	//const editor = useSlate();
+	return (
+		<Button
+			active={isMarkActive(editor, format)}
+			onMouseDown={(event) => {
+				event.preventDefault();
+				toggleMark(editor, format);
+			}}
+		>
+			<Icon>{icon}</Icon>
+		</Button>
+	);
+};
+
+export const Element = ({ attributes, children, element }) => {
+	const style = { textAlign: element.align };
+	switch (element.type) {
+		case "block-quote":
+			return (
+				<blockquote style={style} {...attributes}>
+					{children}
+				</blockquote>
+			);
+		case "bulleted-list":
+			return (
+				<ul style={style} {...attributes}>
+					{children}
+				</ul>
+			);
+
+		case "list-item":
+			return (
+				<li style={style} {...attributes}>
+					{children}
+				</li>
+			);
+		case "numbered-list":
+			return (
+				<ol style={style} {...attributes}>
+					{children}
+				</ol>
+			);
+
+		default:
+			return (
+				<p style={style} {...attributes}>
+					{children}
+				</p>
+			);
+	}
+};
+
+export const Leaf = ({ attributes, children, leaf }) => {
+	if (leaf.bold) {
+		children = <strong>{children}</strong>;
+	}
+
+	if (leaf.italic) {
+		children = <em>{children}</em>;
+	}
+
+	if (leaf.underline) {
+		children = <u>{children}</u>;
+	}
+
+	return <span {...attributes}>{children}</span>;
+};
+
+// ------------------------------------
 
 export const Button = React.forwardRef(
 	({ className, active, reversed, ...props }, ref) => (
@@ -163,3 +374,17 @@ export const deserialize = (el, markAttributes = {}) => {
 			return children;
 	}
 };
+
+/* const isSomeBlockActive = () => {
+		const blocks = ["block-quote", "numbered-list", "bulleted-list"];
+
+		var someIsActive = false;
+		for (let i = 0; i < blocks.length; i++) {
+			var format = blocks[i];
+			if (isBlockActive(editor, format)) {
+				someIsActive = true;
+			}
+		}
+
+		return someIsActive;
+	}; */

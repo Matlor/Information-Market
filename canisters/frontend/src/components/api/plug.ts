@@ -47,8 +47,8 @@ const host = window.location.origin;
 export const establishConnection = async (logout, login) => {
 	const onConnectionUpdate = () => {
 		console.log(window.ic.plug.sessionManager.sessionData);
-		/* logout();
-		login(); */
+		logout();
+		login();
 	};
 
 	try {
@@ -89,7 +89,8 @@ export const checkConnection = async () => {
 export const verifyConnection = async () => {
 	try {
 		const connected = await checkConnection();
-		if (!connected) await window.ic.plug.requestConnect({ whitelist, host });
+		if (!connected)
+			await window.ic.plug.requestConnect({ whitelist, host, requestConnect });
 		if (connected && !window.ic.plug.agent) {
 			await window.ic.plug.createAgent({ whitelist, host });
 		}
@@ -100,6 +101,7 @@ export const verifyConnection = async () => {
 	}
 };
 
+// MAYBE NOT USED
 export const batchTransaction = async (array: Array<any>) => {
 	var result = await window.ic.plug.batchTransactions(array);
 	return result;

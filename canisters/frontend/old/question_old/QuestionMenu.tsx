@@ -31,12 +31,12 @@ const QuestionMenu = ({
 		return (
 			<div className="w-full flex gap-[17px] justify-between items-center">
 				<div>
-					<div className=" heading3 flex justify-between w-[500px] h-[44px]  px-field bg-colorBackgroundComponents rounded-md items-center shadow-md">
-						<div className="heading3">Selected User</div>
+					<div className=" text-normal flex justify-between w-[500px] h-[44px]  px-field bg-colorBackgroundComponents rounded-md items-center shadow-md">
+						<div className="text-normal">Selected User</div>
 						{profile ? (
 							<Profile name={profile.name} id={profile.id} />
 						) : (
-							<div className="italic heading3">None Selected</div>
+							<div className="italic text-normal">None Selected</div>
 						)}
 					</div>
 				</div>
@@ -62,7 +62,7 @@ const QuestionMenu = ({
 								? () => user.market.pick_answer(question_id, currentWinner)
 								: async () => {}
 						}
-						font="heading3"
+						font="text-normal"
 					/>
 				</Menu>
 			);
@@ -80,7 +80,7 @@ const QuestionMenu = ({
 							/>
 						}
 						propFunction={() => user.market.dispute(question_id)}
-						font="heading3"
+						font="text-normal"
 					/>
 				</Menu>
 			);

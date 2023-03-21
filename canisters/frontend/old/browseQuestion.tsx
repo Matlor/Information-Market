@@ -1,23 +1,15 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
-import ListWrapper from "../components/app/ListWrapper";
+import ListWrapper from "../components/core/ListWrapper";
 import Search from "../components/browseQuestion/Search";
+import Filter from "../components/browseQuestion/Filter";
+import Sort from "../components/browseQuestion/Sort";
+import QuestionPreview from "../components/browseQuestion/QuestionPreview";
 import Pagination from "../components/browseQuestion/Pagination";
 import Loading from "../components/core/Loading";
 import { Question as IQuestion } from "../../declarations/market/market.did.d";
 import { Principal } from "@dfinity/principal";
 import { toNullable } from "@dfinity/utils";
 import { ActorContext } from "../components/api/Context";
-
-import { Link } from "react-router-dom";
-import Profile from "../components/core/Profile";
-import { AnswersIcon, OnIcon } from "../components/core/Icons";
-import NumAnswers from "../components/browseQuestion/NumAnswers";
-import { moStatusToString } from "../components/core/utils/conversions";
-import { TimeLeft } from "../components/question/Time";
-
-import Filter from "../components/browseQuestion/Filter";
-
-import { e8sToIcp } from "../components/core/utils/conversions";
 
 // ---------- Types ----------
 export interface IStatusMap {
@@ -87,20 +79,24 @@ const BrowseQuestion = () => {
 					myInteractions: action.field,
 				};
 
-			case "toggleStatus":
+			case "updateStatusMap":
+				if (
+					action.field !== "open" &&
+					action.field !== "pickanswer" &&
+					action.field !== "disputable" &&
+					action.field !== "arbitration" &&
+					action.field !== "closed"
+				) {
+					return state;
+				}
+				setLoading({ main: false, search: false, filter: true });
 				return {
 					...state,
 					status: {
 						...state.status,
-						open: true,
-						pickanswer: !state.status.pickanswer,
-						disputable: !state.status.disputable,
-						arbitration: !state.status.arbitration,
-						payout: !state.status.payout,
-						closed: !state.status.closed,
+						[action.field]: !state.status[action.field],
 					},
 				};
-
 			case "updateOrder":
 				if (
 					action.field.orderBy != "TIME_LEFT" &&
@@ -140,7 +136,7 @@ const BrowseQuestion = () => {
 			pickanswer: true,
 			disputable: true,
 			arbitration: true,
-			payout: true,
+			payout: false,
 			closed: true,
 		},
 		searchedText: "",
@@ -151,7 +147,7 @@ const BrowseQuestion = () => {
 		},
 		pagination: {
 			pageIndex: 0,
-			questionsPerPage: 4,
+			questionsPerPage: 10,
 		},
 	});
 
@@ -230,12 +226,9 @@ const BrowseQuestion = () => {
 			searchedText: text,
 		});
 	};
-
-	const toggleStatus = () => {
-		console.log("toggleStatus");
-		dispatch({ type: "toggleStatus" });
+	const setStatus = (field) => {
+		dispatch({ type: "updateStatusMap", field });
 	};
-
 	const toggleMyInteractions = (principal) => {
 		dispatch({
 			type: "updateMyInteractions",
@@ -247,133 +240,11 @@ const BrowseQuestion = () => {
 		dispatch({ type: "updatePageIndex", field: pageIndex });
 	};
 
-	const ViewState = ({ children }) => {
-		if (loading.main) {
-			return (
-				<div className="w-full h-40 items-center flex justify-center">
-					<Loading />
-				</div>
-			);
-		} else if (questionData.totalQuestions === 0) {
-			return (
-				<div className="w-full h-40 items-center flex justify-center text-normal">
-					No Questions
-				</div>
-			);
-		} else {
-			return <div>{children}</div>;
-		}
-	};
-
-	console.log(questionData.questions, "questions");
-
 	return (
 		<>
 			<ListWrapper>
-				<div className="flex justify-between mb-10">
-					<Search
-						searchLoading={loading.search}
-						setSearchedText={setSearchedText}
-					/>
-					<Filter
-						checks={{
-							status: conditions.status,
-							toggleStatus,
-							myInteractions: conditions.myInteractions,
-							toggleMyInteractions,
-						}}
-						isLoading={loading.filter}
-						setSortOrder={setSortOrder}
-						order={conditions.order}
-					/>
-				</div>
-
-				<ViewState>
-					<div className="flex flex-col gap-20">
-						{questionData.questions.map((questionAndAuthor: any, index) => {
-							const { question, author } = questionAndAuthor;
-							return (
-								<div key={question.id}>
-									<Link
-										to={`/question/${question.id}`}
-										className="flex flex-col gap-3"
-									>
-										<div className="flex justify-between items-center">
-											<div className="flex gap-10">
-												<Profile
-													id={author.id}
-													name={author.name}
-													timeStamp={question.creation_date}
-												/>
-												<NumAnswers number={question.answers.length} />
-											</div>
-											<div className="flex gap-4 items-center">
-												{moStatusToString(question.status) === "OPEN" && (
-													<div className="flex gap-1 items-center justify-center px-3 py-1 rounded-sm">
-														<TimeLeft
-															minutes={question.status_end_date}
-															icon={false}
-														/>
-														<OnIcon />
-													</div>
-												)}
-												{moStatusToString(question.status)}
-												<div className="flex items-center justify-center px-3 py-1 bg-colorBackgroundComponents rounded-sm whitespace-nowrap self-stretch w-full overflow-hidden">
-													{e8sToIcp(question.reward)} ICP
-												</div>
-											</div>
-										</div>
-										<div className="text-normal">
-											{question.title.charAt(0).toUpperCase() +
-												question.title.slice(1)}
-										</div>
-									</Link>
-								</div>
-							);
-						})}
-					</div>
-				</ViewState>
-			</ListWrapper>
-			<div className="flex justify-center mt-20">
-				<Pagination
-					pagination={{
-						pageIndex: conditions.pagination.pageIndex,
-						questionsPerPage: conditions.pagination.questionsPerPage,
-					}}
-					totalQuestions={questionData.totalQuestions}
-					setPageIndex={setPageIndex}
-				/>
-			</div>
-		</>
-	);
-};
-
-export default BrowseQuestion;
-
-{
-	/* QUESTION LIST */
-}
-{
-	/* {loading.main ? (
-					<div className="w-full h-40 items-center flex justify-center">
-						<Loading />
-					</div>
-				) : questionData.totalQuestions === 0 ? (
-					<div className="w-full h-40 items-center flex justify-center text-normal">
-						No Questions
-					</div>
-				) : ( */
-}
-
-{
-	/* 	)} */
-}
-
-{
-	/* QUESTION MENU */
-}
-{
-	/* div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
+				{/* QUESTION MENU */}
+				<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
 					<div className="sm:w-1/2">
 						<Search
 							searchLoading={loading.search}
@@ -392,16 +263,39 @@ export default BrowseQuestion;
 						/>
 						<Sort setSortOrder={setSortOrder} order={conditions.order} />
 					</div>
-				</div> */
-}
+				</div>
 
-{
-	/* <div className="flex gap-1 items-center">
-													<div className="scale-125 mt-[2px]">
-														<AnswersIcon />
-													</div>
-													<div className="text-small-number">
-														{question.answers.length}
-													</div>
-												</div> */
-}
+				{/* QUESTION LIST */}
+				{loading.main ? (
+					<div className="w-full h-40 items-center flex justify-center">
+						<Loading />
+					</div>
+				) : questionData.totalQuestions === 0 ? (
+					<div className="w-full h-40 items-center flex justify-center heading3">
+						No Questions
+					</div>
+				) : (
+					<>
+						{questionData.questions.map((questionAndAuthor: any, index) => (
+							<QuestionPreview
+								question={questionAndAuthor.question}
+								author={questionAndAuthor.author}
+								key={index}
+							/>
+						))}
+					</>
+				)}
+			</ListWrapper>
+			<Pagination
+				pagination={{
+					pageIndex: conditions.pagination.pageIndex,
+					questionsPerPage: conditions.pagination.questionsPerPage,
+				}}
+				totalQuestions={questionData.totalQuestions}
+				setPageIndex={setPageIndex}
+			/>
+		</>
+	);
+};
+
+export default BrowseQuestion;

@@ -1,8 +1,11 @@
 import React from "react";
 import Title from "./Title";
 import Input from "./InputNumber";
-import SlateEditor from "./SlateEditor";
+import { SlateEditor, TollbarInstance } from "./SlateEditor";
 import { IInputs, ISpecifications } from "../../screens/AddQuestion";
+import Selector from "./Selector";
+import Button from "../core/Button";
+import { ArrowSmall } from "../core/Icons";
 
 interface IForm {
 	inputs: IInputs;
@@ -22,32 +25,20 @@ const FormView = ({
 	titlePlaceholder,
 	dispatch,
 }: IForm) => {
+	/* 
+	<div className="text-small">Reward</div>
+						<div className="text-small">Duration</div>
+						<div className="text-small">.</div>
+	
+	*/
 	return (
-		<>
-			<div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
-				<div className="border-10 border-r-colorText sm:w-1/2">
-					<Title
-						value={inputs.title}
-						setValue={dispatch.title}
-						Validity={{
-							isValid: inputs.validation.validTitle,
-							invalidMessage: `Between  ${specifications.title.min} and ${specifications.title.max} letters`,
-						}}
-						placeholder={titlePlaceholder}
-						maxLength={specifications.title.max}
-					/>
-				</div>
-				<div className="flex justify-between w-full sm:w-1/2  sm:justify-end  gap-[17px] ">
-					<Input
-						setValue={dispatch.duration}
-						Validity={{
-							isValid: inputs.validation.validDuration,
-							invalidMessage: `Between ${specifications.duration.min} and ${specifications.duration.max} min`,
-						}}
-						unit={"Min"}
-						key="0"
-					/>
+		/* entire wrapper */
+		<div className="flex flex-col gap-24 mt-10">
+			<div className="flex items-end justify-between">
+				{/* EACH WRAPPED */}
 
+				<div>
+					<div className="mb-1 text-small text-colorTextGrey">Reward</div>
 					<Input
 						setValue={dispatch.reward}
 						Validity={{
@@ -58,14 +49,66 @@ const FormView = ({
 						key="1"
 					/>
 				</div>
+
+				<div>
+					<div className="mb-1  text-small text-colorTextGrey">Duration</div>
+					<Input
+						setValue={dispatch.duration}
+						Validity={{
+							isValid: inputs.validation.validDuration,
+							invalidMessage: `Between ${specifications.duration.min} and ${specifications.duration.max} min`,
+						}}
+						unit={"DAYS"}
+						key="0"
+					/>
+				</div>
+				<div>
+					<Input
+						setValue={dispatch.duration}
+						Validity={{
+							isValid: inputs.validation.validDuration,
+							invalidMessage: `Between ${specifications.duration.min} and ${specifications.duration.max} min`,
+						}}
+						unit={"HOURS"}
+						key="0"
+					/>
+				</div>
 			</div>
 
-			<SlateEditor
-				inputValue={inputs.content}
-				setInputValue={dispatch.content}
-				placeholder="Add your question here..."
+			<Selector />
+
+			<Title
+				value={inputs.title}
+				setValue={dispatch.title}
+				Validity={{
+					isValid: inputs.validation.validTitle,
+					invalidMessage: `Between  ${specifications.title.min} and ${specifications.title.max} letters`,
+				}}
+				placeholder={titlePlaceholder}
+				maxLength={specifications.title.max}
 			/>
-		</>
+
+			<div>
+				<SlateEditor
+					inputValue={inputs.content}
+					setInputValue={dispatch.content}
+					placeholder="Add your question here..."
+				>
+					<div className="mb-6 flex justify-between items-center">
+						<TollbarInstance />
+
+						<Button
+							customButton={
+								<button className="flex text-small font-600 text-colorIcon gap-4 items-center bg-colorLines rounded-lg py-[9px] px-3">
+									<p>Submit</p> <ArrowSmall />
+								</button>
+							}
+							propFunction={async () => {}}
+						/>
+					</div>
+				</SlateEditor>
+			</div>
+		</div>
 	);
 };
 

@@ -1,32 +1,38 @@
 import React from "react";
 
 const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
-	const handler = (e) => {
-		setValue(e.target.value);
+	const onInput = (e) => {
+		e.target.style.height = "auto";
+		e.target.style.height = `${e.target.scrollHeight}px`;
+
+		if (setValue) {
+			setValue(e.target.value);
+		}
 	};
 
-	// TODO: somehow this does not stretch if the input does not have a concrete width.
 	return (
-		<div className="max-w-[600px] w-full py-[8px] px-[15px] flex justify-between items-center relative  shadow-md rounded-md bg-colorBackgroundComponents">
-			<input
-				className="w-full outline-none placeholder:heading3 heading3"
-				type="text"
-				onChange={handler}
-				placeholder={placeholder}
-			/>
-
-			<div className="w-max heading3 pl-[10px]">
+		<div className="relative">
+			<div className="w-max text-extrasmall-number">
 				<div className="flex w-max">
 					{value ? value.length : 0} / {maxLength}
 				</div>
 			</div>
+
 			{!Validity.isValid && value ? (
-				<div className="w-max text-normal text-colorRed flex justify-center absolute bottom-11 ">
+				<div className="w-max text-normal-small text-colorRed flex justify-center absolute -top-10 ">
 					{Validity.invalidMessage}
 				</div>
 			) : (
 				<></>
 			)}
+
+			<textarea
+				rows={1}
+				className="w-full mt-2 outline-none resize-none overflow-hidden title placeholder:title placeholder:opacity-50"
+				onInput={onInput}
+				value={value}
+				placeholder={placeholder}
+			/>
 		</div>
 	);
 };

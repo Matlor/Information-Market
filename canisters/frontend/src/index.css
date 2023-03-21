@@ -1,5 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+@import "./fonts/fonts.css";
 
 @tailwind base;
 @tailwind components;
@@ -17,36 +22,32 @@
 }
 
 @layer components {
-	.heading1-stretch {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-widest text-20 leading-28;
-	}
-
-	.heading2 {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-22 leading-38;
-	}
-
-	.heading3 {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-18 leading-28;
-	}
-
-	.heading-light {
-		@apply text-colorText font-OpenSans font-light antialiased tracking-normal text-18 leading-28;
-	}
-
-	.heading-question-menu {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-25 leading-38;
+	.title {
+		@apply text-colorDark font-Inter text-22 font-450 leading-32;
 	}
 
 	.text-normal {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-14 leading-28;
+		@apply text-colorText font-Inter text-19 font-400 tracking-wide leading-28;
 	}
 
 	.text-small {
-		@apply text-colorText font-OpenSans font-normal antialiased tracking-normal text-12 leading-16;
+		@apply text-colorText font-Inter text-14 tracking-wide;
+	}
+
+	.text-normal-number {
+		@apply text-colorText font-lato text-19 font-400 tracking-wide leading-none;
+	}
+
+	.text-small-number {
+		@apply text-colorText font-Inter text-14 font-400  tracking-wide leading-none;
+	}
+
+	.text-extrasmall-number {
+		@apply text-colorText font-Inter text-12 font-400  tracking-wide leading-none;
 	}
 
 	.editor-wrapper {
-		@apply heading3;
+		@apply text-normal;
 	}
 
 	.editor-wrapper blockquote {
@@ -61,43 +62,35 @@
 		@apply list-decimal ml-6;
 	}
 
-	.editor-wrapper h2 {
-		@apply heading2;
-	}
-
-	.editor-wrapper h3 {
-		@apply heading3;
-	}
+	/* .editor-wrapper h2 {
+		@apply ;
+	} */
 
 	.px-field {
-		@apply px-[40px] md:px-[40px];
+		@apply px-10 md:px-10;
 	}
 
 	.p-content {
-		@apply px-field py-[40px];
+		@apply px-field py-10;
 	}
 
 	.gap-small {
-		@apply gap-[6px];
+		@apply gap-2;
 	}
 
 	.gap-normal {
-		@apply gap-[17px];
+		@apply gap-4;
 	}
 
 	.small-ball-dimension {
-		@apply w-[15px] h-[15px];
+		@apply w-4 h-4;
 	}
 	.ball-dimension {
-		@apply w-[21px] h-[21px];
+		@apply w-5 h-5;
 	}
 
 	.height-menu {
-		@apply h-[45px];
-	}
-
-	.winner {
-		@apply rounded-lg shadow-choice;
+		@apply h-11;
 	}
 
 	.center {

@@ -32,7 +32,7 @@ const QuestionPreview = ({ question, author }: IQuestionPreview) => {
 	// TODO: what is this?
 	const metaInformationLargeScreen = (
 		<div className="w-[120px] flex flex-col gap-normal items-end">
-			<div className="heading3">{reward} ICP</div>
+			<div className="text-normal">{reward} ICP</div>
 			<div>
 				<div className="float-right text-normal mb-2">
 					{capitalStatusToReadable(moStatusToString(status))}
@@ -48,7 +48,7 @@ const QuestionPreview = ({ question, author }: IQuestionPreview) => {
 		<>
 			<div className="flex-1 min-h-full flex flex-col justify-between">
 				<Link to={`/question/${id}`}>
-					<div className="heading3">
+					<div className="text-normal">
 						{title.charAt(0).toUpperCase() + title.slice(1)}
 					</div>
 				</Link>

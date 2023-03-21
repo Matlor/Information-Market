@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState, useReducer, useContext } from "react";
-import ListWrapper from "../components/core/ListWrapper";
+import ListWrapper from "../components/app/ListWrapper";
 import Submit from "../components/addQuestion/Submit";
 import Form from "../components/addQuestion/Form";
 import { e8sToIcp } from "../components/core/utils/conversions";
@@ -176,7 +176,6 @@ const AddQuestion = () => {
 	};
 
 	const [inputs, dispatch] = useReducer(inputsReducer, initialInput);
-	console.log(inputs, "inputs");
 
 	return (
 		<ListWrapper>
@@ -199,19 +198,21 @@ const AddQuestion = () => {
 				inputs={inputs}
 				specifications={specifications}
 			/>
-			{user.principal && inputs ? (
-				<div className="h-[48px] flex ">
-					{isValid(inputs.validation) ? (
-						<Submit inputs={inputs} loggedInUser={user} />
-					) : (
-						<div className="heading3  self-center ml-6">
-							Fill out the form correctly
-						</div>
-					)}
-				</div>
-			) : (
-				<div className="heading3 ml-6"> Login to Submit</div>
-			)}
+			<div className="mt-32">
+				{user.principal && inputs ? (
+					<div className="h-[48px] flex ">
+						{isValid(inputs.validation) ? (
+							<Submit inputs={inputs} loggedInUser={user} />
+						) : (
+							<div className="text-normal  self-center ml-6">
+								Fill out the form correctly
+							</div>
+						)}
+					</div>
+				) : (
+					<div className="text-normal"> Login to Submit</div>
+				)}
+			</div>
 		</ListWrapper>
 	);
 };

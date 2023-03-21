@@ -1,6 +1,6 @@
 import React from "react";
 
-const Profile = ({}) => {
+const Notifications = () => {
 	return (
 		<div>
 			<div className="text-normal flex justify-start mb-3">Coming Soon</div>
@@ -9,4 +9,4 @@ const Profile = ({}) => {
 	);
 };
 
-export default Profile;
+export default Notifications;

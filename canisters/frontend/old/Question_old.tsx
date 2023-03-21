@@ -2,11 +2,11 @@ import React from "react";
 import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router";
 import ListWrapper from "../components/core/ListWrapper";
-import AnswerWrapper from "../components/question/AnswerWrapper";
-import QuestionBody from "../components/question/QuestionBody";
-import SlateSubmit from "../components/question/SlateSubmit";
+import AnswerWrapper from "../components/question_old/AnswerWrapper";
+import QuestionBody from "../components/question_old/QuestionBody";
+import SlateSubmit from "../components/question_old/SlateSubmit";
 import Loading from "../components/core/Loading";
-import QuestionMenu from "../components/question/QuestionMenu";
+import QuestionMenu from "../components/question_old/QuestionMenu";
 import {
 	moStatusToString,
 	getFinalWinnerId,
@@ -28,8 +28,8 @@ import {
 import { Principal } from "@dfinity/principal";
 import PostDate from "../components/core/Date";
 import Profile from "../components/core/Profile";
-import Content from "../components/Question/Content";
-import Title from "../components/Question/Title";
+import Content from "../components/question_old/Content";
+import Title from "../components/question_old/Title";
 import { ActorContext } from "../components/api/Context";
 import {
 	Status,
@@ -38,7 +38,7 @@ import {
 	HowMuchTime,
 	Divider,
 	ShowPayout,
-} from "../components/question/QuestionMetaData";
+} from "../components/question_old/QuestionMetaData";
 
 // ---------- Types ----------
 type Modify<T, K> = Pick<T, Exclude<keyof T, keyof K>> & K;

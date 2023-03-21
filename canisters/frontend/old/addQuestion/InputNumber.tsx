@@ -24,17 +24,20 @@ const Input = ({ setValue, Validity, unit }: IInput) => {
 	};
 
 	return (
-		<div className="w-max text-normal-number flex gap-1 py-[8px] px-[15px] items-center relative">
+		<div className="max-w-[260px] flex gap-[25px] py-[8px] px-[15px] justify-between items-center relative shadow-md rounded-md bg-colorBackgroundComponents">
 			<input
-				className="w-12 outline-none placeholder:text-normal-number  p-0 items-center"
+				className="w-full outline-none placeholder:text-normal text-normal p-0 "
 				type="number"
 				onChange={handler}
 				placeholder={"0"}
 			/>
-			<div>{unit}</div>
 
+			<div className="flex gap-6">
+				<div className="border-colorBackground rounded-full self-stretch border-l-[2px] w-0"></div>
+				<div className="text-normal">{unit} </div>
+			</div>
 			{!Validity.isValid && !isEmpty ? (
-				<div className="text-normal-small text-colorRed  flex justify-center w-max absolute bottom-11 ">
+				<div className="text-normal text-colorRed  flex justify-center w-max absolute bottom-11 ">
 					{Validity.invalidMessage}
 				</div>
 			) : (
