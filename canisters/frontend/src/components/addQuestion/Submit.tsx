@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import Button from "../core/Button";
+import { StagesButton } from "../core/Button";
 import { Principal } from "@dfinity/principal";
 import { SubmitStages, SubmitStagesText } from "./SubmitStages";
 import Mail from "../core/Mail";
@@ -91,10 +91,10 @@ const Submit = ({ inputs, loggedInUser }: ISubmit) => {
 
 	return (
 		<div className="flex items-center">
-			<Button
+			<StagesButton
 				propFunction={submit}
 				text={"Submit"}
-				CustomLoader={() => {
+				customLoader={() => {
 					return <SubmitStages stages={submitStages} />;
 				}}
 			/>

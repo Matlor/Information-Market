@@ -4,12 +4,6 @@ import escapeHtml from "escape-html";
 
 import { jsx } from "slate-hyperscript";
 import { Text, Element as SlateElement, Editor, Transforms } from "slate";
-import { useSlate } from "slate-react";
-// ------------------------------------
-
-// ---------------------------------------------- Marks  ----------------------------------------------
-
-// ---------------------------------------------- Element  ----------------------------------------------
 
 // KEY SHORTCUTS
 export const HOTKEYS = {

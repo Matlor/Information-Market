@@ -127,6 +127,7 @@ module {
         content: Text;
         reward: Int32;
 
+
         // Could be 1 type?
         status_update_date: Int32;
         status_end_date: Int32;

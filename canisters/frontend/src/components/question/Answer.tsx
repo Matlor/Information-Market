@@ -1,5 +1,5 @@
 import React from "react";
-import Profile from "../core/Profile";
+import { Profile } from "../core/Profile";
 import Dots from "./Settings";
 import parse from "html-react-parser";
 
@@ -8,7 +8,7 @@ const Answer = ({ author_id, content, tag, action, timeStamp }) => {
 	return (
 		<div data-cy="answer" className="flex flex-col gap-4">
 			<div className="flex gap-2 w-full justify-between">
-				<Profile id={author_id} name={"Domwoe"} timeStamp={timeStamp} />
+				<Profile principal={author_id} name={"Domwoe"} minutes={timeStamp} />
 				{tag}
 				<Dots />
 			</div>

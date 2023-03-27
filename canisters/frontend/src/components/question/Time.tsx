@@ -3,10 +3,7 @@ import { TimeIcon } from "../core/Icons";
 
 const calcTime = (minutes) => {
 	const currentTime = Math.floor(Date.now() / 1000);
-
 	const diffSeconds = Math.abs(minutes * 60 - currentTime);
-	//console.log(currentTime - Math.abs(minutes) * 60);
-	console.log(diffSeconds);
 
 	const remainingMinutes = Math.floor(diffSeconds / 60);
 	const hours = Math.floor(remainingMinutes / 60);
@@ -50,9 +47,7 @@ export const TimeLeft = ({ minutes, icon = true }) => {
 
 	return (
 		<Wrapper>
-			<div className="self-center">
-				<TimeIcon />
-			</div>
+			<div className="self-center">{icon ? <TimeIcon /> : <></>}</div>
 			<ShowTime value={value} unit={unit} />
 		</Wrapper>
 	);
@@ -63,27 +58,9 @@ export const TimeStamp = ({ minutes }) => {
 	const { value, unit } = calcTime(minutes);
 	return (
 		<Wrapper>
-			<ShowTime value={value} unit={unit} /> <div>ago</div>
+			<div className="flex gap-1">
+				<ShowTime value={value} unit={unit} /> <div>ago</div>
+			</div>
 		</Wrapper>
 	);
 };
-
-// <CalcTime diffSeconds={Math.abs(diffSeconds)} addon="ago" />
-/* 
-const { value, unit } =
-		minutes * 60 <= 0 ? calcTime(minutes) : { value: 0, unit: "min" };
-
-*/
-
-/* <div data-cy="timeStamp" className="items-center">
-		{minutes * 60 <= 0 ? (
-			<div className="text-extrasmall-number self-center whitespace-nowrap">
-				0 min
-			</div>
-		) : (
-			<div className="flex gap-2">
-				<div className="self-center">{icon && <TimeIcon />}</div>
-				<CalcTime minutes={Math.abs(minutes)} addon="left" />
-			</div>
-		)}
-	</div> */

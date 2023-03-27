@@ -1987,146 +1987,262 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
     // --------- ?mainnet ---------
 
     public shared func testQueries() : async {#success; #fail : Text} {
-        let a_user: Test_User.test_user = await  create_test_user();
-        let b_user: Test_User.test_user = await  create_test_user();
+    
         let c_user: Test_User.test_user = await  create_test_user();
-
 
         let base_state:State = {
             users_state = [
                 {
-                    id = Principal.fromActor(a_user); 
+                    id =  Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+                    answers = []; 
+                    avatar = null; 
+                    invoices = []; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "Author"; 
+                    questions = ["10", "20", "30", "40"]
+                },
+                {
+                    id =  Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
+                    answers = []; 
+                    avatar = null; 
+                    invoices = []; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                    name = "Answerer"; 
+                    questions = [];
+                },
+                {
+                    id = Principal.fromActor(c_user); 
                     answers = []; 
                     avatar = null; 
                     invoices = [0, 1]; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "John"; 
-                    questions = ["0", "2", "3"]
-                },
-                {
-                    id = Principal.fromActor(b_user);
-                    answers = ["0"]; 
-                    avatar = null; 
-                    invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Tim"; 
+                    name = "Ohter User"; 
                     questions = []
-                },
-                 {
-                    id = Principal.fromActor(c_user); 
-                    answers = ["1"]; 
-                    avatar = null; 
-                    invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Steve"; 
-                    questions = []
-                },
-                {
-                    id =  Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
-                    answers = ["1"]; 
-                    avatar = null; 
-                    invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Steve"; 
-                    questions = ["1"];
-                }
+                },        
             ];
             invoices_state = [];
             questions_state = [
-                {
-                    id= "0";
+           {
+                    id= "10";
                     invoice_id= 10; 
-                    author_id= Principal.fromActor(a_user);
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
-                    title = "test question";
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500:Int32;
+                    reward = 500000000:Int32;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+20;
                     
-                    answers = ["0", "1"]; 
+                    answers = ["11", "12"]; 
                     potentialWinner = null;
                     finalWinner = null;
                     close_transaction_block_height = null;
                     // (#ANSWER({answer_id="0"}));
                 },
                  {
-                    id= "1";
+                    id= "20";
                     invoice_id= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
-                    title = "test question";
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 600:Int32;
+                    reward = 600000000:Int32;
                             
                     status= #PICKANSWER;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+102;
                     
-                    answers = ["0", "1"]; 
+                    answers = ["21", "22"]; 
                     potentialWinner = null;
                     finalWinner = null;
                     close_transaction_block_height= null;
-                },
+                }, 
                 {
-                    id= "2";
-                    invoice_id= 20; 
-                    author_id= Principal.fromActor(c_user);
+                    id= "30";
+                    invoice_id = 20; 
+                    author_id = Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
-                    title = "test question";
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 700:Int32;
+                    reward = 700000000:Int32;
                             
                     status= #DISPUTABLE;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["0", "1"]; 
-                    potentialWinner = ?"0";
+                    answers = ["31","32"]; 
+                    potentialWinner = ?"31";
                     finalWinner = null;
                     close_transaction_block_height= null;
                 },
-                {
-                    id= "3";
+                 {
+                    id= "40";
                     invoice_id= 30; 
-                    author_id= Principal.fromActor(b_user);
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
-                    title = "test question";
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500:Int32;
+                    reward = 500000000:Int32;
                             
-                    status= #CLOSED;
+                    status= #ARBITRATION;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["0", "1"]; 
-                    potentialWinner = ?"0";
-                    finalWinner = ?(#ANSWER({answer_id="0"}));
+                    answers = ["41","42"]; 
+                    potentialWinner = ?"41";
+                    finalWinner = ?(#ANSWER({answer_id="41"}));
                     close_transaction_block_height= null;
-                },
+                }, 
+                /* Further */
+                  {
+                    id= "50";
+                    invoice_id= 30; 
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
+                    content = "test description";
+                    reward = 500000000:Int32;
+                            
+                    status=  #OPEN;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = []; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                }, 
+                  {
+                    id= "60";
+                    invoice_id= 30; 
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
+                    content = "test description";
+                    reward = 500000000:Int32;
+                            
+                    status=  #OPEN;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = []; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                }, 
+                  {
+                    id= "70";
+                    invoice_id= 30; 
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
+                    content = "test description";
+                    reward = 500000000:Int32;
+                            
+                    status= #OPEN;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = []; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                }, 
+                  {
+                    id= "80";
+                    invoice_id= 30; 
+                    author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
+
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    open_duration= 2;
+                    title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
+                    content = "test description";
+                    reward = 500000000:Int32;
+                            
+                    status= #OPEN;
+                    status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                    status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                    
+                    answers = []; 
+                    potentialWinner = null;
+                    finalWinner = null;
+                    close_transaction_block_height= null;
+                }, 
+                  
             ];
             answers_state = [
                 {
-                    id = "0";
-                    author_id = Principal.fromActor(b_user);
+                    id = "11";
+                    author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "10";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 },
                 {
-                    id = "1";
-                    author_id = Principal.fromActor(c_user);
+                    id = "12";
+                    author_id =  Principal.fromActor(c_user);
                     question_id = "10";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+
+                {
+                    id = "21";
+                    author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
+                    question_id = "20";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+                {
+                    id = "22";
+                    author_id =  Principal.fromActor(c_user);
+                    question_id = "20";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+
+                {
+                    id = "31";
+                    author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
+                    question_id = "30";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+                {
+                    id = "32";
+                    author_id =  Principal.fromActor(c_user);
+                    question_id = "30";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+
+                {
+                    id = "41";
+                    author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
+                    question_id = "40";
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    content = "test answer";
+                },
+                {
+                    id = "42";
+                    author_id =  Principal.fromActor(c_user);
+                    question_id = "40";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "test answer";
                 }
@@ -2140,13 +2256,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         , #REWARD); */
 
         
-        let res = await market_canister.get_users([]);
+       // let res = await market_canister.get_users([]);
         //Debug.print("empty data:     " # debug_show(res));
 
-        let res1 = await market_canister.get_users([Principal.fromActor(c_user)]);
+        //let res1 = await market_canister.get_users([Principal.fromActor(c_user)]);
         //Debug.print("data:     " # debug_show(res1));
 
-        let res2 = await market_canister.get_question_data("10");
+        //let res2 = await market_canister.get_question_data("10");
         //Debug.print("question data:     " # debug_show(res2));
 
         ignore await fund_principal(Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe"));

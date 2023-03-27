@@ -1,5 +1,5 @@
 import React from "react";
-import { IconPaginationDec, IconPaginationInc } from "../core/Icons";
+import { ArrowIcon } from "../core/Icons";
 
 interface Pagination {
 	pageIndex: number;
@@ -53,23 +53,28 @@ const Pagination = ({
 		}
 	};
 
-	if (pagination.questionsPerPage >= totalQuestions) return <></>;
+	//if (pagination.questionsPerPage >= totalQuestions) return <></>;
 
 	return (
-		<div className="flex mt-[17px] gap-[33px] justify-between items-center px-[30px] py-[20px] bg-colorBackgroundComponents w-min shadow-md rounded-lg">
+		<div className="flex mt-[17px] gap-[33px] justify-between items-center px-[30px] py-[20px] w-min rounded-lg">
 			<button onClick={decreaseIndex}>
-				<div className={`flex gap-[17px] ${previousOpacity}`}>
-					<IconPaginationDec />
+				<div className={`flex gap-[17px] ${previousOpacity} `}>
+					<ArrowIcon />
 					<div className="text-normal">Next</div>
 				</div>
 			</button>
 
-			<div className="text-normal">{pagination.pageIndex + 1}</div>
+			<div className="text-normal text-colorBackground px-4 py-1 rounded-lg bg-colorIcon ">
+				{pagination.pageIndex + 1}
+			</div>
 
 			<button onClick={increaseIndex}>
-				<div className={`flex gap-[17px] ${nextOpacity}`}>
+				<div className={`flex gap-[17px] ${nextOpacity} items-center`}>
 					<div className="text-normal ">Prev</div>
-					<IconPaginationInc />
+
+					<div className="rotate-180">
+						<ArrowIcon />
+					</div>
 				</div>
 			</button>
 		</div>

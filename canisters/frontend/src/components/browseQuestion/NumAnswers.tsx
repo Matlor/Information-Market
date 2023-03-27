@@ -3,9 +3,9 @@ import { AnswersIcon } from "../core/Icons";
 
 const NumAnswers = ({ number }: { number: number }) => {
 	return (
-		<div className="flex gap-1 items-center">
-			<div className="scale-125 mt-[2px]">
-				<AnswersIcon />
+		<div className="flex gap-2 items-center">
+			<div className="mt-[3px]">
+				<AnswersIcon size={16} />
 			</div>
 			<div className="text-small-number">{number}</div>
 		</div>

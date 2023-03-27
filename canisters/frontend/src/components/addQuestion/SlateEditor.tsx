@@ -121,7 +121,7 @@ export const SlateEditor = ({
 			}}
 		>
 			{children}
-			{/* overflow-y-scroll scrollbar: looked weird when pressing list without anything in there.  */}
+
 			<Editable
 				className="w-full h-full  editor-wrapper"
 				renderElement={renderElement}
@@ -150,7 +150,7 @@ export const TollbarInstance = () => {
 				{/* Bold true is added to the object in editor.children to the paragraphs where we apply that */}
 				{/* So the editor object stores what parts get that assigned to but the Editable then decides what to show */}
 				{/* Editable then wrappes that part with a classic jsx tag <blockquote> that I think I can style */}
-				<div className="flex gap-2">
+				<div className="flex gap-[14px]">
 					<MarkButton format="bold" icon={<AiOutlineBold />} editor={editor} />
 					<MarkButton
 						format="italic"
@@ -182,68 +182,3 @@ export const TollbarInstance = () => {
 		</IconContext.Provider>
 	);
 };
-/* 
-const toggleIfEmptyList = (format) => {
-	const leaf = Editor.leaf(editor, editor.selection);
-
-	if (leaf[0].text === "") {
-		event.preventDefault();
-		toggleBlock(editor, format);
-	}
-};
-*/
-
-/* if (key === "Backspace") {
-						// IF ON FIRST LINE OF DOCUMENT, RESET THE STYLING COMPLETELY.
-						if (
-							selection.anchor.path[0] === 0 &&
-							selection.anchor.path[1] === 0 &&
-							selection.focus.path[0] === 0 &&
-							selection.focus.path[1] === 0 &&
-							selection.anchor.offset === 0 &&
-							selection.focus.offset === 0
-						) {
-							resetBlocks([], editor);
-							resetMarks();
-						}
-
-						// IF CURSER AT BEGINNING OF LI AND BACKSPACE, RESET BLOCKS
-						const bullFormat = "bulleted-list";
-						const numFormat = "numbered-list";
-
-						var isList = false;
-						if (checkIfList(bullFormat) || checkIfList(numFormat)) {
-							isList = true;
-						}
-
-						if (
-							isList &&
-							selection.anchor.offset === 0 &&
-							selection.focus.offset === 0
-						) {
-							event.preventDefault();
-							resetBlocks([], editor);
-						}
-					} */
-
-/* // NEW LINE ON ENTER, RESET SYTLING, UNLESS LIST
-					if (key === "Enter" && !event.shiftKey) {
-						event.preventDefault();
-
-						Editor.insertBreak(editor);
-
-						const bullFormat = "bulleted-list";
-						const numFormat = "numbered-list";
-						if (checkIfList(bullFormat) || checkIfList(numFormat)) {
-							resetBlocks(["numbered-list", "bulleted-list"], editor);
-						} else {
-							resetBlocks([], editor);
-						}
-
-						resetMarks(editor);
-					}
-
-					if (key === "Enter" && event.shiftKey) {
-						event.preventDefault();
-						editor.insertText("\n");
-					} */

@@ -9,18 +9,6 @@ module.exports = {
 			xl: "1440px",
 		},
 
-		colors: {
-			colorBackground: "#FFFFFF",
-			colorBackgroundComponents: "#F5F5F5",
-			colorDark: "#0F1318",
-			colorText: "#0E1217",
-			colorTextGrey: "#606060",
-			colorIcon: "#0F1318",
-			colorLines: "#F5F5F5",
-			colorRed: "#F6A5A5",
-			colorEffect: "#F3F8F7",
-		},
-
 		fontFamily: {
 			OpenSans: "'Open Sans', sans-serif",
 			ABeeZee: "'ABeeZee', sans-serif",
@@ -83,7 +71,9 @@ module.exports = {
 
 		borderRadius: {
 			none: "0",
+			xsm: "2px",
 			sm: "5px",
+
 			md: "20px",
 			lg: "30px",
 			full: "9999px",
@@ -109,6 +99,18 @@ module.exports = {
 				/* md: "0px 2px 4px rgba(0, 0, 0, 0.04)",
 				lg: "0px 4px 8px rgba(0, 0, 0, 0.04)", */
 				choice: "0px 0px 1px 1px #F3F8F7",
+			},
+
+			colors: {
+				colorBackground: "#FFFFFF",
+				colorBackgroundComponents: "#F5F5F5",
+				colorDark: "#0F1318",
+				colorText: "#0E1217",
+				colorTextGrey: "#8E8E8E",
+				colorIcon: "#0F1318",
+				colorLines: "#F5F5F5",
+				colorRed: "#F6A5A5",
+				colorEffect: "#F3F8F7",
 			},
 		},
 	},

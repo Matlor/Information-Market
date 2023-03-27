@@ -1,83 +1,76 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-const Selector = () => {
-	const [scrollX, setScrollX] = useState(0);
+const Selector = ({ value, setValue }) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const dragStartX = useRef(0);
+	const dragStartValue = useRef(value);
 
-	const handleMouseDown = (e) => {
+	const handleDragStart = (e) => {
 		e.preventDefault();
 		setIsDragging(true);
-		dragStartX.current = e.clientX;
+		dragStartX.current =
+			e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+		dragStartValue.current = value;
 	};
 
-	const handleMouseMove = (e) => {
+	const handleDragMove = (e) => {
 		if (!isDragging) return;
-		const deltaX = e.clientX - dragStartX.current;
-		setScrollX((prev) => prev + deltaX);
-		dragStartX.current = e.clientX;
+		const clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+		const dragDistance = clientX - dragStartX.current;
+		const valueDistance = Math.round(dragDistance / 10);
+		setValue(dragStartValue.current + valueDistance);
 	};
 
-	const handleMouseUp = () => {
+	const handleDragEnd = () => {
 		setIsDragging(false);
 	};
 
-	const handleMouseLeave = () => {
-		setIsDragging(false);
-	};
+	useEffect(() => {
+		// Prevent scrolling while slider is being dragged
+		const handleTouchMove = (e) => {
+			if (isDragging) {
+				e.preventDefault();
+			}
+		};
 
-	const handleTouchStart = (e) => {
-		setIsDragging(true);
-		dragStartX.current = e.touches[0].clientX;
-	};
+		document.addEventListener("touchmove", handleTouchMove, {
+			passive: false,
+		});
 
-	const handleTouchMove = (e) => {
-		if (!isDragging) return;
-		const deltaX = e.touches[0].clientX - dragStartX.current;
-		setScrollX((prev) => prev + deltaX);
-		dragStartX.current = e.touches[0].clientX;
-	};
-
-	const handleTouchEnd = () => {
-		setIsDragging(false);
-	};
-
-	const selectedValue = Math.round(scrollX / 40);
+		return () => {
+			document.removeEventListener("touchmove", handleTouchMove);
+		};
+	}, [isDragging]);
 
 	return (
-		<div className="w-full px-10 relative flex flex-col justify-center">
-			<div className="mb-10 text-center">Selected: {selectedValue}</div>
+		<div className="w-1/2 px-5 relative flex flex-col justify-center">
+			<div className="mb-5 text-center text-small">value: {value}</div>
 			<div
-				onMouseDown={handleMouseDown}
-				onMouseMove={handleMouseMove}
-				onMouseUp={handleMouseUp}
-				onMouseLeave={handleMouseLeave}
-				onTouchStart={handleTouchStart}
-				onTouchMove={handleTouchMove}
-				onTouchEnd={handleTouchEnd}
-				className="w-full h-20 overflow-hidden flex items-center justify-center relative select-none cursor-pointer"
+				onMouseDown={handleDragStart}
+				onTouchStart={handleDragStart}
+				onMouseMove={handleDragMove}
+				onTouchMove={handleDragMove}
+				onMouseUp={handleDragEnd}
+				onTouchEnd={handleDragEnd}
+				onTouchCancel={handleDragEnd}
+				className="w-full h-10 overflow-hidden flex items-center justify-center relative select-none cursor-pointer"
 				style={{
 					background: `
-					linear-gradient(to right, 
-					  transparent 0%, 
-					  transparent calc(50% - 5px), 
-					  #F5F5F5 calc(50% - 5px), 
-					  #F5F5F5 50%, 
-					  transparent 50%, 
-					  transparent 100%)
-					${scrollX}px 50% / 80px 50% repeat-x
-				  `,
+          linear-gradient(to right, 
+            transparent 0%, 
+            transparent calc(50% - 2.5px), 
+            #F5F5F5 calc(50% - 2.5px), 
+            #F5F5F5 50%, 
+            transparent 50%, 
+            transparent 100%)
+          ${value}px 50% / 40px 50% repeat-x
+        `,
 				}}
 			>
-				{/* <div
-					className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-					style={{ transform: `translateX(${scrollX}px)` }}
-				></div> */}
-				<div className="absolute top-1/2 left-1/2 bg-colorRed h-24 w-[8px] rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+				<div className="absolute top-1/2 left-1/2 bg-colorRed h-12 w-[4px] rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
 			</div>
 		</div>
 	);
 };
 
 export default Selector;
-<div className="bg-colorDark h-8 w-0.5 mr-4"></div>;

@@ -22,14 +22,15 @@ import { ActorContext } from "../components/api/Context";
 
 // --- new ---
 import Loading from "../components/core/Loading";
-import Profile from "../components/core/Profile";
+import { Profile } from "../components/core/Profile";
 import Dots from "../components/question/Settings";
 import Divider from "../components/question/Divider";
-import Reward from "../components/question/Reward";
 import Solution from "../components/question/Solution";
 import Answer from "../components/question/Answer";
-import Tag from "../components/question/Tag";
-import Button from "../components/core/Button";
+import { SelectedTag, WinnerTag, StyledReward } from "../components/core/Tag";
+import Reward from "../components/question/Reward";
+
+import { ArrowButton, DefaultButton } from "../components/core/Button";
 import Menu from "../components/question/Menu";
 import { TimeLeft } from "../components/question/Time";
 import Drag from "../components/question/Drag";
@@ -96,31 +97,39 @@ const Question = ({ user, login }) => {
 		}
 	};
 
+	const fetchDataAndUpdateState = async () => {
+		const data = await fetch_data();
+		setLoading(false);
+		if (data) {
+			setState({
+				question: toFrontendQuestion(data.question),
+				answers: data.answers,
+				users: data.users,
+			});
+		}
+	};
+
 	useEffect(() => {
 		let isCancelled = false;
-		(async () => {
-			const data = await fetch_data();
-			if (!isCancelled && data) {
-				setState({
-					question: toFrontendQuestion(data.question),
-					answers: data.answers,
-					users: data.users,
-				});
-			}
-		})();
 
-		var interval = setInterval(async () => {
-			const data = await fetch_data();
-			setLoading(false);
-			if (!isCancelled && data) {
-				setState({
-					question: toFrontendQuestion(data.question),
-					answers: data.answers,
-					users: data.users,
-				});
+		// Fetch data and update state immediately
+		if (!isCancelled) {
+			fetchDataAndUpdateState();
+		}
+
+		// Set interval to fetch data regularly
+		const interval = setInterval(async () => {
+			console.log("fetching data");
+			if (!isCancelled) {
+				fetchDataAndUpdateState();
 			}
 		}, 5000);
-		return () => clearInterval(interval);
+
+		// Cleanup function to clear interval
+		return () => {
+			isCancelled = true;
+			clearInterval(interval);
+		};
 	}, []);
 
 	// ------------------------------------------------ UI ------------------------------------------------
@@ -156,11 +165,11 @@ const Question = ({ user, login }) => {
 		pick: {
 			solution: "ongoing",
 			tag: (id) => {
-				return id === selected && <Tag option={"selected"} />;
+				return id === selected && <SelectedTag />;
 			},
 			answerButton: (id) => {
 				return (
-					<Button
+					<DefaultButton
 						customButton={
 							<button className="flex gap-2 items-center">
 								<p>Select</p> <ArrowSmall />
@@ -176,24 +185,18 @@ const Question = ({ user, login }) => {
 		dispute: {
 			solution: "ongoing",
 			tag: (id) => {
-				return (
-					state.question.potentialWinner === id && <Tag option={"selected"} />
-				);
+				return state.question.potentialWinner === id && <SelectedTag />;
 			},
 			answerButton: (id) => {
 				return (
 					state.question?.potentialWinner === id && (
 						<div>
 							<TimeLeft minutes={state.question.status_end_date} />
-							<Button
-								customButton={
-									<button>
-										<p>dispute</p> <ArrowSmall />
-									</button>
-								}
+							<ArrowButton
 								propFunction={async () => {
 									console.log(await user.market.dispute(state.question.id));
 								}}
+								text="dispute"
 							/>
 						</div>
 					)
@@ -208,7 +211,7 @@ const Question = ({ user, login }) => {
 			tag: (id) => {
 				return (
 					state.question.finalWinner === id && (
-						<Tag option={"winner"}>{state.question.reward}</Tag>
+						<WinnerTag reward={state.question.reward} />
 					)
 				);
 			},
@@ -227,10 +230,11 @@ const Question = ({ user, login }) => {
 	//console.log("view:", view);
 
 	console.log("state:", state);
+	console.log("user:", user);
 	return (
 		<div className="w-full">
 			<div>
-				<div className="flex w-full justify-between my-6">
+				{/* <div className="flex w-full justify-between my-6">
 					<Link to="/" className="self-center">
 						<ArrowIcon />
 					</Link>
@@ -238,25 +242,37 @@ const Question = ({ user, login }) => {
 						<Dots />
 						{!user.principal ? (
 							<div data-cy="login">
-								<Button propFunction={login} text="Login" />
+								<ArrowButton propFunction={login} text={"Login"} />
 							</div>
 						) : (
-							<Profile name={""} id={"id"} />
+							<Profile
+								name={
+									(() => {
+										return (
+											state.users.find(
+												(userObj) =>
+													userObj.id.toString() === user.principal.toString()
+											) ?? { name: "" }
+										);
+									})().name
+								}
+								principal={user.principal}
+							/>
 						)}
 					</div>
-				</div>
+				</div> */}
 
 				{/* <Divider /> */}
-				<Divider />
+				{/* <Divider /> */}
 				<div className="flex justify-between mt-6 mb-4">
 					<Profile
 						name={"peter"}
-						id={"id"}
-						timeStamp={state.question.creation_date}
+						principal={state.question.author_id}
+						minutes={state.question.creation_date}
 					/>
-					<div className="flex gap-4">
-						<Reward reward={state.question.reward} />
+					<div className="flex gap-7">
 						<Solution option={view.solution} />
+						<StyledReward reward={state.question.reward} />
 					</div>
 				</div>
 
@@ -268,9 +284,8 @@ const Question = ({ user, login }) => {
 				</p>
 
 				{state.answers.map((answer) => (
-					<div className="mt-20">
+					<div className="mt-20" key={answer.id}>
 						<Answer
-							key={answer.id}
 							author_id={answer.author_id}
 							content={answer.content}
 							tag={view?.tag ? view.tag(answer.id) : null}
@@ -312,7 +327,7 @@ const Question = ({ user, login }) => {
 											</SlateEditor>
 										</div>
 										{/* CONTINUE HERE */}
-										{/* <Button
+										{/* <DefaultButton
 											propFunction={async () => {
 												await user.market.answer_question(
 													state.question.id,
@@ -327,7 +342,7 @@ const Question = ({ user, login }) => {
 							case "login":
 								return (
 									<div data-cy="login">
-										<Button propFunction={login} text="Login" />
+										<DefaultButton propFunction={login} text="Login" />
 									</div>
 								);
 							case "menu":
@@ -355,35 +370,4 @@ const Question = ({ user, login }) => {
 	);
 };
 
-/* 
-	propFunction={async () => {
-						await user.market.answer_question(
-							Input.question_id,
-							Input.slateInput
-						);
-						Mail("new answer");
-					}}
-
-*/
-
 export default Question;
-
-/* 
-tag={
-	view?.tag?.condition(answer.id) && view.tag.component(answer.id)
-}
-action={
-	view?.answerButton?.condition(answer.id) &&
-	view.answerButton.component(answer.id)
-}
-
-*/
-
-{
-	/* <Button
-				propFunction={async () => {
-					console.log("hh");
-				}}
-				text="test"
-			/> */
-}

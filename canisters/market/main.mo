@@ -434,15 +434,22 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
     // TODO decide if I want to have return values from these functions or not
     // TODO: they should return a Result, would be way cleaner, then it's clear what happend for debugging
     public func update_open(question_id:Text) : async () {
+
         switch(DB.Questions.get_question(question_id)){
             case(null){ return };
             case(?question){
                 if(question.status != #OPEN){ return } else {
                     if(Utils.time_minutes_now() > question.status_end_date){
+                         Debug.print("hit time");
+
                         if(DB.Questions.has_answers(question.answers)){
                             ignore DB.Questions.open_to_pickanswer(question, duration_pick_answer_);
+                                    Debug.print("hit to pickanswer");
+
                         } else {
                             ignore DB.Questions.to_payout( question, #QUESTION );
+                                    Debug.print("hit to payout");
+
                         };
                     };
                 }
@@ -573,7 +580,7 @@ shared({ caller = admin }) actor class Market(arguments: Types.InstallMarketArgu
                     case(#PAYOUT(#PAY)){  
                         Debug.print(debug_show(await update_payout(question.id)));
                     };
-                    case(_){ return };
+                    case(_){ continue l };
                 };
             };
       

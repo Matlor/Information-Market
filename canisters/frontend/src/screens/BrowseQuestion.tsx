@@ -9,13 +9,15 @@ import { toNullable } from "@dfinity/utils";
 import { ActorContext } from "../components/api/Context";
 
 import { Link } from "react-router-dom";
-import Profile from "../components/core/Profile";
-import { AnswersIcon, OnIcon } from "../components/core/Icons";
+import { Profile } from "../components/core/Profile";
+import { OnIcon } from "../components/core/Icons";
 import NumAnswers from "../components/browseQuestion/NumAnswers";
 import { moStatusToString } from "../components/core/utils/conversions";
 import { TimeLeft } from "../components/question/Time";
+import { RewardTag } from "../components/core/Tag";
 
-import Filter from "../components/browseQuestion/Filter";
+import Sort from "../components/browseQuestion/Sort";
+import OpenToggle from "../components/browseQuestion/OpenToggle";
 
 import { e8sToIcp } from "../components/core/utils/conversions";
 
@@ -270,28 +272,33 @@ const BrowseQuestion = () => {
 	return (
 		<>
 			<ListWrapper>
-				<div className="flex justify-between mb-10">
+				<div className="flex justify-between mb-8">
 					<Search
 						searchLoading={loading.search}
 						setSearchedText={setSearchedText}
 					/>
-					<Filter
-						checks={{
-							status: conditions.status,
-							toggleStatus,
-							myInteractions: conditions.myInteractions,
-							toggleMyInteractions,
-						}}
-						isLoading={loading.filter}
-						setSortOrder={setSortOrder}
-						order={conditions.order}
-					/>
+					<div className="flex gap-2">
+						<OpenToggle
+							checks={{
+								status: conditions.status,
+								toggleStatus,
+								myInteractions: conditions.myInteractions,
+								toggleMyInteractions,
+							}}
+						/>
+						<Sort
+							isLoading={loading.filter}
+							setSortOrder={setSortOrder}
+							order={conditions.order}
+						/>
+					</div>
 				</div>
 
 				<ViewState>
 					<div className="flex flex-col gap-20">
 						{questionData.questions.map((questionAndAuthor: any, index) => {
 							const { question, author } = questionAndAuthor;
+							console.log(author, "author");
 							return (
 								<div key={question.id}>
 									<Link
@@ -301,15 +308,15 @@ const BrowseQuestion = () => {
 										<div className="flex justify-between items-center">
 											<div className="flex gap-10">
 												<Profile
-													id={author.id}
+													principal={author.id}
 													name={author.name}
-													timeStamp={question.creation_date}
+													minutes={question.creation_date}
 												/>
 												<NumAnswers number={question.answers.length} />
 											</div>
-											<div className="flex gap-4 items-center">
+											<div className="flex gap-10 items-center">
 												{moStatusToString(question.status) === "OPEN" && (
-													<div className="flex gap-1 items-center justify-center px-3 py-1 rounded-sm">
+													<div className="flex gap-1 items-center justify-center rounded-sm">
 														<TimeLeft
 															minutes={question.status_end_date}
 															icon={false}
@@ -317,10 +324,8 @@ const BrowseQuestion = () => {
 														<OnIcon />
 													</div>
 												)}
-												{moStatusToString(question.status)}
-												<div className="flex items-center justify-center px-3 py-1 bg-colorBackgroundComponents rounded-sm whitespace-nowrap self-stretch w-full overflow-hidden">
-													{e8sToIcp(question.reward)} ICP
-												</div>
+												{/* {moStatusToString(question.status)} */}
+												<RewardTag reward={e8sToIcp(question.reward)} />
 											</div>
 										</div>
 										<div className="text-normal">
@@ -349,59 +354,3 @@ const BrowseQuestion = () => {
 };
 
 export default BrowseQuestion;
-
-{
-	/* QUESTION LIST */
-}
-{
-	/* {loading.main ? (
-					<div className="w-full h-40 items-center flex justify-center">
-						<Loading />
-					</div>
-				) : questionData.totalQuestions === 0 ? (
-					<div className="w-full h-40 items-center flex justify-center text-normal">
-						No Questions
-					</div>
-				) : ( */
-}
-
-{
-	/* 	)} */
-}
-
-{
-	/* QUESTION MENU */
-}
-{
-	/* div className="flex flex-col sm:flex-row sm:justify-between gap-normal">
-					<div className="sm:w-1/2">
-						<Search
-							searchLoading={loading.search}
-							setSearchedText={setSearchedText}
-						/>
-					</div>
-					<div className="sm:w-1/2 flex justify-between items-center p-0 gap-[17px] sm:justify-end">
-						<Filter
-							checks={{
-								status: conditions.status,
-								setStatus,
-								myInteractions: conditions.myInteractions,
-								toggleMyInteractions,
-							}}
-							isLoading={loading.filter}
-						/>
-						<Sort setSortOrder={setSortOrder} order={conditions.order} />
-					</div>
-				</div> */
-}
-
-{
-	/* <div className="flex gap-1 items-center">
-													<div className="scale-125 mt-[2px]">
-														<AnswersIcon />
-													</div>
-													<div className="text-small-number">
-														{question.answers.length}
-													</div>
-												</div> */
-}

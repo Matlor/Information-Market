@@ -10,7 +10,7 @@ interface IInput {
 	unit: string;
 }
 
-const Input = ({ setValue, Validity, unit }: IInput) => {
+const Input = ({ setValue, Validity, unit, value }) => {
 	const [isEmpty, setIsEmpty] = useState<boolean>(true);
 
 	const handler = (e) => {
@@ -24,14 +24,16 @@ const Input = ({ setValue, Validity, unit }: IInput) => {
 	};
 
 	return (
-		<div className="w-max text-normal-number flex gap-1 py-[8px] px-[15px] items-center relative">
+		<div className="w-max text-small flex gap-1 py-[8px] px-[15px]  rounded-sm items-center relative">
 			<input
-				className="w-12 outline-none placeholder:text-normal-number  p-0 items-center"
+				className="w-10 outline-none placeholder:text-small p-0 "
 				type="number"
 				onChange={handler}
+				value={value}
 				placeholder={"0"}
+				min={1}
 			/>
-			<div>{unit}</div>
+			<div className="">{unit}</div>
 
 			{!Validity.isValid && !isEmpty ? (
 				<div className="text-normal-small text-colorRed  flex justify-center w-max absolute bottom-11 ">

@@ -1,13 +1,14 @@
 import React from "react";
-import Button from "../core/Button";
+import { DefaultButton } from "../core/Button";
 
+// TODO: Make named export
 const Menu = ({ selected, confirmFunc }) => {
 	if (selected) {
 		return (
 			<div data-cy="menu">
 				Selected Menu: Confirm your selection
 				<div> Time Left:</div>
-				<Button propFunction={confirmFunc} text="Confirm" />
+				<DefaultButton propFunction={confirmFunc} text="Confirm" />
 			</div>
 		);
 	} else {

@@ -35,7 +35,7 @@
 	}
 
 	.text-normal-number {
-		@apply text-colorText font-lato text-19 font-400 tracking-wide leading-none;
+		@apply text-colorText font-Inter text-19 font-400 tracking-wide leading-none;
 	}
 
 	.text-small-number {

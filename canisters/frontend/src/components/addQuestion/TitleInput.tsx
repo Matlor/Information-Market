@@ -1,6 +1,6 @@
 import React from "react";
 
-const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
+const TitleInput = ({ value, setValue, Validity, placeholder, maxLength }) => {
 	const onInput = (e) => {
 		e.target.style.height = "auto";
 		e.target.style.height = `${e.target.scrollHeight}px`;
@@ -12,7 +12,7 @@ const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
 
 	return (
 		<div className="relative">
-			<div className="w-max text-extrasmall-number">
+			<div className="w-max text-extrasmall-number text-colorTextGrey">
 				<div className="flex w-max">
 					{value ? value.length : 0} / {maxLength}
 				</div>
@@ -28,7 +28,7 @@ const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
 
 			<textarea
 				rows={1}
-				className="w-full mt-2 outline-none resize-none overflow-hidden title placeholder:title placeholder:opacity-50"
+				className="w-full mt-3 outline-none resize-none overflow-hidden title placeholder:title placeholder:opacity-50"
 				onInput={onInput}
 				value={value}
 				placeholder={placeholder}
@@ -37,4 +37,4 @@ const Title = ({ value, setValue, Validity, placeholder, maxLength }) => {
 	);
 };
 
-export default Title;
+export default TitleInput;

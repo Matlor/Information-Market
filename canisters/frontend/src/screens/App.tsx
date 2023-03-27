@@ -19,6 +19,7 @@ import Header from "../components/app/Header";
 import Footer from "../components/app/Footer";
 import Notifications from "./Notifications";
 import Protected from "../components/app/Protected";
+import UI from "./UI";
 
 export interface ILoggedOutUser {
 	principal: undefined;
@@ -158,196 +159,103 @@ function App() {
 	// in browser I need to do this: /#/question/1
 	return (
 		<ActorContext.Provider value={{ user, login, logout }}>
-			<PageLayout>
-				<Routes>
-					<Route
-						path="/"
-						element={
-							<>
-								<Header
-									isConnected={user.principal ? true : false}
-									login={login}
-									logout={logout}
-									avatar={""}
-								/>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<>
+							<Header
+								isConnected={user.principal ? true : false}
+								login={login}
+								logout={logout}
+								avatar={""}
+							/>
 
+							<PageLayout>
 								<BrowseQuestion />
-							</>
-						}
-					/>
-					<Route
-						path="/add-question"
-						element={
-							<>
-								<Header
-									isConnected={user.principal ? true : false}
-									login={login}
-									logout={logout}
-									avatar={""}
-								/>
+							</PageLayout>
+						</>
+					}
+				/>
+				<Route
+					path="/add-question"
+					element={
+						<>
+							<Header
+								isConnected={user.principal ? true : false}
+								login={login}
+								logout={logout}
+								avatar={""}
+							/>
+							<PageLayout>
 								<AddQuestion />
-							</>
-						}
-					/>
-					<Route
-						path="/question/:id"
-						element={
-							<>
-								{/* <Header
-									isConnected={user.principal ? true : false}
-									login={login}
-									logout={logout}
-									avatar={""}
-								/> */}
+							</PageLayout>
+						</>
+					}
+				/>
+				<Route
+					path="/question/:id"
+					element={
+						<>
+							<Header
+								isConnected={user.principal ? true : false}
+								login={login}
+								logout={logout}
+								avatar={""}
+							/>
+							<PageLayout>
 								<Question
 									question={question}
 									answers={answers}
 									user={user}
 									login={login}
 								/>
-							</>
-						}
-					/>
-					<Route
-						path="/profile"
-						element={
-							<Protected principal={user.principal}>
-								<Header
-									isConnected={user.principal ? true : false}
-									login={login}
-									logout={logout}
-									avatar={""}
-								/>
-								<Profile />
-							</Protected>
-						}
-					/>
-					<Route
-						path="/notifications"
-						element={
-							<Protected principal={user.principal}>
-								<Header
-									isConnected={user.principal ? true : false}
-									login={login}
-									logout={logout}
-									avatar={""}
-								/>
+							</PageLayout>
+						</>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<Protected principal={user.principal}>
+							<Header
+								isConnected={user.principal ? true : false}
+								login={login}
+								logout={logout}
+								avatar={""}
+							/>
+							<PageLayout>
+								<Profile logout={logout} />
+							</PageLayout>
+						</Protected>
+					}
+				/>
+				<Route
+					path="/notifications"
+					element={
+						<Protected principal={user.principal}>
+							<Header
+								isConnected={user.principal ? true : false}
+								login={login}
+								logout={logout}
+								avatar={""}
+							/>
+							<PageLayout>
 								<Notifications />
-							</Protected>
-						}
-					/>
-				</Routes>
-			</PageLayout>
+							</PageLayout>
+						</Protected>
+					}
+				/>
+				<Route
+					path="/Test"
+					element={
+						<PageLayout>
+							<UI />
+						</PageLayout>
+					}
+				/>
+			</Routes>
 		</ActorContext.Provider>
 	);
 }
 export default App;
-
-/* return (
-		<>
-			<ActorContext.Provider value={{ user, login, logout }}>
-				<LoginTest login={login} logout={logout} />
-			</ActorContext.Provider>
-		</>
-	); */
-
-/* const [plug, setPlug] = useState<IPlug>({
-		principal: undefined,
-		actors: { marketActor: plugApi.default_actor, ledgerActor: {} },
-		user: undefined,
-	}); */
-
-// TODO: rename these funcs
-/* const refreshUser = async () => {
-		try {
-			if (!(await plugApi.verifyConnection()) || !plug.principal) {
-				logout();
-				return;
-			} else {
-				const fetchedUser = fromNullable(
-					await plug.actors.marketActor.get_user(plug.principal)
-				);
-				if (!fetchedUser) {
-					logout();
-					return;
-				} else {
-					setPlug({
-						...plug,
-						user: fetchedUser,
-					});
-				}
-			}
-		} catch (error) {
-			console.error("Failed to get user: " + error);
-			logout();
-		}
-	}; */
-/* const updateUserInformation = async (newUserName, newAvatar) => {
-		if (!(await plugApi.verifyConnection())) {
-			logout();
-			return;
-		} else {
-			// TODO: allow to update avatar again
-			let updateUser = await plug.actors.marketActor.update_user(newUserName);
-			if ("err" in updateUser) {
-				console.error("Failed to update user: " + updateUser.err);
-			} else {
-				refreshUser();
-			}
-		}
-	}; */
-// TODO: change input to string if it makes sense with plug
-/* const createUser = async (
-		principal_id: string,
-		create_user,
-		name = "newUser"
-	) => {
-		let createUser = await create_user(name);
-		if (!createUser.ok) {
-			return;
-		} else {
-			return fromNullable(
-				await plug.actors.marketActor.get_user(Principal.fromText(principal_id))
-			);
-		}
-	}; */
-/* const login = async () => {
-		const plugObject = await plugApi.establishConnection(logout, login);
-		if (Object.keys(plugObject).length === 0) {
-			// TODO: replace with deep clone, or shallow copy?
-			setPlug(JSON.parse(JSON.stringify(plug)));
-			return;
-		}
-		const principal_id = window.ic.plug.principalId;
-		if (!principal_id) {
-			return;
-		} else {
-			var user: FUser = fromNullable(
-				await plug.actors.marketActor.get_user(Principal.fromText(principal_id))
-			);
-			if (!user) {
-				user = await createUser(principal_id, plugObject.market.create_user);
-				if (!user) {
-					// TODO: should certainly be user here make this type wise better
-					return;
-				}
-			}
-			setPlug({
-				principal: Principal.fromText(principal_id),
-				actors: {
-					marketActor: plugObject.market,
-					ledgerActor: plugObject.ledger,
-				},
-				user,
-			});
-		}
-	}; */
-// TODO: not logged in actor
-/* const logout = async () => {
-		setPlug({
-			principal: undefined,
-			actors: { marketActor: {}, ledgerActor: {} },
-			user: undefined,
-		});
-		navigate("/");
-	}; */

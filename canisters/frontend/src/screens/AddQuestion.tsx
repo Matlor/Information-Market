@@ -62,7 +62,7 @@ export interface IInputs {
 	};
 	title: string;
 	duration: number;
-	reward: number;
+	reward: number | undefined;
 	content: string;
 }
 
@@ -198,7 +198,7 @@ const AddQuestion = () => {
 				inputs={inputs}
 				specifications={specifications}
 			/>
-			<div className="mt-32">
+			{/* <div className="mt-32">
 				{user.principal && inputs ? (
 					<div className="h-[48px] flex ">
 						{isValid(inputs.validation) ? (
@@ -212,7 +212,7 @@ const AddQuestion = () => {
 				) : (
 					<div className="text-normal"> Login to Submit</div>
 				)}
-			</div>
+			</div> */}
 		</ListWrapper>
 	);
 };

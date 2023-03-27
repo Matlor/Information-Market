@@ -11,8 +11,9 @@ graphql.old.did
 .vessel
 
 
-canisters/frontend/src/components/question_new/*
+canisters/frontend/src/components/old/*
 
 helpers/
 helpers/get_blob.sh
+
 

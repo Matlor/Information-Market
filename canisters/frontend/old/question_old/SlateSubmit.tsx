@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import SlateEditor from "../addQuestion/SlateEditor";
-import Button from "../core/Button";
+import { ArrowButton } from "../core/Button";
 import { Mail } from "../addQuestion/mail";
 
 import { Market as IMarket } from "../../../declarations/market/market.did.d";
@@ -27,8 +27,7 @@ const SlateSubmit = ({ currentCase, Input }: ISlateSubmit) => {
 				placeholder="Answer here..."
 			/>
 			<div className="mt-[17px]">
-				<Button
-					text={"Submit"}
+				<ArrowButton
 					propFunction={async () => {
 						await user.market.answer_question(
 							Input.question_id,
@@ -36,6 +35,7 @@ const SlateSubmit = ({ currentCase, Input }: ISlateSubmit) => {
 						);
 						Mail("new answer");
 					}}
+					text="Submit"
 				/>
 			</div>
 		</div>

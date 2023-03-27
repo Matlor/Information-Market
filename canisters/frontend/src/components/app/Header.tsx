@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import Button from "../../components/core/Button";
+import { LoginButton, AskButton } from "../../components/core/Button";
 import Logo from "./Logo";
 import { Link, useLocation } from "react-router-dom";
 import { ILoggedInUser, ILoggedOutUser } from "../../screens/App";
@@ -11,6 +11,7 @@ import {
 	NavigationAddIcon,
 	NavigationProfileIcon,
 } from "../core/Icons";
+import { ProfilePicture } from "../core/Profile";
 
 // -------------- Types --------------
 /* interface IHeader {
@@ -28,14 +29,21 @@ const Header = () => {
 
 	const Switch = ({ user, children }) => {
 		let { pathname } = useLocation();
-		const isProfilePath = pathname.includes("/profile");
 
 		return (
 			<>
 				{!user.principal ? (
-					<Button propFunction={login} text={"Login"} font={"text-normal"} />
-				) : isProfilePath ? (
-					<Button propFunction={logout} text={"Logout"} font={"text-normal"} />
+					<>
+						<Link to="/add-question">
+							{/* TODO: scale */}
+							{/* lg:scale-125 */}
+							<div className="text-normal w-max ">
+								{/* <NavigationAddIcon /> */}
+								<AskButton />
+							</div>
+						</Link>
+						<LoginButton propFunction={login} text={"Login"} />
+					</>
 				) : (
 					<>{children}</>
 				)}
@@ -45,36 +53,41 @@ const Header = () => {
 
 	// scale-75 lg:scale-100
 	return (
-		<div className="">
-			<div className="flex justify-end ">
+		<div className="px-4 lg:px-20 ">
+			{/* TODO: */}
+			{/* <div className="flex justify-end ">
 				{user!.principal && (
 					<div>{user!.principal.toString().slice(0, 11)}</div>
 				)}
-			</div>
-			<div className="flex justify-between flex-row p-0 mb-10 lg:mb-[101px] pt-[47px]">
+			</div> */}
+			{/* mb-24 */}
+			<div className="flex justify-between flex-row mb-14 pt-5">
 				<div className="flex-none w-max">
 					<Link to="/" className="">
 						<Logo />
 					</Link>
 				</div>
 
-				{/* used to be: gap-[5.2vw] */}
-				<div className="flex flex-row w-fit items-center gap-10 lg:gap-[100px] py-[10px] m-0 ">
+				{/* used to be: gap-[5.2vw] lg:gap-[100px] */}
+				<div className="flex flex-row w-fit items-center gap-12  py-[10px]">
 					<Switch user={user}>
 						<Link to="/add-question">
-							<div className="text-normal w-max lg:scale-125">
-								<NavigationAddIcon />
+							{/* TODO: scale */}
+							{/* lg:scale-125 */}
+							<div className="text-normal w-max ">
+								{/* <NavigationAddIcon /> */}
+								<AskButton />
 							</div>
 						</Link>
 						<Link to="/notifications">
-							<div className="text-normal w-max lg:scale-125">
+							<div className="text-normal w-max ">
 								<NavigationNotificationIcon />
 							</div>
 						</Link>
 
 						<Link to="/profile">
-							<div className="text-normal w-max lg:scale-125">
-								<NavigationProfileIcon />
+							<div className="text-normal w-max">
+								<ProfilePicture principal={user.principal} />
 							</div>
 						</Link>
 					</Switch>
