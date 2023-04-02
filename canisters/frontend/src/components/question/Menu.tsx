@@ -1,14 +1,32 @@
 import React from "react";
-import { DefaultButton } from "../core/Button";
 
 // TODO: Make named export
-const Menu = ({ selected, confirmFunc }) => {
-	if (selected) {
+// selected, confirmFunc
+const Menu = ({ text, button, time }) => {
+	return (
+		<div
+			data-cy="menu"
+			className="flex flex-col gap-6 p-5 border-2 rounded-1 w-11"
+		>
+			<div className="self-end">
+				{time && <div className="text-sm text-gray-500 ">{time}</div>}
+			</div>
+			<div className="flex items-baseline justify-between">
+				<div>{text}</div>
+				{button && <button className="">{button}</button>}
+			</div>
+		</div>
+	);
+};
+
+export default Menu;
+
+/* if (selected) {
 		return (
 			<div data-cy="menu">
 				Selected Menu: Confirm your selection
 				<div> Time Left:</div>
-				<DefaultButton propFunction={confirmFunc} text="Confirm" />
+				<Button onClick={confirmFunc} text="Confirm" />
 			</div>
 		);
 	} else {
@@ -18,7 +36,4 @@ const Menu = ({ selected, confirmFunc }) => {
 				<div> Time Left:</div>
 			</div>
 		);
-	}
-};
-
-export default Menu;
+	} */

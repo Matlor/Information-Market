@@ -13,7 +13,7 @@ import { Profile } from "../components/core/Profile";
 import { OnIcon } from "../components/core/Icons";
 import NumAnswers from "../components/browseQuestion/NumAnswers";
 import { moStatusToString } from "../components/core/utils/conversions";
-import { TimeLeft } from "../components/question/Time";
+import { TimeLeft } from "../components/core/Time";
 import { RewardTag } from "../components/core/Tag";
 
 import Sort from "../components/browseQuestion/Sort";
@@ -252,13 +252,13 @@ const BrowseQuestion = () => {
 	const ViewState = ({ children }) => {
 		if (loading.main) {
 			return (
-				<div className="w-full h-40 items-center flex justify-center">
+				<div className="flex items-center justify-center w-full h-40">
 					<Loading />
 				</div>
 			);
 		} else if (questionData.totalQuestions === 0) {
 			return (
-				<div className="w-full h-40 items-center flex justify-center text-normal">
+				<div className="flex items-center justify-center w-full h-40 text-normal">
 					No Questions
 				</div>
 			);
@@ -279,12 +279,13 @@ const BrowseQuestion = () => {
 					/>
 					<div className="flex gap-2">
 						<OpenToggle
-							checks={{
-								status: conditions.status,
-								toggleStatus,
-								myInteractions: conditions.myInteractions,
-								toggleMyInteractions,
-							}}
+							isOn={
+								!conditions?.status?.pickanswer &&
+								!conditions?.status?.disputable &&
+								!conditions?.status?.arbitration &&
+								!conditions?.status?.payout &&
+								!conditions?.status?.closed
+							}
 						/>
 						<Sort
 							isLoading={loading.filter}
@@ -305,7 +306,7 @@ const BrowseQuestion = () => {
 										to={`/question/${question.id}`}
 										className="flex flex-col gap-3"
 									>
-										<div className="flex justify-between items-center">
+										<div className="flex items-center justify-between">
 											<div className="flex gap-10">
 												<Profile
 													principal={author.id}
@@ -314,9 +315,9 @@ const BrowseQuestion = () => {
 												/>
 												<NumAnswers number={question.answers.length} />
 											</div>
-											<div className="flex gap-10 items-center">
+											<div className="flex items-center gap-10">
 												{moStatusToString(question.status) === "OPEN" && (
-													<div className="flex gap-1 items-center justify-center rounded-sm">
+													<div className="flex items-center justify-center gap-1 rounded-sm">
 														<TimeLeft
 															minutes={question.status_end_date}
 															icon={false}
@@ -341,10 +342,8 @@ const BrowseQuestion = () => {
 			</ListWrapper>
 			<div className="flex justify-center mt-20">
 				<Pagination
-					pagination={{
-						pageIndex: conditions.pagination.pageIndex,
-						questionsPerPage: conditions.pagination.questionsPerPage,
-					}}
+					pageIndex={conditions.pagination.pageIndex}
+					questionsPerPage={conditions.pagination.questionsPerPage}
 					totalQuestions={questionData.totalQuestions}
 					setPageIndex={setPageIndex}
 				/>

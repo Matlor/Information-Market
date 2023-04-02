@@ -1,53 +1,26 @@
 import React from "react";
 
 interface ILoading {
-	color?: "colorLines" | "colorBackgroundComponents";
-	style?: "filled" | "empty" | "loading";
+	style?: "filled" | "loading" | "empty";
 }
 
-const Loading = ({ color = "colorLines", style = "loading" }: ILoading) => {
-	const basicStyle = "w-[26px] h-[26px] rounded-full";
-	const borderWidth = "border-[4px]";
+const Loading = ({ style = "loading" }: ILoading) => {
+	let className = `w-5 h-5 rounded-full border-2 border-gray-500`;
+
 	switch (style) {
 		case "filled":
-			return (
-				<div>
-					<div
-						className={`${
-							color === "colorLines"
-								? "bg-colorLines"
-								: "bg-colorBackgroundComponents"
-						} ${basicStyle}  shadow-md`}
-					></div>
-				</div>
-			);
-		case "empty":
-			return (
-				<div>
-					<div
-						className={`${
-							color === "colorLines"
-								? "border-colorLines"
-								: "border-colorBackgroundComponents"
-						} ${basicStyle} ${borderWidth}  shadow-md`}
-					></div>
-				</div>
-			);
+			className += " bg-gray-500";
+			break;
 		case "loading":
-			return (
-				<div>
-					<div
-						className={`${
-							color === "colorLines"
-								? "border-l-[transparent] border-colorLines"
-								: "border-l-[transparent] border-colorBackgroundComponents"
-						} ${basicStyle} ${borderWidth} rounded-full animate-spin`}
-					></div>
-				</div>
-			);
+			className += " animate-spin border  border-l-white ";
+			break;
+		case "empty":
 		default:
-			return <div></div>;
+			className += " border border-gray-500 ";
+			break;
 	}
+
+	return <div className={className}></div>;
 };
 
 export default Loading;

@@ -1,542 +1,500 @@
-import React, { ReactElement } from "react";
-import { RiFontSize } from "react-icons/ri";
+import React from "react";
 
-export const SearchIcon = ({ size = 20 }): ReactElement => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 22 20"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path
-				d="M15.3565 14.3542L20 18.8M16.2263 9.01188C16.2263 12.8844 13.0416 16.0238 9.11314 16.0238C5.18466 16.0238 2 12.8844 2 9.01188C2 5.13932 5.18466 2 9.11314 2C13.0416 2 16.2263 5.13932 16.2263 9.01188Z"
-				stroke="black"
-				strokeWidth="2.4"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-			/>
-		</svg>
-	);
-};
+// fix the settings icon
+// only allow for specific sizes (for this I need tailwind config)
+// maybe use this:         preserveAspectRatio="xMidYMid meet"
 
-export const IconArrowUpDown = ({
-	isFull,
-	fullColor = "#969696",
-	emptyColor = "#EBF2ED",
-	size = 12,
-}) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 14 9"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path
-				d="M0.101701 0.742969L6.63212 8.82646C6.81904 9.05785 7.17897 9.05785 7.36788 8.82646L13.8983 0.742969C14.1409 0.441536 13.9222 0 13.5304 0H0.469584C0.0778387 0 -0.140902 0.441536 0.101701 0.742969Z"
-				fill={isFull ? fullColor : emptyColor}
-			/>
-		</svg>
-	);
-};
-
-// sideways icon
-export const ArrowIcon = ({ size = 20, fill = "0F1318" }) => {
-	return (
-		<div data-cy="arrow">
-			<svg
-				width={size}
-				height={size}
-				viewBox="0 0 12 22"
-				fill={fill}
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M10.467 2L1.86174 10.0991C1.3945 10.5389 1.3945 11.2814 1.86174 11.7212L10.467 19.8203"
-					stroke={fill}
-					strokeWidth="2.85874"
-					strokeLinecap="round"
-				/>
-			</svg>
-		</div>
-	);
-};
-
-export const DownArrowIcon = ({ size = 20, fill }) => {
-	return (
-		<div>
-			<svg
-				width={size}
-				height={size}
-				viewBox="0 0 6 9"
-				fill={fill}
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M2.94122 8.27167C3.06106 8.39151 3.25535 8.39151 3.37519 8.27167L5.32806 6.3188C5.4479 6.19897 5.4479 6.00467 5.32806 5.88483C5.20822 5.765 5.01392 5.765 4.89409 5.88483L3.1582 7.62072L1.42232 5.88483C1.30248 5.765 1.10819 5.765 0.988349 5.88483C0.868511 6.00467 0.868511 6.19897 0.988349 6.3188L2.94122 8.27167ZM2.85134 0.0546875L2.85134 8.05469H3.46507L3.46507 0.0546875L2.85134 0.0546875Z"
-					fill={fill}
-				/>
-			</svg>
-		</div>
-	);
-};
-
-export const LinkIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 12 11"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path
-				d="M6.13734 8.50311C5.53484 8.51368 4.9141 8.65203 4.48626 9.07639L4.04356 9.51549C3.69907 9.85553 3.23451 10.0462 2.75047 10.0462C2.26643 10.0462 1.80188 9.85553 1.45739 9.51549C1.28945 9.34793 1.15621 9.14889 1.06531 8.92977C0.974396 8.71065 0.927602 8.47575 0.927602 8.23851C0.927602 8.00128 0.974396 7.76638 1.06531 7.54726C1.15621 7.32813 1.28945 7.12909 1.45739 6.96154L3.6156 4.82174C3.96008 4.4817 4.42464 4.29104 4.90868 4.29104C5.39272 4.29104 5.85728 4.4817 6.20176 4.82174C6.37926 4.99808 6.51702 5.20944 6.60673 5.44161C6.63654 5.51873 6.73356 5.54816 6.78618 5.48439V5.48439V5.48439C7.14152 5.1318 7.25157 4.57298 6.90802 4.20891C6.88919 4.18896 6.87005 4.16928 6.85061 4.14989C6.33368 3.63844 5.63586 3.35156 4.90868 3.35156C4.1815 3.35156 3.48368 3.63844 2.96676 4.14989L0.803948 6.30809C0.549195 6.5609 0.347 6.86163 0.209019 7.19295C0.0710382 7.52426 0 7.87961 0 8.23851C0 8.59742 0.0710382 8.95277 0.209019 9.28408C0.347 9.6154 0.549195 9.91613 0.803948 10.1689C1.32087 10.6804 2.01869 10.9673 2.74587 10.9673C3.47305 10.9673 4.17087 10.6804 4.6878 10.1689L6.20406 8.66514C6.26413 8.60556 6.22194 8.50311 6.13734 8.50311V8.50311V8.50311Z"
-				fill="#0F1318"
-			/>
-			<path
-				d="M10.2301 0.807543C10.2329 0.802043 10.2318 0.795389 10.2274 0.791081C9.71123 0.284166 9.01657 0 8.29283 0C7.56565 0 6.86783 0.286874 6.3509 0.798324L4.83137 2.30536C4.77251 2.36375 4.81385 2.46415 4.89676 2.46415V2.46415V2.46415C5.50186 2.46399 6.12772 2.33055 6.55733 1.90443L6.99514 1.47017C7.33963 1.13014 7.80419 0.939475 8.28823 0.939475C8.77227 0.939475 9.23683 1.13014 9.58131 1.47017C9.74925 1.63773 9.88249 1.83677 9.9734 2.05589C10.0643 2.27502 10.1111 2.50992 10.1111 2.74715C10.1111 2.98438 10.0643 3.21929 9.9734 3.43841C9.88249 3.65753 9.74925 3.85657 9.58131 4.02413L7.4231 6.16393C7.07862 6.50397 6.61406 6.69463 6.13002 6.69463C5.64598 6.69463 5.18142 6.50397 4.83694 6.16393C4.6573 5.98546 4.51836 5.77112 4.42874 5.53565C4.3996 5.45907 4.30627 5.42534 4.24792 5.48287V5.48287V5.48287C3.89258 5.83546 3.78253 6.39428 4.12608 6.75835C4.14491 6.7783 4.16405 6.79798 4.18349 6.81737C4.70042 7.32882 5.39824 7.6157 6.12542 7.6157C6.8526 7.6157 7.55042 7.32882 8.06734 6.81737L10.2256 4.67757C10.4798 4.42446 10.6815 4.12363 10.8191 3.79235C10.9567 3.46108 11.0276 3.10588 11.0276 2.74715C11.0276 2.38842 10.9567 2.03323 10.8191 1.70195C10.6828 1.37384 10.4836 1.0756 10.2328 0.823995C10.2285 0.819651 10.2274 0.813028 10.2301 0.807543V0.807543Z"
-				fill="#0F1318"
-			/>
-		</svg>
-	);
-};
-
-export const NavigationProfileIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 21 18"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<circle cx="10.3989" cy="4.35985" r="4.35985" fill="#D0D3D8" />
-			<path
-				fillRule="evenodd"
-				clipRule="evenodd"
-				d="M20.7982 17.3254H0C1.39157 12.9071 5.52117 9.70312 10.3991 9.70312C15.277 9.70312 19.4066 12.9071 20.7982 17.3254Z"
-				fill="#D0D3D8"
-			/>
-		</svg>
-	);
-};
-
-export const NavigationNotificationIcon = ({ size = 20, fill = "#000000" }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 16 18"
-			fill={fill}
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path
-				d="M12.6667 5.76239C12.6667 4.49933 12.175 3.28799 11.2998 2.39487C10.4247 1.50175 9.23768 1 8 1C6.76232 1 5.57534 1.50175 4.70017 2.39487C3.825 3.28799 3.33333 4.49933 3.33333 5.76239C3.33333 11.3185 1 12.906 1 12.906H15C15 12.906 12.6667 11.3185 12.6667 5.76239Z"
-				fill={fill}
-			/>
-			<path
-				d="M9.34555 16.0809C9.20881 16.3215 9.01254 16.5212 8.7764 16.66C8.54025 16.7988 8.27252 16.8718 8 16.8718C7.72748 16.8718 7.45975 16.7988 7.2236 16.66C6.98746 16.5212 6.79119 16.3215 6.65444 16.0809M12.6667 5.76239C12.6667 4.49933 12.175 3.28799 11.2998 2.39487C10.4247 1.50175 9.23768 1 8 1C6.76232 1 5.57534 1.50175 4.70017 2.39487C3.825 3.28799 3.33333 4.49933 3.33333 5.76239C3.33333 11.3185 1 12.906 1 12.906H15C15 12.906 12.6667 11.3185 12.6667 5.76239Z"
-				stroke={fill}
-				strokeWidth="1.8082"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-			/>
-		</svg>
-	);
-};
-
-export const NavigationAddIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 21 21"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<circle cx="10.5" cy="10.5" r="10.5" fill="#D0D3D8" />
-			<line
-				x1="10.693"
-				y1="6.33757"
-				x2="10.693"
-				y2="14.7353"
-				stroke="white"
-				strokeWidth="1.51889"
-				strokeLinecap="round"
-			/>
-			<line
-				x1="6.00945"
-				y1="10.7093"
-				x2="15.1228"
-				y2="10.7093"
-				stroke="white"
-				strokeWidth="1.51889"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-};
-
-export const TimeIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 15 15"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<path
-				d="M10.1562 8.4375H7.03125C6.90693 8.4375 6.7877 8.38811 6.69979 8.30021C6.61189 8.2123 6.5625 8.09307 6.5625 7.96875V3.59375C6.5625 3.46943 6.61189 3.3502 6.69979 3.26229C6.7877 3.17439 6.90693 3.125 7.03125 3.125C7.15557 3.125 7.2748 3.17439 7.36271 3.26229C7.45061 3.3502 7.5 3.46943 7.5 3.59375V7.5H10.1562C10.2806 7.5 10.3998 7.54939 10.4877 7.63729C10.5756 7.7252 10.625 7.84443 10.625 7.96875C10.625 8.09307 10.5756 8.2123 10.4877 8.30021C10.3998 8.38811 10.2806 8.4375 10.1562 8.4375V8.4375ZM7.5 0C3.3575 0 0 3.35813 0 7.5C0 11.6419 3.3575 15 7.5 15C11.6419 15 15 11.6419 15 7.5C15 3.35813 11.6419 0 7.5 0Z"
-				fill="#0F1318"
-			/>
-		</svg>
-	);
-};
-
-// sideways arrow
-// "#0F1318"
-export const ArrowSmall = ({ size = 12, fill = "#0F1318" }) => {
-	return (
-		<div>
-			<svg
-				width={size}
-				height={size}
-				viewBox="0 0 5 9"
-				fill={fill}
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M1.49937 0.897258L3.72617 3.93426M1.27576 7.86296L3.50939 4.30669"
-					stroke={fill}
-					strokeWidth="1.75647"
-					strokeLinecap="round"
-				/>
-			</svg>
-		</div>
-	);
-};
-
-export const AnswersIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 12 12"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<rect width="11.4261" height="8.37911" rx="4.18955" fill="#D0D3D8" />
-			<path
-				d="M4.75628 7.70913L7.69723 7.84916L4.73646 10.6533L4.75628 7.70913Z"
-				fill="#D0D3D8"
-			/>
-		</svg>
-	);
-};
-
-export const OnIcon = () => {
-	return <div className="bg-colorIcon rounded-full w-3 h-3"></div>;
-};
-
-export const OngoingIcon = () => {
-	return <img src="../../../assets/ongoing.png" alt="Image description" />;
-};
-
-/* const RoundWrapper = ({ children }) => {
-	return (
-		<div className="flex bg-[#F8F8F8] rounded-full p-2  items-center justify-center">
-			{children}
-		</div>
-	);
-};
-
-export const OnIcon = () => {
-	return (
-		<RoundWrapper>
-			<div className="bg-colorIcon rounded-full w-3 h-3"></div>
-		</RoundWrapper>
-	);
-};
-
-export const OngoingIcon = () => {
-	return (
-		<RoundWrapper>
-			<div className="rounded-full w-3 h-3">
-				<img src="../../../assets/ongoing.png" alt="Image description" />
-			</div>
-		</RoundWrapper>
-	);
-};
-
-export const ClosedIcon = ({ size, fill }) => {
-	return (
-		<RoundWrapper>
-			<DownArrowIcon size={size} />
-		</RoundWrapper>
-	);
-}; */
-
-export const ClearIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 15 16"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<line
-				x1="4.4373"
-				y1="4.89844"
-				x2="10.3754"
-				y2="10.8366"
-				stroke="#D0D3D8"
-				strokeWidth="1.51889"
-				strokeLinecap="round"
-			/>
-			<line
-				x1="4.2168"
-				y1="11.301"
-				x2="10.6609"
-				y2="4.85686"
-				stroke="#D0D3D8"
-				strokeWidth="1.51889"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-};
-
-/* export const NavigationSettingsIcon = ({ size = 20 }) => {
-	return (
-		<div>
-			<svg
-				width={size}
-				height={size}
-				viewBox="0 0 19 15"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<line
-					x1="1.3243"
-					y1="1.6757"
-					x2="17.2159"
-					y2="1.6757"
-					stroke="#D0D3D8"
-					strokeWidth="2.64861"
-					strokeLinecap="round"
-				/>
-				<line
-					x1="1.3243"
-					y1="7.6757"
-					x2="17.2159"
-					y2="7.6757"
-					stroke="#D0D3D8"
-					strokeWidth="2.64861"
-					strokeLinecap="round"
-				/>
-				<line
-					x1="1.3243"
-					y1="13.6757"
-					x2="17.2159"
-					y2="13.6757"
-					stroke="#D0D3D8"
-					strokeWidth="2.64861"
-					strokeLinecap="round"
-				/>
-			</svg>
-		</div>
-	);
-}; */
-
+// TODO:
+// On Icon
+// Sort Icon composition
+// Improve Link icon
+// Loading thing add here and not as separate component (maybe?)
+// Logo here as well
+// Settings Icon
+// Passing tailwind colors does not work
+// Maybe add another wrapper for the this stuff
 /* 
-export const FilterIcon = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 23 18"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<line
-				x1="20"
-				y1="4"
-				x2="11"
-				y2="4"
-				stroke="black"
-				strokeWidth="2"
-				strokeLinecap="round"
-			/>
-			<line
-				x1="2"
-				y1="14"
-				x2="11"
-				y2="14"
-				stroke="black"
-				strokeWidth="2"
-				strokeLinecap="round"
-			/>
-			<circle
-				cx="3.91086"
-				cy="3.91141"
-				r="2.91141"
-				transform="rotate(90 3.91086 3.91141)"
-				stroke="black"
-				strokeWidth="2"
-			/>
-			<circle
-				cx="18.0891"
-				cy="14.0652"
-				r="2.91141"
-				transform="rotate(-90 18.0891 14.0652)"
-				stroke="black"
-				strokeWidth="2"
-			/>
-		</svg>
-	);
-}; */
-
-// 90 degree angle
-/* export const EckigerArrow = ({ size=20 }): ReactElement => {
-	return (
-		<div>
-			eriu
-			<svg
-				width={size}
-				height={size}
-				viewBox="0 0 13 20"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M3.18328 3L10.0818 9.04937M3 16.5325L9.34969 9.85079"
-					stroke="#969696"
-					strokeWidth="3.5"
-					strokeLinecap="round"
-				/>
-			</svg>
-		</div>
-	);
-}; */
-
-/* 
-export const IconPaginationDec = ({ size=20 }): ReactElement => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 12 18"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-			className="self-center"
-		>
-			<path
-				d="M9.98772 16.4453L2 9.78883M9.82836 1.55472L2.47609 8.90699"
-				stroke="#969696"
-				strokeWidth="2.67884"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-};
-
-export const IconPaginationInc = ({ size=20 }): ReactElement => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 12 18"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-			className="self-center"
-		>
-			<path
-				d="M2.20001 1.55472L10.1877 8.21115M1.98779 16.4453L9.34006 9.093"
-				stroke="#969696"
-				strokeWidth="2.67884"
-				strokeLinecap="round"
-			/>
-		</svg>
-	);
-};
- */
-
-/* 
-
-
-export const IconDate = ({ size = 20 }): ReactElement => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 15 15"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
-			<g clipPath="url(#clip0_448_462)">
-				<path
-					d="M6.04219 11.895V9.39469V6.89438H5.44875C5.02373 7.12094 4.61296 7.37328 4.21875 7.65V8.30156C4.57031 8.06062 5.12719 7.72031 5.39812 7.57313H5.40937V11.895H6.04219ZM7.15594 10.6716C7.2 11.2716 7.71281 11.9897 8.7525 11.9897C9.93188 11.9897 10.6275 10.9903 10.6275 9.29813C10.6275 7.485 9.89531 6.79688 8.79656 6.79688C7.92844 6.79688 7.11188 7.42688 7.11188 8.49281C7.11188 9.58031 7.88438 10.1522 8.68313 10.1522C9.3825 10.1522 9.83625 9.79969 9.97969 9.41156H10.005C10.0012 10.6453 9.57281 11.4403 8.78156 11.4403C8.15906 11.4403 7.83656 11.0184 7.79719 10.6716H7.15594ZM9.92438 8.49937C9.92438 9.15188 9.40031 9.60563 8.81438 9.60563C8.25094 9.60563 7.74188 9.24656 7.74188 8.48062C7.74188 7.70906 8.2875 7.34625 8.83687 7.34625C9.43031 7.34625 9.92438 7.71937 9.92438 8.49937Z"
-					fill="#969696"
-				/>
-				<path
-					d="M3.28125 0C3.40557 0 3.5248 0.049386 3.61271 0.137294C3.70061 0.225201 3.75 0.34443 3.75 0.46875V0.9375H11.25V0.46875C11.25 0.34443 11.2994 0.225201 11.3873 0.137294C11.4752 0.049386 11.5944 0 11.7188 0C11.8431 0 11.9623 0.049386 12.0502 0.137294C12.1381 0.225201 12.1875 0.34443 12.1875 0.46875V0.9375H13.125C13.6223 0.9375 14.0992 1.13504 14.4508 1.48667C14.8025 1.83831 15 2.31522 15 2.8125V13.125C15 13.6223 14.8025 14.0992 14.4508 14.4508C14.0992 14.8025 13.6223 15 13.125 15H1.875C1.37772 15 0.900806 14.8025 0.549175 14.4508C0.197544 14.0992 0 13.6223 0 13.125V2.8125C0 2.31522 0.197544 1.83831 0.549175 1.48667C0.900806 1.13504 1.37772 0.9375 1.875 0.9375H2.8125V0.46875C2.8125 0.34443 2.86189 0.225201 2.94979 0.137294C3.0377 0.049386 3.15693 0 3.28125 0V0ZM1.875 1.875C1.62636 1.875 1.3879 1.97377 1.21209 2.14959C1.03627 2.3254 0.9375 2.56386 0.9375 2.8125V13.125C0.9375 13.3736 1.03627 13.6121 1.21209 13.7879C1.3879 13.9637 1.62636 14.0625 1.875 14.0625H13.125C13.3736 14.0625 13.6121 13.9637 13.7879 13.7879C13.9637 13.6121 14.0625 13.3736 14.0625 13.125V2.8125C14.0625 2.56386 13.9637 2.3254 13.7879 2.14959C13.6121 1.97377 13.3736 1.875 13.125 1.875H1.875Z"
-					fill="#969696"
-				/>
-				<path
-					d="M2.34375 3.75C2.34375 3.62568 2.39314 3.50645 2.48104 3.41854C2.56895 3.33064 2.68818 3.28125 2.8125 3.28125H12.1875C12.3118 3.28125 12.431 3.33064 12.519 3.41854C12.6069 3.50645 12.6562 3.62568 12.6562 3.75V4.6875C12.6562 4.81182 12.6069 4.93105 12.519 5.01896C12.431 5.10686 12.3118 5.15625 12.1875 5.15625H2.8125C2.68818 5.15625 2.56895 5.10686 2.48104 5.01896C2.39314 4.93105 2.34375 4.81182 2.34375 4.6875V3.75Z"
-					fill="#969696"
-				/>
-			</g>
-			<defs>
-				<clipPath id="clip0_448_462">
-					<rect width="15" height="15" fill="white" />
-				</clipPath>
-			</defs>
-		</svg>
-	);
-};
+width={size}
+height={size}
+viewBox="0 0 14 16"
+fill={fillColor}
+stroke={borderColor}
+strokeWidth={strokeWidth}
+strokeLinecap="round"
+strokeLinejoin="round"
 
 */
 
-/* export const IconAnswers = ({ size = 20 }): ReactElement => {
+interface IconProps {
+	size?: number;
+	fillColor?: string;
+	borderColor?: string;
+	strokeWidth?: number;
+}
+
+/* const IconWrapper = (IconComponent) => {
+	const WrappedIcon = ({
+		size = 200,
+		fillColor = "none",
+		borderColor = "black",
+		strokeWidth = 0.8,
+		...props
+	}: IconProps) => {
+		return (
+			<IconComponent
+				size={size}
+				fillColor={fillColor}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+				{...props}
+			/>
+		);
+	};
+	return WrappedIcon;
+}; */
+
+const defaultSize = 20;
+const defaultFillColor = "none";
+const defaultBorderColor = "black";
+const defaultStrokeWidth = 0.8;
+
+export const BellIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 14 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path d="M8.36133 14.3024C8.24071 14.5145 8.06759 14.6907 7.85929 14.8131C7.651 14.9356 7.41484 15 7.17446 15C6.93408 15 6.69792 14.9356 6.48963 14.8131C6.28133 14.6907 6.10821 14.5145 5.98759 14.3024M11.2908 5.20074C11.2908 4.08664 10.8571 3.01816 10.0851 2.23037C9.31317 1.44258 8.26617 1 7.17446 1C6.08275 1 5.03575 1.44258 4.26379 2.23037C3.49183 3.01816 3.05815 4.08664 3.05815 5.20074C3.05815 10.1016 1 11.5019 1 11.5019H13.3489C13.3489 11.5019 11.2908 10.1016 11.2908 5.20074Z" />
+		</svg>
+	);
+};
+
+export const ClockIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
 	return (
 		<svg
 			width={size}
 			height={size}
 			viewBox="0 0 16 16"
-			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
+			{/* Clock face (circle) */}
 			<path
-				d="M14 1.48858C14.2652 1.48858 14.5196 1.59148 14.7071 1.77466C14.8946 1.95783 15 2.20627 15 2.46531V10.2792C15 10.5383 14.8946 10.7867 14.7071 10.9699C14.5196 11.153 14.2652 11.2559 14 11.2559H11.5C11.1895 11.2559 10.8833 11.3266 10.6056 11.4622C10.3279 11.5978 10.0863 11.7947 9.9 12.0373L8 14.5114L6.1 12.0373C5.91371 11.7947 5.67214 11.5978 5.39443 11.4622C5.11672 11.3266 4.81049 11.2559 4.5 11.2559H2C1.73478 11.2559 1.48043 11.153 1.29289 10.9699C1.10536 10.7867 1 10.5383 1 10.2792V2.46531C1 2.20627 1.10536 1.95783 1.29289 1.77466C1.48043 1.59148 1.73478 1.48858 2 1.48858H14ZM2 0.511841C1.46957 0.511841 0.960859 0.717653 0.585786 1.084C0.210714 1.45035 0 1.94722 0 2.46531L0 10.2792C0 10.7973 0.210714 11.2942 0.585786 11.6605C0.960859 12.0269 1.46957 12.2327 2 12.2327H4.5C4.65525 12.2327 4.80836 12.268 4.94721 12.3358C5.08607 12.4036 5.20685 12.5021 5.3 12.6234L7.2 15.0974C7.29315 15.2188 7.41393 15.3172 7.55279 15.385C7.69164 15.4528 7.84475 15.4881 8 15.4881C8.15524 15.4881 8.30836 15.4528 8.44721 15.385C8.58607 15.3172 8.70685 15.2188 8.8 15.0974L10.7 12.6234C10.7931 12.5021 10.9139 12.4036 11.0528 12.3358C11.1916 12.268 11.3448 12.2327 11.5 12.2327H14C14.5304 12.2327 15.0391 12.0269 15.4142 11.6605C15.7893 11.2942 16 10.7973 16 10.2792V2.46531C16 1.94722 15.7893 1.45035 15.4142 1.084C15.0391 0.717653 14.5304 0.511841 14 0.511841H2Z"
-				fill="#969696"
+				d="M0.999997 8.00001C0.999997 11.866 4.134 15 8 15C11.866 15 15 11.866 15 8.00001C15 4.13402 11.866 1.00001 8 1.00001C4.134 1.00001 0.999997 4.13402 0.999997 8.00001Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
 			/>
-		</svg>
-	);
-};
-
-export const IconInfinity = ({ size = 20 }) => {
-	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 45 22"
-			fill="none"
-			xmlns="http://www.w3.org/2000/svg"
-		>
+			{/* Clock hands */}
 			<path
-				d="M17.7959 4.87265C16.5839 3.66033 15.0397 2.83465 13.3584 2.50004C11.6772 2.16542 9.93446 2.33689 8.35068 2.99278C6.7669 3.64866 5.4132 4.75949 4.46078 6.18477C3.50836 7.61005 3 9.28577 3 11C3 12.7142 3.50836 14.3899 4.46078 15.8152C5.4132 17.2405 6.7669 18.3513 8.35068 19.0072C9.93446 19.6631 11.6772 19.8345 13.3584 19.4999C15.0397 19.1653 16.5839 18.3396 17.7959 17.1273C19.7189 15.3833 21.3129 13.3079 22.5019 11C23.6908 8.6921 25.2848 6.61666 27.2079 4.87265C28.4198 3.66033 29.9641 2.83465 31.6453 2.50004C33.3265 2.16542 35.0692 2.33689 36.653 2.99278C38.2368 3.64866 39.5905 4.75949 40.5429 6.18477C41.4953 7.61005 42.0037 9.28577 42.0037 11C42.0037 12.7142 41.4953 14.3899 40.5429 15.8152C39.5905 17.2405 38.2368 18.3513 36.653 19.0072C35.0692 19.6631 33.3265 19.8345 31.6453 19.4999C29.9641 19.1653 28.4198 18.3396 27.2079 17.1273C25.2848 15.3833 23.6908 13.3079 22.5019 11C21.3129 8.6921 19.7189 6.61666 17.7959 4.87265"
-				stroke="#969696"
-				strokeWidth="4.33333"
+				d="M10.36 8.55077H7.63778V4.6619"
+				fill="none"
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
 		</svg>
 	);
-}; */
+};
+
+export const SearchIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 18 18"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path
+				d="M12.8725 12.7659L17 17M13.6456 7.67798C13.6456 11.3661 10.8148 14.356 7.32279 14.356C3.83081 14.356 1 11.3661 1 7.67798C1 3.98983 3.83081 1 7.32279 1C10.8148 1 13.6456 3.98983 13.6456 7.67798Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const AnswerIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 17 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path
+				d="M6.26345 1C3.35653 1 1 3.35653 1 6.26345C1 9.17037 3.35653 11.5269 6.26345 11.5269H6.81682L6.79175 15L10.7251 11.5269H11.1339C14.0409 11.5269 16.3974 9.17037 16.3974 6.26345C16.3974 3.35653 14.0409 1 11.1339 1H6.26345Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+// TODO: somehow this looks not coherent to the others
+export const SettingsIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 14 14"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M1.75 0C2.7165 -4.2247e-08 3.5 0.783502 3.5 1.75C3.5 2.7165 2.7165 3.5 1.75 3.5C0.783502 3.5 4.2247e-08 2.7165 0 1.75C-4.2247e-08 0.783502 0.783502 4.2247e-08 1.75 0Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<path
+				d="M1.75 5.25C2.7165 5.25 3.5 6.0335 3.5 7C3.5 7.9665 2.7165 8.75 1.75 8.75C0.783502 8.75 4.2247e-08 7.9665 0 7C-4.2247e-08 6.0335 0.783502 5.25 1.75 5.25Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<path
+				d="M1.75 10.5C2.7165 10.5 3.5 11.2835 3.5 12.25C3.5 13.2165 2.7165 14 1.75 14C0.783502 14 4.2247e-08 13.2165 0 12.25C-4.2247e-08 11.2835 0.783502 10.5 1.75 10.5Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+/* 
+import React from "react";
+
+// TODO: correct color
+const Settings = () => {
+	return (
+		<div data-cy="settings" className="self-center ">
+			<svg
+				width="4"
+				height="20"
+				viewBox="0 0 4 20"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<circle
+					cx="2"
+					cy="10"
+					r="2"
+					transform="rotate(-90 2 10)"
+					fill="#0F1318"
+				/>
+				<circle
+					cx="2"
+					cy="18"
+					r="2"
+					transform="rotate(-90 2 18)"
+					fill="#0F1318"
+				/>
+				<circle
+					cx="2"
+					cy="2"
+					r="2"
+					transform="rotate(-90 2 2)"
+					fill="#0F1318"
+				/>
+			</svg>
+		</div>
+	);
+};
+
+*/
+
+export const ArrowIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 9 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M1.00015 15L7.95557 8L1.00015 1"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const CrossIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 16 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M1 1.00003L15 15M1 15L15 1"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const TriangleIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 12 12"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M10.7952 0.626019L5.63449 6.59998C5.63435 6.59999 5.6342 6.59999 5.63405 6.6L0.47336 0.626019L10.7952 0.626019Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const SortIcon = ({
+	size,
+	fillColor1,
+	fillColor2,
+	borderColor,
+	strokeWidth,
+}) => {
+	return (
+		<div className="flex flex-col gap-1 w-max">
+			<div className="rotate-180">
+				<TriangleIcon
+					size={size}
+					fillColor={fillColor2}
+					borderColor={borderColor}
+					strokeWidth={strokeWidth}
+				/>
+			</div>
+			<TriangleIcon
+				size={size}
+				fillColor={fillColor1}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+			/>
+		</div>
+	);
+};
+
+export const OnIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 16 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={0}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<svg
+				width="16"
+				height="16"
+				viewBox="0 0 16 16"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+					fill={borderColor}
+				/>
+				<path
+					d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
+					fill={fillColor}
+				/>
+			</svg>
+		</svg>
+	);
+};
+
+export const OngoingIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 16 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M15.0262 7.12336C14.8118 5.58067 14.0961 4.15126 12.9894 3.05532C11.8828 1.95938 10.4464 1.25771 8.90172 1.05839C7.35701 0.859076 5.78961 1.17317 4.44098 1.95229C3.09234 2.73142 2.03728 3.93235 1.43832 5.37009M1 1.86354V5.37009H4.50655M1 8.87664C1.21439 10.4193 1.93005 11.8487 3.03674 12.9447C4.14344 14.0406 5.57977 14.7423 7.12448 14.9416C8.66918 15.1409 10.2366 14.8268 11.5852 14.0477C12.9339 13.2686 13.9889 12.0677 14.5879 10.6299M15.0262 14.1365V10.6299H11.5196"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const ClosedIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 16 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M5.66667 8L7.22222 9.55556L10.3333 6.44444M15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};
+
+export const LinkIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	return (
+		<svg
+			width={size}
+			height={size}
+			viewBox="0 0 16 16"
+			fill={fillColor}
+			stroke={borderColor}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M8.89947 12.4092C8.02624 12.4246 7.12631 12.6257 6.50791 13.2424L5.86337 13.8852C5.36385 14.3809 4.69022 14.6589 3.98833 14.6589C3.28645 14.6589 2.61281 14.3809 2.11329 13.8852C1.86977 13.6409 1.67657 13.3507 1.54475 13.0312C1.41293 12.7118 1.34507 12.3693 1.34507 12.0234C1.34507 11.6775 1.41293 11.3351 1.54475 11.0156C1.67657 10.6961 1.86977 10.4059 2.11329 10.1616L5.24281 7.04189C5.74233 6.54613 6.41596 6.26815 7.11785 6.26815C7.81973 6.26815 8.49337 6.54613 8.99288 7.04189C9.2504 7.29912 9.45023 7.60746 9.58031 7.94616C9.62333 8.05815 9.76422 8.10075 9.84032 8.008C10.3561 7.49346 10.5162 6.68064 10.0178 6.14928C9.99024 6.11989 9.96222 6.09092 9.93374 6.06236C9.18417 5.31669 8.17229 4.89844 7.11785 4.89844C6.0634 4.89844 5.05152 5.31669 4.30195 6.06236L1.16577 9.20893C0.796362 9.57751 0.503169 10.016 0.303089 10.499C0.103009 10.9821 0 11.5001 0 12.0234C0 12.5467 0.103009 13.0648 0.303089 13.5478C0.503169 14.0308 0.796362 14.4693 1.16577 14.8379C1.91533 15.5835 2.92721 16.0018 3.98166 16.0018C5.03611 16.0018 6.04799 15.5835 6.79755 14.8379L8.99685 12.6448C9.08393 12.5579 9.02243 12.4092 8.89947 12.4092Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+			<path
+				d="M14.8337 1.17736C14.8377 1.16934 14.8361 1.15964 14.8297 1.15334C14.0812 0.414296 13.0739 0 12.0245 0C10.97 0 9.95813 0.41825 9.20856 1.16392L7.00454 3.36175C6.91921 3.44684 6.97947 3.59262 7.09998 3.59262C7.97696 3.5924 8.88434 3.39843 9.50531 2.77916L10.1427 2.14345C10.6423 1.64769 11.3159 1.36971 12.0178 1.36971C12.7197 1.36971 13.3933 1.64769 13.8928 2.14345C14.1363 2.38775 14.3295 2.67794 14.4614 2.99741C14.5932 3.31688 14.661 3.65936 14.661 4.00523C14.661 4.35111 14.5932 4.69358 14.4614 5.01306C14.3295 5.33253 14.1363 5.62272 13.8928 5.86701L10.7633 8.98675C10.2638 9.48251 9.59015 9.76048 8.88827 9.76048C8.18639 9.76048 7.51275 9.48251 7.01323 8.98675C6.75259 8.72639 6.55104 8.41368 6.4211 8.07013C6.37904 7.95894 6.24354 7.9101 6.15912 7.9938C5.64338 8.50834 5.48325 9.32116 5.98164 9.85252C6.0092 9.88191 6.03723 9.91088 6.0657 9.93944C6.81527 10.6851 7.82715 11.1034 8.8816 11.1034C9.93605 11.1034 10.9479 10.6851 11.6975 9.93944L14.827 6.8197C15.1956 6.45067 15.4881 6.01207 15.6877 5.52909C15.8872 5.0461 15.99 4.52824 15.99 4.00523C15.99 3.48222 15.8872 2.96436 15.6877 2.48138C15.49 2.00301 15.2012 1.56819 14.8376 1.20137C14.8313 1.19502 14.8297 1.18537 14.8337 1.17736Z"
+				fill={fillColor}
+				stroke={borderColor}
+				strokeWidth={strokeWidth}
+				strokeLinecap="round"
+				strokeLinejoin="round"
+			/>
+		</svg>
+	);
+};

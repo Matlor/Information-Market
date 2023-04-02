@@ -1,20 +1,14 @@
 import React from "react";
-import { ToggleButton } from "../core/Button";
+import { OnIcon } from "../core/Icons";
 
-const OpenToggle = ({ checks }) => {
+const OpenToggle = ({ isOn = false, toggleStatus }) => {
 	return (
-		<div>
-			<ToggleButton
-				propFunction={checks.toggleStatus}
-				text="Open"
-				isChecked={
-					!checks.status.pickanswer &&
-					!checks.status.disputable &&
-					!checks.status.arbitration &&
-					!checks.status.payout &&
-					!checks.status.closed
-				}
+		<div onClick={toggleStatus} className="flex items-center gap-1">
+			<OnIcon
+				fillColor={`${isOn ? "#267DFF" : "#707072"}`}
+				borderColor={`${isOn ? "#ECFCFF" : "#F6F6F6"}`}
 			/>
+			<div className="text-md">Open</div>
 		</div>
 	);
 };

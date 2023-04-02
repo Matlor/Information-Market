@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Editor = ({ children }) => {
+const Drag = ({ children }) => {
 	const [thing, setThing] = useState({
 		height: 100,
 		startY: null,
@@ -69,10 +69,10 @@ const Editor = ({ children }) => {
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
 			>
-				<div className="h-full">{children}</div>
+				{children}
 			</div>
 		</div>
 	);
 };
 
-export default Editor;
+export default Drag;

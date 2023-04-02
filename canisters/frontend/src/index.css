@@ -1,10 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
-
-@import "./fonts/fonts.css";
 
 @tailwind base;
 @tailwind components;
@@ -16,35 +11,63 @@
 	}
 
 	.scrollbar::-webkit-scrollbar-thumb {
-		@apply bg-colorIcon;
+		@apply bg-colorIconGrey;
 		border-radius: 100vh;
 	}
 }
 
-@layer components {
-	.title {
+@layer base {
+	.h1 {
+		@apply text-lg text-gray-800 font-600 font-inter leading-lg;
+	}
+
+	.text-large {
+		@apply tracking-wide text-gray-800 text-md font-450 leading-md;
+	}
+
+	.text-small {
+		@apply text-sm tracking-wide text-gray-800 font-400;
+	}
+
+	.text-extra-small {
+		@apply text-xs tracking-wide text-gray-500 font-400;
+	}
+}
+
+/* 
+@layer base {
+	html {
+		@apply inter;
+	}
+}
+ */
+/* @layer components {
+	
+} */
+
+/* .title {
 		@apply text-colorDark font-Inter text-22 font-450 leading-32;
 	}
 
 	.text-normal {
-		@apply text-colorText font-Inter text-19 font-400 tracking-wide leading-28;
+		@apply tracking-wide text-colorText font-Inter text-19 font-400 leading-28;
 	}
 
 	.text-small {
-		@apply text-colorText font-Inter text-14 tracking-wide;
+		@apply tracking-wide text-colorText font-Inter text-14;
 	}
 
 	.text-normal-number {
-		@apply text-colorText font-Inter text-19 font-400 tracking-wide leading-none;
+		@apply leading-none tracking-wide text-colorText font-Inter text-19 font-400;
 	}
 
 	.text-small-number {
-		@apply text-colorText font-Inter text-14 font-400  tracking-wide leading-none;
+		@apply leading-none tracking-wide text-colorText font-Inter text-14 font-400;
 	}
 
 	.text-extrasmall-number {
-		@apply text-colorText font-Inter text-12 font-400  tracking-wide leading-none;
-	}
+		@apply leading-none tracking-wide text-colorText font-Inter text-12 font-400;
+	} 
 
 	.editor-wrapper {
 		@apply text-normal;
@@ -55,23 +78,23 @@
 	}
 
 	.editor-wrapper ul {
-		@apply list-disc ml-6;
+		@apply ml-6 list-disc;
 	}
 
 	.editor-wrapper ol {
-		@apply list-decimal ml-6;
+		@apply ml-6 list-decimal;
 	}
-
-	/* .editor-wrapper h2 {
+*/
+/* .editor-wrapper h2 {
 		@apply ;
 	} */
-
+/* 
 	.px-field {
 		@apply px-10 md:px-10;
 	}
 
 	.p-content {
-		@apply px-field py-10;
+		@apply py-10 px-field;
 	}
 
 	.gap-small {
@@ -94,6 +117,12 @@
 	}
 
 	.center {
-		@apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
-	}
-}
+		@apply absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2;
+	} */
+
+/* 
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
+
+
+*/

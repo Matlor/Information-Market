@@ -101,7 +101,7 @@ export const SlateEditor = ({
 		}
 	};
 
-	// previously: className="h-[400px] flex flex-col gap-[37px] p-content items-start bg-colorBackgroundComponents shadow-md rounded-lg"
+	// previously: className="h-[400px] flex flex-col gap-[37px] p-content items-start  shadow-md rounded-lg"
 	// to stretch they just all need h-full (including parent div, not necessarily anything about min-h)
 	return (
 		/* Is about the state of an object and Slate itself provides that state to UI component further down */
@@ -122,8 +122,9 @@ export const SlateEditor = ({
 		>
 			{children}
 
+			{/*  editor-wrapper */}
 			<Editable
-				className="w-full h-full  editor-wrapper"
+				className="w-full h-full "
 				renderElement={renderElement}
 				renderLeaf={renderLeaf}
 				placeholder={placeholder}

@@ -1,13 +1,15 @@
 import React from "react";
-import { ArrowButton } from "../components/core/Button";
+import Button from "../components/core/Button";
 
 const Profile = ({ logout }) => {
 	return (
 		<div>
-			<div className="text-normal flex justify-start mb-3">Coming Soon</div>
-			<div data-cy="divider" className="w-full h-[1px]  bg-colorLines"></div>
-			<div className="mt-10 flex justify-start">
-				<ArrowButton propFunction={logout} text="Logout" />
+			<div className="flex justify-start gap-2 mb-3 text-normal">
+				Coming Soon
+			</div>
+			<div data-cy="divider" className="w-full h-[1px] "></div>
+			<div className="flex justify-start mt-10">
+				<Button onClick={logout}>hello</Button>
 			</div>
 		</div>
 	);

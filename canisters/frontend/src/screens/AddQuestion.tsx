@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState, useReducer, useContext } from "react";
 import ListWrapper from "../components/app/ListWrapper";
 import Submit from "../components/addQuestion/Submit";
-import Form from "../components/addQuestion/Form";
+import Form from "../components/addQuestion/FormView";
 import { e8sToIcp } from "../components/core/utils/conversions";
 import { ActorContext } from "../components/api/Context";
 
@@ -204,13 +204,13 @@ const AddQuestion = () => {
 						{isValid(inputs.validation) ? (
 							<Submit inputs={inputs} loggedInUser={user} />
 						) : (
-							<div className="text-normal  self-center ml-6">
+							<div className="  self-center ml-6">
 								Fill out the form correctly
 							</div>
 						)}
 					</div>
 				) : (
-					<div className="text-normal"> Login to Submit</div>
+					<div className=""> Login to Submit</div>
 				)}
 			</div> */}
 		</ListWrapper>

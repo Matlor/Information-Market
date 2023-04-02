@@ -27,18 +27,18 @@ import Dots from "../components/question/Settings";
 import Divider from "../components/question/Divider";
 import Solution from "../components/question/Solution";
 import Answer from "../components/question/Answer";
-import { SelectedTag, WinnerTag, StyledReward } from "../components/core/Tag";
+import { SelectedTag, RewardIconTag } from "../components/core/Tag";
 import Reward from "../components/question/Reward";
 
 import { ArrowButton, DefaultButton } from "../components/core/Button";
 import Menu from "../components/question/Menu";
-import { TimeLeft } from "../components/question/Time";
+import { TimeLeft } from "../components/core/Time";
 import Drag from "../components/question/Drag";
 import {
 	SlateEditor,
 	TollbarInstance,
 } from "../components/addQuestion/SlateEditor";
-import { ArrowIcon, ArrowSmall } from "../components/core/Icons";
+import { ArrowIcon } from "../components/core/Icons";
 
 import Mail from "../components/core/Mail";
 
@@ -171,8 +171,8 @@ const Question = ({ user, login }) => {
 				return (
 					<DefaultButton
 						customButton={
-							<button className="flex gap-2 items-center">
-								<p>Select</p> <ArrowSmall />
+							<button className="flex items-center gap-2">
+								<p>Select</p> <ArrowIcon />
 							</button>
 						}
 						propFunction={async () => setSelected(id)}
@@ -211,7 +211,7 @@ const Question = ({ user, login }) => {
 			tag: (id) => {
 				return (
 					state.question.finalWinner === id && (
-						<WinnerTag reward={state.question.reward} />
+						<RewardIconTag reward={state.question.reward} />
 					)
 				);
 			},
@@ -234,7 +234,7 @@ const Question = ({ user, login }) => {
 	return (
 		<div className="w-full">
 			<div>
-				{/* <div className="flex w-full justify-between my-6">
+				{/* <div className="flex justify-between w-full my-6">
 					<Link to="/" className="self-center">
 						<ArrowIcon />
 					</Link>
@@ -272,11 +272,11 @@ const Question = ({ user, login }) => {
 					/>
 					<div className="flex gap-7">
 						<Solution option={view.solution} />
-						<StyledReward reward={state.question.reward} />
+						<RewardIconTag reward={state.question.reward} />
 					</div>
 				</div>
 
-				<div data-cy="title" className="title mb-6 mt-4">
+				<div data-cy="title" className="mt-4 mb-6">
 					{state.question.title}
 				</div>
 				<p data-cy="text" className="text-normal">
@@ -305,8 +305,8 @@ const Question = ({ user, login }) => {
 							case "login":
 								return (
 									<Drag>
-										<div className="px-6 py-4 flex  justify-center flex-col ">
-											{/* <div className="flex h-[6px] w-6 self-center px-8 rounded-md bg-colorText"></div>
+										<div className="flex flex-col justify-center px-6 py-4 ">
+											{/* <div className="flex h-[6px] w-6 self-center px-8 rounded-md "></div>
 											 */}
 											<SlateEditor
 												inputValue={answerInput}
@@ -314,11 +314,11 @@ const Question = ({ user, login }) => {
 												placeholder="Answer..."
 											>
 												<div className="flex mb-2">
-													<div className="flex-1 flex">
+													<div className="flex flex-1">
 														{/* <TollbarInstance /> */}
 													</div>
-													<div className="flex h-[6px] w-6 self-center px-8 rounded-md bg-colorText"></div>
-													<div className="flex flex-1 justify-end">
+													<div className="flex h-[6px] w-6 self-center px-8 rounded-md "></div>
+													<div className="flex justify-end flex-1">
 														<TimeLeft
 															minutes={state.question.status_end_date}
 														/>

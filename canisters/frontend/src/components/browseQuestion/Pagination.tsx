@@ -7,53 +7,49 @@ interface Pagination {
 }
 
 interface IPagination {
-	pagination: Pagination;
+	pageIndex: number;
+	questionsPerPage: number;
 	totalQuestions: number;
 	setPageIndex: (pageIndex: number) => void;
 }
 
 const Pagination = ({
-	pagination,
+	pageIndex,
+	questionsPerPage,
 	totalQuestions,
 	setPageIndex,
 }: IPagination) => {
 	var previousOpacity = "";
-	if (pagination.pageIndex == 0) {
+	if (pageIndex == 0) {
 		previousOpacity = "opacity-[0.5]";
 	} else {
 		previousOpacity = "";
 	}
 
 	const decreaseIndex = () => {
-		if (pagination.pageIndex == 0) {
+		if (pageIndex == 0) {
 			return;
 		} else {
-			setPageIndex(pagination.pageIndex - 1);
+			setPageIndex(pageIndex - 1);
 		}
 	};
 
 	var nextOpacity = "";
-	if (
-		pagination.pageIndex ==
-		Math.ceil(totalQuestions / pagination.questionsPerPage) - 1
-	) {
+	if (pageIndex == Math.ceil(totalQuestions / questionsPerPage) - 1) {
 		nextOpacity = "opacity-[0.5]";
 	} else {
 		nextOpacity = "";
 	}
 
 	const increaseIndex = () => {
-		if (
-			pagination.pageIndex ==
-			Math.ceil(totalQuestions / pagination.questionsPerPage) - 1
-		) {
+		if (pageIndex == Math.ceil(totalQuestions / questionsPerPage) - 1) {
 			return;
 		} else {
-			setPageIndex(pagination.pageIndex + 1);
+			setPageIndex(pageIndex + 1);
 		}
 	};
 
-	//if (pagination.questionsPerPage >= totalQuestions) return <></>;
+	//if (questionsPerPage >= totalQuestions) return <></>;
 
 	return (
 		<div className="flex mt-[17px] gap-[33px] justify-between items-center px-[30px] py-[20px] w-min rounded-lg">
@@ -64,13 +60,11 @@ const Pagination = ({
 				</div>
 			</button>
 
-			<div className="text-normal text-colorBackground px-4 py-1 rounded-lg bg-colorIcon ">
-				{pagination.pageIndex + 1}
-			</div>
+			<div className="px-4 py-1 rounded-lg ">{pageIndex + 1}</div>
 
 			<button onClick={increaseIndex}>
 				<div className={`flex gap-[17px] ${nextOpacity} items-center`}>
-					<div className="text-normal ">Prev</div>
+					<div className="">Prev</div>
 
 					<div className="rotate-180">
 						<ArrowIcon />

@@ -19,7 +19,6 @@ import Header from "../components/app/Header";
 import Footer from "../components/app/Footer";
 import Notifications from "./Notifications";
 import Protected from "../components/app/Protected";
-import UI from "./UI";
 
 export interface ILoggedOutUser {
 	principal: undefined;
@@ -244,14 +243,6 @@ function App() {
 								<Notifications />
 							</PageLayout>
 						</Protected>
-					}
-				/>
-				<Route
-					path="/Test"
-					element={
-						<PageLayout>
-							<UI />
-						</PageLayout>
 					}
 				/>
 			</Routes>

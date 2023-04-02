@@ -50,29 +50,16 @@ const valuesPerSubmitStage = (
 export const SubmitStages = ({ stages }) => {
 	return (
 		<div className="flex gap-[17px]">
-			<Loading
-				color="colorBackgroundComponents"
-				style={valuesPerSubmitStage(stages).style[0]}
-			/>
-			<Loading
-				color="colorBackgroundComponents"
-				style={valuesPerSubmitStage(stages).style[1]}
-			/>
-			<Loading
-				color="colorBackgroundComponents"
-				style={valuesPerSubmitStage(stages).style[2]}
-			/>
+			<Loading color="" style={valuesPerSubmitStage(stages).style[0]} />
+			<Loading color="" style={valuesPerSubmitStage(stages).style[1]} />
+			<Loading color="" style={valuesPerSubmitStage(stages).style[2]} />
 		</div>
 	);
 };
 
 export const SubmitStagesText = ({ stages }) => {
 	return (
-		<div
-			className={`${
-				stages === "error" ? "text-colorRed" : ""
-			} text-normal ml-4`}
-		>
+		<div className={`${stages === "error" ? "" : ""}  ml-4`}>
 			{valuesPerSubmitStage(stages).text}
 		</div>
 	);

@@ -1,10 +1,6 @@
 import React, { useContext } from "react";
-import { useState, useEffect } from "react";
 import { Principal } from "@dfinity/principal";
-import { fromNullable } from "@dfinity/utils";
-import { blobToBase64Str } from "../core/utils/conversions";
-import { ActorContext } from "../../components/api/Context";
-import { TimeStamp } from "../question/Time";
+import { TimeStamp } from "./Time";
 
 export const ProfilePicture = ({
 	principal,
@@ -19,8 +15,6 @@ export const ProfilePicture = ({
 			(max - min + 1));
 
 	const idNumber = stringToNumber(principal.toString());
-
-	//return <div className="w-[35px] h-[35px] rounded-full bg-colorLines"></div>;
 	const gridSize = 5;
 	const squareSize = size / gridSize;
 	const colors = [
@@ -35,7 +29,7 @@ export const ProfilePicture = ({
 		"#EE5C41",
 		//"#0c1b23", // added new color (mediumslateblue)
 		//"#5f667a",
-		"#000000",
+		//"#000000",
 	];
 
 	const squares = Array.from({ length: gridSize * gridSize }, (_, i) => {
@@ -82,15 +76,14 @@ interface IProfile {
 
 export const Profile = ({ principal, name, minutes }: IProfile) => {
 	return (
-		<div data-cy="profile">
-			<div className="flex items-center p-0 gap-2.5 w-max">
-				<ProfilePicture principal={principal} size={32} />
-				<div className="flex flex-col">
-					<div className="text-small text-colorDark font-600 max-w-[100px] text-ellipsis overflow-hidden whitespace-nowrap">
-						{name && name}
-					</div>
-					{minutes && <TimeStamp minutes={minutes} />}
-				</div>
+		<div data-cy="profile" className="flex items-center gap-1">
+			<ProfilePicture principal={principal} size={32} />
+			<div className="flex flex-col justify-center">
+				<p className="text-gray-800 text-extra-small font-600 max-w-[100px] text-ellipsis overflow-hidden whitespace-nowrap">
+					{name && name}
+				</p>
+
+				{minutes && <TimeStamp minutes={minutes} />}
 			</div>
 		</div>
 	);
