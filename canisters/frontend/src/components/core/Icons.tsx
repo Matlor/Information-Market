@@ -32,27 +32,6 @@ interface IconProps {
 	strokeWidth?: number;
 }
 
-/* const IconWrapper = (IconComponent) => {
-	const WrappedIcon = ({
-		size = 200,
-		fillColor = "none",
-		borderColor = "black",
-		strokeWidth = 0.8,
-		...props
-	}: IconProps) => {
-		return (
-			<IconComponent
-				size={size}
-				fillColor={fillColor}
-				borderColor={borderColor}
-				strokeWidth={strokeWidth}
-				{...props}
-			/>
-		);
-	};
-	return WrappedIcon;
-}; */
-
 const defaultSize = 20;
 const defaultFillColor = "none";
 const defaultBorderColor = "black";
@@ -180,85 +159,45 @@ export const SettingsIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 0.2857;
+	const width = size * aspectRatio;
+	console.log(size);
+
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
-			viewBox="0 0 14 14"
+			viewBox="0 0 4 14"
 			fill={fillColor}
-			stroke={borderColor}
-			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
-			<path
-				d="M1.75 0C2.7165 -4.2247e-08 3.5 0.783502 3.5 1.75C3.5 2.7165 2.7165 3.5 1.75 3.5C0.783502 3.5 4.2247e-08 2.7165 0 1.75C-4.2247e-08 0.783502 0.783502 4.2247e-08 1.75 0Z"
+			<circle
+				cx="1.81481"
+				cy="1.81481"
+				r="1.41481"
 				fill={fillColor}
 				stroke={borderColor}
 				strokeWidth={strokeWidth}
-				strokeLinecap="round"
-				strokeLinejoin="round"
 			/>
-			<path
-				d="M1.75 5.25C2.7165 5.25 3.5 6.0335 3.5 7C3.5 7.9665 2.7165 8.75 1.75 8.75C0.783502 8.75 4.2247e-08 7.9665 0 7C-4.2247e-08 6.0335 0.783502 5.25 1.75 5.25Z"
+			<circle
+				cx="1.81481"
+				cy="6.99841"
+				r="1.41481"
 				fill={fillColor}
 				stroke={borderColor}
 				strokeWidth={strokeWidth}
-				strokeLinecap="round"
-				strokeLinejoin="round"
 			/>
-			<path
-				d="M1.75 10.5C2.7165 10.5 3.5 11.2835 3.5 12.25C3.5 13.2165 2.7165 14 1.75 14C0.783502 14 4.2247e-08 13.2165 0 12.25C-4.2247e-08 11.2835 0.783502 10.5 1.75 10.5Z"
+			<circle
+				cx="1.81481"
+				cy="12.1859"
+				r="1.41481"
 				fill={fillColor}
 				stroke={borderColor}
 				strokeWidth={strokeWidth}
-				strokeLinecap="round"
-				strokeLinejoin="round"
 			/>
 		</svg>
 	);
 };
-
-/* 
-import React from "react";
-
-// TODO: correct color
-const Settings = () => {
-	return (
-		<div data-cy="settings" className="self-center ">
-			<svg
-				width="4"
-				height="20"
-				viewBox="0 0 4 20"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<circle
-					cx="2"
-					cy="10"
-					r="2"
-					transform="rotate(-90 2 10)"
-					fill="#0F1318"
-				/>
-				<circle
-					cx="2"
-					cy="18"
-					r="2"
-					transform="rotate(-90 2 18)"
-					fill="#0F1318"
-				/>
-				<circle
-					cx="2"
-					cy="2"
-					r="2"
-					transform="rotate(-90 2 2)"
-					fill="#0F1318"
-				/>
-			</svg>
-		</div>
-	);
-};
-
-*/
 
 export const ArrowIcon = ({
 	size = defaultSize,
@@ -473,6 +412,25 @@ export const LinkIcon = ({
 		<svg
 			width={size}
 			height={size}
+			viewBox="0 0 24 24"
+			fill={fillColor}
+			stroke-width={strokeWidth}
+			stroke={borderColor}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+			/>
+		</svg>
+	);
+};
+
+{
+	/* <svg
+			width={size}
+			height={size}
 			viewBox="0 0 16 16"
 			fill={fillColor}
 			stroke={borderColor}
@@ -495,6 +453,5 @@ export const LinkIcon = ({
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
-		</svg>
-	);
-};
+		</svg> */
+}
