@@ -5,11 +5,11 @@ interface ILoading {
 }
 
 const Loading = ({ style = "loading" }: ILoading) => {
-	let className = `w-5 h-5 rounded-full border-2 border-gray-500`;
+	let className = `w-5 h-5 rounded-full border-4  border-gray-500`;
 
 	switch (style) {
 		case "filled":
-			className += " bg-gray-500";
+			className += " bg-gray-500 border-none ";
 			break;
 		case "loading":
 			className += " animate-spin border  border-l-white ";

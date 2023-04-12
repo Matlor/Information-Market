@@ -18,7 +18,7 @@ Default.args = {
 	tag: <RewardTag reward={3.11} />,
 	action: (
 		<Button
-			size="md"
+			size="sm"
 			arrow={true}
 			color="gray"
 			text="Dispute"

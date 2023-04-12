@@ -30,7 +30,7 @@ Default.args = {
 	maxLength: 100,
 };
 
-export const Invalid = Template.bind({});
+/* export const Invalid = Template.bind({});
 Invalid.args = {
 	placeholder: "Enter a title",
 	maxLength: 100,
@@ -39,3 +39,4 @@ Invalid.args = {
 		invalidMessage: "Title should be at least 10 characters",
 	},
 };
+ */

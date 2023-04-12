@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
-import ListWrapper from "../components/app/ListWrapper";
 import Search from "../components/browseQuestion/Search";
 import Pagination from "../components/browseQuestion/Pagination";
 import Loading from "../components/core/Loading";
@@ -7,7 +6,6 @@ import { Question as IQuestion } from "../../declarations/market/market.did.d";
 import { Principal } from "@dfinity/principal";
 import { toNullable } from "@dfinity/utils";
 import { ActorContext } from "../components/api/Context";
-
 import { Link } from "react-router-dom";
 import { Profile } from "../components/core/Profile";
 import { OnIcon } from "../components/core/Icons";
@@ -15,11 +13,12 @@ import NumAnswers from "../components/browseQuestion/NumAnswers";
 import { moStatusToString } from "../components/core/utils/conversions";
 import { TimeLeft } from "../components/core/Time";
 import { RewardTag } from "../components/core/Tag";
-
-import Sort from "../components/browseQuestion/Sort";
+import { Sort } from "../components/browseQuestion/Sort";
 import OpenToggle from "../components/browseQuestion/OpenToggle";
-
 import { e8sToIcp } from "../components/core/utils/conversions";
+import { List } from "../components/app/Layout";
+
+import QuestionPreview from "../components/browseQuestion/QuestionPreview";
 
 // ---------- Types ----------
 export interface IStatusMap {
@@ -234,7 +233,6 @@ const BrowseQuestion = () => {
 	};
 
 	const toggleStatus = () => {
-		console.log("toggleStatus");
 		dispatch({ type: "toggleStatus" });
 	};
 
@@ -263,21 +261,23 @@ const BrowseQuestion = () => {
 				</div>
 			);
 		} else {
-			return <div>{children}</div>;
+			return <>{children}</>;
 		}
 	};
 
 	console.log(questionData.questions, "questions");
 
+	console.log(conditions, "conditions");
+
 	return (
 		<>
-			<ListWrapper>
-				<div className="flex justify-between mb-8">
+			<List>
+				<div className="flex justify-between">
 					<Search
 						searchLoading={loading.search}
 						setSearchedText={setSearchedText}
 					/>
-					<div className="flex gap-2">
+					<div className="flex gap-8 ">
 						<OpenToggle
 							isOn={
 								!conditions?.status?.pickanswer &&
@@ -286,6 +286,7 @@ const BrowseQuestion = () => {
 								!conditions?.status?.payout &&
 								!conditions?.status?.closed
 							}
+							onClick={toggleStatus}
 						/>
 						<Sort
 							isLoading={loading.filter}
@@ -296,51 +297,22 @@ const BrowseQuestion = () => {
 				</div>
 
 				<ViewState>
-					<div className="flex flex-col gap-20">
-						{questionData.questions.map((questionAndAuthor: any, index) => {
-							const { question, author } = questionAndAuthor;
-							console.log(author, "author");
-							return (
-								<div key={question.id}>
-									<Link
-										to={`/question/${question.id}`}
-										className="flex flex-col gap-3"
-									>
-										<div className="flex items-center justify-between">
-											<div className="flex gap-10">
-												<Profile
-													principal={author.id}
-													name={author.name}
-													minutes={question.creation_date}
-												/>
-												<NumAnswers number={question.answers.length} />
-											</div>
-											<div className="flex items-center gap-10">
-												{moStatusToString(question.status) === "OPEN" && (
-													<div className="flex items-center justify-center gap-1 rounded-sm">
-														<TimeLeft
-															minutes={question.status_end_date}
-															icon={false}
-														/>
-														<OnIcon />
-													</div>
-												)}
-												{/* {moStatusToString(question.status)} */}
-												<RewardTag reward={e8sToIcp(question.reward)} />
-											</div>
-										</div>
-										<div className="text-normal">
-											{question.title.charAt(0).toUpperCase() +
-												question.title.slice(1)}
-										</div>
-									</Link>
-								</div>
-							);
-						})}
-					</div>
+					{questionData.questions.map((questionAndAuthor: any, index) => {
+						const { question, author } = questionAndAuthor;
+						console.log(author, "author");
+						return (
+							<Link to={`/question/${question.id}`} key={question.id}>
+								<QuestionPreview
+									key={question.id}
+									question={question}
+									author={author}
+								/>
+							</Link>
+						);
+					})}
 				</ViewState>
-			</ListWrapper>
-			<div className="flex justify-center mt-20">
+			</List>
+			<div className="flex justify-center">
 				<Pagination
 					pageIndex={conditions.pagination.pageIndex}
 					questionsPerPage={conditions.pagination.questionsPerPage}
@@ -353,3 +325,6 @@ const BrowseQuestion = () => {
 };
 
 export default BrowseQuestion;
+{
+	/* {moStatusToString(question.status)} */
+}

@@ -1,14 +1,14 @@
 import React from "react";
 import { OnIcon } from "../core/Icons";
 
-const OpenToggle = ({ isOn = false, toggleStatus }) => {
+const OpenToggle = ({ isOn = false, onClick }) => {
 	return (
-		<div onClick={toggleStatus} className="flex items-center gap-1">
+		<div onClick={onClick} className="flex items-center gap-2">
 			<OnIcon
-				fillColor={`${isOn ? "#267DFF" : "#707072"}`}
-				borderColor={`${isOn ? "#ECFCFF" : "#F6F6F6"}`}
+				fillColor={`${isOn ? "blue-500" : "gray-100"}`}
+				borderColor={`${isOn ? "blue-100" : "gray-500"}`}
 			/>
-			<div className="text-md">Open</div>
+			<div className="text-large">Open</div>
 		</div>
 	);
 };

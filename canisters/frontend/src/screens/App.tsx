@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../index.css";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import PageLayout from "../components/app/PageLayout";
+import { Page } from "../components/app/Layout";
 import BrowseQuestion from "./BrowseQuestion";
 import AddQuestion from "./AddQuestion";
 import Question from "./Question";
@@ -20,6 +20,8 @@ import Footer from "../components/app/Footer";
 import Notifications from "./Notifications";
 import Protected from "../components/app/Protected";
 
+import { ArrowIcon } from "../components/core/Icons";
+
 export interface ILoggedOutUser {
 	principal: undefined;
 	market: IDefaultActor;
@@ -31,6 +33,11 @@ export interface ILoggedInUser {
 	market: IMarketActor;
 	ledger: ILedgerActor;
 }
+
+export type ICurrentUser = ILoggedOutUser | ILoggedInUser;
+
+export type LoginFunction = () => Promise<void>;
+export type LogoutFunction = () => Promise<void>;
 
 // -----------------  Question Sample Data (delete later) -----------------------
 
@@ -107,7 +114,7 @@ const user = 1;
 function App() {
 	const navigate = useNavigate();
 
-	const [user, setUser] = useState<ILoggedInUser | ILoggedOutUser>({
+	const [user, setUser] = useState<ICurrentUser>({
 		principal: undefined,
 		market: defaultActor,
 		ledger: undefined,
@@ -128,7 +135,7 @@ function App() {
 		}
 	};
 
-	const login = async () => {
+	const login: LoginFunction = async () => {
 		let plugActor = await establishConnection(login, logout);
 		console.log(window.ic.plug.principalId, "window.ic.plug.principalId");
 		let res = await createUserIfNotExists(
@@ -146,7 +153,7 @@ function App() {
 		});
 	};
 
-	const logout = () => {
+	const logout: LogoutFunction = async () => {
 		setUser({
 			principal: undefined,
 			market: defaultActor,
@@ -157,96 +164,68 @@ function App() {
 
 	// in browser I need to do this: /#/question/1
 	return (
-		<ActorContext.Provider value={{ user, login, logout }}>
-			<Routes>
-				<Route
-					path="/"
-					element={
-						<>
-							<Header
-								isConnected={user.principal ? true : false}
-								login={login}
-								logout={logout}
-								avatar={""}
-							/>
-
-							<PageLayout>
-								<BrowseQuestion />
-							</PageLayout>
-						</>
+		<div className="font-inter">
+			<ActorContext.Provider value={{ user, login, logout }}>
+				<Page
+					Header={
+						<Header
+							isConnected={user.principal ? true : false}
+							login={login}
+							logout={logout}
+							avatar={""}
+						/>
 					}
-				/>
-				<Route
-					path="/add-question"
-					element={
-						<>
-							<Header
-								isConnected={user.principal ? true : false}
-								login={login}
-								logout={logout}
-								avatar={""}
-							/>
-							<PageLayout>
-								<AddQuestion />
-							</PageLayout>
-						</>
-					}
-				/>
-				<Route
-					path="/question/:id"
-					element={
-						<>
-							<Header
-								isConnected={user.principal ? true : false}
-								login={login}
-								logout={logout}
-								avatar={""}
-							/>
-							<PageLayout>
-								<Question
-									question={question}
-									answers={answers}
-									user={user}
-									login={login}
-								/>
-							</PageLayout>
-						</>
-					}
-				/>
-				<Route
-					path="/profile"
-					element={
-						<Protected principal={user.principal}>
-							<Header
-								isConnected={user.principal ? true : false}
-								login={login}
-								logout={logout}
-								avatar={""}
-							/>
-							<PageLayout>
-								<Profile logout={logout} />
-							</PageLayout>
-						</Protected>
-					}
-				/>
-				<Route
-					path="/notifications"
-					element={
-						<Protected principal={user.principal}>
-							<Header
-								isConnected={user.principal ? true : false}
-								login={login}
-								logout={logout}
-								avatar={""}
-							/>
-							<PageLayout>
-								<Notifications />
-							</PageLayout>
-						</Protected>
-					}
-				/>
-			</Routes>
-		</ActorContext.Provider>
+				>
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<>
+									<BrowseQuestion />
+								</>
+							}
+						/>
+						<Route
+							path="/add-question"
+							element={
+								<>
+									<AddQuestion />
+								</>
+							}
+						/>
+						<Route
+							path="/question/:id"
+							element={
+								<>
+									<Question
+										question={question}
+										answers={answers}
+										user={user}
+										login={login}
+									/>
+								</>
+							}
+						/>
+						<Route
+							path="/profile"
+							element={
+								<Protected principal={user.principal}>
+									<Profile logout={logout} />
+								</Protected>
+							}
+						/>
+						<Route
+							path="/notifications"
+							element={
+								<Protected principal={user.principal}>
+									<Notifications />
+								</Protected>
+							}
+						/>
+					</Routes>
+				</Page>
+			</ActorContext.Provider>
+		</div>
 	);
 }
 export default App;

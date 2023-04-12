@@ -37,13 +37,15 @@ module.exports = {
 
 		fontWeight: {
 			400: "400",
-			450: "450",
+			420: "420",
 			500: "500",
 			600: "600",
 		},
 
 		// tracking-wide
 		letterSpacing: {
+			narrow: "-0.01em",
+			none: "0",
 			wide: "0.015em",
 		},
 
@@ -55,7 +57,22 @@ module.exports = {
 			full: "9999px",
 		},
 
+		borderWidth: {
+			0: "0",
+			1: "1px",
+			2: "2px",
+			3: "3px",
+			4: "4px",
+			5: "5px",
+			6: "6px",
+			7: "7px",
+			8: "8px",
+			9: "9px",
+			10: "10px",
+		},
+
 		colors: {
+			transparent: "transparent",
 			white: "#FFFFFF",
 			black: "#000000",
 			gray: {
@@ -64,6 +81,10 @@ module.exports = {
 				800: "#0E1217",
 			},
 			red: "#EE5C41",
+			blue: {
+				100: "#267DFF",
+				500: "#ECFCFF",
+			},
 		},
 
 		extend: {
@@ -73,7 +94,9 @@ module.exports = {
 				md: "27.5px",
 			},
 
-			boxShadow: {},
+			boxShadow: {
+				md: "0px 0px 3px  rgb(0 0 0 / 0.1)",
+			},
 
 			iconSizes: (theme) => ({
 				sm: theme("spacing.3"), // Corresponds to fontSize.sm and spacing[4]

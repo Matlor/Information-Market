@@ -4,7 +4,6 @@ const Modal = ({ children, view }) => {
 	const [display, setDisplay] = useState(false);
 
 	window.addEventListener("click", () => {
-		console.log("event handler");
 		if (display) {
 			setDisplay(false);
 		}
@@ -15,7 +14,6 @@ const Modal = ({ children, view }) => {
 			<button
 				className="w-full"
 				onClick={(e) => {
-					console.log("click");
 					setDisplay(!display);
 					e.stopPropagation();
 				}}

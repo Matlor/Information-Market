@@ -1,12 +1,33 @@
 import React from "react";
 import { useEffect, useState, useReducer, useContext } from "react";
-import ListWrapper from "../components/app/ListWrapper";
-import Submit from "../components/addQuestion/Submit";
-import Form from "../components/addQuestion/FormView";
+import { List } from "../components/app/Layout";
+import Form from "../components/addQuestion/Form";
 import { e8sToIcp } from "../components/core/utils/conversions";
 import { ActorContext } from "../components/api/Context";
+import { LoginToSubmitTag } from "../components/core/Tag";
 
-const doValidation = (inputs, specifications) => {
+import {
+	createInvoice,
+	transfer,
+	createQuestion,
+} from "../components/addQuestion/Submit";
+
+/* 
+Whole thing is 2 machines. Logged in or not, valid or not. 
+If both true, then the UI can trigger the submit function.
+But it should only have it in the first place if both are true.
+
+*/
+
+export type SubmitStages =
+	| null
+	| "invoice"
+	| "transfer"
+	| "submit"
+	| "success"
+	| "error";
+
+export const doValidation = (inputs, specifications) => {
 	const isBetween = (max, value, min) => {
 		return value >= min && value <= max;
 	};
@@ -86,34 +107,21 @@ const AddQuestion = () => {
 	const { user } = useContext(ActorContext);
 
 	// ------------------------------ Specifications -------------------------------
-	// TODO: visually show that min reward is fetched
-	const [specifications, setSpecifications] = useState<ISpecifications>({
+	// TODO: This is not based on backend
+	const specifications: ISpecifications = {
 		title: {
 			max: 300,
 			min: 20,
 		},
 		duration: {
-			max: 7200,
-			min: 0,
+			max: 168,
+			min: 1,
 		},
 		reward: {
-			max: 500,
-			min: undefined,
+			max: 10,
+			min: 0.25,
 		},
-	});
-
-	useEffect(() => {
-		(async () => {
-			// TODO:
-			const fetchedMin: number = Number(
-				e8sToIcp(await user.market.get_min_reward())
-			);
-			setSpecifications({
-				...specifications,
-				reward: { min: fetchedMin, max: specifications.reward.max },
-			});
-		})();
-	}, []);
+	};
 
 	// -------------- State --------------
 	const initialInput: IInputs = {
@@ -124,11 +132,13 @@ const AddQuestion = () => {
 		},
 		title: "",
 		content: "",
-		duration: 0,
-		reward: 0,
+		duration: specifications.duration.min,
+		reward: specifications.reward.min,
 	};
 
 	const inputsReducer = (state: IInputs, action): IInputs => {
+		setSubmitStages(null);
+
 		switch (action.type) {
 			case "reset":
 				return initialInput;
@@ -175,10 +185,34 @@ const AddQuestion = () => {
 		}
 	};
 
+	const [submitStages, setSubmitStages] = useState<SubmitStages>(null);
+
 	const [inputs, dispatch] = useReducer(inputsReducer, initialInput);
 
+	const submit = async (loggedInUser, inputs) => {
+		try {
+			setSubmitStages("invoice");
+			const invoice = await createInvoice(loggedInUser, inputs);
+			console.log(invoice, "invoice");
+
+			setSubmitStages("transfer");
+			console.log(await transfer(loggedInUser, invoice), "transfer");
+
+			setSubmitStages("submit");
+			console.log(
+				await createQuestion(loggedInUser, invoice.id, inputs),
+				"createQuestion"
+			);
+			setSubmitStages("success");
+			dispatch({ type: "reset" });
+		} catch (err) {
+			console.log("Error in submit function:", err);
+			setSubmitStages("error");
+		}
+	};
+
 	return (
-		<ListWrapper>
+		<List>
 			<Form
 				dispatch={{
 					reward: (reward) => {
@@ -197,23 +231,14 @@ const AddQuestion = () => {
 				titlePlaceholder={"Add your title here"}
 				inputs={inputs}
 				specifications={specifications}
+				submitStages={submitStages}
+				submit={
+					isValid(inputs.validation) && user.principal
+						? () => submit(user, inputs)
+						: null
+				}
 			/>
-			{/* <div className="mt-32">
-				{user.principal && inputs ? (
-					<div className="h-[48px] flex ">
-						{isValid(inputs.validation) ? (
-							<Submit inputs={inputs} loggedInUser={user} />
-						) : (
-							<div className="  self-center ml-6">
-								Fill out the form correctly
-							</div>
-						)}
-					</div>
-				) : (
-					<div className=""> Login to Submit</div>
-				)}
-			</div> */}
-		</ListWrapper>
+		</List>
 	);
 };
 

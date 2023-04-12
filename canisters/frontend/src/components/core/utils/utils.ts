@@ -3,7 +3,12 @@ import {
 	Answer as IAnswer,
 	User as IUser,
 } from "../../../../declarations/market/market.did.d";
-import { FQuestion } from "../../../screens/Question_old";
+import { FQuestion } from "../../../screens/Question";
+import {
+	ICurrentUser,
+	ILoggedOutUser,
+	ILoggedInUser,
+} from "../../../screens/App";
 
 export const user_from_answer_id = (
 	answer_id: string | undefined,
@@ -55,7 +60,7 @@ export const get_str_user_from_principals = (
 	}
 };
 
-export const calcUserRole = (
+/* export const calcUserRole = (
 	question: FQuestion | undefined,
 	answers: IAnswer[],
 	principal: Principal | undefined
@@ -84,7 +89,7 @@ export const calcUserRole = (
 	} else {
 		return "isNone";
 	}
-};
+}; */
 
 export const getUserFromAnswer = (
 	answer_id: string | undefined,
@@ -100,7 +105,7 @@ export const getUserFromAnswer = (
 	return user;
 };
 
-export const deadlineToConutdown = (
+/* export const deadlineToConutdown = (
 	deadlineInSeconds: number
 ): { days: number; hours: number; minutes: number } => {
 	const now = Date.now() / 1000;
@@ -119,30 +124,36 @@ export const deadlineToConutdown = (
 	const floatMinutes = hourRemainder * 60;
 	const minutes = Math.round(floatMinutes);
 	return { days, hours, minutes };
-};
+}; */
 
-// todo: does it need !question?
-// todo: should I add !answers?
-export const defineRole = (principal, question, answers) => {
-	//console.log("defineRole, principal", principal.toString());
-	//console.log("defineRole, question", question.author_id.toString());
+type Role = "anonymous" | "author" | "answerer" | "unrelated";
 
+export const defineRole = (
+	principal: Principal | undefined,
+	question: FQuestion,
+	answers: IAnswer[]
+): Role => {
+	let role: Role;
 	if (!principal) {
-		return "anonymous";
+		role = "anonymous";
 	} else if (!question) {
-		return "unrelated";
+		role = "unrelated";
 	} else if (question.author_id.toString() === principal.toString()) {
-		return "author";
+		role = "author";
 	} else if (
 		answers.some(
 			(answer) => answer.author_id.toString() === principal.toString()
 		)
 	) {
-		return "answerer";
+		role = "answerer";
 	} else {
-		return "unrelated";
+		role = "unrelated";
 	}
+
+	return role;
 };
+// todo (above): does it need !question?
+// todo(above): should I add !answers?
 
 // OLD
 /* import { Principal } from "@dfinity/principal";

@@ -45,7 +45,7 @@ export const e8sToIcp = (e8s: number): number => {
 
 export const icpToE8s = (icp: number): bigint => {
 	// TODO: do multiplication outside bigint, it currently fails because not supported by target env
-	return BigInt(icp * 10 ** 8);
+	return BigInt(Math.round(icp * 10 ** 8));
 };
 
 // TODO: why number and not bigInt?

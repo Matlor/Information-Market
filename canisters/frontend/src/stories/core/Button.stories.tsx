@@ -1,6 +1,6 @@
 import React from "react";
 import { Meta, Story } from "@storybook/react";
-import Button from "../../components/core/Button";
+import Button, { ButtonProps } from "../../components/core/Button";
 
 export default {
 	title: "core/Button",
@@ -19,7 +19,9 @@ export default {
 	},
 } as Meta;
 
-const Template: Story = (args) => <Button {...args} />;
+const ButtonWrapper = (props: ButtonProps) => <Button {...props} />;
+
+const Template: Story<ButtonProps> = (args) => <ButtonWrapper {...args} />;
 
 export const Small = Template.bind({});
 Small.args = {
@@ -27,6 +29,9 @@ Small.args = {
 	arrow: false,
 	color: "none",
 	text: "Login",
+	onClick: async () => {
+		await new Promise((resolve) => setTimeout(resolve, 1000));
+	},
 };
 
 export const Large = Template.bind({});

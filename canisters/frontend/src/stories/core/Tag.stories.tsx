@@ -29,7 +29,7 @@ RewardIcon.args = {
 };
 
 export const Selected = SelectedTagTemplate.bind({});
-RewardIcon.args = {};
+Selected.args = {};
 
 export const LoginToSubmit = LoginToSubmitTagTemplate.bind({});
 LoginToSubmit.args = {};

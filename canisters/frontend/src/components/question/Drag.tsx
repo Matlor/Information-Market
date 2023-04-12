@@ -50,27 +50,25 @@ const Drag = ({ children }) => {
 
 	// TODO: left and width should be related to the layout border or something
 	return (
-		<div className="">
-			<div
-				data-cy="drag"
-				className="rounded-t-md drop-shadow-[0_-1px_10px_rgba(0,0,0,0.1)]"
-				style={{
-					position: "fixed",
-					maxWidth: "800px",
-					width: "100%",
-					bottom: 0,
-					left: "50%",
-					transform: "translateX(-50%)",
-					height: `${thing.height}px`,
-					backgroundColor: "#FFFFFF",
-					cursor: thing.dragging ? "ns-resize" : "default",
-				}}
-				onMouseDown={handleMouseDown}
-				onMouseMove={handleMouseMove}
-				onMouseUp={handleMouseUp}
-			>
-				{children}
-			</div>
+		<div
+			data-cy="drag"
+			className="rounded-t-2  drop-shadow-[0_-1px_4px_rgba(0,0,0,0.1)]"
+			style={{
+				position: "fixed",
+				maxWidth: "800px",
+				width: "100%",
+				bottom: 0,
+				left: "50%",
+				transform: "translateX(-50%)",
+				height: `${thing.height}px`,
+				backgroundColor: "#FFFFFF",
+				cursor: thing.dragging ? "ns-resize" : "default",
+			}}
+			onMouseDown={handleMouseDown}
+			onMouseMove={handleMouseMove}
+			onMouseUp={handleMouseUp}
+		>
+			{children}
 		</div>
 	);
 };

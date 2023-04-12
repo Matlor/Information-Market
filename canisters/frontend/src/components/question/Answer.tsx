@@ -6,17 +6,16 @@ import parse from "html-react-parser";
 // TODO: pass principal to profile
 const Answer = ({ author_id, content, tag, action, timeStamp }) => {
 	return (
-		<div data-cy="answer" className="flex flex-col gap-4">
-			<div className="flex justify-between w-full">
-				<Profile principal={author_id} name={"Domwoe"} minutes={timeStamp} />
-				<div className="flex gap-4">
+		<div className="flex flex-col gap-4">
+			<div className="flex items-center justify-between">
+				<Profile principal={author_id} minutes={timeStamp} />
+				<div className="flex items-center gap-4">
 					{tag}
-					<SettingsIcon />
+					<SettingsIcon fillColor="black" borderColor="black" />
 				</div>
 			</div>
-			{/* editor-wrapper */}
-			<div className="">{parse(content)}</div>
-			<div className="flex justify-end">{action} </div>
+			<div className="editor-content">{parse(content)}</div>
+			{action && <div className="flex justify-end">{action}</div>}
 		</div>
 	);
 };

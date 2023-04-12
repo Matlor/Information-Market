@@ -1,18 +1,16 @@
 import React from "react";
 import { Meta } from "@storybook/react";
 import {
-	SubmitStages,
+	ShowStages,
 	SubmitStagesText,
-} from "../../components/addQuestion/SubmitStages";
+} from "../../components/addQuestion/Stages";
 
 export default {
 	title: "addQuestion/SubmitStages",
-	component: SubmitStages,
+	component: ShowStages,
 } as Meta;
 
-export const Default = () => <SubmitStages stages="" />;
-export const Invoice = () => <SubmitStages stages="invoice" />;
-export const Transfer = () => <SubmitStages stages="transfer" />;
-export const Submitting = () => <SubmitStages stages="submit" />;
-export const Success = () => <SubmitStages stages="success" />;
-export const Error = () => <SubmitStages stages="error" />;
+export const Invoice = () => <ShowStages stages="invoice" />;
+export const Transfer = () => <ShowStages stages="transfer" />;
+export const Submitting = () => <ShowStages stages="submit" />;
+export const Success = () => <ShowStages stages="success" />;

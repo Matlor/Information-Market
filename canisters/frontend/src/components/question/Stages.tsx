@@ -3,17 +3,18 @@ import { OnIcon, OngoingIcon, ClosedIcon } from "../core/Icons";
 
 const Stages = ({ stage }) => {
 	return (
-		<div className="w-max flex gap-4 p-3 border-[1px] border-gray-100 rounded-full">
+		//  border-[1px]
+		<div className="flex gap-4 p-3 border-gray-100 w-max rounded-2">
 			<OnIcon
-				fillColor={`${stage === "open" ? "#267DFF" : "#707072"}`}
-				borderColor={`${stage === "open" ? "#ECFCFF" : "#F6F6F6"}`}
+				fillColor={`${stage === "open" ? "blue-500" : "gray-100"}`}
+				borderColor={`${stage === "open" ? "blue-100" : "gray-500"}`}
 			/>
 
 			<OngoingIcon
-				borderColor={`${stage === "ongoing" ? "#267DFF" : "#707072"}`}
+				borderColor={`${stage === "ongoing" ? "blue-100" : "gray-500"}`}
 			/>
 			<ClosedIcon
-				borderColor={`${stage === "closed" ? "#267DFF" : "#707072"}`}
+				borderColor={`${stage === "closed" ? "blue-100" : "gray-500"}`}
 			/>
 		</div>
 	);

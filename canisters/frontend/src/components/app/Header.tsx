@@ -8,6 +8,7 @@ import { ActorContext } from "../api/Context";
 
 import { BellIcon } from "../core/Icons";
 import { ProfilePicture } from "../core/Profile";
+import FixedWidthWrapper from "../core/FixedWidthWrapper";
 
 // -------------- Types --------------
 /* interface IHeader {
@@ -19,58 +20,57 @@ import { ProfilePicture } from "../core/Profile";
 } */
 
 // TODO: solve "back" issue
-// TODO: fetch avatar here
 const Header = () => {
-	const { login, logout, user } = useContext(ActorContext);
+	const { login, user } = useContext(ActorContext);
 	{
 		/* <div className="px-4 lg:px-20"> */
 	}
 	return (
-		<div className="flex justify-between">
+		<div className="flex justify-between w-full py-5">
 			<Link to="/" className="flex-none w-max">
 				<Logo />
 			</Link>
 
-			<div className="flex items-center gap-5 w-fit">
-				{!user?.principal ? (
-					<>
-						<Link to="/add-question">
-							<Button
-								size={"lg"}
-								arrow={false}
-								color={"black"}
-								onClick={() => {}}
-								text="Ask"
-							/>
-						</Link>
+			{!user?.principal ? (
+				<div className="flex items-center gap-8">
+					<Link to="/add-question">
+						<Button
+							size={"lg"}
+							arrow={false}
+							color={"black"}
+							onClick={() => {}}
+							text="Ask"
+						/>
+					</Link>
+					<FixedWidthWrapper>
 						<Button
 							size={"lg"}
 							arrow={true}
 							color={"none"}
-							onClick={() => login}
+							onClick={login}
 							text={"Login"}
 						/>
-					</>
-				) : (
-					<>
-						<Link to="/add-question">
-							<Button
-								size={"lg"}
-								arrow={false}
-								color={"black"}
-								onClick={() => {}}
-								text="Ask"
-							/>
-						</Link>
-						<Link to="/notifications">
-							<BellIcon />
-						</Link>
-						<Link to="/profile">
-							<ProfilePicture principal={user.principal} size={35} />
-						</Link>
-					</>
-				)}
-			</div>
+					</FixedWidthWrapper>
+				</div>
+			) : (
+				<div className="flex items-center gap-8 ">
+					<Link to="/add-question">
+						<Button
+							size={"lg"}
+							arrow={false}
+							color={"black"}
+							onClick={() => {}}
+							text="Ask"
+						/>
+					</Link>
+					<Link to="/notifications">
+						<BellIcon />
+					</Link>
+					<Link to="/profile">
+						<ProfilePicture principal={user.principal} size={35} />
+					</Link>
+				</div>
+			)}
 		</div>
 	);
 };

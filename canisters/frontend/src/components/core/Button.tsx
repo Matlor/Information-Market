@@ -1,16 +1,60 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
-
 import { ArrowIcon } from "./Icons";
 import Loading from "./Loading";
 
-// the conditional stuff could be way simpler
-const Button = ({ size, arrow, color, onClick = () => {}, loader, text }) => {
-	const [loading, setLoading] = useState(false);
-	const isAsync = onClick.constructor.name === "AsyncFunction";
+// Weird it still allows to pass whatever prop we want
 
+export type ButtonSize = "sm" | "lg";
+export type Color = "none" | "gray" | "black";
+
+interface ButtonBaseProps {
+	onClick?: () => void;
+	loader?: React.ReactNode;
+	text: string;
+}
+
+interface LargeButton extends ButtonBaseProps {
+	size: "lg";
+	arrow: false;
+	color: "black";
+}
+
+interface LargeArrowButtonProps extends ButtonBaseProps {
+	size: "lg";
+	arrow: true;
+	color: "none";
+}
+
+interface SmallArrowButtonProps extends ButtonBaseProps {
+	size: "sm";
+	arrow: true;
+	color: Color;
+}
+
+interface SmallNoArrowButtonProps extends ButtonBaseProps {
+	size: "sm";
+	arrow: false;
+	color: "black";
+}
+
+export type ButtonProps =
+	| LargeButton
+	| LargeArrowButtonProps
+	| SmallArrowButtonProps
+	| SmallNoArrowButtonProps;
+
+const Button = ({
+	size,
+	arrow,
+	color,
+	onClick = () => {},
+	loader,
+	text,
+}: ButtonProps) => {
+	// ------- Loader Logic -------------
+	const [loading, setLoading] = useState(false);
 	const handleClick = async () => {
-		if (isAsync) {
+		if (onClick.constructor.name === "AsyncFunction") {
 			setLoading(true);
 			await onClick();
 			setLoading(false);
@@ -19,57 +63,50 @@ const Button = ({ size, arrow, color, onClick = () => {}, loader, text }) => {
 		}
 	};
 
-	const sizeClass =
-		size === "sm"
-			? "text-extra-small px-3 py-2"
-			: "text-large leading-lg py-1 px-5";
-	const colorClassMap = {
-		gray: "bg-gray-100 text-black",
-		black: "bg-black text-white",
-		none: "bg-transparent text-black",
+	const showLoader = () => {
+		if (loading) {
+			return loader ? <>{loader}</> : <Loading />;
+		}
+		return null;
 	};
-	const colorClasses = colorClassMap[color] || "bg-transparent text-black";
+
+	// -------------- Content ----------------
+	const sizeClass =
+		size === "sm" ? "text-extra-small py-2 px-3" : "text-large leading-lg py-1";
+	const pxClass = arrow && color === "none" ? "" : "px-5";
+	const arrowClass = arrow ? "flex items-baseline gap-3" : "";
+
+	const colorClass =
+		color === "gray"
+			? "bg-gray-100 text-black"
+			: color === "black"
+			? "bg-black text-white"
+			: "bg-transparent text-black";
+
+	const content = () => {
+		return (
+			<div className="flex items-baseline gap-3">
+				<div>{text}</div>
+				{arrow && (
+					<ArrowIcon
+						size={size === "sm" ? 8 : 10}
+						strokeWidth={3}
+						borderColor={color === "black" ? "white" : "black"}
+					/>
+				)}
+			</div>
+		);
+	};
 
 	return (
 		<button
 			onClick={handleClick}
-			className={`flex items-center font-600 rounded-full ${sizeClass} ${colorClasses} focus:outline-none`}
+			className={`flex w-max items-center font-600 rounded-full ${sizeClass} ${pxClass} ${arrowClass} ${colorClass} focus:outline-none`}
 			disabled={loading}
 		>
-			{!loading ? (
-				<div className="flex items-baseline gap-3 ">
-					{text}
-					{arrow && (
-						<ArrowIcon
-							size={size === "sm" ? 8 : 10}
-							strokeWidth={3}
-							borderColor={"white"}
-						/>
-					)}
-				</div>
-			) : (
-				<div className="flex items-center space-x-3">
-					{loader ? <>{loader}</> : <Loading />}
-				</div>
-			)}
+			{showLoader() || content()}
 		</button>
 	);
-};
-
-Button.propTypes = {
-	size: PropTypes.oneOf(["sm", "lg"]),
-	arrow: PropTypes.bool,
-	color: PropTypes.oneOf(["none", "gray", "black"]),
-	onClick: PropTypes.func.isRequired,
-	loader: PropTypes.node,
-	text: PropTypes.node.isRequired,
-};
-
-Button.defaultProps = {
-	size: "sm",
-	arrow: false,
-	color: "none",
-	loader: null,
 };
 
 export default Button;

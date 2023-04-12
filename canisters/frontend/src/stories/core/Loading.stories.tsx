@@ -15,3 +15,12 @@ EmptyLoading.storyName = "Empty";
 
 export const LoadingAnimation = () => <Loading style="loading" />;
 LoadingAnimation.storyName = "Loading";
+
+export const AllLoadingStates = () => (
+	<div className="flex gap-4">
+		<FilledLoading />
+		<EmptyLoading />
+		<LoadingAnimation />
+	</div>
+);
+AllLoadingStates.storyName = "All Loading States";

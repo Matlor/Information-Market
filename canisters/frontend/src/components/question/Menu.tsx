@@ -1,39 +1,33 @@
 import React from "react";
+import Button from "../core/Button";
 
-// TODO: Make named export
-// selected, confirmFunc
-const Menu = ({ text, button, time }) => {
+type MenuProps = {
+	text: string;
+	onClick?: (...args: any[]) => void;
+	time?: React.ReactNode;
+};
+
+const Menu = ({ text, onClick, time }: MenuProps) => {
 	return (
 		<div
 			data-cy="menu"
-			className="flex flex-col gap-6 p-5 border-2 rounded-1 w-11"
+			className="flex flex-col justify-between w-1/2 h-10 p-5 shadow-md rounded-2"
 		>
-			<div className="self-end">
-				{time && <div className="text-sm text-gray-500 ">{time}</div>}
-			</div>
-			<div className="flex items-baseline justify-between">
-				<div>{text}</div>
-				{button && <button className="">{button}</button>}
+			<div className="self-end text-sm text-gray-500 ">{time && time}</div>
+			<div className="flex items-center justify-between">
+				<div className="text-small">{text}</div>
+				{onClick && (
+					<Button
+						onClick={onClick}
+						text="Confirm"
+						size="sm"
+						color="gray"
+						arrow={true}
+					/>
+				)}
 			</div>
 		</div>
 	);
 };
 
 export default Menu;
-
-/* if (selected) {
-		return (
-			<div data-cy="menu">
-				Selected Menu: Confirm your selection
-				<div> Time Left:</div>
-				<Button onClick={confirmFunc} text="Confirm" />
-			</div>
-		);
-	} else {
-		return (
-			<div className="text-normal">
-				Pick Menu: Select the best answer
-				<div> Time Left:</div>
-			</div>
-		);
-	} */

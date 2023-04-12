@@ -11,26 +11,42 @@
 	}
 
 	.scrollbar::-webkit-scrollbar-thumb {
-		@apply bg-colorIconGrey;
+		@apply bg-gray-500;
 		border-radius: 100vh;
 	}
 }
 
 @layer base {
 	.h1 {
-		@apply text-lg text-gray-800 font-600 font-inter leading-lg;
+		@apply text-lg antialiased text-gray-800 font-500 font-inter leading-lg tracking-none;
 	}
 
 	.text-large {
-		@apply tracking-wide text-gray-800 text-md font-450 leading-md;
+		@apply antialiased tracking-wide text-gray-800 text-md font-400 font-inter leading-md;
 	}
 
 	.text-small {
-		@apply text-sm tracking-wide text-gray-800 font-400;
+		@apply text-sm antialiased tracking-wide text-gray-800 font-400 font-inter;
 	}
 
 	.text-extra-small {
-		@apply text-xs tracking-wide text-gray-500 font-400;
+		@apply text-xs antialiased tracking-wide text-gray-500 font-400 font-inter;
+	}
+
+	.editor-content {
+		@apply antialiased text-large font-inter;
+	}
+
+	.editor-content blockquote {
+		@apply pt-1 pl-3 border-l-[6px] border-b-gray-500  bg-gray-100;
+	}
+
+	.editor-content ul {
+		@apply ml-6 list-disc;
+	}
+
+	.editor-content ol {
+		@apply ml-6 list-decimal;
 	}
 }
 
@@ -45,7 +61,49 @@
 	
 } */
 
-/* .title {
+/* 
+	.editor-content {
+		@apply text-normal;
+	}
+
+	.editor-content blockquote {
+		@apply pt-1 pl-3 border-l-[6px] border-colorIcon  bg-colorLines;
+	}
+
+	.editor-content ul {
+		@apply ml-6 list-disc;
+	}
+
+	.editor-content ol {
+		@apply ml-6 list-decimal;
+	}
+
+	.editor-content h2 {
+		@apply ;
+	} 
+*/
+
+/* 
+
+
+.editor-content h2 {
+		@apply;
+	}
+	
+// -------------------------------------------
+// -------------------------------------------
+// -------------------------------------------
+
+
+/* 
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
+
+
+*/
+
+/* 
+.title {
 		@apply text-colorDark font-Inter text-22 font-450 leading-32;
 	}
 
@@ -69,60 +127,38 @@
 		@apply leading-none tracking-wide text-colorText font-Inter text-12 font-400;
 	} 
 
-	.editor-wrapper {
-		@apply text-normal;
-	}
-
-	.editor-wrapper blockquote {
-		@apply pt-1 pl-3 border-l-[6px] border-colorIcon  bg-colorLines;
-	}
-
-	.editor-wrapper ul {
-		@apply ml-6 list-disc;
-	}
-
-	.editor-wrapper ol {
-		@apply ml-6 list-decimal;
-	}
-*/
-/* .editor-wrapper h2 {
-		@apply ;
-	} */
-/* 
-	.px-field {
-		@apply px-10 md:px-10;
-	}
-
-	.p-content {
-		@apply py-10 px-field;
-	}
-
-	.gap-small {
-		@apply gap-2;
-	}
-
-	.gap-normal {
-		@apply gap-4;
-	}
-
-	.small-ball-dimension {
-		@apply w-4 h-4;
-	}
-	.ball-dimension {
-		@apply w-5 h-5;
-	}
-
-	.height-menu {
-		@apply h-11;
-	}
-
-	.center {
-		@apply absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2;
-	} */
-
-/* 
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
-
 
 */
+
+/* 
+
+.px-field {
+	@apply px-10 md:px-10;
+}
+
+.p-content {
+	@apply py-10 px-field;
+}
+
+.gap-small {
+	@apply gap-2;
+}
+
+.gap-normal {
+	@apply gap-4;
+}
+
+.small-ball-dimension {
+	@apply w-4 h-4;
+}
+.ball-dimension {
+	@apply w-5 h-5;
+}
+
+.height-menu {
+	@apply h-11;
+}
+
+.center {
+	@apply absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2;
+} */

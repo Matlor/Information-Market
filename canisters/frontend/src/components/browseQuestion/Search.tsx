@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-
 import Loading from "../core/Loading";
 import { SearchIcon, CrossIcon } from "../core/Icons";
 
@@ -19,7 +18,9 @@ const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 	};
 
 	const handleIconClick = () => {
-		inputRef.current.focus();
+		if (inputRef.current) {
+			inputRef.current.focus();
+		}
 		if (!show) {
 			setShow(true);
 		}
@@ -36,35 +37,30 @@ const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 		setSearchedText("");
 	};
 
-	console.log(show, "show");
-	// "shadow-[0px_2px_0px_rgba(0,0,0,0.9)]"
 	return (
-		<div
-			className={`pb-1 relative max-w-[270px]w-full flex gap-[25px] justify-center items-center box-border ${
-				show && ""
-			} `}
-			onClick={(e) => {
-				handleIconClick();
-				e.stopPropagation();
-			}}
-		>
+		<div className={`flex gap-4 items-center relative w-max ${show && ""} `}>
 			<div
-				className={`items-center rounded-full p-3 ${
-					!show ? "cursor-pointer  " : ""
-				} `}
+				className={`items-center rounded-full cursor-pointer`}
+				onClick={(e) => {
+					handleIconClick();
+					e.stopPropagation();
+				}}
 			>
-				<SearchIcon size={16} />
+				<SearchIcon />
 			</div>
 			<input
 				ref={inputRef}
-				className="w-[100%] outline-none "
+				className="w-[100%] outline-none text-large"
 				type="text"
-				placeholder=""
 				value={input}
 				onChange={handler}
+				onClick={(e) => {
+					handleIconClick();
+					e.stopPropagation();
+				}}
 			/>
 
-			<div onClick={handleClearClick}>{show && <CrossIcon />}</div>
+			<div onClick={handleClearClick}>{show && <CrossIcon size={15} />}</div>
 
 			{searchLoading ? (
 				<div className="absolute left-[100%] ml-4">

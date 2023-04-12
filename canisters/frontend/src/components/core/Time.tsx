@@ -1,36 +1,33 @@
 import React from "react";
 import { ClockIcon } from "./Icons";
 
-const calcTime = (minutes) => {
+const calcTime = (deadlineMinutes) => {
 	const currentTime = Math.floor(Date.now() / 1000);
-	const diffSeconds = Math.abs(minutes * 60 - currentTime);
+	const diffSeconds = Math.abs(deadlineMinutes * 60 - currentTime);
 
-	const remainingMinutes = Math.floor(diffSeconds / 60);
-	const hours = Math.floor(remainingMinutes / 60);
+	const minutes = Math.floor(diffSeconds / 60);
+	const hours = Math.floor(minutes / 60);
 	const days = Math.floor(hours / 24);
 	const years = Math.floor(days / 365);
 
 	const { value, unit } = (() => {
-		if (years > 0) return { value: years, unit: "years" };
-		if (days > 0) return { value: days, unit: "days" };
-		if (hours > 0) return { value: hours, unit: "hours" };
-		return { value: remainingMinutes, unit: "min" };
+		return years > 0
+			? { value: years, unit: years === 1 ? "year" : "years" }
+			: days > 0
+			? { value: days, unit: days === 1 ? "day" : "days" }
+			: hours > 0
+			? { value: hours, unit: hours === 1 ? "hour" : "hours" }
+			: minutes > 0
+			? { value: minutes, unit: minutes === 1 ? "min" : "mins" }
+			: { value: "", unit: "" };
 	})();
 
 	return { value, unit };
 };
 
-const ShowTime = ({ value, unit, addOn }) => {
-	return (
-		<div className="flex items-center gap-1 whitespace-nowrap">
-			<div>{value}</div>
-			<div>{unit}</div>
-			<div>{addOn}</div>
-		</div>
-	);
-};
+const showTimeClass = "flex items-center gap-1 whitespace-nowrap";
 
-const Wrapper = ({ children }) => {
+const TimeWrapper = ({ children }) => {
 	return (
 		<div
 			data-cy="timeStamp"
@@ -44,13 +41,25 @@ const Wrapper = ({ children }) => {
 export const TimeLeft = ({ minutes, icon = true }) => {
 	if (minutes * 60 < Math.floor(Date.now() / 1000)) return <></>;
 	const { value, unit } = calcTime(minutes);
-	console.log(minutes, "m");
 
 	return (
-		<Wrapper>
-			<div className="self-center">{icon ? <ClockIcon /> : <></>}</div>
-			<ShowTime value={value} unit={unit} addOn="" />
-		</Wrapper>
+		<TimeWrapper>
+			<div className="self-center">
+				{icon ? <ClockIcon borderColor="white" fillColor="black" /> : <></>}
+			</div>
+			<div className={`${showTimeClass}`}>
+				{!value ? (
+					/* or closing */
+					<div>{"closing soon"}</div>
+				) : (
+					<>
+						<div>{value}</div>
+						<div>{unit}</div>
+						<div>{"left"}</div>
+					</>
+				)}
+			</div>
+		</TimeWrapper>
 	);
 };
 
@@ -58,11 +67,21 @@ export const TimeStamp = ({ minutes }) => {
 	if (minutes * 60 > Math.floor(Date.now() / 1000)) return <></>;
 	const { value, unit } = calcTime(minutes);
 	return (
-		<Wrapper>
+		<TimeWrapper>
 			<div className="flex">
-				<ShowTime value={value} unit={unit} addOn="ago" />
+				<div className={`${showTimeClass}`}>
+					{!value ? (
+						<div>{"Just Now"}</div>
+					) : (
+						<>
+							<div>{value}</div>
+							<div>{unit}</div>
+							<div>{"ago"}</div>
+						</>
+					)}
+				</div>
 			</div>
-		</Wrapper>
+		</TimeWrapper>
 	);
 };
 

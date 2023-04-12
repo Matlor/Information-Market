@@ -4,12 +4,16 @@ import Button from "../components/core/Button";
 const Profile = ({ logout }) => {
 	return (
 		<div>
-			<div className="flex justify-start gap-2 mb-3 text-normal">
-				Coming Soon
-			</div>
-			<div data-cy="divider" className="w-full h-[1px] "></div>
-			<div className="flex justify-start mt-10">
-				<Button onClick={logout}>hello</Button>
+			<div className="flex justify-start mb-5 text-large">Coming Soon</div>
+			<div data-cy="divider" className="w-full h-[3px] bg-gray-100"></div>
+			<div className="mt-5">
+				<Button
+					onClick={logout}
+					text="Logout"
+					size="lg"
+					arrow={false}
+					color={"black"}
+				/>
 			</div>
 		</div>
 	);

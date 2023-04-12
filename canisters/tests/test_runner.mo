@@ -2027,11 +2027,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2048,11 +2048,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 600000000:Int32;
+                    reward = 610000000:Int32;
                             
                     status= #PICKANSWER;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2068,11 +2068,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id = 20; 
                     author_id = Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 700000000:Int32;
+                    reward = 710000000:Int32;
                             
                     status= #DISPUTABLE;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2088,11 +2088,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status= #ARBITRATION;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2109,11 +2109,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status=  #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2129,11 +2129,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status=  #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2149,11 +2149,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2169,11 +2169,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     invoice_id= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "test description";
-                    reward = 500000000:Int32;
+                    reward = 510000000:Int32;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2191,14 +2191,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "11";
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "10";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
                 {
                     id = "12";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "10";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
 
@@ -2206,14 +2206,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "21";
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "20";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
                 {
                     id = "22";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "20";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
 
@@ -2221,14 +2221,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "31";
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "30";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
                 {
                     id = "32";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "30";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
 
@@ -2236,14 +2236,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = "41";
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "40";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 },
                 {
                     id = "42";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "40";
-                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                    creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "test answer";
                 }
             ];

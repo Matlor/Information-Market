@@ -13,17 +13,10 @@ import React from "react";
 // Settings Icon
 // Passing tailwind colors does not work
 // Maybe add another wrapper for the this stuff
-/* 
-width={size}
-height={size}
-viewBox="0 0 14 16"
-fill={fillColor}
-stroke={borderColor}
-strokeWidth={strokeWidth}
-strokeLinecap="round"
-strokeLinejoin="round"
 
-*/
+// stroke with on center might be a problem? maybe that causes the mess
+
+// TODO: if some weird color then it should be transparent and not black
 
 interface IconProps {
 	size?: number;
@@ -32,8 +25,33 @@ interface IconProps {
 	strokeWidth?: number;
 }
 
+// stupid af but only if mentioned here then we can use them dynamicallys
+const fillNames = [
+	"fill-transparent",
+	"fill-black",
+	"fill-white",
+	"fill-gray-100",
+	"fill-gray-500",
+	"fill-gray-800",
+	"fill-red",
+	"fill-blue-100",
+	"fill-blue-500",
+];
+
+const borderNames = [
+	"stroke-transparent",
+	"stroke-black",
+	"stroke-white",
+	"stroke-gray-100",
+	"stroke-gray-500",
+	"stroke-gray-800",
+	"stroke-red",
+	"stroke-blue-100",
+	"stroke-blue-500",
+];
+
 const defaultSize = 20;
-const defaultFillColor = "none";
+const defaultFillColor = "transparent";
 const defaultBorderColor = "black";
 const defaultStrokeWidth = 0.8;
 
@@ -43,16 +61,20 @@ export const BellIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 0.875;
+	const width = size * aspectRatio;
+
+	console.log(fillColor, "fillColor");
+
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 14 16"
-			fill={fillColor}
-			stroke={borderColor}
 			strokeWidth={strokeWidth}
 			strokeLinecap="round"
 			strokeLinejoin="round"
+			className={`fill-${fillColor} stroke-${borderColor}`}
 		>
 			<path d="M8.36133 14.3024C8.24071 14.5145 8.06759 14.6907 7.85929 14.8131C7.651 14.9356 7.41484 15 7.17446 15C6.93408 15 6.69792 14.9356 6.48963 14.8131C6.28133 14.6907 6.10821 14.5145 5.98759 14.3024M11.2908 5.20074C11.2908 4.08664 10.8571 3.01816 10.0851 2.23037C9.31317 1.44258 8.26617 1 7.17446 1C6.08275 1 5.03575 1.44258 4.26379 2.23037C3.49183 3.01816 3.05815 4.08664 3.05815 5.20074C3.05815 10.1016 1 11.5019 1 11.5019H13.3489C13.3489 11.5019 11.2908 10.1016 11.2908 5.20074Z" />
 		</svg>
@@ -65,9 +87,11 @@ export const ClockIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 16 16"
 			xmlns="http://www.w3.org/2000/svg"
@@ -75,20 +99,19 @@ export const ClockIcon = ({
 			{/* Clock face (circle) */}
 			<path
 				d="M0.999997 8.00001C0.999997 11.866 4.134 15 8 15C11.866 15 15 11.866 15 8.00001C15 4.13402 11.866 1.00001 8 1.00001C4.134 1.00001 0.999997 4.13402 0.999997 8.00001Z"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				className={`fill-${fillColor} stroke-${borderColor} `}
 			/>
 			{/* Clock hands */}
 			<path
 				d="M10.36 8.55077H7.63778V4.6619"
 				fill="none"
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 		</svg>
 	);
@@ -100,24 +123,21 @@ export const SearchIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 18 18"
-			fill={fillColor}
-			stroke={borderColor}
-			strokeWidth={strokeWidth}
-			strokeLinecap="round"
-			strokeLinejoin="round"
+			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M12.8725 12.7659L17 17M13.6456 7.67798C13.6456 11.3661 10.8148 14.356 7.32279 14.356C3.83081 14.356 1 11.3661 1 7.67798C1 3.98983 3.83081 1 7.32279 1C10.8148 1 13.6456 3.98983 13.6456 7.67798Z"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 		</svg>
 	);
@@ -129,24 +149,21 @@ export const AnswerIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1.0625;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 17 16"
-			fill={fillColor}
-			stroke={borderColor}
-			strokeWidth={strokeWidth}
-			strokeLinecap="round"
-			strokeLinejoin="round"
+			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M6.26345 1C3.35653 1 1 3.35653 1 6.26345C1 9.17037 3.35653 11.5269 6.26345 11.5269H6.81682L6.79175 15L10.7251 11.5269H11.1339C14.0409 11.5269 16.3974 9.17037 16.3974 6.26345C16.3974 3.35653 14.0409 1 11.1339 1H6.26345Z"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 		</svg>
 	);
@@ -161,39 +178,35 @@ export const SettingsIcon = ({
 }: IconProps) => {
 	const aspectRatio = 0.2857;
 	const width = size * aspectRatio;
-	console.log(size);
 
 	return (
 		<svg
 			width={width}
 			height={size}
 			viewBox="0 0 4 14"
-			fill={fillColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<circle
 				cx="1.81481"
 				cy="1.81481"
 				r="1.41481"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 			<circle
 				cx="1.81481"
 				cy="6.99841"
 				r="1.41481"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 			<circle
 				cx="1.81481"
 				cy="12.1859"
 				r="1.41481"
-				fill={fillColor}
-				stroke={borderColor}
 				strokeWidth={strokeWidth}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 			/>
 		</svg>
 	);
@@ -205,20 +218,20 @@ export const ArrowIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 0.5625;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 9 16"
-			fill={fillColor}
-			stroke={borderColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M1.00015 15L7.95557 8L1.00015 1"
-				fill={fillColor}
-				stroke={borderColor}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -233,20 +246,20 @@ export const CrossIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 16 16"
-			fill={fillColor}
-			stroke={borderColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M1 1.00003L15 15M1 15L15 1"
-				fill={fillColor}
-				stroke={borderColor}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -261,20 +274,20 @@ export const TriangleIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
-			viewBox="0 0 12 12"
-			fill={fillColor}
-			stroke={borderColor}
+			viewBox="0.473 0.626 10.322 5.974"
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M10.7952 0.626019L5.63449 6.59998C5.63435 6.59999 5.6342 6.59999 5.63405 6.6L0.47336 0.626019L10.7952 0.626019Z"
-				fill={fillColor}
-				stroke={borderColor}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -284,67 +297,115 @@ export const TriangleIcon = ({
 };
 
 export const SortIcon = ({
-	size,
-	fillColor1,
-	fillColor2,
-	borderColor,
-	strokeWidth,
+	size = defaultSize,
+	fillColor1 = defaultFillColor,
+	fillColor2 = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+	gap = 1, // New prop for gap
 }) => {
+	const aspectRatio = 0.75;
+	const width = size * aspectRatio;
+	const adjustedHeight = size + gap; // Adjust the height based on the gap
 	return (
-		<div className="flex flex-col gap-1 w-max">
+		<svg
+			width={width}
+			height={adjustedHeight}
+			viewBox={`0 0 12 ${16 + gap}`} // Adjust the viewBox based on the gap
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M10.9277 6.50764L6.26981 1.11575C6.13649 0.961416 5.87977 0.961416 5.74503 1.11575L1.08719 6.50764C0.914149 6.7087 1.07017 7.00322 1.34958 7.00322H10.6653C10.9447 7.00322 11.1007 6.7087 10.9277 6.50764Z"
+				className={`fill-${fillColor1} stroke-${borderColor}`}
+				strokeWidth={strokeWidth}
+			/>
+			<path
+				d={`M1.07234 ${9.50017 + gap}L5.73019 ${14.8921 + gap}C5.86351 ${
+					15.0464 + gap
+				} 6.12023 ${15.0464 + gap} 6.25497 ${14.8921 + gap}L10.9128 ${
+					9.50017 + gap
+				}C11.0859 ${9.29911 + gap} 10.9298 ${9.0046 + gap} 10.6504 ${
+					9.0046 + gap
+				}H1.33474C1.05532 ${9.0046 + gap} 0.899306 ${9.29911 + gap} 1.07234 ${
+					9.50017 + gap
+				}Z`}
+				className={`fill-${fillColor2} stroke-${borderColor}`}
+				strokeWidth={strokeWidth}
+			/>
+		</svg>
+	);
+};
+
+/* 
+	<div className="flex flex-col items-center gap-1">
 			<div className="rotate-180">
 				<TriangleIcon
-					size={size}
+					size={size / 2}
 					fillColor={fillColor2}
 					borderColor={borderColor}
 					strokeWidth={strokeWidth}
 				/>
 			</div>
 			<TriangleIcon
-				size={size}
+				size={size / 2}
 				fillColor={fillColor1}
 				borderColor={borderColor}
 				strokeWidth={strokeWidth}
 			/>
 		</div>
-	);
-};
+
+
+*/
 
 export const OnIcon = ({
 	size = defaultSize,
-	fillColor = defaultFillColor,
-	borderColor = defaultBorderColor,
+	fillColor = "",
+	borderColor = "",
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
+
+	//const d = "fill-" + fillColor;
 	return (
-		<svg
-			width={size}
-			height={size}
-			viewBox="0 0 16 16"
-			fill={fillColor}
-			stroke={borderColor}
-			strokeWidth={0}
-			xmlns="http://www.w3.org/2000/svg"
-		>
+		<div>
 			<svg
-				width="16"
-				height="16"
+				width={width}
+				height={size}
 				viewBox="0 0 16 16"
 				fill="none"
+				strokeWidth={0}
 				xmlns="http://www.w3.org/2000/svg"
 			>
 				<path
 					d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
-					fill={borderColor}
+					className={` fill-${fillColor}  `}
 				/>
 				<path
 					d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
-					fill={fillColor}
+					className={` fill-${borderColor}  `}
 				/>
 			</svg>
-		</svg>
+		</div>
 	);
 };
+
+<svg
+	width="16"
+	height="16"
+	viewBox="0 0 16 16"
+	fill="none"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<path
+		d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+		fill="#ECFCFF"
+	/>
+	<path
+		d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
+		fill="#267DFF"
+	/>
+</svg>;
 
 export const OngoingIcon = ({
 	size = defaultSize,
@@ -352,20 +413,20 @@ export const OngoingIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 16 16"
-			fill={fillColor}
-			stroke={borderColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M15.0262 7.12336C14.8118 5.58067 14.0961 4.15126 12.9894 3.05532C11.8828 1.95938 10.4464 1.25771 8.90172 1.05839C7.35701 0.859076 5.78961 1.17317 4.44098 1.95229C3.09234 2.73142 2.03728 3.93235 1.43832 5.37009M1 1.86354V5.37009H4.50655M1 8.87664C1.21439 10.4193 1.93005 11.8487 3.03674 12.9447C4.14344 14.0406 5.57977 14.7423 7.12448 14.9416C8.66918 15.1409 10.2366 14.8268 11.5852 14.0477C12.9339 13.2686 13.9889 12.0677 14.5879 10.6299M15.0262 14.1365V10.6299H11.5196"
-				fill={fillColor}
-				stroke={borderColor}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -380,20 +441,20 @@ export const ClosedIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 16 16"
-			fill={fillColor}
-			stroke={borderColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M5.66667 8L7.22222 9.55556L10.3333 6.44444M15 8C15 11.866 11.866 15 8 15C4.13401 15 1 11.866 1 8C1 4.13401 4.13401 1 8 1C11.866 1 15 4.13401 15 8Z"
-				fill={fillColor}
-				stroke={borderColor}
+				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
 				strokeLinecap="round"
 				strokeLinejoin="round"
@@ -408,14 +469,15 @@ export const LinkIcon = ({
 	borderColor = defaultBorderColor,
 	strokeWidth = defaultStrokeWidth,
 }: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
 	return (
 		<svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 24 24"
-			fill={fillColor}
+			className={`fill-${fillColor} stroke-${borderColor}`}
 			stroke-width={strokeWidth}
-			stroke={borderColor}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
@@ -429,7 +491,7 @@ export const LinkIcon = ({
 
 {
 	/* <svg
-			width={size}
+			width={width}
 			height={size}
 			viewBox="0 0 16 16"
 			fill={fillColor}
