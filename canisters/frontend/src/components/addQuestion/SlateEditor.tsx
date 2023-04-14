@@ -60,11 +60,9 @@ const initialValue = [
 	},
 ];
 
-export const SlateEditor = ({ setInputValue, children, className }) => {
+export const SlateEditor = ({ setInputValue, children, className = "" }) => {
+	// could I put this outside of this component?
 	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
-
-	//console.log(editor.children);
-
 	return (
 		// Is about the state of an object and Slate itself provides that state to UI component further down
 		<Slate
@@ -89,8 +87,7 @@ export const TollbarInstance = () => {
 	return (
 		<IconContext.Provider
 			value={{
-				color: "#707072",
-				className: "global-class-name",
+				color: "#0E1217",
 				size: "1.25em",
 			}}
 		>
@@ -136,7 +133,7 @@ export const TollbarInstance = () => {
 };
 
 export const EditableInstance = ({
-	placeholder,
+	placeholder = "",
 	disabled = false,
 	className = "",
 	scroll = false,
