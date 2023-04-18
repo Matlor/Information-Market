@@ -34,8 +34,9 @@ const fillNames = [
 	"fill-gray-500",
 	"fill-gray-800",
 	"fill-red",
-	"fill-blue-100",
-	"fill-blue-500",
+	"fill-accent-200",
+	"fill-accent-400",
+	"fill-brown",
 ];
 
 const borderNames = [
@@ -46,14 +47,15 @@ const borderNames = [
 	"stroke-gray-500",
 	"stroke-gray-800",
 	"stroke-red",
-	"stroke-blue-100",
-	"stroke-blue-500",
+	"stroke-accent-200",
+	"stroke-accent-400",
+	"stroke-brown",
 ];
 
 const defaultSize = 20;
 const defaultFillColor = "transparent";
 const defaultBorderColor = "black";
-const defaultStrokeWidth = 0.8;
+const defaultStrokeWidth = 1.2;
 
 export const BellIcon = ({
 	size = defaultSize,
@@ -174,7 +176,7 @@ export const SettingsIcon = ({
 	size = defaultSize,
 	fillColor = defaultFillColor,
 	borderColor = defaultBorderColor,
-	strokeWidth = defaultStrokeWidth,
+	strokeWidth = 0,
 }: IconProps) => {
 	const aspectRatio = 0.2857;
 	const width = size * aspectRatio;
@@ -368,44 +370,25 @@ export const OnIcon = ({
 
 	//const d = "fill-" + fillColor;
 	return (
-		<div>
-			<svg
-				width={width}
-				height={size}
-				viewBox="0 0 16 16"
-				fill="none"
-				strokeWidth={0}
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
-					className={` fill-${fillColor}  `}
-				/>
-				<path
-					d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
-					className={` fill-${borderColor}  `}
-				/>
-			</svg>
-		</div>
+		<svg
+			width={width}
+			height={size}
+			viewBox="0 0 16 16"
+			fill="none"
+			strokeWidth={0}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			{/* <path
+				d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
+				className={` fill-${fillColor}  `}
+			/> */}
+			<path
+				d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
+				className={` fill-${borderColor}  `}
+			/>
+		</svg>
 	);
 };
-
-<svg
-	width="16"
-	height="16"
-	viewBox="0 0 16 16"
-	fill="none"
-	xmlns="http://www.w3.org/2000/svg"
->
-	<path
-		d="M16 8C16 12.4183 12.4183 16 8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8Z"
-		fill="#ECFCFF"
-	/>
-	<path
-		d="M10.7422 8.37109C10.7422 9.68061 9.68061 10.7422 8.37109 10.7422C7.06157 10.7422 6 9.68061 6 8.37109C6 7.06157 7.06157 6 8.37109 6C9.68061 6 10.7422 7.06157 10.7422 8.37109Z"
-		fill="#267DFF"
-	/>
-</svg>;
 
 export const OngoingIcon = ({
 	size = defaultSize,
@@ -447,6 +430,27 @@ export const ClosedIcon = ({
 		<svg
 			width={width}
 			height={size}
+			viewBox="0 0 17 15"
+			className={`fill-${fillColor} stroke-${borderColor}`}
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M12.2777 4.72266L7.08328 9.9171L4.72217 7.55599"
+				className={`fill-${fillColor} stroke-${borderColor}`}
+				strokeWidth={strokeWidth}
+				stroke-width="0.8"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
+	);
+};
+
+{
+	/* <svg
+			width={width}
+			height={size}
 			viewBox="0 0 16 16"
 			className={`fill-${fillColor} stroke-${borderColor}`}
 			strokeWidth={strokeWidth}
@@ -459,9 +463,8 @@ export const ClosedIcon = ({
 				strokeLinecap="round"
 				strokeLinejoin="round"
 			/>
-		</svg>
-	);
-};
+		</svg> */
+}
 
 export const LinkIcon = ({
 	size = defaultSize,
@@ -486,6 +489,159 @@ export const LinkIcon = ({
 				d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
 			/>
 		</svg>
+	);
+};
+
+export const LoginIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
+	return (
+		<svg
+			width={width}
+			height={size}
+			viewBox="0 0 21 16"
+			fill="none"
+			className={`fill-${fillColor} stroke-${borderColor}  `}
+			stroke-width={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M14.2819 15L17.7085 15C18.2278 15 18.7258 14.8156 19.093 14.4874C19.4602 14.1592 19.6665 13.7141 19.6665 13.25L19.6665 2.75C19.6665 2.28587 19.4602 1.84075 19.093 1.51256C18.7258 1.18437 18.2278 1 17.7085 1L14.2819 0.999999"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+			<path
+				d="M0.999999 7.89579L13.9231 7.8958M13.9231 7.8958L8.98522 2.72656M13.9231 7.8958L8.98522 13.065"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			/>
+		</svg>
+	);
+};
+const getSizeClass = (size) => {
+	// Replace these values with the size classes you want to use.
+	const sizeMap = {
+		16: "w-[16px] h-[16px]",
+		32: "w-[32px] h-[32px]",
+		36: "w-[36px] h-[36px]",
+		40: "w-[40px] h-[40px]",
+		48: "w-[48px] h-[48px]",
+		64: "w-[64px] h-[64px]",
+	};
+
+	return sizeMap[size] || sizeMap[32]; // Default to 'w-8 h-8' if the provided size is not found in the map.
+};
+
+export const RoundIconWrapper = ({
+	size,
+	fillColor,
+	borderColor,
+	strokeWidth,
+	children,
+}) => {
+	const wrapperSizeClass = getSizeClass(size);
+	const iconSize = size / 2;
+	return (
+		<div
+			className={`flex justify-center items-center rounded-full border-[1px] border-gray-200  ${wrapperSizeClass}`}
+		>
+			{/* <CrossIcon
+				size={iconSize}
+				fillColor={fillColor}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+			/> */}
+			{children({
+				iconSize,
+				fillColor,
+				borderColor,
+				strokeWidth,
+			})}
+		</div>
+	);
+};
+
+export const WrappedBellIcon = ({
+	size,
+	fillColor,
+	borderColor,
+	strokeWidth,
+}) => {
+	return (
+		<RoundIconWrapper
+			size={size}
+			fillColor={fillColor}
+			borderColor={borderColor}
+			strokeWidth={strokeWidth}
+		>
+			{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+				<BellIcon
+					size={iconSize}
+					fillColor={fillColor}
+					borderColor={borderColor}
+					strokeWidth={strokeWidth}
+				/>
+			)}
+		</RoundIconWrapper>
+	);
+};
+
+export const WrappedLoginIcon = ({
+	size,
+	fillColor,
+	borderColor,
+	strokeWidth,
+}) => {
+	return (
+		<RoundIconWrapper
+			size={size}
+			fillColor={fillColor}
+			borderColor={borderColor}
+			strokeWidth={strokeWidth}
+		>
+			{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+				<div className="-ml-1">
+					<LoginIcon
+						size={iconSize}
+						fillColor={fillColor}
+						borderColor={borderColor}
+						strokeWidth={strokeWidth}
+					/>
+				</div>
+			)}
+		</RoundIconWrapper>
+	);
+};
+
+export const WrappedCrossIcon = ({
+	size,
+	fillColor,
+	borderColor,
+	strokeWidth,
+}) => {
+	return (
+		<RoundIconWrapper
+			size={size}
+			fillColor={fillColor}
+			borderColor={borderColor}
+			strokeWidth={strokeWidth}
+		>
+			{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+				<div className="rotate-45">
+					<CrossIcon
+						size={iconSize / 1.7}
+						fillColor={fillColor}
+						borderColor={borderColor}
+						strokeWidth={strokeWidth}
+					/>
+				</div>
+			)}
+		</RoundIconWrapper>
 	);
 };
 

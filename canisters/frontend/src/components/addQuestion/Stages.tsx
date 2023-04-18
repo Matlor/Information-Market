@@ -41,5 +41,5 @@ export const ShowStages = ({ stages }) => {
 };
 
 export const SubmitStagesText = ({ stages }) => {
-	return <div className={`text-small italic`}>{getText(stages)}</div>;
+	return <div className={`text-small `}>{getText(stages)}</div>;
 };

@@ -1,6 +1,13 @@
 import React from "react";
 
-const TitleInput = ({ value, setValue, placeholder, maxLength, disabled }) => {
+const TitleInput = ({
+	value,
+	setValue,
+	placeholder,
+	maxLength,
+	disabled,
+	className = "",
+}) => {
 	const onInput = (e) => {
 		e.target.style.height = "auto";
 		e.target.style.height = `${e.target.scrollHeight}px`;
@@ -12,7 +19,7 @@ const TitleInput = ({ value, setValue, placeholder, maxLength, disabled }) => {
 	return (
 		<textarea
 			rows={1}
-			className="w-full mt-3 overflow-hidden outline-none resize-none placeholder:opacity-50 h1 disabled:bg-transparent"
+			className={`w-full overflow-hidden outline-none resize-none placeholder:h1 placeholder:opacity-20 h1 disabled:bg-transparent ${className}`}
 			onInput={onInput}
 			value={value}
 			placeholder={placeholder}

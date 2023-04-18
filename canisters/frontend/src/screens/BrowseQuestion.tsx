@@ -1,24 +1,11 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
-import Search from "../components/browseQuestion/Search";
-import Pagination from "../components/browseQuestion/Pagination";
-import Loading from "../components/core/Loading";
+
 import { Question as IQuestion } from "../../declarations/market/market.did.d";
 import { Principal } from "@dfinity/principal";
 import { toNullable } from "@dfinity/utils";
 import { ActorContext } from "../components/api/Context";
-import { Link } from "react-router-dom";
-import { Profile } from "../components/core/Profile";
-import { OnIcon } from "../components/core/Icons";
-import NumAnswers from "../components/browseQuestion/NumAnswers";
-import { moStatusToString } from "../components/core/utils/conversions";
-import { TimeLeft } from "../components/core/Time";
-import { RewardTag } from "../components/core/Tag";
-import { Sort } from "../components/browseQuestion/Sort";
-import OpenToggle from "../components/browseQuestion/OpenToggle";
-import { e8sToIcp } from "../components/core/utils/conversions";
-import { List } from "../components/app/Layout";
 
-import QuestionPreview from "../components/browseQuestion/QuestionPreview";
+import UIBrowseQuestion from "../components/browseQuestion/UIBrowseQuestion";
 
 // ---------- Types ----------
 export interface IStatusMap {
@@ -152,7 +139,7 @@ const BrowseQuestion = () => {
 		},
 		pagination: {
 			pageIndex: 0,
-			questionsPerPage: 4,
+			questionsPerPage: 10,
 		},
 	});
 
@@ -201,7 +188,7 @@ const BrowseQuestion = () => {
 				});
 				setLoading({ main: false, search: false, filter: false });
 			}
-		}, 5000);
+		}, 50000);
 		return () => {
 			isCancelled = true;
 			clearInterval(interval);
@@ -247,84 +234,19 @@ const BrowseQuestion = () => {
 		dispatch({ type: "updatePageIndex", field: pageIndex });
 	};
 
-	const ViewState = ({ children }) => {
-		if (loading.main) {
-			return (
-				<div className="flex items-center justify-center w-full h-40">
-					<Loading />
-				</div>
-			);
-		} else if (questionData.totalQuestions === 0) {
-			return (
-				<div className="flex items-center justify-center w-full h-40 text-normal">
-					No Questions
-				</div>
-			);
-		} else {
-			return <>{children}</>;
-		}
-	};
-
 	console.log(questionData.questions, "questions");
 
-	console.log(conditions, "conditions");
-
 	return (
-		<>
-			<List>
-				<div className="flex justify-between">
-					<Search
-						searchLoading={loading.search}
-						setSearchedText={setSearchedText}
-					/>
-					<div className="flex gap-8 ">
-						<OpenToggle
-							isOn={
-								!conditions?.status?.pickanswer &&
-								!conditions?.status?.disputable &&
-								!conditions?.status?.arbitration &&
-								!conditions?.status?.payout &&
-								!conditions?.status?.closed
-							}
-							onClick={toggleStatus}
-						/>
-						<Sort
-							isLoading={loading.filter}
-							setSortOrder={setSortOrder}
-							order={conditions.order}
-						/>
-					</div>
-				</div>
-
-				<ViewState>
-					{questionData.questions.map((questionAndAuthor: any, index) => {
-						const { question, author } = questionAndAuthor;
-						console.log(author, "author");
-						return (
-							<Link to={`/question/${question.id}`} key={question.id}>
-								<QuestionPreview
-									key={question.id}
-									question={question}
-									author={author}
-								/>
-							</Link>
-						);
-					})}
-				</ViewState>
-			</List>
-			<div className="flex justify-center">
-				<Pagination
-					pageIndex={conditions.pagination.pageIndex}
-					questionsPerPage={conditions.pagination.questionsPerPage}
-					totalQuestions={questionData.totalQuestions}
-					setPageIndex={setPageIndex}
-				/>
-			</div>
-		</>
+		<UIBrowseQuestion
+			questionData={questionData}
+			loading={loading}
+			conditions={conditions}
+			setSearchedText={setSearchedText}
+			setSortOrder={setSortOrder}
+			toggleStatus={toggleStatus}
+			setPageIndex={setPageIndex}
+		/>
 	);
 };
 
 export default BrowseQuestion;
-{
-	/* {moStatusToString(question.status)} */
-}

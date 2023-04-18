@@ -10,12 +10,11 @@ const SortOptions = ({ setSortOrder, order }) => {
 	};
 
 	return (
-		<div className="flex flex-col gap-3 p-4 py-2 mt-1 bg-white min-w-max rounded-2 ">
+		<div className="flex flex-col gap-5 px-6 py-5 mt-3 bg-white rounded-2 min-w-max">
 			<div
-				className="flex items-center justify-between gap-6 text-large"
+				className="flex items-center gap-6 text-large"
 				onClick={() => handleSortOrder("REWARD")}
 			>
-				Reward
 				<div className="flex flex-col">
 					<SortIcon
 						fillColor1={
@@ -33,12 +32,12 @@ const SortOptions = ({ setSortOrder, order }) => {
 						gap={0}
 					/>
 				</div>
+				Reward
 			</div>
 			<div
-				className="flex items-center justify-between gap-6 text-large"
+				className="flex items-center gap-6 text-large"
 				onClick={() => handleSortOrder("TIME_LEFT")}
 			>
-				Time Left
 				<div className="flex flex-col">
 					<SortIcon
 						fillColor1={
@@ -56,6 +55,7 @@ const SortOptions = ({ setSortOrder, order }) => {
 						gap={0}
 					/>
 				</div>
+				Time Left
 			</div>
 		</div>
 	);
@@ -76,7 +76,7 @@ export const Sort = ({ isLoading, setSortOrder, order }) => {
 			{/* Modal */}
 			<Modal
 				view={
-					<div className="flex items-center gap-2 text-large">
+					<div className="flex items-center gap-3 text-gray-500 font-300 text-large">
 						<div className="flex flex-col w-max">
 							<SortIcon
 								fillColor1={"black"}
@@ -88,6 +88,7 @@ export const Sort = ({ isLoading, setSortOrder, order }) => {
 						Sort
 					</div>
 				}
+				className="rounded-2"
 			>
 				<SortOptions setSortOrder={setSortOrder} order={order} />
 			</Modal>

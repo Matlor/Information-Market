@@ -21,6 +21,7 @@
 		"@mui/icons-material": "^5.8.0",
 		"@mui/material": "^5.8.0",
 		"@tailwindcss/forms": "^0.5.2",
+		"alea": "^1.0.1",
 		"cypress-vite": "^1.1.1",
 		"escape-html": "^1.0.3",
 		"fs": "^0.0.1-security",
@@ -33,11 +34,14 @@
 		"react-icons": "^4.4.0",
 		"react-router-dom": "^6.3.0",
 		"react-select": "^5.3.2",
+		"seedrandom": "^3.0.5",
+		"simplex-noise": "^4.0.1",
 		"slate": "^0.81.0",
 		"slate-history": "^0.66.0",
 		"slate-hyperscript": "^0.77.0",
 		"slate-react": "^0.81.0",
-		"sudograph": "^0.4.3"
+		"sudograph": "^0.4.3",
+		"three": "^0.151.3"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",

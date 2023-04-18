@@ -5,6 +5,14 @@ export const Slider = ({ value, onChange, min, max, step, disabled }) => {
 		onChange(parseFloat(event.target.value));
 	};
 
+	const leftColor = "#1E1C1A"; // Change the color of the left side of the thumb here
+	const rightColor = "#F6F6F6"; // Change the color of the right side of the thumb here
+	const percentage = ((value - min) / (max - min)) * 100;
+
+	const backgroundStyle = {
+		background: `linear-gradient(to right, ${leftColor} ${percentage}%, ${rightColor} ${percentage}%)`,
+	};
+
 	return (
 		<input
 			type="range"
@@ -13,17 +21,9 @@ export const Slider = ({ value, onChange, min, max, step, disabled }) => {
 			max={max}
 			step={step}
 			onChange={handleChange}
-			className="flex w-full h-1 bg-gray-100 rounded-full appearance-none cursor-pointer accent-gray-800"
+			className="slider"
+			style={backgroundStyle}
 			disabled={disabled}
 		/>
-	);
-};
-
-export const SliderLabel = ({ left, right }) => {
-	return (
-		<div className="flex gap-4 text-small">
-			<div>{left}</div>
-			<div>{right}</div>
-		</div>
 	);
 };

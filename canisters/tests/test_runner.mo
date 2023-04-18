@@ -478,7 +478,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             }];
         }: State);
 
-        let ask_unknown_invoice = await a_user.ask_question(100, 2, "test question", "test description");
+        let ask_unknown_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
 
 
         let amount: Nat = await a_user.get_min_reward();
@@ -493,7 +493,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             Prelude.unreachable()}  
         }; 
 
-        let ask_unpaid_invoice = await a_user.ask_question(100, 2, "test question", "test description");
+        let ask_unpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_0 = await ledger_state(null);
         Debug.print("ledger_state_0:     " # debug_show(ledger_state_0));
 
@@ -505,7 +505,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             memo = 42;
             to = invoic_account_blob;
         });
-        let ask_underpaid_invoice = await a_user.ask_question(100, 2, "test question", "test description");
+        let ask_underpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_1 = await ledger_state(null);
         // switch(transfer_state_1){case(#Ok(val)){?val}; case(_){Prelude.unreachable()}}
         Debug.print("ledger_state_1:     " # debug_show(ledger_state_1));
@@ -518,12 +518,12 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             memo = 42;
             to = invoic_account_blob;
         });
-        let ask_paid_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "test description");
+        let ask_paid_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_2 = await ledger_state(null);
         Debug.print("ledger_state_2:     " # debug_show(ledger_state_2));
 
 
-        let ask_again_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "test description");
+        let ask_again_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_3 = await ledger_state(null);
 
 
@@ -640,7 +640,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         let a_user: Test_User.test_user = await  create_test_user();
 
-        let answer_no_user = await a_user.answer_question("0", "test answer");
+        let answer_no_user = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         ignore await market_canister.set_db({
             answers_state = [];
@@ -656,7 +656,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 questions = []
             }];
         }: State);
-        let answer_no_question = await a_user.answer_question("0", "test answer");
+        let answer_no_question = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         var single_question_no_answer = {
             answers_state = [];
@@ -675,7 +675,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                 open_duration :Int32 = 2;
                 title = "test question";
-                content = "test description";
+                content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                 reward:Int32 = 1_300_000:Int32;
                 potentialWinner = null;
                 finalWinner = null;
@@ -694,7 +694,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         };
        
         Debug.print(debug_show(await market_canister.set_db(single_question_no_answer: State)));
-        let answer_is_author = await a_user.answer_question("0", "test answer");
+        let answer_is_author = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // add user to state
         let b_user: Test_User.test_user = await create_test_user();
@@ -725,41 +725,41 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         //let new_question_closed: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #CLOSED};
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PICKANSWER}] }: State)));
-        let answer_wrong_status_pickanswer = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #DISPUTABLE}] }: State)));
-        let answer_wrong_status_disputable = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_disputable = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #ARBITRATION}] }: State)));
-        let answer_wrong_status_arbitration = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_arbitration = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#PAY)}] }: State)));
-        let answer_wrong_status_payout_pay = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_payout_pay = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#ONGOING)}] }: State)));
-        let answer_wrong_status_payout_ongoing = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_payout_ongoing = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #CLOSED}] }: State)));
-        let answer_wrong_status_closed = await b_user.answer_question("0", "test answer");
+        let answer_wrong_status_closed = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // finally works
         Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #OPEN}] }: State)));
-        let answer_submitted = await b_user.answer_question("0", "test answer");
+        let answer_submitted = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         
         let answer_submitted_state = await market_canister.get_db();
 
         // correct state transition to pickanswer
         ignore await market_canister.set_db({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000) - 10 }]}: State);
-        let time_transition_to_pickanswer = await b_user.answer_question("0", "test answer");
+        let time_transition_to_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         let time_transition_to_pickanswer_state = await market_canister.get_db();
         Debug.print("time_transition_to_pickanswer_state" # debug_show(time_transition_to_pickanswer_state));
         
         // correct state transition to payout
         ignore await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = Int32.fromInt(Time.now() / 60000000000) - 10 }] }: State);
-        let time_transition_to_payout = await b_user.answer_question("0", "test answer");
+        let time_transition_to_payout = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         let time_transition_to_payout_state = await market_canister.get_db(); 
 
-        let suite = S.suite("test answering question", [
+        let suite = S.suite("Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.ing question", [
             S.test(
                 "user does not exist",
                 switch(answer_no_user){
@@ -833,7 +833,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                             // TODO: should be resetable
                             //answer_in_state.id == "0" and
                             answer_in_state.author_id == Principal.fromActor(b_user)  and
-                            answer_in_state.content == "test answer" and
+                            answer_in_state.content == "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern." and
                             answer_in_state.question_id == "0" 
                         ){ "success" } else {"unexpected state"};
                     };
@@ -905,7 +905,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 author_id = Principal.fromActor(b_user);
                 question_id = "0";
                 creation_date:Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                content = "test answer";
+                content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
             }];
             invoices_state = [{
                 id = 0;
@@ -927,7 +927,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                 open_duration= 2;
                 title = "test question";
-                content = "test description";
+                content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                 reward = 1_300_000:Int32;
                 potentialWinner = null;
                 finalWinner = null;
@@ -944,7 +944,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                 open_duration= 2;
                 title = "test question";
-                content = "test description";
+                content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                 reward = 1_300_000:Int32;
                 potentialWinner = null;
                 finalWinner = null;
@@ -1227,7 +1227,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 1_300_000:Int32;
 
                     status= #DISPUTABLE;
@@ -1249,7 +1249,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 1_300_000:Int32;
 
                     status= #DISPUTABLE;
@@ -1268,14 +1268,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
             ];
         };
@@ -1538,7 +1538,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 1_300_000:Int32;
 
                     status= #ARBITRATION;
@@ -1557,14 +1557,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
             ];
         };
@@ -1779,7 +1779,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 1_300_000:Int32;
                             
                     status= #PAYOUT(#PAY);
@@ -1798,14 +1798,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromActor(b_user);
                     question_id = "0";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "1";
                     author_id = Principal.fromActor(c_user);
                     question_id = "0";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
             ];
         };
@@ -2030,7 +2030,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status= #OPEN;
@@ -2051,7 +2051,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 610000000:Int32;
                             
                     status= #PICKANSWER;
@@ -2069,9 +2069,9 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    open_duration= 2;
+                    open_duration= 1;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 710000000:Int32;
                             
                     status= #DISPUTABLE;
@@ -2091,7 +2091,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status= #ARBITRATION;
@@ -2112,7 +2112,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status=  #OPEN;
@@ -2132,7 +2132,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status=  #OPEN;
@@ -2152,7 +2152,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status= #OPEN;
@@ -2172,7 +2172,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
-                    content = "test description";
+                    content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
                     reward = 510000000:Int32;
                             
                     status= #OPEN;
@@ -2192,14 +2192,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "10";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "12";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "10";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
@@ -2207,14 +2207,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "20";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "22";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "20";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
@@ -2222,14 +2222,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "30";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "32";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "30";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
@@ -2237,14 +2237,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
                     question_id = "40";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
                     id = "42";
                     author_id =  Principal.fromActor(c_user);
                     question_id = "40";
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    content = "test answer";
+                    content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
             ];
         };

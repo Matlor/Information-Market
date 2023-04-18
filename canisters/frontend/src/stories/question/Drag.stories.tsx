@@ -1,18 +1,26 @@
+// Draggable.stories.js
 import React from "react";
-import { Meta } from "@storybook/react";
-import Drag from "../../components/question/Drag";
+import { Draggable, Drag } from "../../components/question/Drag";
 
 export default {
 	title: "question/Drag",
-	component: Drag,
-} as Meta;
+	component: Draggable,
+};
 
 const Template = (args) => (
-	<Drag {...args}>
-		<div className="p-4">
-			<p>Content inside draggable container.</p>
-		</div>
-	</Drag>
+	<Draggable {...args} className="border-2 ">
+		{({ handleMouseDown }) => (
+			<>
+				<Drag handleMouseDown={handleMouseDown} className="pt-3 mb-6 border-2">
+					<h1>Content inside the Drag component</h1>
+				</Drag>
+				<p>Content outside the Drag component</p>
+			</>
+		)}
+	</Draggable>
 );
 
 export const Default = Template.bind({});
+Default.args = {
+	className: "",
+};

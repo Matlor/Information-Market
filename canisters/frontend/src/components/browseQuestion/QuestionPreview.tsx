@@ -3,11 +3,13 @@ import { Question as IQuestion } from "../../../declarations/market/market.did.d
 import { Principal } from "@dfinity/principal";
 import { Link } from "react-router-dom";
 import { Profile } from "../core/Profile";
-import { OnIcon } from "../core/Icons";
+
 import NumAnswers from "../browseQuestion/NumAnswers";
 import { moStatusToString } from "../core/utils/conversions";
 import { TimeLeft, TimeStamp } from "../core/Time";
 import { RewardTag } from "../core/Tag";
+
+import { OnStage } from "../question/Stages";
 
 export interface QuestionPreviewProps {
 	question: IQuestion;
@@ -22,26 +24,24 @@ const QuestionPreview: React.FC<QuestionPreviewProps> = ({
 	author,
 }) => {
 	return (
-		<div className="space-y-3">
+		<div className="flex flex-col gap-2">
 			<div className="flex items-center justify-between">
-				<div className="flex space-x-6">
+				<div className="flex space-x-4">
 					<Profile
-						principal={author.id}
-						// minutes={question.creation_date}
+						principal={author.id} /* minutes={question.creation_date} */
 					/>
 				</div>
-				<div className="flex space-x-6">
+				<div className="flex space-x-3 md:space-x-5">
 					{moStatusToString(question.status) === "OPEN" && (
-						<div className="flex items-center space-x-2 rounded-sm">
+						<div className="flex items-center space-x-3 rounded-sm">
 							<TimeLeft minutes={question.status_end_date} icon={false} />
-							<OnIcon fillColor={`blue-500`} borderColor={`blue-100`} />
+							<OnStage isActive={true} />
 						</div>
 					)}
 					<RewardTag reward={question.reward} />
 				</div>
 			</div>
 
-			{/* Text */}
 			<div className="text-large">
 				{question.title.charAt(0).toUpperCase() + question.title.slice(1)}
 			</div>

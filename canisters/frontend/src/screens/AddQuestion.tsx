@@ -102,39 +102,40 @@ export interface ISpecifications {
 	};
 }
 
+// ------------------------------ Specifications -------------------------------
+// TODO: This is not based on backend
+const specifications: ISpecifications = {
+	title: {
+		max: 300,
+		min: 20,
+	},
+	duration: {
+		max: 168,
+		min: 1,
+	},
+	reward: {
+		max: 10,
+		min: 0.25,
+	},
+};
+
+export const initialInput: IInputs = {
+	validation: {
+		validTitle: false,
+		validDuration: false,
+		validReward: false,
+	},
+	title: "",
+	content: "",
+	duration: 24,
+	reward: 1,
+};
+
 const AddQuestion = () => {
 	// --------------------  Context --------------------
 	const { user } = useContext(ActorContext);
 
-	// ------------------------------ Specifications -------------------------------
-	// TODO: This is not based on backend
-	const specifications: ISpecifications = {
-		title: {
-			max: 300,
-			min: 20,
-		},
-		duration: {
-			max: 168,
-			min: 1,
-		},
-		reward: {
-			max: 10,
-			min: 0.25,
-		},
-	};
-
 	// -------------- State --------------
-	const initialInput: IInputs = {
-		validation: {
-			validTitle: false,
-			validDuration: false,
-			validReward: false,
-		},
-		title: "",
-		content: "",
-		duration: specifications.duration.min,
-		reward: specifications.reward.min,
-	};
 
 	const inputsReducer = (state: IInputs, action): IInputs => {
 		setSubmitStages(null);
@@ -228,7 +229,6 @@ const AddQuestion = () => {
 						dispatch({ type: "content", payload: content });
 					},
 				}}
-				titlePlaceholder={"Add your title here"}
 				inputs={inputs}
 				specifications={specifications}
 				submitStages={submitStages}

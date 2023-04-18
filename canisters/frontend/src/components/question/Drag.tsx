@@ -1,44 +1,39 @@
 import React, { useState, useEffect } from "react";
 
-const Drag = ({ children }) => {
+const Draggable = ({ children, className = "" }) => {
 	const [thing, setThing] = useState({
 		height: 100,
 		startY: null,
 		dragging: false,
 	});
 
-	function handleMouseDown(event) {
-		setThing({
-			...thing,
-			dragging: true,
-			startY: event.clientY,
-		});
-	}
+	useEffect(() => {
+		function handleMouseMove(event) {
+			if (thing.dragging) {
+				const delta = thing.startY ? thing.startY - event.clientY : 0;
+				const newHeight = thing.height + delta;
+				const minHeight = 50;
+				const maxHeight = window.innerHeight - 50;
+				const clampedHeight = Math.min(
+					maxHeight,
+					Math.max(minHeight, newHeight)
+				);
 
-	function handleMouseUp() {
-		setThing({
-			...thing,
-			dragging: false,
-		});
-	}
+				setThing({
+					...thing,
+					height: clampedHeight,
+					startY: event.clientY,
+				});
+			}
+		}
 
-	function handleMouseMove(event) {
-		if (thing.dragging) {
-			const delta = thing.startY ? thing.startY - event.clientY : 0;
-			const newHeight = thing.height + delta;
-			const minHeight = 50;
-			const maxHeight = window.innerHeight - 50;
-			const clampedHeight = Math.min(maxHeight, Math.max(minHeight, newHeight));
-
+		function handleMouseUp() {
 			setThing({
 				...thing,
-				height: clampedHeight,
-				startY: event.clientY,
+				dragging: false,
 			});
 		}
-	}
 
-	useEffect(() => {
 		document.addEventListener("mousemove", handleMouseMove);
 		document.addEventListener("mouseup", handleMouseUp);
 
@@ -48,29 +43,43 @@ const Drag = ({ children }) => {
 		};
 	}, [thing]);
 
-	// TODO: left and width should be related to the layout border or something
+	const handleMouseDown = (event) => {
+		setThing({
+			...thing,
+			dragging: true,
+			startY: event.clientY,
+		});
+	};
+
 	return (
 		<div
-			data-cy="drag"
-			className="rounded-t-2  drop-shadow-[0_-1px_4px_rgba(0,0,0,0.1)]"
+			className={`rounded-t-2  drop-shadow-[0_-1px_4px_rgba(0,0,0,0.1)] ${className}`}
 			style={{
-				position: "fixed",
+				/* position: "fixed",
 				maxWidth: "800px",
 				width: "100%",
 				bottom: 0,
 				left: "50%",
-				transform: "translateX(-50%)",
-				height: `${thing.height}px`,
 				backgroundColor: "#FFFFFF",
-				cursor: thing.dragging ? "ns-resize" : "default",
+				transform: "translateX(-50%)", */
+
+				height: `${thing.height}px`,
 			}}
+		>
+			{children({ thing, handleMouseDown })}
+		</div>
+	);
+};
+
+const Drag = ({ children, handleMouseDown, className = "" }) => {
+	return (
+		<div
+			className={`${className} cursor-pointer`}
 			onMouseDown={handleMouseDown}
-			onMouseMove={handleMouseMove}
-			onMouseUp={handleMouseUp}
 		>
 			{children}
 		</div>
 	);
 };
 
-export default Drag;
+export { Draggable, Drag };

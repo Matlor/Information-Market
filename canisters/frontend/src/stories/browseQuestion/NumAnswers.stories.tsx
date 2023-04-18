@@ -6,7 +6,12 @@ export default {
 	component: NumAnswers,
 };
 
-const Template = (args) => <NumAnswers {...args} />;
+const Template = (args) => (
+	<div className="flex gap-2 text-extra-small">
+		some text
+		<NumAnswers {...args} />{" "}
+	</div>
+);
 
 export const Default = Template.bind({});
 Default.args = {

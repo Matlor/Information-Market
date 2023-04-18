@@ -143,7 +143,9 @@ const Question = ({ user, login }: IProps) => {
 
 	if (!state?.question) {
 		return (
-			<div className="mt-[78px] flex justify-center">No question found</div>
+			<div className="mt-[78px] flex justify-center text-large">
+				No question found
+			</div>
 		);
 	} else {
 		const question = state.question;

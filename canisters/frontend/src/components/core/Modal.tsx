@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Modal = ({ children, view }) => {
+const Modal = ({ children, view, className = "" }) => {
 	const [display, setDisplay] = useState(false);
 
 	window.addEventListener("click", () => {
@@ -22,7 +22,7 @@ const Modal = ({ children, view }) => {
 			</button>
 			{display && (
 				<div
-					className="absolute right-0 shadow-lg"
+					className={`absolute shadow-lg right-[0px] ${className}`}
 					onClick={(e) => {
 						e.stopPropagation();
 					}}

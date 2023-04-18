@@ -59,7 +59,9 @@ const Pagination = ({
 				</div>
 			</button>
 
-			<div className="px-5 py-1 bg-gray-100 rounded-full">{pageIndex + 1}</div>
+			<div className="px-5 py-1 bg-gray-100 rounded-full text-large">
+				{pageIndex + 1}
+			</div>
 
 			<button onClick={increaseIndex}>
 				<div className={`flex gap-4  ${nextOpacity} items-center`}>

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
+
 import { Profile } from "../core/Profile";
 import Stages from "../question/Stages";
 import Answer from "../question/Answer";
@@ -6,7 +7,7 @@ import { SelectedTag, RewardTag, RewardIconTag } from "../core/Tag";
 import Button from "../core/Button";
 import Menu from "../question/Menu";
 import { TimeLeft } from "../core/Time";
-import Drag from "../question/Drag";
+import { Draggable, Drag } from "../question/Drag";
 import {
 	SlateEditor,
 	TollbarInstance,
@@ -19,9 +20,10 @@ import {
 } from "../../../declarations/market/market.did";
 import { FQuestion } from "../../screens/Question";
 import { ICurrentUser } from "../../screens/App";
-
+import { TimeStamp } from "../core/Time";
 import Mail from "../core/Mail";
 import parse from "html-react-parser";
+import { List } from "../app/Layout";
 
 export interface UIQuestionProps {
 	question: FQuestion;
@@ -122,22 +124,25 @@ const UIQuestion = ({
 	console.log(viewCase);
 
 	return (
-		<>
-			<div className="space-y-2">
-				<div className="flex justify-between">
+		<List>
+			<div className="flex flex-col">
+				<div className="flex items-center justify-between mb-6">
 					<Profile
-						name={"peter"}
 						principal={question.author_id}
 						minutes={question.creation_date}
 					/>
-					<div className="flex gap-4">
+					<div className="flex gap-4 lg:gap-6">
 						<Stages stage={view.stages} />
 						<RewardTag reward={question.reward} />
 					</div>
 				</div>
 
-				<div data-cy="title" className="h1 ">
+				<div data-cy="title" className="mb-5 text-lg h1">
 					{question.title}
+					{/* <div className="mt-3 mb-6">
+						{<TimeStamp minutes={question.creation_date} />}{" "}
+						<div className="h-[2px] mt-3 bg-gray-800 w-10"></div>
+					</div> */}
 				</div>
 
 				<div data-cy="text" className="editor-content">
@@ -163,40 +168,53 @@ const UIQuestion = ({
 						case "editor":
 							return (
 								/* TODO: I could make this an instance and as such a separate component */
-								<Drag>
-									<SlateEditor
-										setInputValue={answer.setAnswerInput}
-										className={"flex flex-col gap-6 justify-center px-6 py-4 "}
-									>
-										<div className="flex">
-											<div className="flex flex-1">
-												<TollbarInstance />
+								<Draggable
+									className={`w-full md:page-width fixed bottom-0 bg-white`}
+								>
+									{({ handleMouseDown }) => (
+										<SlateEditor
+											inputValue={answer.answerInput}
+											setInputValue={answer.setAnswerInput}
+											className={
+												"flex flex-col gap-4 px-6 py-4 h-full  overflow-hidden"
+											}
+										>
+											<Drag handleMouseDown={handleMouseDown}>
+												<div className="flex">
+													<div className="flex flex-1">
+														<TollbarInstance className="flex gap-3 lg:gap-5" />
+													</div>
+													<div className="flex h-[6px] self-center w-8 rounded-md bg-gray-500 rounded-full"></div>
+													<div className="flex justify-end flex-1">
+														<TimeLeft minutes={question.status_end_date} />
+													</div>
+												</div>
+											</Drag>
+
+											<EditableInstance
+												placeholder="Answer..."
+												className="w-full overflow-auto !min-h-[80px] h-full"
+											/>
+											<div className="flex justify-end">
+												<Button
+													onClick={async () => {
+														await user.market.answer_question(
+															question.id,
+															answer.answerInput
+														);
+														answer.setAnswerInput("");
+														Mail("new answer");
+													}}
+													arrow={true}
+													size="sm"
+													color="gray"
+													text={"Submit"}
+												/>
 											</div>
-											<div className="flex h-[6px] self-center w-8 rounded-md bg-gray-500 rounded-full"></div>
-											<div className="flex justify-end flex-1">
-												<TimeLeft minutes={question.status_end_date} />
-											</div>
-										</div>
-										<EditableInstance placeholder="Answer..." />
-										<Button
-											onClick={async () => {
-												await user.market.answer_question(
-													question.id,
-													answer.answerInput
-												);
-												Mail("new answer");
-											}}
-											arrow={true}
-											size="sm"
-											color="black"
-											text={"Submit"}
-										/>
-									</SlateEditor>
-								</Drag>
+										</SlateEditor>
+									)}
+								</Draggable>
 							);
-						case "login":
-							/* TODO: create menu for this that asks to log in */
-							return <Menu text="Login to Answer" />;
 						case "menu":
 							return (
 								<>
@@ -226,11 +244,15 @@ const UIQuestion = ({
 					}
 				})()}
 			</div>
-		</>
+		</List>
 	);
 };
 
 export default UIQuestion;
+
+//case "login":
+/* TODO: create menu for this that asks to log in */
+//return <Menu text="Login to Answer" />;
 
 /* 
 In the end:

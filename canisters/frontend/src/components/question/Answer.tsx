@@ -11,7 +11,7 @@ const Answer = ({ author_id, content, tag, action, timeStamp }) => {
 				<Profile principal={author_id} minutes={timeStamp} />
 				<div className="flex items-center gap-4">
 					{tag}
-					<SettingsIcon fillColor="black" borderColor="black" />
+					{/* <SettingsIcon fillColor="black" borderColor="black" size={20} /> */}
 				</div>
 			</div>
 			<div className="editor-content">{parse(content)}</div>

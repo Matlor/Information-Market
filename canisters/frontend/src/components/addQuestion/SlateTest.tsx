@@ -34,8 +34,8 @@ const initialValue = [
 ];
 
 export const SlateEditor = ({
-	inputValue,
 	setInputValue,
+	inputValue,
 	children,
 	className = "",
 }) => {
@@ -56,6 +56,7 @@ export const SlateEditor = ({
 	if (inputValue === "" && editor.children !== initialValue) {
 		resetEditor();
 	}
+
 	return (
 		// Is about the state of an object and Slate itself provides that state to UI component further down
 		<Slate
@@ -70,18 +71,18 @@ export const SlateEditor = ({
 				}
 			}}
 		>
-			<div className={` ${className}`}>{children}</div>
+			<div className={`${className}`}>{children}</div>
 		</Slate>
 	);
 };
 
-export const TollbarInstance = ({ className = "" }) => {
+export const TollbarInstance = () => {
 	const editor = useSlate();
 	return (
 		<IconContext.Provider
 			value={{
 				color: "#0E1217",
-				size: "1.1em",
+				size: "1.25em",
 			}}
 		>
 			<Toolbar>
@@ -92,7 +93,7 @@ export const TollbarInstance = ({ className = "" }) => {
 					So the editor object stores what parts get that assigned to but the Editable then decides what to show.
 					Editable then wrappes that part with a classic jsx tag <blockquote> that I think I can style. 
 				*/}
-				<div className={`flex ${className} `}>
+				<div className="flex gap-[14px]">
 					<MarkButton format="bold" icon={<AiOutlineBold />} editor={editor} />
 					<MarkButton
 						format="italic"
@@ -191,15 +192,12 @@ export const EditableInstance = ({
 
 	return (
 		<Editable
-			className={`w-full editor-content ${className} `}
+			className={`w-full h-full editor-content ${className} ${
+				scroll ? "overflow-y-auto" : ""
+			}`}
 			renderElement={renderElement}
 			renderLeaf={renderLeaf}
 			placeholder={placeholder}
-			renderPlaceholder={({ children, attributes }) => (
-				<div className="!opacity-20" {...attributes}>
-					{children}
-				</div>
-			)}
 			spellCheck
 			onKeyDown={(event) => handleKeyDown(event, editor)}
 			readOnly={disabled}

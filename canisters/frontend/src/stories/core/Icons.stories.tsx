@@ -14,6 +14,8 @@ import {
 	ClosedIcon,
 	LinkIcon,
 	SortIcon,
+	LoginIcon,
+	RoundIconWrapper,
 } from "../../components/core/Icons";
 
 export default {
@@ -138,6 +140,15 @@ LinkIconStory.args = {
 	strokeWidth: 0.8,
 };
 
+export const LoginIconStory = (args) => <LoginIcon {...args} />;
+LoginIconStory.storyName = "Login Icon";
+LoginIconStory.args = {
+	size: 20,
+	fillColor: "transparent",
+	borderColor: "black",
+	strokeWidth: 0.8,
+};
+
 const AllIcons = (args) => (
 	<div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
 		<BellIcon {...args} {...args.BellIcon} />
@@ -151,9 +162,70 @@ const AllIcons = (args) => (
 		<SortIconStory {...args} {...args.SortIcon} />
 		<OngoingIcon {...args} {...args.OngoingIcon} />
 		<ClosedIcon {...args} {...args.ClosedIcon} />
+		<LoginIcon {...args} {...args.LoginIcon} />
 		<LinkIcon {...args} {...args.LinkIcon} />
 	</div>
 );
+
+export const WrappedLoginIcon = (args) => (
+	<RoundIconWrapper {...args}>
+		{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+			<LoginIcon
+				size={iconSize}
+				fillColor={fillColor}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+			/>
+		)}
+	</RoundIconWrapper>
+);
+WrappedLoginIcon.storyName = "WrappedLoginIcon Icon";
+WrappedLoginIcon.args = {
+	size: 32,
+	fillColor: "transparent",
+	borderColor: "black",
+	strokeWidth: 1,
+};
+
+export const WrappedCrossIcon = (args) => (
+	<RoundIconWrapper {...args}>
+		{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+			<CrossIcon
+				size={iconSize}
+				fillColor={fillColor}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+			/>
+		)}
+	</RoundIconWrapper>
+);
+WrappedCrossIcon.storyName = "WrappedCrossIcon Icon";
+WrappedCrossIcon.args = {
+	size: 32,
+	fillColor: "transparent",
+	borderColor: "black",
+	strokeWidth: 1,
+};
+
+export const WrappedBellIcon = (args) => (
+	<RoundIconWrapper {...args}>
+		{({ iconSize, fillColor, borderColor, strokeWidth }) => (
+			<BellIcon
+				size={iconSize}
+				fillColor={fillColor}
+				borderColor={borderColor}
+				strokeWidth={strokeWidth}
+			/>
+		)}
+	</RoundIconWrapper>
+);
+WrappedBellIcon.storyName = "WrappedBellIcon Icon";
+WrappedBellIcon.args = {
+	size: 40,
+	fillColor: "transparent",
+	borderColor: "black",
+	strokeWidth: 1,
+};
 
 export const AllIconsStory = AllIcons.bind({});
 AllIconsStory.storyName = "All Icons";
@@ -174,4 +246,5 @@ AllIconsStory.args = {
 	OngoingIcon: {},
 	ClosedIcon: {},
 	LinkIcon: {},
+	LoginIcon: {},
 };

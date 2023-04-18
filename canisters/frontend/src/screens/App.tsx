@@ -20,7 +20,16 @@ import Footer from "../components/app/Footer";
 import Notifications from "./Notifications";
 import Protected from "../components/app/Protected";
 
+import Button, { LoadingWrapper } from "../components/core/Button";
+
 import { ArrowIcon } from "../components/core/Icons";
+
+import {
+	SlateEditor,
+	TollbarInstance,
+	EditableInstance,
+} from "../components/addQuestion/SlateTest";
+import { timeout } from "@dfinity/agent/lib/cjs/polling/strategy";
 
 export interface ILoggedOutUser {
 	principal: undefined;
@@ -162,9 +171,25 @@ function App() {
 		navigate("/");
 	};
 
+	/* const [input, setInput] = useState("");
+	console.log(input, "input"); */
+
 	// in browser I need to do this: /#/question/1
 	return (
 		<div className="font-inter">
+			{/* <div className={"p-10"}>
+				<SlateEditor setInputValue={setInput} inputValue={input}>
+					<TollbarInstance />
+					<EditableInstance className="border-2" />
+				</SlateEditor>
+			</div>
+			<button
+				onClick={() => {
+					setInput("");
+				}}
+			>
+				reset input
+			</button> */}
 			<ActorContext.Provider value={{ user, login, logout }}>
 				<Page
 					Header={
@@ -210,7 +235,7 @@ function App() {
 							path="/profile"
 							element={
 								<Protected principal={user.principal}>
-									<Profile logout={logout} />
+									<Profile logout={logout} principal={user.principal} />
 								</Protected>
 							}
 						/>

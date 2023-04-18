@@ -1,14 +1,21 @@
 import React, { useContext } from "react";
 
-import Button from "../../components/core/Button";
+import Button, { LoadingWrapper } from "../../components/core/Button";
 import Logo from "./Logo";
 import { Link, useLocation } from "react-router-dom";
 import { ILoggedInUser, ILoggedOutUser } from "../../screens/App";
 import { ActorContext } from "../api/Context";
 
-import { BellIcon } from "../core/Icons";
+import {
+	BellIcon,
+	WrappedBellIcon,
+	WrappedLoginIcon,
+	WrappedCrossIcon,
+} from "../core/Icons";
 import { ProfilePicture } from "../core/Profile";
 import FixedWidthWrapper from "../core/FixedWidthWrapper";
+
+import { ShapeGrid } from "../core/TestPicture";
 
 // -------------- Types --------------
 /* interface IHeader {
@@ -22,52 +29,58 @@ import FixedWidthWrapper from "../core/FixedWidthWrapper";
 // TODO: solve "back" issue
 const Header = () => {
 	const { login, user } = useContext(ActorContext);
-	{
-		/* <div className="px-4 lg:px-20"> */
-	}
+
+	const gaps = "gap-5 lg:gap-7";
+
 	return (
-		<div className="flex justify-between w-full py-5">
+		<div className="flex justify-between w-full bg-white lg:px-5 xl:px-7">
 			<Link to="/" className="flex-none w-max">
 				<Logo />
 			</Link>
 
 			{!user?.principal ? (
-				<div className="flex items-center gap-8">
+				<div className="flex items-center gap-5 lg:gap-7 ">
 					<Link to="/add-question">
-						<Button
+						{/* <Button
 							size={"lg"}
 							arrow={false}
-							color={"black"}
+							color={"gray"}
 							onClick={() => {}}
 							text="Ask"
-						/>
+						/> */}
+						<WrappedCrossIcon size={40} strokeWidth={0.6} />
 					</Link>
-					<FixedWidthWrapper>
-						<Button
-							size={"lg"}
-							arrow={true}
-							color={"none"}
-							onClick={login}
-							text={"Login"}
-						/>
-					</FixedWidthWrapper>
+					{/* <Button
+						size={"lg"}
+						arrow={true}
+						color={"none"}
+						onClick={login}
+						text={"Login"}
+					/> */}
+
+					<LoadingWrapper onClick={login}>
+						<WrappedLoginIcon size={40} strokeWidth={0.8} />
+					</LoadingWrapper>
 				</div>
 			) : (
-				<div className="flex items-center gap-8 ">
+				<div className={`flex items-center ${gaps}`}>
 					<Link to="/add-question">
-						<Button
+						{/* <Button
 							size={"lg"}
 							arrow={false}
-							color={"black"}
+							color={"gray"}
 							onClick={() => {}}
 							text="Ask"
-						/>
+						/> */}
+						<WrappedCrossIcon size={40} strokeWidth={0.6} />
 					</Link>
-					<Link to="/notifications">
-						<BellIcon />
+					<Link to="/notifications" className="flex items-center gap-1">
+						{/* <BellIcon size={20} /> */}
+						<WrappedBellIcon size={40} strokeWidth={0.6} />
 					</Link>
-					<Link to="/profile">
-						<ProfilePicture principal={user.principal} size={35} />
+					<Link to="/profile" className="flex items-center gap-1">
+						{/* <ProfilePicture principal={user.principal} size={36} /> */}
+						<ShapeGrid uniqueString={user.principal.toString()} />
 					</Link>
 				</div>
 			)}
