@@ -122,12 +122,14 @@ const Form = ({
 
 	return (
 		<List>
-			<div className="flex flex-col items-start w-full gap-6 md:gap-9 md:flex-row">
-				<div className="flex flex-col w-full gap-0">
-					<div className="flex text-small">
+			<div className="flex flex-col items-start w-full gap-6 md:gap-10 md:flex-row">
+				<div className="flex flex-col w-full gap-2">
+					<div className="flex text-small ">
 						{/* <div>{"Reward : "}</div> */}
 
-						<div className="text-left w-7">{inputs?.reward?.toFixed(2)} </div>
+						<div className="text-left w-7 font-600">
+							{inputs?.reward?.toFixed(2)}{" "}
+						</div>
 						<div className="">ICP</div>
 					</div>
 					<div className="w-full">
@@ -141,14 +143,14 @@ const Form = ({
 						/>
 					</div>
 				</div>
-				<div className="flex flex-col w-full gap-0">
+				<div className="flex flex-col w-full gap-2">
 					<div className="flex gap-6 text-small">
 						<div className="flex">
-							<div className="w-5 text-left">{days}</div>
+							<div className="w-5 text-left font-600">{days}</div>
 							<div className="ml-1">Days</div>
 						</div>
 						<div className="flex">
-							<div className="w-5 text-left">{hours}</div>
+							<div className="w-5 text-left font-600">{hours}</div>
 							<div className="ml-1">Hours</div>
 						</div>
 					</div>
@@ -165,6 +167,7 @@ const Form = ({
 				</div>
 			</div>
 
+			{/* <div className="w-full h-[0.5px] bg-gray-800"></div> */}
 			<div className="space-y-1 ">
 				<div className="flex items-center h-6 rounded-1 text-small">
 					<div className="w-9">

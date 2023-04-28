@@ -17,16 +17,16 @@
 }
 
 .slider {
-	@apply w-full rounded-full h-[2.5px]  appearance-none cursor-pointer;
+	@apply w-full rounded-full h-[3px]  appearance-none cursor-pointer;
 }
 
 .slider::-webkit-slider-thumb {
-	@apply w-[18px] h-[18px] bg-white   rounded-full shadow-lg appearance-none cursor-pointer;
+	@apply w-[25px] h-[25px] bg-white   rounded-full shadow-lg appearance-none cursor-pointer;
 	-webkit-appearance: none;
 }
 
 .slider::-moz-range-thumb {
-	@apply w-[18px] h-[18px] bg-white rounded-full shadow-lg cursor-pointer;
+	@apply w-[25px] h-[25px] bg-white rounded-full shadow-lg cursor-pointer;
 }
 
 @layer components {

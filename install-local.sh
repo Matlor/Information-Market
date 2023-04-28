@@ -86,7 +86,7 @@ dfx generate test_runner
 #dfx ledger account-id --of-principal "[USER_PRINCIPAL]"
 #dfx canister call invoice accountIdentifierToBlob '(variant {text = "[USER_ACCOUNT_ID]"})'
 #dfx identity use minter
-#dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "[USER_BLOB]" } )'
+#dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000_000 }; fee = record { e8s = 0 }; to = blob "[USER_BLOB]" } )'
 #dfx canister call ledger account_balance '( record { account = blob "[USER_BLOB]" } )'
 
 # or: dfx ledger balance 03e3d86f29a069c6f2c5c48e01bc084e4ea18ad02b0eec8fccadf4487183c223 --network ic
