@@ -3,22 +3,18 @@
 # 1. Get wallet
 export WALLET_PRINCIPAL=$(dfx identity --network ic get-wallet)
 
-dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create invoice --with-cycles 0
 dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create market --with-cycles 0
 dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create frontend --with-cycles 0
 dfx canister --network ic --wallet "$WALLET_PRINCIPAL" create test_runner --with-cycles 0
 
 export LEDGER_PRINCIPAL=$(dfx canister --network ic  id ledger)
-export INVOICE_PRINCIPAL=$(dfx canister --network ic id invoice)
 export MARKET_PRINCIPAL=$(dfx canister --network ic id market)
 export TEST_RUNNER_ACCOUNT=$(dfx ledger account-id --of-principal $(dfx canister --network ic id test_runner))
 
 # cycles:500000000000
 
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" invoice --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 0
-
 dfx deploy --mode reinstall --network ic --wallet "$WALLET_PRINCIPAL" market --argument='(record {
-    invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; 
+    ledger_canister = principal "'${LEDGER_PRINCIPAL}'";
     coin_symbol = "ICP"; 
     min_reward_e8s = 1250000; 
     transfer_fee_e8s = 10000; 
@@ -31,11 +27,9 @@ dfx deploy --mode reinstall --network ic --wallet "$WALLET_PRINCIPAL" market --a
 dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" test_runner --argument='(
     principal "'${MARKET_PRINCIPAL}'", 
     principal "'${LEDGER_PRINCIPAL}'",
-    principal "'${INVOICE_PRINCIPAL}'"
 )' --with-cycles 0
 
 dfx generate ledger
-dfx generate invoice
 dfx generate market
 dfx generate test_runner 
 

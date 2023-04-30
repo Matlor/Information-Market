@@ -44,7 +44,7 @@ module {
         // --------------------------- DB FUNCTIONS ---------------------------
         
         // TODO: rename the func so that not both are called "create_user"
-        public func create_user(id:Principal, name:Text) : Result.Result<User, Types.StateError> {
+        public func create_user(id:Principal, name:Text) : Result.Result<User, Types.Error> {
             // if user does not exist yet and is !ananymous
             if(not users.validate_key(id)){
                 return #err(#UserIsInvalid);
@@ -53,24 +53,17 @@ module {
             };
         }; 
         
-        public func create_invoice(invoice_id:Nat, buyer_id:Principal) : Result.Result<Invoice, Types.StateError> {
+
+        // checks if the user exists
+        // create invoice -> requires buyer id
+        // add the invoice id to the user by replacing the user
+        public func create_invoice(amount:Nat, marketPrincipal:Principal, buyer_id:Principal) : Result.Result<Invoice, Types.Error> {
             switch(users.get_user(buyer_id)){
                 case(null){return #err(#UserNotFound)};
-                case(?prevUser){
-                    switch(Array.find<Nat>(prevUser.invoices, func (key: Nat) {return key == invoice_id;})){
-                        case(?key){return #err(#InvoiceExists)};
-                        case(null){
-                            if(not invoices.validate_key(invoice_id)){ return #err(#InvoiceIsInvalid) } 
-                            else {
-                                // add invoice to invoices
-                                let returnedInvoice: Invoice = invoices.create_invoice(invoice_id, buyer_id);
-
-                                // update invoice ids on the user
-                                ignore users.put_user(users.replace_invoice_ids(prevUser, invoice_id));
-                                return #ok(returnedInvoice);
-                            };
-                        };
-                    };
+                case(?user){
+                    let invoice: Invoice = invoices.create_invoice(amount, marketPrincipal, buyer_id);
+                    ignore users.put_user(users.replace_invoice_ids(user, invoice.id));
+                    return #ok(invoice);
                 };
             };
         };
@@ -85,22 +78,19 @@ module {
         // assumes that further above it is checked that invoice did not yet have this id
         // TODO: Question should point to invoice to check quickly if invoice has been used for question already
         // TODO: Do I have to pass the reward? Should it be int or nat?
-        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32) : Result.Result<Question, Types.StateError> {
-            // TO DO: the switches are independent and can be refactored (readability)
+        // TO DO: the switches are independent and can be refactored (readability)
+        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32) : Result.Result<Question, Types.Error> {
             switch(invoices.get_invoice(invoice_id)){
                 case(null){ return #err(#InvoiceNotFound) };
-                case(?prevInvoice){
+                case(?invoice){
                     switch(users.get_user(user_id)){
                         case(null){ return #err(#UserNotFound) };
-                        case(?prevUser){
-                            // Add question to questions
+                        case(?user){
+                           
                             let question: Question = questions.create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32);
-                            
-                            // Add it to inoive
-                            ignore invoices.put_invoice(invoices.replace_question_id(prevInvoice, question.id));
-
-                            // Add id to the user
-                            ignore users.put_user(users.replace_question_ids(prevUser, question.id));
+                            ignore invoices.put_invoice(invoices.replace_question_id(invoice, question.id));
+                            ignore users.put_user(users.replace_question_ids(user, question.id));
+                           
                             return #ok(question);
                         };
                     };
@@ -116,7 +106,7 @@ module {
         // add to the answer
         // replace question to add id
         // user question to add id
-        public func create_answer(user_id:Principal, question_id:Text, content:Text) : Result.Result<Answer, Types.StateError> {
+        public func create_answer(user_id:Principal, question_id:Text, content:Text) : Result.Result<Answer, Types.Error> {
             switch(users.get_user(user_id)){
                 case(null){return #err(#UserNotFound)};
                 case(?prevUser){
@@ -327,6 +317,8 @@ module {
 
         public let Invoices = object {
             public let { get_invoice } = invoices;
+            public let { verify_invoice } = invoices;
+            public let { un_verify_invoice } = invoices;
         };
 
         public let Questions = object {

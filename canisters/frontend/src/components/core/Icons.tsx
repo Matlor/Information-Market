@@ -439,9 +439,8 @@ export const ClosedIcon = ({
 				d="M12.2777 4.72266L7.08328 9.9171L4.72217 7.55599"
 				className={`fill-${fillColor} stroke-${borderColor}`}
 				strokeWidth={strokeWidth}
-				stroke-width="0.8"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				strokeLinecap="round"
+				strokeLinejoin="round"
 			/>
 		</svg>
 	);
@@ -480,12 +479,12 @@ export const LinkIcon = ({
 			height={size}
 			viewBox="0 0 24 24"
 			className={`fill-${fillColor} stroke-${borderColor}`}
-			stroke-width={strokeWidth}
+			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				strokeLinecap="round"
+				strokeLinejoin="round"
 				d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
 			/>
 		</svg>
@@ -507,18 +506,18 @@ export const LoginIcon = ({
 			viewBox="0 0 21 16"
 			fill="none"
 			className={`fill-${fillColor} stroke-${borderColor}  `}
-			stroke-width={strokeWidth}
+			strokeWidth={strokeWidth}
 			xmlns="http://www.w3.org/2000/svg"
 		>
 			<path
 				d="M14.2819 15L17.7085 15C18.2278 15 18.7258 14.8156 19.093 14.4874C19.4602 14.1592 19.6665 13.7141 19.6665 13.25L19.6665 2.75C19.6665 2.28587 19.4602 1.84075 19.093 1.51256C18.7258 1.18437 18.2278 1 17.7085 1L14.2819 0.999999"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				strokeLinecap="round"
+				strokeLinejoin="round"
 			/>
 			<path
 				d="M0.999999 7.89579L13.9231 7.8958M13.9231 7.8958L8.98522 2.72656M13.9231 7.8958L8.98522 13.065"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				strokeLinecap="round"
+				strokeLinejoin="round"
 			/>
 		</svg>
 	);

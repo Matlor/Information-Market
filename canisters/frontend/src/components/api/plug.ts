@@ -17,8 +17,8 @@ export interface IDefaultActor {
 	get_update_status_on_heartbeat: IMarketActor["get_update_status_on_heartbeat"];
 	get_user: IMarketActor["get_user"];
 	get_users: IMarketActor["get_users"];
-	who_am_i: IMarketActor["who_am_i"];
 }
+
 export const defaultActor: IDefaultActor = {
 	get_conditional_questions: market.get_conditional_questions,
 	get_conditional_questions_with_authors:
@@ -34,29 +34,36 @@ export const defaultActor: IDefaultActor = {
 	get_update_status_on_heartbeat: market.get_update_status_on_heartbeat,
 	get_user: market.get_user,
 	get_users: market.get_users,
-	who_am_i: market.who_am_i,
 };
 
 const marketCanisterId = process.env.MARKET_CANISTER_ID;
 const ledgerCanisterId = process.env.LEDGER_CANISTER_ID;
-const invoiceCanisterId = process.env.INVOICE_CANISTER_ID;
 
-const whitelist = [marketCanisterId, ledgerCanisterId, invoiceCanisterId];
+const whitelist = [marketCanisterId, ledgerCanisterId];
 const host = window.location.origin;
 
+console.log(whitelist, host);
 export const establishConnection = async (logout, login) => {
+	console.log("establishing connection");
 	const onConnectionUpdate = () => {
 		console.log(window.ic.plug.sessionManager.sessionData);
 		logout();
 		login();
 	};
 
+	console.log("after onConnectionUpdate");
+
 	try {
-		await window.ic.plug.requestConnect({
-			whitelist,
-			host,
-			onConnectionUpdate,
-		});
+		console.log(
+			await window.ic.plug.requestConnect({
+				whitelist,
+				host,
+				onConnectionUpdate,
+			}),
+			"request connect"
+		);
+
+		console.log("requested connection");
 
 		if (process.env.NODE_ENV !== "production") {
 			await window.ic?.plug?.agent?.fetchRootKey();

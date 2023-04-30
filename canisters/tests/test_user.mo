@@ -4,14 +4,9 @@ import Debug "mo:base/Debug";
 import Result "mo:base/Result";
 
 // TODO: if the interface change the changes are not reflected in the imported motoko
-import InvoiceTypes "../invoice/types";
-import LedgerTypes "../invoice/ledgerTypes2";
+import LedgerTypes  "../ledger/ledgerTypes2";
 
 shared (deployer) actor class test_user(market_canister: Types.Interface, ledger_canister: LedgerTypes.Interface): async (Types.Interface or LedgerTypes.Interface)  = this  {
-
-    public shared func who_am_i() : async () {
-        return await market_canister.who_am_i();
-    };
 
     public shared func get_coin_symbol() : async Text {
         return await market_canister.get_coin_symbol();
@@ -37,19 +32,19 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.get_update_status_on_heartbeat();
     };
 
-    public shared({caller}) func update_market_params(params: Types.UpdateMarketParams) : async Result.Result<(), Types.StateError>{
+    public shared({caller}) func update_market_params(params: Types.UpdateMarketParams) : async Result.Result<(), Types.Error>{
         return await market_canister.update_market_params(params: Types.UpdateMarketParams);
     };
 
-    public shared({caller}) func set_db(initial_state:Types.State): async Types.State {
+    public shared({caller}) func set_db(initial_state:Types.State): async Result.Result<Types.State, Types.Error> {
         return await market_canister.set_db(initial_state:Types.State);
     };
     
-    public shared({caller}) func get_db(): async Types.State {
+    public shared({caller}) func get_db(): async Result.Result<Types.State, Types.Error> {
         return await market_canister.get_db();
     };
 
-    public shared({caller}) func create_user(name:Text): async Result.Result<Types.User, Types.StateError> {
+    public shared({caller}) func create_user(name:Text): async Result.Result<Types.User, Types.Error> {
         return await market_canister.create_user(name:Text);
     };
 
@@ -57,32 +52,32 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.get_user(user_id:Principal);
     };
 
-    public shared ({caller}) func create_invoice(reward: Nat) : async InvoiceTypes.CreateInvoiceResult  {
+    public shared ({caller}) func create_invoice(reward: Nat) : async Result.Result<Types.Invoice, Types.Error>  {
         return await market_canister.create_invoice(reward: Nat);
     };
 
     public shared ({caller}) func ask_question (
         invoice_id: Nat,
-        duration_minutes: Nat,
+        duration_minutes: Int32,
         title: Text,
         content: Text
-    ) : async Result.Result<Types.Question, Types.StateError> {
-        return await market_canister.ask_question(invoice_id: Nat, duration_minutes: Nat, title: Text,content: Text);
+    ) : async Result.Result<Types.Question, Types.Error> {
+        return await market_canister.ask_question(invoice_id: Nat, duration_minutes: Int32, title: Text,content: Text);
     };
 
-    public shared ({caller}) func answer_question(question_id: Text, content: Text): async Result.Result<Types.Answer, Types.StateError> {
+    public shared ({caller}) func answer_question(question_id: Text, content: Text): async Result.Result<Types.Answer, Types.Error> {
         return await market_canister.answer_question(question_id: Text, content: Text);
     };
 
-    public shared ({caller}) func pick_answer(question_id: Text, answer_id: Text) : async Result.Result<(), Types.StateError> {
+    public shared ({caller}) func pick_answer(question_id: Text, answer_id: Text) : async Result.Result<(), Types.Error> {
         return await market_canister.pick_answer(question_id: Text, answer_id: Text);
     };
 
-    public shared ({caller}) func dispute (question_id: Text): async Result.Result<(), Types.StateError> {
+    public shared ({caller}) func dispute (question_id: Text): async Result.Result<(), Types.Error> {
         return await market_canister.dispute (question_id: Text);
     };
 
-    public shared ({caller}) func arbitrate (question_id: Text, finalWinner: Types.FinalWinner): async Result.Result<(), Types.StateError> {
+    public shared ({caller}) func arbitrate (question_id: Text, finalWinner: Types.FinalWinner): async Result.Result<(), Types.Error> {
         return await market_canister.arbitrate(question_id: Text, finalWinner: Types.FinalWinner);
     }; 
     
@@ -98,15 +93,9 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.update_disputable(question_id:Text);
     };
 
-    public func update_payout(question_id:Text) : async Result.Result<Nat64, Types.StateError> {
+    public func update_payout(question_id:Text) : async Result.Result<Nat64, Types.Error> {
         return await market_canister.update_payout(question_id:Text); 
     };
-
-    // TODO: DELETE
-    public func exp() : async Text {
-        return await market_canister.exp(); 
-    };
-
 
     // ---------------------- Ledger ----------------------
     public func transfer(args:LedgerTypes.TransferArgs) : async LedgerTypes.TransferResult {

@@ -3,22 +3,27 @@ import Mail from "../core/Mail";
 import { icpToE8s } from "../core/utils/conversions";
 
 export const createInvoice = async (loggedInUser, inputs) => {
+	console.log("createInvoice hit");
 	const res = await loggedInUser.market.create_invoice(icpToE8s(inputs.reward));
+
 	console.log("createInvoice res", res);
 
 	if ("Err" in res) {
 		throw new Error(`Error: ${res}`);
 	} else {
-		return res.ok.invoice;
+		console.log(res.ok);
+		return res.ok;
 	}
 };
 
 export const transfer = async (loggedInUser, invoice) => {
-	const destination = Principal.fromHex(
+	/* const destination = Principal.fromHex(
 		invoice.destination.text
-	).toUint8Array();
+	).toUint8Array(); */
+
+	// Array.from(destination),
 	const res = await loggedInUser.ledger.transfer({
-		to: Array.from(destination),
+		to: invoice.destination,
 		fee: { e8s: BigInt(10000) },
 		memo: BigInt(0),
 		from_subaccount: [],

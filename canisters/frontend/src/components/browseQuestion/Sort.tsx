@@ -62,8 +62,6 @@ const SortOptions = ({ setSortOrder, order }) => {
 };
 
 export const Sort = ({ isLoading, setSortOrder, order }) => {
-	console.log(order, "order");
-
 	return (
 		<>
 			{/* Loading */}

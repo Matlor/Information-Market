@@ -1,38 +1,33 @@
-import Iter         "mo:base/Iter";
 import Time         "mo:base/Time";
+import Iter         "mo:base/Iter";
 import Array        "mo:base/Array";
-import Blob         "mo:base/Blob";
 import Buffer       "mo:base/Buffer";
-import Int32        "mo:base/Int32";
-import Nat          "mo:base/Nat";
 import Bool         "mo:base/Bool";
+import Blob         "mo:base/Blob";
+import Principal    "mo:base/Principal";
+import Debug        "mo:base/Debug";
+import Result       "mo:base/Result";
+import Prelude      "mo:base/Prelude";
+import Nat          "mo:base/Nat";
+import Nat64        "mo:base/Nat64";
+import Int32        "mo:base/Int32";
 import C            "mo:matchers/Canister";
 import M            "mo:matchers/Matchers";
 import T            "mo:matchers/Testable";
 import S            "mo:matchers/Suite";
-import Principal    "mo:base/Principal";
-import Debug        "mo:base/Debug";
-import Result       "mo:base/Result";
+
 import MarketTypes  "../market/types";
+import LedgerTypes  "../ledger/ledgerTypes";
+import LedgerTypes2 "../ledger/ledgerTypes2"; // needed for block archive
+
 import Test_User    "./test_user";
-import Hex          "../invoice/Hex";
+import A            "../market/invoice/Account";
+import Hex          "../market/invoice/Hex";
+import AccountUtils "AccountUtils";
 
-// TODO: improve these imports
-import Account          "../market/ledger/accounts";
-import LedgerTypes      "../invoice/ledgerTypes";
-import LedgerTypes2      "../invoice/ledgerTypes2";
-
-import InvoiceTypes     "../invoice/types";
-
-import Prelude          "mo:base/Prelude";
-import Nat64            "mo:base/Nat64";
-
-
-shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Principal, invoice:Principal) = this {
+shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Principal) = this {
     // TODO: generally check that the state I set is as long as what I define, because if I add the same question id it will just overwrite the value there
     // TODO: check that only one answer is related to one question and so on. The setState should check for these things possibly?
-
-    // for convenience
     type Question = MarketTypes.Question;
     type User = MarketTypes.User;
     type Invoice = MarketTypes.Invoice;
@@ -42,31 +37,29 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
     let market_canister : MarketTypes.Interface = actor(Principal.toText(market));
     let ledger_canister : LedgerTypes2.Interface = actor(Principal.toText(ledger));
-
-    // ----------------------- HELPERS -----------------------
-    // TODO: Everything can ultimately run in the test function I suppose
-    // that would get around the limitation that I can only run async stuff in a function
-
-
-    // ---------------------- Ledger Helpers ----------------------
-    // DELETE
-    public func def_acc_delete(): async Blob {
-        getDefaultAccount(invoice, market);
+    
+    // ----------- Fund Entities ---------
+    public shared func fund_principal(principal:Principal) : async LedgerTypes2.TransferResult { 
+        let transfer_res: LedgerTypes2.TransferResult = await ledger_canister.transfer({ 
+                memo = 42:Nat64;
+                amount = { e8s = 2_000_000_000 };
+                fee = { e8s = 10_000 };
+                from_subaccount = null;
+                to = A.getDefaultAccountId(principal);
+                created_at_time = null;
+            }
+        );
     };
 
-    // TODO: rename not that it gets confused
-    func getDefaultAccount(invoice:Principal, market:Principal):  Blob {
-        Account.accountIdentifier(invoice, Account.principalToSubaccount(market));
-    };
-
+    // --------- Known Addresses ---------
     var known_accounts: Buffer.Buffer<{name: Text; account: Text}> = Buffer.Buffer<{name: Text; account: Text}>(10);
 
     func get_known_addresses () : [{name:Text; account:Text}] {
         let test_runner_principal: Principal = Principal.fromActor(this);
         let market_: Principal = market;
-        
-        let test_runner_account_id: Blob = Account.accountIdentifier(test_runner_principal, Account.defaultSubaccount());
-        let market_bank_account: Blob = getDefaultAccount(invoice, market_);
+    
+        let test_runner_account_id: Blob = A.getDefaultAccountId(test_runner_principal);
+        let market_bank_account: Blob = A.getDefaultAccountId(market_);
         
         known_accounts.add( {name = "test_runner_account"; account = Hex.encode(Blob.toArray(test_runner_account_id))});
         known_accounts.add( {name = "market_bank_account"; account = Hex.encode(Blob.toArray(market_bank_account))});
@@ -82,133 +75,49 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         known_accounts.add( {name=name; account} );
     };
 
+
+    //----------- Create User ---------
     var user_counter: Nat = 0;  
     public func create_test_user() : async Test_User.test_user {
         let user = await Test_User.test_user(market_canister, ledger_canister);
-        add_known_address(Nat.toText(user_counter), Hex.encode(Blob.toArray(Account.accountIdentifier(Principal.fromActor(user), Account.defaultSubaccount()))));
+        add_known_address(Nat.toText(user_counter), A.blobToAccount(A.getDefaultAccountId(Principal.fromActor(user))));
         user_counter += 1;
         return user;
     };
 
+    // ---------- Ledger State ---------------
+
     public shared func ledger_state(initial_block_: ?Nat64) : async (Nat, [{name: Text; account: Text; balance: Nat64}]) {
-        let initial_block:Nat64 = 0;
-        //switch(initial_block_){case(null){0}; case(?value){value};};
         
-        //(await ledger_canister.query_blocks({ start = 0:Nat64; length = 1:Nat64; })).chain_length;
-
-        let a_user = await create_test_user();
-        let b_user = await create_test_user();
-
-       /*  // sample transactions
-        await exp(Principal.fromActor(a_user));
-        await exp(Principal.fromActor(a_user));
-        await exp(Principal.fromActor(b_user));*/
-
+        // get blocks
+        let initial_block:Nat64 = 0;
         let currentBlock:Nat64 = (await ledger_canister.query_blocks({ start = 0:Nat64; length = 1:Nat64; })).chain_length;
         let length:Nat64 = currentBlock - initial_block;
-        let res:LedgerTypes2.QueryBlocksResponse = await ledger_canister.query_blocks({ start = initial_block; length; });
-        let blocks: [LedgerTypes2.Block] = res.blocks;
+        let blocks: [LedgerTypes2.Block] = (await ledger_canister.query_blocks({ start = initial_block; length; })).blocks;
 
+        // Initial addresses
         var addresses: Buffer.Buffer<Blob> = Buffer.Buffer<Blob>(10);
-        addresses.add(Account.accountIdentifier(Principal.fromActor(this), Account.defaultSubaccount()));
+        addresses.add(A.getDefaultAccountId(Principal.fromActor(this)));
 
-        // TODO:
+        // get relevant transactions
         var transaction_counter: Nat = 0;
+        transaction_counter := AccountUtils.process_blocks(blocks, addresses);
 
-        // iterate through all of these transactions
-        let blocks_iter: Iter.Iter<LedgerTypes2.Block> = Iter.fromArray<LedgerTypes2.Block>(blocks);
-        label l for (block in blocks_iter) {
-            switch(block.transaction.operation){
-                case(null){};
-                case(?operation){
-                    switch(operation){
-                        case(#Transfer(transfer)){
-                            var fromIsIncluded: Bool = false;
-                            var toIsIncluded:Bool = false;
-                            for(address in addresses.vals()){
-                                if(address == transfer.from){
-                                    fromIsIncluded := true;
-                                };
-                                if(address == transfer.to){
-                                    toIsIncluded := true;
-                                };
-                            };
-
-                            if(fromIsIncluded and toIsIncluded){ 
-                                transaction_counter += 1;
-                                continue l
-                            } else if(not fromIsIncluded and not toIsIncluded){continue l} 
-                            else if(fromIsIncluded and not toIsIncluded){
-                                transaction_counter += 1;
-                                addresses.add(transfer.to);
-                                continue l;
-                            } else if(not fromIsIncluded and toIsIncluded){
-                                addresses.add(transfer.from);
-                                continue l;
-                            };
-                        };
-                        case(_){};
-                    };
-                };
-            };
-        };
-
-        var accounts: Buffer.Buffer<{name: Text; account: Text; balance: Nat64}> = Buffer.Buffer<{name: Text; account: Text; balance: Nat64}>(10);
-
-        // Major limitation: we cannot go from account id to principal
-        for(address in addresses.vals()){
-            let arr = get_known_addresses();
-            let iter: Iter.Iter<{name: Text; account: Text}> = Iter.fromArray<{name: Text; account: Text}>(get_known_addresses());
-            
-            // TODO: this balance can't be correct, I can't fetch past balances!
-            var textAddress = {name= ""; account = Hex.encode(Blob.toArray(address)); balance= (await ledger_canister.account_balance({ account=address })).e8s };
-            label inner for (item in iter) {
-                if(textAddress.account == item.account){
-                    textAddress :=  {name= item.name; account = textAddress.account; balance= textAddress.balance};
-                } else { continue inner };
-            };
-            accounts.add(textAddress);
-        };
+        // create list of involved accounts
+        let accountsArray = await AccountUtils.get_account_details(addresses, get_known_addresses(), ledger_canister);
+        var accounts: Buffer.Buffer<{name: Text; account: Text; balance: Nat64}> = Buffer.fromArray<{name: Text; account: Text; balance: Nat64}>(accountsArray);
         (transaction_counter, Buffer.toArray(accounts));
-    };
-
-
-    public shared func fund_principal(principal:Principal) : async LedgerTypes2.TransferResult { 
-        Debug.print(debug_show(principal));  
-        let transfer_res: LedgerTypes2.TransferResult = await ledger_canister.transfer({ 
-                memo = 42:Nat64;
-                amount = { e8s = 2_000_000_000 };
-                fee = { e8s = 10_000 };
-                from_subaccount = null;
-                to = Account.accountIdentifier(principal, Account.defaultSubaccount());
-                created_at_time = null;
-            }
-        );
-    };
-
-    public shared func fund_account_on_invoice( ) : async LedgerTypes2.TransferResult { 
-        Debug.print(debug_show(getDefaultAccount(invoice, market)));
-        let transfer_res: LedgerTypes2.TransferResult = await ledger_canister.transfer({ 
-                memo = 42:Nat64;
-                amount = { e8s = 2_000_000_000 };
-                fee = { e8s = 10_000 };
-                from_subaccount = null;
-                to = getDefaultAccount(invoice, market);
-                created_at_time = null;
-            }
-        );
     };
 
     // ---------------------- State Helpers ----------------------
     // TODO: a function that find which values in the state have changed.
-
     func array_length<T>(arr: [T]): Nat {
         let iter: Iter.Iter<T> = Iter.fromArray<T>(arr);
         Iter.size<T>(iter);
     };
 
     func set_empty_state(): async () {
-        ignore await market_canister.set_db({
+        ignore await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -216,6 +125,124 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         }: State);
     };
 
+
+    // ---------------------- State ----------------------
+   /*  ignore  await set_db_unwrapped({
+        answers_state = [];
+        invoices_state = [];
+        questions_state = [];
+        users_state = [];
+    }: State); */
+
+    // ignore await set_db_unwrapped(base_state:State);
+
+    public func get_base_state(a_user:Test_User.test_user, b_user:Test_User.test_user, c_user:Test_User.test_user) :async State {
+       return {
+            answers_state = [{
+                id = "0";
+                author_id = Principal.fromActor(b_user);
+                question_id = "0";
+                creation_date:Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
+            },  
+            {
+                id = "1";
+                author_id = Principal.fromActor(c_user);
+                question_id = "0";
+                creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
+            }];
+            invoices_state = [{
+                id = 0;
+                buyer_id = Principal.fromActor(a_user);
+                question_id = ?"0";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
+            },
+            {
+                id = 1;
+                buyer_id = Principal.fromActor(a_user);
+                question_id = ?"1";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
+            }];
+            questions_state = [{
+                id= "0";
+                author_id= Principal.fromActor(a_user);
+                invoice_id= 0; 
+                creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                status= #OPEN;
+                status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                open_duration= 2;
+                title = "test question";
+                content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
+                reward = 1_300_000:Int32;
+                potentialWinner = null;
+                finalWinner = null;
+                close_transaction_block_height= null;
+                answers = ["0", "1"]; 
+            },
+            {
+                id= "1";
+                author_id= Principal.fromActor(a_user);
+                invoice_id= 1; 
+                creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
+                status= #OPEN;
+                status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
+                status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
+                open_duration= 2;
+                title = "test question";
+                content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
+                reward = 1_300_000:Int32;
+                potentialWinner = null;
+                finalWinner = null;
+                close_transaction_block_height= null;
+                answers = []; 
+            }];
+            users_state = [{
+                id = Principal.fromActor(a_user); 
+                answers = []; 
+                avatar = null; 
+                invoices = [0, 1]; 
+                joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                name = "John"; 
+                questions = ["0", "1"]
+            },
+            {
+                id = Principal.fromActor(b_user); 
+                answers = ["0"]; 
+                avatar = null; 
+                invoices = []; 
+                joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
+                name = "Tim"; 
+                questions = []
+            }];
+        };
+    };
+
+
+    func get_db_unwrapped () :async State {
+        switch(await market_canister.get_db()){case(#ok(state)){state}; case(_){
+            Debug.print("get_db");
+            Prelude.unreachable()
+        }};
+    };
+
+    func set_db_unwrapped (state:State) :async State {
+        switch(await market_canister.set_db(state)){case(#ok(state)){state}; case(#err(err)){
+            Debug.print("set_db" # debug_show(err));
+            Prelude.unreachable()
+        }};
+    };
+
+    
     // --------------------------------- TESTS ----------------------------------
     // TODO: should I only ever interact with the canister from the test_user canisters?
     // TODO: this test_runner should probably deploy the canister as I can then mess with the min_reward and other settings. (or I set them)
@@ -230,11 +257,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         return "Success";
     };
 
+
+    // ------------------------------ testUserManagement ------------------------------
+
     // TODO: Test against state instead of return values
     public shared func testUserManagement() : async {#success; #fail : Text} {
 
         Debug.print("running testUserManagement");
-        ignore  await market_canister.set_db({
+        ignore  await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -244,7 +274,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let a_user = await Test_User.test_user(market_canister, ledger_canister);
         let b_user = await Test_User.test_user(market_canister, ledger_canister);
 
-        let res_first_user: Result.Result<User, MarketTypes.StateError> = await a_user.create_user("John");
+        let res_first_user: Result.Result<User, MarketTypes.Error> = await a_user.create_user("John");
         let first_user_expectation: User =  {
             id = Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai") ; 
             answers = []; 
@@ -255,9 +285,9 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions = []
         };
 
-        let res_second_user: Result.Result<User, MarketTypes.StateError> = await market_canister.create_user("John");
+        let res_second_user: Result.Result<User, MarketTypes.Error> = await market_canister.create_user("John");
 
-        let res_third_user: Result.Result<User, MarketTypes.StateError> = await b_user.create_user("Tim");
+        let res_third_user: Result.Result<User, MarketTypes.Error> = await b_user.create_user("Tim");
         let third_user_expectation: User =  {
             id = Principal.fromActor(b_user); 
             answers = []; 
@@ -324,11 +354,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         return #success;
     };
    
+
+    
+
     public shared func testCreateInvoice() : async {#success; #fail : Text} {
         Debug.print("running testCreateInvoice");
         let a_user = await Test_User.test_user(market_canister, ledger_canister);
 
-        ignore await market_canister.set_db({
+        ignore await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -345,23 +378,20 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
         }: State);
 
-        let prior_state: State = await market_canister.get_db();
+
+        let prior_state: State = await get_db_unwrapped();
         Debug.print("get_db: " # debug_show(prior_state));
 
-        // TODO: try to get the invoice from the invoice canister
-        // TODO: sequential would be much nicer. Have a scenario and then an assertion.
-
         let first_res = await a_user.create_invoice((await a_user.get_min_reward()) - 1);
-        let state = await market_canister.get_db();
+        let state = await get_db_unwrapped();
 
         let second_res = await a_user.create_invoice((await a_user.get_min_reward()) + 1 );
-        let state_res = await market_canister.get_db();
+        let state_res = await get_db_unwrapped();
 
         let suite = S.suite("test create invoice", [
             // TODO: might not work if 0
             S.test("should fail if reward < min-reward", switch(first_res){
-                    case(#ok(success)){ Debug.print("" # debug_show(success.invoice)); "success" };
-                    // TODO: use specific error:
+                    case(#ok(success)){ Debug.print("" # debug_show(success)); "success" };
                     case(#err(err)){ 
                         if(state == prior_state){
                             "expected error";
@@ -376,7 +406,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 "should work if reward > min-reward",
                 switch(second_res){
                     case(#ok(success)){ "success" };
-                    // TODO: use specific error:
                     case(#err(err)){ "error" };
                 },
                 M.equals<Text>(T.text("success")),
@@ -395,64 +424,17 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 ,
                 M.equals<Text>(T.text("success")),
             ),
-            
         ]);
         S.run(suite);
         return #success;
     }; 
 
-    // TODO: a func that ignores the bad case
-    /* func ignore_case<T>(result: Result.Result<T, ()>): T {
-        switch(result){
-            case(#ok(val)) { return ok };
-            case(#err(err)) { Prelude.unreachable() };
-        };
-    };  */
-
-    // TODO: replace this, extremely unsafe!
-    func fromText(accountId : Text) : Blob {
-        switch (Hex.decode(accountId)) {
-            case(#ok v){ let blob = Blob.fromArray(v);
-            };
-            case(_){Prelude.unreachable()};
-        };
-    };
 
     public shared func testPayingInvoice() : async {#success; #fail : Text} {
-        // ----- Setup -----
-        // set state to: 
-        // have a user -> I'd need to add the specific principal as a user to the state
-        // have an invoice
-        // fund the user -> how? I need a minter. Can the minter be the deployer? Call the ledger, which ledger? import the ledger and so on. 
-        // pay the invoice -> maybe get the invoice? call the ledger 
-        // state of the invoice/ledger -> can I log them somehow? Could my "get_db" func contain queries to them?
-        // visualise what is happening here exactly
-
-        // should verify invoice be a public func? then I could test that step separately?
-        // here I need a logger what happens when exactly. Here it gets interesting with the actor model.
-        // ------------
-
-        // add:
-        // refering to invoice that does not exist
-        // could invoice be created on IC but not locally?
-        
-
-        // 1. the test_runner should be funded automatically when I deploy it. Then I can assume it to be funded -> DONE
-        // 2. create a user & add to the db -> DONE
-        // 2.5 create_invoice -> problem I'd like to simulate that directly -> or I just call the function!  -> put it into a function
-        // 3. user calls "create_question" -> should fail
-        // 4. user calls create_question -> fails / no state change
-        // 5. user calls ledger to transfer some amount -> should work
-        // 6. user calls create_question -> fails / no state change
-        // 7. user calls ledger and pays the rest -> should work
-        // 8. user calls create_question -> should work
-        // 9. invoice can't be used twice
-        // 10. state is correct (invoice containing q etc.)
-
         Debug.print("running testPayingInvoice");
 
         let a_user = await Test_User.test_user(market_canister, ledger_canister);
-        let a_user_account = Account.accountIdentifier(Principal.fromActor(a_user), Account.defaultSubaccount());
+        let a_user_account = A.getDefaultAccountId(Principal.fromActor(a_user));
         Debug.print("ledger transfer: " # debug_show(await ledger_canister.transfer({ 
                 amount = { e8s = 2_000_000_000 };
                 created_at_time = null;
@@ -463,7 +445,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             }
         )));
 
-        ignore await market_canister.set_db({
+        ignore await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -480,22 +462,18 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         let ask_unknown_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
 
-
         let amount: Nat = await a_user.get_min_reward();
-        let invoice: InvoiceTypes.Invoice = switch(await a_user.create_invoice(amount)){ 
-            case(#ok(success)){ success.invoice };
+        let invoice: MarketTypes.Invoice = switch(await a_user.create_invoice(amount)){ 
+            case(#ok(success)){ success };
             case(_){ 
             Debug.print("create_invoice failed");
             Prelude.unreachable() 
         }};
-        let invoic_account_blob: Blob = switch(invoice.destination){ case(#text(account_id_text)){ fromText(account_id_text) }; case(_){
-            Debug.print("invoic_account_blob failed");
-            Prelude.unreachable()}  
-        }; 
+        let invoic_account_blob: Blob = invoice.destination;
 
         let ask_unpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_0 = await ledger_state(null);
-        Debug.print("ledger_state_0:     " # debug_show(ledger_state_0));
+        Debug.print("ledger_state_unpaid:     " # debug_show(ledger_state_0));
 
         let transfer_state_1 =  await a_user.transfer({ 
             amount = { e8s = (Nat64.fromNat(invoice.amount) - 50_000)};
@@ -508,7 +486,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let ask_underpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_1 = await ledger_state(null);
         // switch(transfer_state_1){case(#Ok(val)){?val}; case(_){Prelude.unreachable()}}
-        Debug.print("ledger_state_1:     " # debug_show(ledger_state_1));
+        Debug.print("ledger_state_underpaid:     " # debug_show(ledger_state_1));
 
         let transfer_state_2 = await a_user.transfer({ 
             amount = { e8s = Nat64.fromNat(50_000)};
@@ -520,12 +498,12 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         });
         let ask_paid_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_2 = await ledger_state(null);
-        Debug.print("ledger_state_2:     " # debug_show(ledger_state_2));
+        Debug.print("ledger_state_paid:     " # debug_show(ledger_state_2));
 
 
         let ask_again_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_3 = await ledger_state(null);
-
+        Debug.print("ledger_state asked_again:     " # debug_show(ledger_state_2));
 
 
         let suite = S.suite("test paying invoice", [
@@ -599,24 +577,12 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 },
                 M.equals<Text>(T.text("expected error"))
             ),
-          // Check what else we did with ic-repl
         ]);
         S.run(suite);
         return #success;
     };
 
-    // ---------------------- TIME BASED FUNCTIONS ----------------------
-
-    // TODO: I need a "change state function, that allows me to only change one thing"
-    // TODO: I need to define somewhere all the basic states that should work or not. Here it will get complicated
-
-    // --------- answer_question ---------
-    // think of all cases that should not allow a questio to occur
-    // then test that it works
-    // then test update func
-    
-    // I HAVE TO GET DONE TODAY!
-    
+   
     public shared func testAnsweringQuestion() : async {#success; #fail : Text} {
         // TODO: ananymous users 
         // TODO: status update tests for minutes
@@ -631,7 +597,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         // this always includes checking the balances
         // -----------------------------------------------
         Debug.print("running testAnsweringQuestion");
-        ignore await market_canister.set_db({
+        ignore await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -642,7 +608,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         let answer_no_user = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        ignore await market_canister.set_db({
+        ignore await set_db_unwrapped({
             answers_state = [];
             invoices_state = [];
             questions_state = [];
@@ -664,6 +630,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
             }];
             questions_state = [{
                 id= "0";
@@ -693,7 +664,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             }];
         };
        
-        Debug.print(debug_show(await market_canister.set_db(single_question_no_answer: State)));
+        Debug.print(debug_show(await set_db_unwrapped(single_question_no_answer: State)));
         let answer_is_author = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // add user to state
@@ -714,50 +685,42 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             single_question_no_answer with users_state = new_users_state;
         };
 
-        Debug.print(debug_show(await market_canister.set_db(state_two_users: State)));
+        Debug.print(debug_show(await set_db_unwrapped(state_two_users: State)));
 
-        /* let new_question_open: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #OPEN};
-        let new_question_pickanswer: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #PICKANSWER};
-        let new_question_disputable: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #DISPUTABLE};
-        let new_question_arbitration: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #ARBITRATION};
-        let new_question_payout_pay: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #PAYOUT(#PAY)};
-        let new_question_payout_ongoing: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #PAYOUT(#ONGOING)}; */
-        //let new_question_closed: MarketTypes.Question = {single_question_no_answer.questions_state[0] with status = #CLOSED};
-
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PICKANSWER}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PICKANSWER}] }: State)));
         let answer_wrong_status_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #DISPUTABLE}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #DISPUTABLE}] }: State)));
         let answer_wrong_status_disputable = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #ARBITRATION}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #ARBITRATION}] }: State)));
         let answer_wrong_status_arbitration = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#PAY)}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#PAY)}] }: State)));
         let answer_wrong_status_payout_pay = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#ONGOING)}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#ONGOING)}] }: State)));
         let answer_wrong_status_payout_ongoing = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #CLOSED}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #CLOSED}] }: State)));
         let answer_wrong_status_closed = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // finally works
-        Debug.print(debug_show(await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #OPEN}] }: State)));
+        Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #OPEN}] }: State)));
         let answer_submitted = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         
-        let answer_submitted_state = await market_canister.get_db();
+        let answer_submitted_state = await get_db_unwrapped();
 
         // correct state transition to pickanswer
-        ignore await market_canister.set_db({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000) - 10 }]}: State);
+        ignore await set_db_unwrapped({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000) - 10 }]}: State);
         let time_transition_to_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
-        let time_transition_to_pickanswer_state = await market_canister.get_db();
+        let time_transition_to_pickanswer_state = await get_db_unwrapped();
         Debug.print("time_transition_to_pickanswer_state" # debug_show(time_transition_to_pickanswer_state));
         
         // correct state transition to payout
-        ignore await market_canister.set_db({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = Int32.fromInt(Time.now() / 60000000000) - 10 }] }: State);
+        ignore await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = Int32.fromInt(Time.now() / 60000000000) - 10 }] }: State);
         let time_transition_to_payout = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
-        let time_transition_to_payout_state = await market_canister.get_db(); 
+        let time_transition_to_payout_state = await get_db_unwrapped(); 
 
         let suite = S.suite("Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.ing question", [
             S.test(
@@ -899,7 +862,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let b_user: Test_User.test_user = await  create_test_user();
         let c_user: Test_User.test_user = await  create_test_user();
 
-        let base_state:State = {
+    let base_state:State = {
             answers_state = [{
                 id = "0";
                 author_id = Principal.fromActor(b_user);
@@ -911,11 +874,21 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
             },
             {
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"1";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
             }];
             questions_state = [{
                 id= "0";
@@ -971,88 +944,88 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             }];
         };
 
-        ignore await market_canister.set_db(base_state:State);
+        ignore await set_db_unwrapped(base_state:State);
 
         // user does not exists
         let uknown_user = await c_user.pick_answer("0", "0");
-        let uknown_user_state = await market_canister.get_db();
+        let uknown_user_state = await get_db_unwrapped();
 
         // question does not exist
         let unknown_question = await a_user.pick_answer("10", "0");
-        let unknown_question_state = await market_canister.get_db();
+        let unknown_question_state = await get_db_unwrapped();
 
         // answer does not exist
         let unknown_answer = await a_user.pick_answer("0", "3");
-        let unknown_answer_state = await market_canister.get_db();
+        let unknown_answer_state = await get_db_unwrapped();
         
         // is not author
         let not_author = await b_user.pick_answer("0", "0");
-        let not_author_state = await market_canister.get_db();
+        let not_author_state = await get_db_unwrapped();
     
         // answer is not in question
         let answer_not_in_question = await a_user.pick_answer("1", "0");
-        let answer_not_in_question_state = await market_canister.get_db();
+        let answer_not_in_question_state = await get_db_unwrapped();
         Debug.print("random print 2");
 
         // status is not pickanswer
         // --> state change
-        let pickanswer_wrong_status_open_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
             {base_state.questions_state[1] with status = #OPEN }
         ]}: State);
         let pickanswer_wrong_status_open = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_open_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_open_state_after = await get_db_unwrapped();
 
-        let pickanswer_wrong_status_disputable_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
             {base_state.questions_state[1] with status = #DISPUTABLE }
         ]}: State);
         let pickanswer_wrong_status_disputable = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_disputable_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_disputable_state_after = await get_db_unwrapped();
 
-        let pickanswer_wrong_status_arbitration_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
             {base_state.questions_state[1] with status = #ARBITRATION }
         ]}: State);
         let pickanswer_wrong_status_arbitration = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_arbitration_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_arbitration_state_after = await get_db_unwrapped();
        
-        let pickanswer_wrong_status_payout_pay_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
             {base_state.questions_state[1] with status = #PAYOUT(#PAY) }
         ]}: State);
         let pickanswer_wrong_status_payout_pay = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_payout_pay_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
-        let pickanswer_wrong_status_payout_ongoing_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
             {base_state.questions_state[1] with status = #PAYOUT(#ONGOING) }
         ]}: State);
         let pickanswer_wrong_status_payout_ongoing = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_payout_ongoing_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
-        let pickanswer_wrong_status_payout_closed_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
             {base_state.questions_state[1] with status = #CLOSED }
         ]}: State);
         let pickanswer_wrong_status_payout_closed = await a_user.pick_answer("0", "0");
-        let pickanswer_wrong_status_payout_closed_state_after = await market_canister.get_db();
+        let pickanswer_wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // time is not up -> success
-        let pickanswer_right_status_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_right_status_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
             {base_state.questions_state[1] with status = #PICKANSWER }
         ]}: State);
         let pickanswer_right_status = await a_user.pick_answer("0", "0");
-        let pickanswer_right_status_state_after = await market_canister.get_db();
+        let pickanswer_right_status_state_after = await get_db_unwrapped();
 
         // time is up -> update
-        let pickanswer_time_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let pickanswer_time_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status_end_date = base_state.questions_state[0].status_end_date - 10 },
             {base_state.questions_state[1] with status_end_date = base_state.questions_state[1].status_end_date - 10 }
         ]}: State);
         let pickanswer_time = await a_user.pick_answer("0", "0");
-        let pickanswer_time_state_after = await market_canister.get_db();
+        let pickanswer_time_state_after = await get_db_unwrapped();
 
         let suite = S.suite("test pick answer", [
             S.test("unknown user should not pick a winner", 
@@ -1206,18 +1179,26 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     questions = []
                 }
             ];
-            invoices_state = [
-                {
-                    id = 0;
-                    buyer_id = Principal.fromActor(a_user);
-                    question_id = ?"0";
-                },
-                {
-                    id = 1;
-                    buyer_id = Principal.fromActor(a_user);
-                    question_id = ?"1";
-                }
-            ];
+            invoices_state = [{
+                id = 0;
+                buyer_id = Principal.fromActor(a_user);
+                question_id = ?"0";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
+            },
+            {
+                id = 1;
+                buyer_id = Principal.fromActor(a_user);
+                question_id = ?"1";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
+            }];
             questions_state = [
                 {
                     id= "0";
@@ -1280,82 +1261,82 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
         };
 
-        ignore await market_canister.set_db(base_state:State);
+        ignore await set_db_unwrapped(base_state:State);
 
         // user does not exist 
         let uknown_user = await d_user.dispute("0");
-        let uknown_user_state = await market_canister.get_db();
+        let uknown_user_state = await get_db_unwrapped();
 
         // question does not exist
         let unknown_question = await b_user.dispute("10");
-        let unknown_question_state = await market_canister.get_db();
+        let unknown_question_state = await get_db_unwrapped();
 
         // user did not answer
         let user_did_not_answer = await d_user.dispute("0");
-        let user_did_not_answer_state = await market_canister.get_db();
+        let user_did_not_answer_state = await get_db_unwrapped();
         
         // user is author
         let is_author = await a_user.dispute("0");
-        let is_author_state = await market_canister.get_db();
+        let is_author_state = await get_db_unwrapped();
         
         // wrong status
-        let disputable_wrong_status_open_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
             {base_state.questions_state[1] with status = #OPEN }
         ]}: State);
         let disputable_wrong_status_open = await b_user.dispute("0");
-        let disputable_wrong_status_open_state_after = await market_canister.get_db();
+        let disputable_wrong_status_open_state_after = await get_db_unwrapped();
 
-        let disputable_wrong_status_pickanswer_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
             {base_state.questions_state[1] with status = #PICKANSWER }
         ]}: State);
         let disputable_wrong_status_pickanswer = await b_user.dispute("0");
-        let disputable_wrong_status_pickanswer_state_after = await market_canister.get_db();
+        let disputable_wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
-        let disputable_wrong_status_arbitration_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
             {base_state.questions_state[1] with status = #ARBITRATION }
         ]}: State);
         let disputable_wrong_status_arbitration = await b_user.dispute("0");
-        let disputable_wrong_status_arbitration_state_after = await market_canister.get_db();
+        let disputable_wrong_status_arbitration_state_after = await get_db_unwrapped();
        
-        let disputable_wrong_status_payout_pay_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
             {base_state.questions_state[1] with status = #PAYOUT(#PAY) }
         ]}: State);
         let disputable_wrong_status_payout_pay = await b_user.dispute("0");
-        let disputable_wrong_status_payout_pay_state_after = await market_canister.get_db();
+        let disputable_wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
-        let disputable_wrong_status_payout_ongoing_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
             {base_state.questions_state[1] with status = #PAYOUT(#ONGOING) }
         ]}: State);
         let disputable_wrong_status_payout_ongoing = await b_user.dispute("0");
-        let disputable_wrong_status_payout_ongoing_state_after = await market_canister.get_db();
+        let disputable_wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
-        let disputable_wrong_status_payout_closed_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
             {base_state.questions_state[1] with status = #CLOSED }
         ]}: State);
         let disputable_wrong_status_payout_closed = await b_user.dispute("0");
-        let disputable_wrong_status_payout_closed_state_after = await market_canister.get_db();
+        let disputable_wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // action based state transition
-        let disputable_right_status_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_right_status_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
             {base_state.questions_state[1] with status = #DISPUTABLE }
         ]}: State);
         let disputable_right_status = await b_user.dispute("0");
-        let disputable_right_status_state_after = await market_canister.get_db();
+        let disputable_right_status_state_after = await get_db_unwrapped();
 
         // time base state transition
-        let disputable_time_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let disputable_time_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status_end_date = base_state.questions_state[0].status_end_date - 10 },
             {base_state.questions_state[1] with status_end_date = base_state.questions_state[1].status_end_date - 10 }
         ]}: State);
         let disputable_time = await b_user.dispute("0");
-        let disputable_time_state_after = await market_canister.get_db();
+        let disputable_time_state_after = await get_db_unwrapped();
 
 
         let suite = S.suite("test disputable", [
@@ -1460,8 +1441,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         return #success;
     };
 
-
-
     public shared func testArbitration() : async {#success; #fail : Text} {
         /* 
         I'm choosing now the final winner basically (and status end date / status update)
@@ -1523,12 +1502,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 },
             ];
             invoices_state = [
-                {
-                    id = 0;
-                    buyer_id = Principal.fromActor(a_user);
-                    question_id = ?"0";
-                },
-            ];
+            {
+                id = 0;
+                buyer_id = Principal.fromActor(a_user);
+                question_id = ?"0";
+                amount = 1_300_000;
+                verifiedAtTime = ?Time.now(); 
+                paid = true;
+                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                subAccount = A.getSubaccount(Nat64.fromNat(1));
+            }];
             questions_state = [
                 {
                     id= "0";
@@ -1569,73 +1552,73 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
         };
 
-        ignore await market_canister.set_db(base_state:State);
+        ignore await set_db_unwrapped(base_state:State);
 
         // not admin
         let not_admin = await a_user.arbitrate("0", #ANSWER({answer_id="0"}));
-        let not_admin_state = await market_canister.get_db();
+        let not_admin_state = await get_db_unwrapped();
 
         // no question
         let unknown_question = await market_canister.arbitrate("10", #QUESTION);
-        let unknown_question_state = await market_canister.get_db();
+        let unknown_question_state = await get_db_unwrapped();
 
         // wrong status
-        let wrong_status_open_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
         ]}: State);
         let wrong_status_open = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_open_state_after = await market_canister.get_db();
+        let wrong_status_open_state_after = await get_db_unwrapped();
 
-        let wrong_status_pickanswer_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
         ]}: State);
         let wrong_status_pickanswer = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_pickanswer_state_after = await market_canister.get_db();
+        let wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
-        let wrong_status_disputable_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
         ]}: State);
         let wrong_status_disputable = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_disputable_state_after = await market_canister.get_db();
+        let wrong_status_disputable_state_after = await get_db_unwrapped();
 
-        let wrong_status_payout_pay_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
         ]}: State);
         let wrong_status_payout_pay = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_payout_pay_state_after = await market_canister.get_db();
+        let wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
-        let wrong_status_payout_ongoing_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
         ]}: State);
         let wrong_status_payout_ongoing = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_payout_ongoing_state_after = await market_canister.get_db();
+        let wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
-        let wrong_status_payout_closed_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
         ]}: State);
         let wrong_status_payout_closed = await market_canister.arbitrate("0", #QUESTION);
-        let wrong_status_payout_closed_state_after = await market_canister.get_db();
+        let wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // incorrect answer id
-        let incorrect_answer_id_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let incorrect_answer_id_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
         let incorrect_answer_id = await market_canister.arbitrate("0", #ANSWER({answer_id="10"}));
-        let incorrect_answer_id_state_after = await market_canister.get_db();
+        let incorrect_answer_id_state_after = await get_db_unwrapped();
 
         // should work for correct "Answer" id
-        let correct_answer_id_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let correct_answer_id_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
         let correct_answer_id = await market_canister.arbitrate("0", #ANSWER({answer_id="0"}));
-        let correct_answer_id_state_after = await market_canister.get_db();
+        let correct_answer_id_state_after = await get_db_unwrapped();
 
         // has to work if I pass "Question" for final winner
-        let right_status_question_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let right_status_question_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
         let right_status_question = await market_canister.arbitrate("0", #QUESTION);
-        let right_status_question_state_after = await market_canister.get_db();
+        let right_status_question_state_after = await get_db_unwrapped();
 
 
         let suite = S.suite("test pick answer", [
@@ -1768,7 +1751,12 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = 0;
                     buyer_id = Principal.fromActor(a_user);
                     question_id = ?"0";
-                },
+                    amount = 1_300_000;
+                    verifiedAtTime = ?Time.now(); 
+                    paid = true;
+                    destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
+                    subAccount = A.getSubaccount(Nat64.fromNat(1));
+                }
             ];
             questions_state = [
                 {
@@ -1810,48 +1798,48 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
         };
 
-        ignore await market_canister.set_db(base_state:State);
+        ignore await set_db_unwrapped(base_state:State);
 
         // no question
         let unknown_question = await market_canister.update_payout("10");
-        let unknown_question_state = await market_canister.get_db();
+        let unknown_question_state = await get_db_unwrapped();
 
         // wrong status synchronous
-        let wrong_status_open_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
         ]}: State);
         let wrong_status_open = await market_canister.update_payout("0");
-        let wrong_status_open_state_after = await market_canister.get_db();
+        let wrong_status_open_state_after = await get_db_unwrapped();
 
-        let wrong_status_pickanswer_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
         ]}: State);
         let wrong_status_pickanswer = await market_canister.update_payout("0");
-        let wrong_status_pickanswer_state_after = await market_canister.get_db();
+        let wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
-        let wrong_status_disputable_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
         ]}: State);
         let wrong_status_disputable = await market_canister.update_payout("0");
-        let wrong_status_disputable_state_after = await market_canister.get_db();
+        let wrong_status_disputable_state_after = await get_db_unwrapped();
 
-        let wrong_status_arbitration_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
         let wrong_status_arbitration = await market_canister.update_payout("0");
-        let wrong_status_arbitration_state_after = await market_canister.get_db();
+        let wrong_status_arbitration_state_after = await get_db_unwrapped();
 
-        let wrong_status_payout_ongoing_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
         ]}: State);
         let wrong_status_payout_ongoing = await market_canister.update_payout("0");
-        let wrong_status_payout_ongoing_state_after = await market_canister.get_db();
+        let wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
-        let wrong_status_payout_closed_state_before = await market_canister.set_db({ base_state with questions_state = [
+        let wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
         ]}: State);
         let wrong_status_payout_closed = await market_canister.update_payout("0");
-        let wrong_status_payout_closed_state_after = await market_canister.get_db();
+        let wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // TODO: for both #answer and #question
         // that the ongoing is put in place and nothing can be called then
@@ -1865,38 +1853,37 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         // can I get temporary state? -> yes of course I can also get it without awaiting and then later on await it.
        
         //  ------- async blocker tests (failure) -------
-        ignore await market_canister.set_db(base_state:State);
+        ignore await set_db_unwrapped(base_state:State);
 
         let a = market_canister.update_payout("0");
-        let db_ongoing = market_canister.get_db();
+        let db_ongoing = await get_db_unwrapped();
         let b_blocked = market_canister.update_payout("0");
         let c_blocked = market_canister.update_payout("0");
 
-        let db_ongoing_awaited = (await db_ongoing).questions_state[0];
+        let db_ongoing_awaited = db_ongoing.questions_state[0];
         let a_awaited =  await a;
         let b_blocked_awaited =  await b_blocked;
         let c_blocked_awaited =  await c_blocked;
-        let db_state_after = await market_canister.get_db();
+        let db_state_after = await get_db_unwrapped();
 
         // ledger await.noPayment has happened
 
         //  ------- async blocker tests (failure) -------
         // TODO: rename vars
         // TODO: allow to pass amount
-        ignore await market_canister.set_db(base_state:State);
-        Debug.print("funding of actor:"# debug_show(await fund_account_on_invoice()));
+        ignore await set_db_unwrapped(base_state:State);
 
         let x = market_canister.update_payout("0");
-        let db_ongoing_success = market_canister.get_db();
+        let db_ongoing_success = await get_db_unwrapped();
 
         let y_blocked = market_canister.update_payout("0");
         let z_blocked = market_canister.update_payout("0");
 
-        let db_ongoing_awaited_success = (await db_ongoing_success).questions_state[0];
+        let db_ongoing_awaited_success =  db_ongoing_success.questions_state[0];
         let x_awaited_success =  await x;
         let y_blocked_awaited_success =  await y_blocked;
         let z_blocked_awaited_success =  await z_blocked;
-        let db_state_after_success = await market_canister.get_db();
+        let db_state_after_success = await get_db_unwrapped();
 
         let suite = S.suite("test payout", [
             S.test(
@@ -1978,14 +1965,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         return #success;
 
     };
-    // --------- update functions ---------
-    // add several questions that need to be updates?
-
-    // --------- ?heartbeat ---------
-    // not sure if I can tests this
-
-    // --------- ?mainnet ---------
-
+  
     public shared func testQueries() : async {#success; #fail : Text} {
     
         let c_user: Test_User.test_user = await  create_test_user();
@@ -2020,9 +2000,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     questions = []
                 },        
             ];
+            // TODO:
             invoices_state = [];
             questions_state = [
-           {
+                {
                     id= "10";
                     invoice_id= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
@@ -2249,42 +2230,8 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
         };
 
-        ignore await market_canister.set_db(base_state:State);
-        
-        /* let res = await market_canister.get_conditional_questions({
-            open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }
-        , #REWARD); */
-
-        
-       // let res = await market_canister.get_users([]);
-        //Debug.print("empty data:     " # debug_show(res));
-
-        //let res1 = await market_canister.get_users([Principal.fromActor(c_user)]);
-        //Debug.print("data:     " # debug_show(res1));
-
-        //let res2 = await market_canister.get_question_data("10");
-        //Debug.print("question data:     " # debug_show(res2));
-
+        ignore await set_db_unwrapped(base_state:State);
         ignore await fund_principal(Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe"));
-
-        /* Debug.print("0 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 10 )));
-        Debug.print("1 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 1, 10 )));
-        Debug.print("2 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 2, 10 )));
-        Debug.print("3 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 3, 10 )));
-        Debug.print("4 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 4, 10 )));
-        Debug.print("5 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 5, 10 ))); */
-
-        /* Debug.print("0, 0 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 0 )));
-        Debug.print("0, 1 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 1 )));
-        Debug.print("0, 2 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 2 )));
-        Debug.print("0, 3 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 3 )));
-        Debug.print("0, 4 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 4 )));
-        Debug.print("0, 5 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 5 )));
-        Debug.print("0, 6 :     " # debug_show(await market_canister.get_conditional_questions({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 6 )));  */
-
-        //Debug.print("0, 10 :     " # debug_show(await market_canister.get_conditional_questions_with_authors({open= true; pickanswer= true; disputable= true; arbitration= true; payout= true; closed= true; }, #REWARD, 0, 10 )));
-        //Debug.print("db :     " # debug_show((await market_canister.get_db())).questions_state);
-
 
         let suite = S.suite("queries", [
             S.test(
@@ -2297,5 +2244,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         S.run(suite);
         return #success;
     };
+
+      // --------- update functions ---------
+    // add several questions that need to be updates?
+
+    // --------- ?heartbeat ---------
+    // not sure if I can tests this
+
+    // --------- ?mainnet ---------
 };
    
+
+

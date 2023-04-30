@@ -117,7 +117,7 @@ module {
         public func open_to_pickanswer(prevQuestion:Question, duration_pick_answer_:Int32) : Question {
             let newQuestion:Question = { 
                 prevQuestion with status = #PICKANSWER; 
-                status_update_date= Utils.time_minutes_now();  
+                status_update_date = Utils.time_minutes_now();  
                 status_end_date = Utils.time_minutes_now() + duration_pick_answer_; 
             };
             return put_question(newQuestion);

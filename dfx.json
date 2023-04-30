@@ -14,13 +14,6 @@
 				"output": "canisters/frontend/declarations/ledger"
 			}
 		},
-		"invoice": {
-			"main": "canisters/invoice/main.mo",
-			"type": "motoko",
-			"declarations": {
-				"output": "canisters/frontend/declarations/invoice"
-			}
-		},
 		"market": {
 			"main": "canisters/market/main.mo",
 			"type": "motoko",

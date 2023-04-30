@@ -8,11 +8,9 @@ export const LoadingWrapper = ({
 	children,
 	...props
 }) => {
-	console.log("onClick", onClick);
 	const [loading, setLoading] = useState(false);
 
 	const handleClick = useCallback(async () => {
-		console.log("hit");
 		if (onClick.constructor.name === "AsyncFunction") {
 			setLoading(true);
 			await onClick();
@@ -32,7 +30,6 @@ export const LoadingWrapper = ({
 	const childrenWithLoading = React.Children.map(children, (child) => {
 		if (React.isValidElement(child)) {
 			return React.cloneElement(child, {
-				onClick: handleClick,
 				disabled: loading,
 			} as React.Attributes & React.PropsWithChildren<{}>);
 		}

@@ -4,10 +4,8 @@ import Int          "mo:base/Int";
 import Principal    "mo:base/Principal";
 import Time         "mo:base/Time";
 
-import Accounts     "ledger/accounts";
 
 module {
-
     // TODO: Should be safe but double check
     public func time_minutes_now() : Int32 {
         let time:Int = Time.now() / 60000000000;
@@ -42,7 +40,7 @@ module {
         return Int.abs(Int32.toInt(amount)) * 100000;
     };
 
-    public func getDefaultAccountIdentifier(
+   /*  public func getDefaultAccountIdentifier(
         principal: Principal,
     ) : ?Accounts.AccountIdentifier {
         let identifier = Accounts.accountIdentifier(principal, Accounts.defaultSubaccount());
@@ -51,5 +49,5 @@ module {
         } else {
             return null;
         };
-    };
+    }; */
 }

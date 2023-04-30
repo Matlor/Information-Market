@@ -10,21 +10,20 @@ export DEFAULT_PRINCIPAL=$(dfx identity get-principal)
 export DEFAULT_ACCOUNT=$(dfx ledger account-id)
 
 dfx canister create ledger
-dfx canister create invoice
 dfx canister create market
 dfx canister create frontend
 dfx canister create test_runner
 
 export LEDGER_PRINCIPAL=$(dfx canister id ledger)
-export INVOICE_PRINCIPAL=$(dfx canister id invoice)
 export MARKET_PRINCIPAL=$(dfx canister id market)
 export TEST_RUNNER_ACCOUNT=$(dfx ledger account-id --of-principal $(dfx canister id test_runner))
+
 
 rm canisters/ledger/ledger.did
 cp canisters/ledger/ledger.private.did canisters/ledger/ledger.did
 dfx deploy --mode reinstall ledger --argument '(record {
     minting_account = "'${MINTER_ACCOUNT}'"; 
-    initial_values = vec { record { "'${TEST_RUNNER_ACCOUNT}'"; record { e8s = 18446744073709551615: nat64 } } }; 
+    initial_values = vec { record { "'${TEST_RUNNER_ACCOUNT}'"; record { e8s = 10000000000000000000: nat64 } } }; 
     archive_options = opt record { 
         trigger_threshold = 2000; 
         num_blocks_to_archive = 1000; 
@@ -35,9 +34,8 @@ dfx deploy --mode reinstall ledger --argument '(record {
 rm canisters/ledger/ledger.did
 cp canisters/ledger/ledger.public.did canisters/ledger/ledger.did
 
-dfx deploy invoice --argument='(principal "'${LEDGER_PRINCIPAL}'")'
 dfx deploy --mode reinstall market --argument='(record {
-    invoice_canister = principal "'${INVOICE_PRINCIPAL}'"; 
+    ledger_canister = principal "'${LEDGER_PRINCIPAL}'";
     coin_symbol = "ICP"; 
     min_reward_e8s = 1250000; 
     transfer_fee_e8s = 10000; 
@@ -52,13 +50,16 @@ dfx deploy frontend
 dfx deploy --mode reinstall test_runner --argument='(
     principal "'${MARKET_PRINCIPAL}'", 
     principal "'${LEDGER_PRINCIPAL}'",
-    principal "'${INVOICE_PRINCIPAL}'"
 )'
 
 dfx generate ledger
-dfx generate invoice
 dfx generate market
 dfx generate test_runner 
+
+
+
+# 18446744073709551615
+
 # ------------------------- FOR PRODUCTION ENVIRONMENT -------------------------
 
 
@@ -79,17 +80,23 @@ dfx generate test_runner
 #dfx canister call invoice get_account_identifier '(record {"principal" = principal "[MARKET_ID]"; token = record {symbol = "ICP"}})'
 #dfx canister call invoice accountIdentifierToBlob '(variant {text = "[MARKET_ACCOUNT]"})'
 #dfx identity use minter
-#dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000_000 }; fee = record { e8s = 0 }; to = blob "[MARKET_BLOB]" } )'
+#dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "[MARKET_BLOB]" } )'
 #dfx canister call ledger account_balance '( record { account = blob "[MARKET_BLOB]" } )'
 
 # 2. To transfer thousand ICPs to the user connected through plug
-#dfx ledger account-id --of-principal "[USER_PRINCIPAL]"
-#dfx canister call invoice accountIdentifierToBlob '(variant {text = "[USER_ACCOUNT_ID]"})'
-#dfx identity use minter
-#dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000_000 }; fee = record { e8s = 0 }; to = blob "[USER_BLOB]" } )'
-#dfx canister call ledger account_balance '( record { account = blob "[USER_BLOB]" } )'
+# dfx ledger account-id --of-principal "[USER_PRINCIPAL]"
+# dfx canister call invoice accountIdentifierToBlob '(variant {text = "[USER_ACCOUNT_ID]"})'
+# dfx identity use minter
+# dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "|#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7" } )'
+# dfx canister call ledger account_balance '( record { account = blob "|#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7" } )'
 
 # or: dfx ledger balance 03e3d86f29a069c6f2c5c48e01bc084e4ea18ad02b0eec8fccadf4487183c223 --network ic
+
+
+
+
+
+
 
 
 
@@ -97,6 +104,8 @@ dfx generate test_runner
 # tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe
 # 7c233932aee8f5ca6de6cf9ccefc2d93f03f4975e9bd0bdccf30b758ff3281a7
 # |#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7
+
+
 
 # test runner: 
 # d245503f277e7f83fc326f1bfb7538c50b8dee8311be8c06437b9cd621afb365
