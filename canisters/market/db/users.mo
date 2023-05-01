@@ -43,8 +43,8 @@ module {
             else {return true};
         };
 
-        public func replace_invoice_ids(prevUser: User, invoice_id:Nat) : User {
-            let prev_ids: Buffer.Buffer<Nat> = Buffer.fromArray(prevUser.invoices);
+        public func replace_invoice_ids(prevUser: User, invoice_id:Nat32) : User {
+            let prev_ids: Buffer.Buffer<Nat32> = Buffer.fromArray(prevUser.invoices);
             prev_ids.add(invoice_id);
             let new_ids = Buffer.toArray(prev_ids);
             let newUser: User = {prevUser with invoices = new_ids};

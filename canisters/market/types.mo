@@ -32,7 +32,7 @@ module {
         id: Principal;
         name: Text;
         joined_date: Int32;
-        invoices: [Nat];  // relation to invoice
+        invoices: [Nat32];  // relation to invoice
         questions: [Text]; // relation to user
         answers: [Text];   // relation to answer
     };
@@ -41,10 +41,10 @@ module {
 
     // -------------- Main Entities --------------
     public type Invoice = {
-        id: Nat;
+        id: Nat32;
         buyer_id: Principal; 
         question_id: ?Text;
-        amount: Nat;
+        amount: Nat32;
         verifiedAtTime: ?Time.Time;
         paid: Bool;
         destination: Blob;  
@@ -62,11 +62,11 @@ module {
     public type Question = {
         id: Text;
         author_id: Principal; // relation to user
-        invoice_id: Nat; 
+        invoice_id: Nat32; 
         creation_date: Int32;
         title: Text;
         content: Text;
-        reward: Int32;
+        reward: Nat32;
         status_update_date: Int32;
         status_end_date: Int32;
         open_duration: Int32; 
@@ -127,8 +127,8 @@ module {
     public type InstallMarketArguments = {
         ledger_canister: Principal;
         coin_symbol: Text;
-        min_reward_e8s: Nat;
-        transfer_fee_e8s: Nat;
+        min_reward_e8s: Nat32;
+        transfer_fee_e8s: Nat32;
         pick_answer_duration_minutes: Int32;
         disputable_duration_minutes: Int32;
         update_status_on_heartbeat: Bool;
@@ -136,10 +136,17 @@ module {
 
     // TODO: changed min reward and transfer_fee_e8s from Nat to Int32, check of that is ok
     public type UpdateMarketParams = {
-        min_reward_e8s: ?Nat;
-        transfer_fee_e8s: ?Nat;
+        min_reward_e8s: ?Nat32;
+        transfer_fee_e8s: ?Nat32;
         pick_answer_duration_minutes: ?Int32;
         disputable_duration_minutes: ?Int32;
+    };
+
+
+    // DELETE
+    type Measurment = {
+        time: Time.Time;
+        name: Text;
     };
 
     // --------------- TODO: IMPROVE THIS------------------------   
@@ -147,9 +154,9 @@ module {
     public type Interface = actor {
         answer_question: (Text, Text) -> async (Result.Result<Answer, Error>);
         arbitrate: (Text, FinalWinner) -> async (Result.Result<(), Error>);
-        ask_question: (Nat, Int32, Text, Text) -> async (Result.Result<Question, Error>);
-        create_invoice: (Nat) -> async (Result.Result<Invoice, Error>);
-        verify_invoice: (Nat) -> async (Result.Result<Invoice, Error>);
+        ask_question: (Nat32, Int32, Text, Text) -> async (Result.Result<Question, Error>);
+        create_invoice: (Nat32) -> async (Result.Result<Invoice, Error>);
+        verify_invoice: (Nat32) -> async (Result.Result<Invoice, Error>);
 
         create_user: (Text) -> async(Result.Result<User, Error>);
         dispute: (Text) -> async (Result.Result<(), Error>);
@@ -161,13 +168,13 @@ module {
         update_pick_answer: (Text) -> async ();
         set_db: (State) -> async (Result.Result<State, Error>);
 
-        get_invoice: () -> async (Result.Result<Invoice, Error>);
+        get_invoice: (Nat32) -> async (Result.Result<Invoice, Error>);
         get_db: query() -> async (Result.Result<State, Error>);
         get_coin_symbol: query() ->  async (Text);
         get_duration_disputable: query() -> async (Int32);
         get_duration_pick_answer: query() -> async (Int32);
-        get_fee: query() -> async (Nat);
-        get_min_reward: query() -> async (Nat);
+        get_fee: query() -> async (Nat32);
+        get_min_reward: query() -> async (Nat32);
         get_update_status_on_heartbeat: query() -> async (Bool);
 
         get_user: query (Principal) ->  async (?User);
@@ -180,6 +187,9 @@ module {
         update_user: (Text) -> async (Result.Result<User, Error>);
         update_profile:(Blob) -> async (Result.Result<?Blob, Error>);
 
-        update_status: () -> async ();        
+        update_status: () -> async ();      
+
+        get_measurements:() -> async ([Measurment]);
+
     };
 };

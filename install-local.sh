@@ -96,15 +96,16 @@ dfx generate test_runner
 
 
 
-
-
+# default identity:
+# revei-zdpgf-3pew6-7zpnn-ckelh-ochlq-gneee-ifod2-cctir-zk6t2-qqe
+# 050b3c5e08055d8ee5088483a99d9937834384089baf9a44c1532f637a0e6af8
+# \05\0b<^\08\05]\8e\e5\08\84\83\a9\9d\997\83C\84\08\9b\af\9aD\c1S/cz\0ej\f8
 
 
 # plug:
 # tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe
 # 7c233932aee8f5ca6de6cf9ccefc2d93f03f4975e9bd0bdccf30b758ff3281a7
 # |#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7
-
 
 
 # test runner: 
@@ -117,3 +118,8 @@ dfx generate test_runner
 # 1b26e99d9381624c6a21e0e4d21f9461f0b533b055f3fe36b0eeb97841d7a230
 # \1b&\e9\9d\93\81bLj!\e0\e4\d2\1f\94a\f0\b53\b0U\f3\fe6\b0\ee\b9xA\d7\a20
 # \1B\26\E9\9D\93\81\62\4C\6A\21\E0\E4\D2\1F\94\61\F0\B5\33\B0\55\F3\FE\36\B0\EE\B9\78\41\D7\A2\30
+
+
+
+
+# call mainnet ledger from terminal: dfx canister call "ryjl3-tyaaa-aaaaa-aaaba-cai" --network ic account_balance '(record{account = blob "|#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7"})'

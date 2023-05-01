@@ -10,6 +10,7 @@ import Result       "mo:base/Result";
 import Prelude      "mo:base/Prelude";
 import Nat          "mo:base/Nat";
 import Nat64        "mo:base/Nat64";
+import Nat32        "mo:base/Nat32";
 import Int32        "mo:base/Int32";
 import C            "mo:matchers/Canister";
 import M            "mo:matchers/Matchers";
@@ -156,7 +157,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -166,7 +167,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"1";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -175,7 +176,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [{
                 id= "0";
                 author_id= Principal.fromActor(a_user);
-                invoice_id= 0; 
+                invoice_id:Nat32= 0; 
                 creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #OPEN;
                 status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -183,7 +184,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 open_duration= 2;
                 title = "test question";
                 content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                reward = 1_300_000:Int32;
+                reward:Nat32 = 1_300_000:Nat32;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -192,7 +193,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {
                 id= "1";
                 author_id= Principal.fromActor(a_user);
-                invoice_id= 1; 
+                invoice_id:Nat32= 1; 
                 creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #OPEN;
                 status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -200,7 +201,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 open_duration= 2;
                 title = "test question";
                 content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                reward = 1_300_000:Int32;
+                reward:Nat32 = 1_300_000:Nat32;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -462,7 +463,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         let ask_unknown_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
 
-        let amount: Nat = await a_user.get_min_reward();
+        let amount: Nat32 = await a_user.get_min_reward();
         let invoice: MarketTypes.Invoice = switch(await a_user.create_invoice(amount)){ 
             case(#ok(success)){ success };
             case(_){ 
@@ -476,7 +477,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         Debug.print("ledger_state_unpaid:     " # debug_show(ledger_state_0));
 
         let transfer_state_1 =  await a_user.transfer({ 
-            amount = { e8s = (Nat64.fromNat(invoice.amount) - 50_000)};
+            amount = { e8s = (Nat64.fromNat(Nat32.toNat(invoice.amount)) - 50_000)};
             created_at_time = null;
             fee = { e8s = 10_000 };
             from_subaccount = null;
@@ -627,10 +628,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         var single_question_no_answer = {
             answers_state = [];
             invoices_state = [{
-                id = 0;
+                id:Nat32 = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -639,7 +640,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [{
                 id= "0";
                 author_id= Principal.fromActor(a_user);
-                invoice_id= 0; 
+                invoice_id:Nat32= 0; 
                 creation_date :Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #OPEN;
                 status_update_date:Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -647,7 +648,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 open_duration :Int32 = 2;
                 title = "test question";
                 content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                reward:Int32 = 1_300_000:Int32;
+                reward:Nat32 = 1_300_000;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -662,6 +663,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 name = "John"; 
                 questions = []
             }];
+
         };
        
         Debug.print(debug_show(await set_db_unwrapped(single_question_no_answer: State)));
@@ -874,7 +876,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -884,7 +886,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"1";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -893,7 +895,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [{
                 id= "0";
                 author_id= Principal.fromActor(a_user);
-                invoice_id= 0; 
+                invoice_id:Nat32= 0; 
                 creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #PICKANSWER;
                 status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -901,7 +903,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 open_duration= 2;
                 title = "test question";
                 content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                reward = 1_300_000:Int32;
+                reward = 1_300_000:Nat32;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -910,7 +912,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {
                 id= "1";
                 author_id= Principal.fromActor(a_user);
-                invoice_id= 1; 
+                invoice_id:Nat32= 1; 
                 creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 status= #PICKANSWER;
                 status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -918,7 +920,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 open_duration= 2;
                 title = "test question";
                 content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                reward = 1_300_000:Int32;
+                reward = 1_300_000:Nat32;
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
@@ -1183,7 +1185,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -1193,7 +1195,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"1";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -1202,14 +1204,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [
                 {
                     id= "0";
-                    invoice_id= 0; 
+                    invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 1_300_000:Int32;
+                    reward = 1_300_000:Nat32;
 
                     status= #DISPUTABLE;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -1225,13 +1227,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 {
                     id= "1";
                     author_id= Principal.fromActor(a_user);
-                    invoice_id= 1; 
+                    invoice_id:Nat32= 1; 
                     
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 1_300_000:Int32;
+                    reward = 1_300_000:Nat32;
 
                     status= #DISPUTABLE;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -1506,7 +1508,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?"0";
-                amount = 1_300_000;
+                amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
                 destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -1515,14 +1517,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [
                 {
                     id= "0";
-                    invoice_id= 0; 
+                    invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 1_300_000:Int32;
+                    reward = 1_300_000:Nat32;
 
                     status= #ARBITRATION;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -1751,7 +1753,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     id = 0;
                     buyer_id = Principal.fromActor(a_user);
                     question_id = ?"0";
-                    amount = 1_300_000;
+                    amount:Nat32 = 1_300_000;
                     verifiedAtTime = ?Time.now(); 
                     paid = true;
                     destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
@@ -1761,14 +1763,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [
                 {
                     id= "0";
-                    invoice_id= 0; 
+                    invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     open_duration= 2;
                     title = "test question";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 1_300_000:Int32;
+                    reward = 1_300_000:Nat32;
                             
                     status= #PAYOUT(#PAY);
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2005,14 +2007,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             questions_state = [
                 {
                     id= "10";
-                    invoice_id= 10; 
+                    invoice_id:Nat32= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2026,14 +2028,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 },
                  {
                     id= "20";
-                    invoice_id= 10; 
+                    invoice_id:Nat32= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 610000000:Int32;
+                    reward:Nat32 = 610000000;
                             
                     status= #PICKANSWER;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2046,14 +2048,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 }, 
                 {
                     id= "30";
-                    invoice_id = 20; 
+                    invoice_id:Nat32 = 20; 
                     author_id = Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 1;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 710000000:Int32;
+                    reward:Nat32 = 710000000;
                             
                     status= #DISPUTABLE;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2066,14 +2068,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 },
                  {
                     id= "40";
-                    invoice_id= 30; 
+                    invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status= #ARBITRATION;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2087,14 +2089,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 /* Further */
                   {
                     id= "50";
-                    invoice_id= 30; 
+                    invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status=  #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2107,14 +2109,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 }, 
                   {
                     id= "60";
-                    invoice_id= 30; 
+                    invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status=  #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2127,14 +2129,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 }, 
                   {
                     id= "70";
-                    invoice_id= 30; 
+                    invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
@@ -2147,14 +2149,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 }, 
                   {
                     id= "80";
-                    invoice_id= 30; 
+                    invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     open_duration= 2;
                     title = "What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?What challenges did you face and what were your key learnings from this?";
                     content = "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.";
-                    reward = 510000000:Int32;
+                    reward:Nat32 = 510000000;
                             
                     status= #OPEN;
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;

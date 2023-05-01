@@ -81,7 +81,7 @@ module {
 
         // TODO: I can use the put_question function here
         // when id is generated 'put' will certainly work (no need to return result)
-        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32) : Question {
+        public func create_question(user_id:Principal, invoice_id:Nat32, duration_minutes:Int32, title:Text, content:Text, reward:Nat32) : Question {
             let now = Utils.time_minutes_now();
             let id: Text = generate_id();
             let newQuestion: Question = {

@@ -12,11 +12,11 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.get_coin_symbol();
     };
 
-    public shared func get_min_reward() : async Nat {
+    public shared func get_min_reward() : async Nat32 {
         return await market_canister.get_min_reward();
     };
 
-    public shared func get_fee() : async Nat {
+    public shared func get_fee() : async Nat32 {
         return await market_canister.get_fee();
     };
 
@@ -52,17 +52,17 @@ shared (deployer) actor class test_user(market_canister: Types.Interface, ledger
         return await market_canister.get_user(user_id:Principal);
     };
 
-    public shared ({caller}) func create_invoice(reward: Nat) : async Result.Result<Types.Invoice, Types.Error>  {
-        return await market_canister.create_invoice(reward: Nat);
+    public shared ({caller}) func create_invoice(reward: Nat32) : async Result.Result<Types.Invoice, Types.Error>  {
+        return await market_canister.create_invoice(reward: Nat32);
     };
 
     public shared ({caller}) func ask_question (
-        invoice_id: Nat,
+        invoice_id: Nat32,
         duration_minutes: Int32,
         title: Text,
         content: Text
     ) : async Result.Result<Types.Question, Types.Error> {
-        return await market_canister.ask_question(invoice_id: Nat, duration_minutes: Int32, title: Text,content: Text);
+        return await market_canister.ask_question(invoice_id: Nat32, duration_minutes: Int32, title: Text,content: Text);
     };
 
     public shared ({caller}) func answer_question(question_id: Text, content: Text): async Result.Result<Types.Answer, Types.Error> {

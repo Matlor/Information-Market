@@ -4,7 +4,6 @@ import Text         "mo:base/Text";
 import Principal    "mo:base/Principal";
 import Blob         "mo:base/Blob";
 import Result       "mo:base/Result";
-import Buffer         "mo:base/Buffer";
 import Hash         "mo:base/Hash";
 import Iter         "mo:base/Iter";
 import Time         "mo:base/Time";
@@ -15,8 +14,6 @@ import Nat64     "mo:base/Nat64";
 import Nat          "mo:base/Nat";
 
 import  A         "../invoice/Account";
-
-
 
 module {
 
@@ -41,13 +38,13 @@ module {
     public class Invoices() {
 
         // --------------------- Storage ---------------------
-        var invoices: Trie.Trie<Nat, Invoice> = Trie.empty<Nat, Invoice>();
+        var invoices: Trie.Trie<Nat32, Invoice> = Trie.empty<Nat32, Invoice>();
 
         public func set_state(initial:[Invoice]) : (){
-            var newData: Trie.Trie<Nat, Invoice> = Trie.empty<Nat, Invoice>();
+            var newData: Trie.Trie<Nat32, Invoice> = Trie.empty<Nat32, Invoice>();
             let initial_iter: Iter.Iter<Invoice> = Iter.fromArray<Invoice>(initial);
             for (question in initial_iter) {
-                let (newTrie, prevValue) : (Trie.Trie<Nat, Invoice>, ?Invoice) = Trie.put(newData, {key=question.id; hash=Hash.hash(question.id)}, Nat.equal, question);
+                let (newTrie, prevValue) : (Trie.Trie<Nat32, Invoice>, ?Invoice) = Trie.put(newData, {key=question.id; hash=Hash.hash(Nat32.toNat(question.id))}, Nat32.equal, question);
                 newData:= newTrie;
             };
             invoices:= newData;
@@ -55,15 +52,15 @@ module {
        
         // deals with inserting it into the data structure
         public func put_invoice(invoice:Invoice) : Invoice {
-            let (newTrie, prevValue) : (Trie.Trie<Nat, Invoice>, ?Invoice) = Trie.put(invoices, {key=invoice.id; hash=Hash.hash(invoice.id)}, Nat.equal, invoice);
+            let (newTrie, prevValue) : (Trie.Trie<Nat32, Invoice>, ?Invoice) = Trie.put(invoices, {key=invoice.id; hash=Hash.hash(Nat32.toNat(invoice.id))}, Nat32.equal, invoice);
             invoices:= newTrie;
             return invoice;
         };  
 
 
 
-        var counter: Nat = 1;
-        public func generate_id() : Nat {
+        var counter: Nat32 = 1;
+        public func generate_id() : Nat32 {
             let preCounter = counter;
             counter := counter + 1;
             return preCounter;
@@ -73,7 +70,7 @@ module {
         // --------------------- HELPER ---------------------
         
         // TODO: maybe delete
-        public func validate_key(key:Nat) : Bool {
+        public func validate_key(key:Nat32) : Bool {
             // if it does not exist yet, it is a valid key
             if(get_invoice(key) == null){ return true } 
             else { return false };
@@ -84,7 +81,7 @@ module {
         // --------------------- CRUD ---------------------
         // create, update
 
-         public func create_invoice(amount: Nat, marketPrincipal: Principal, buyer_id:Principal): Invoice {
+         public func create_invoice(amount: Nat32, marketPrincipal: Principal, buyer_id:Principal): Invoice {
             let id = generate_id();
 
             let invoice : Invoice = {
@@ -94,8 +91,8 @@ module {
                 amount;
                 verifiedAtTime = null;
                 paid = false;
-                destination = A.getAccountId(Nat64.fromNat(id), Principal.toText(marketPrincipal));
-                subAccount = A.getSubaccount(Nat64.fromNat(id));
+                destination = A.getAccountId(Nat64.fromNat(Nat32.toNat(id)), Principal.toText(marketPrincipal));
+                subAccount = A.getSubaccount(Nat64.fromNat(Nat32.toNat(id)));
             };
 
             return put_invoice(invoice);
@@ -146,28 +143,19 @@ module {
         }; */
 
 
-
-
-
-
-
-
-
-
-            
         // --------------------- QUERIES ---------------------
-        public func get_invoice(id:Nat) : ?Invoice{
-            // TODO: field hash is deprecated:
-            Trie.get(invoices, {key=id; hash=Hash.hash(id)}, Nat.equal);
+        public func get_invoice(id:Nat32) : ?Invoice{
+            // TODO: the conversion I do for the Hash might be unsafe!
+            Trie.get(invoices, {key=id; hash=Hash.hash(Nat32.toNat(id))}, Nat32.equal);
         };
         
         public func get_invoices() : [Invoice] {
-            Trie.toArray<Nat, Invoice, Invoice>(invoices, func(pair:(Nat, Invoice)):Invoice { return pair.1 });
+            Trie.toArray<Nat32, Invoice, Invoice>(invoices, func(pair:(Nat32, Invoice)):Invoice { return pair.1 });
         };
 
         // --------------------- UPGRADE ---------------------
         // TODO: 
-        public func share() : Trie.Trie<Nat, Invoice> {
+        public func share() : Trie.Trie<Nat32, Invoice> {
             invoices;
         };
     };

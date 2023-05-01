@@ -21,10 +21,10 @@ dfx deploy --mode reinstall --network ic --wallet "$WALLET_PRINCIPAL" market --a
     pick_answer_duration_minutes = 2; 
     disputable_duration_minutes = 2; 
     update_status_on_heartbeat = false; 
-})' --with-cycles 500000000000
+})' --with-cycles 0
 
 
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" test_runner --argument='(
+dfx deploy --mode reinstall --network ic --wallet "$WALLET_PRINCIPAL" test_runner --argument='(
     principal "'${MARKET_PRINCIPAL}'", 
     principal "'${LEDGER_PRINCIPAL}'",
 )' --with-cycles 0
@@ -33,7 +33,7 @@ dfx generate ledger
 dfx generate market
 dfx generate test_runner 
 
-dfx deploy --network ic --wallet "$WALLET_PRINCIPAL" frontend --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 0
+dfx deploy --mode reinstall --network ic --wallet "$WALLET_PRINCIPAL" frontend --argument='(principal "ryjl3-tyaaa-aaaaa-aaaba-cai")' --with-cycles 0
 
 
 # ------------------------ PREPARATION ------------------------

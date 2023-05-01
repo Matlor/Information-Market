@@ -86,9 +86,9 @@ module {
         // Transfers tokens from a subaccount of the caller to the destination address.
         // The source address is computed from the principal of the caller and the specified subaccount.
         // When successful, returns the index of the block containing the transaction.
-        transfer : (TransferArgs) -> async TransferResult;
+        transfer: (TransferArgs) -> async TransferResult;
 
         // Returns the amount of Token on the specified account.
-        account_balance : (AccountBalanceArgs) -> async (Token);
+        account_balance: query (AccountBalanceArgs) -> async (Token);
     };
 }

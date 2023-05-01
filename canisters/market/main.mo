@@ -54,8 +54,8 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
 
     // ---------------- Settings ----------------
     private stable var coin_symbol_ : Text = arguments.coin_symbol;
-    private stable var min_reward_ : Nat = arguments.min_reward_e8s;
-    private stable var fee_ : Nat = arguments.transfer_fee_e8s;
+    private stable var min_reward_ : Nat32 = arguments.min_reward_e8s;
+    private stable var fee_ : Nat32 = arguments.transfer_fee_e8s;
     private stable var duration_pick_answer_ : Int32 = arguments.pick_answer_duration_minutes;
     private stable var duration_disputable_ : Int32 = arguments.disputable_duration_minutes;
     private stable var update_status_on_heartbeat_: Bool = arguments.update_status_on_heartbeat;
@@ -75,11 +75,11 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         return coin_symbol_;
     };
 
-    public query func get_min_reward() : async Nat {
+    public query func get_min_reward() : async Nat32 {
         return min_reward_;
     };
 
-    public query func get_fee() : async Nat {
+    public query func get_fee() : async Nat32 {
         return fee_;
     };
 
@@ -178,7 +178,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
 
 
     // ---------------- Invoice ----------------
-    public shared ({caller}) func get_invoice(invoice_id: Nat) : async Result.Result<Types.Invoice, Types.Error>  {
+    public shared ({caller}) func get_invoice(invoice_id: Nat32) : async Result.Result<Types.Invoice, Types.Error>  {
          if(not (await callerIsController(caller))){
             return #err(#NotAllowed);
          } else {
@@ -189,7 +189,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     }; 
 
-    public shared ({caller}) func create_invoice(reward: Nat) : async Result.Result<Types.Invoice, Types.Error> {
+    public shared ({caller}) func create_invoice(reward: Nat32) : async Result.Result<Types.Invoice, Types.Error> {
         switch (DB.Users.get_user(caller)){
             case(null){
                 return #err(#UserNotFound);
@@ -198,13 +198,21 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                 if(reward < min_reward_) {
                     return #err(#BelowMinReward);
                 } else {
-                    DB.create_invoice(reward + fee_,  Principal.fromActor(this), caller);
+                    DB.create_invoice(reward,  Principal.fromActor(this), caller);
                 };
             };
         };
     };
+
+    public query func get_balance() : async LedgerTypes.Token {
+        measure(Time.now(), "before account balance check");
+        let res = await ledger_canister_.account_balance({account = A.getDefaultAccountId(Principal.fromActor(this)) });
+        measure(Time.now(), "before account balance check");
+        return res;
+    };
+
     
-    public func verify_invoice(id : Nat) : async Result.Result<Types.Invoice, Types.Error> {
+    public func verify_invoice(id : Nat32) : async Result.Result<Types.Invoice, Types.Error> {
         // 1) check if exists
         switch (DB.Invoices.get_invoice(id)) {
             case (null) { return #err(#InvoiceNotFound) };
@@ -213,16 +221,22 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                 if (invoice.verifiedAtTime != null) {
                     return #err(#InvoiceAlreadyVerified);
                 } else {
-                    // 3) check if paid
+                    // 3) check if paid (inter-canister queries don't work yet)
                     let res = await ledger_canister_.account_balance({account = invoice.destination});
-                    let balance = Nat64.toNat(res.e8s);
+                    let balance = Nat32.fromNat(Nat64.toNat(res.e8s));
+
                     if (balance >= invoice.amount) {
                         let verifiedAtTime = Time.now();
                         let marketDefaultAccount = A.getAccountId(Nat64.fromNat(0), Principal.toText(Principal.fromActor(this)));
                         Debug.print("marketDefaultAccount: " # debug_show(marketDefaultAccount));
+
                         // 3.5) verify already to avoid async problems
                         let verifiedInvoice = DB.Invoices.verify_invoice(invoice);
-                        // 4) attempt to do the transfer
+                        return #ok(verifiedInvoice);
+
+
+                        /* // 4) attempt to do the transfer
+                        measure(Time.now(), "before transfer");
                         let transferRes: LedgerTypes.TransferResult = await ledger_canister_.transfer({
                             memo = 0;
                             fee = {
@@ -235,6 +249,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                             to = marketDefaultAccount;
                             created_at_time = null;
                         });
+                        measure(Time.now(), "after transfer");
                         switch transferRes {
                             case (#Ok index) {
                                 // 5) if success: return the verified invoice
@@ -246,7 +261,9 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                                 ignore DB.Invoices.un_verify_invoice(verifiedInvoice);
                                 return #err(#TransferError(err));
                             };        
-                        };
+                        }; */
+
+
                     // 7) if not paid return error
                     } else {
                         return #err(#InvoiceNotPaid)
@@ -257,25 +274,46 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Ask Question ----------------
+
+    type Measurment = {
+        time: Time.Time;
+        name: Text;
+    };
+
+    var measurements = Buffer.Buffer<Measurment>(20);   
+    
+    func measure (time:Time.Time, name:Text) : () {
+        let newMeasure: Measurment = {time = time; name = name};
+        measurements.add(newMeasure);
+    };
+
+    public func get_measurements() : async [Measurment] {
+        return Buffer.toArray(measurements);
+    };
+
+
     public shared ({caller}) func ask_question (
-        invoice_id: Nat,
+        invoice_id: Nat32,
         duration_minutes: Int32,
         title: Text,
         content: Text
     ) : async Result.Result<Types.Question, Types.Error> {
+        measure(Time.now(), "function start");
+
         switch (DB.Invoices.get_invoice(invoice_id)){
 
             case (null) { return #err(#InvoiceNotFound) };
             case (?invoice) {
-                Debug.print("1");
                 // buyer of invoice is caller && ensures user exists
                 if (invoice.buyer_id != caller) {return #err(#NotAllowed)} 
                 else {
-                    Debug.print("2");
+                    measure(Time.now(), "before verify");
                     switch (await verify_invoice(invoice_id)) {
+                       
                         case(#err err) { return #err(#VerifyInvoiceError) };
                         case(#ok verifiedInvoice){
-                            Debug.print("3");
+                            // from here on near instantly
+                            measure(Time.now(), "after verify");
                             if(invoice.question_id != null){ return #err(#NotAllowed) } 
                             else {
                                 let now = Utils.time_minutes_now();
@@ -286,10 +324,10 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                                     duration_minutes,
                                     title,
                                     content,
-                                    Utils.nat_to_int32(verifiedInvoice.amount - fee_) 
+                                    verifiedInvoice.amount,
                                 )){
                                     case(#err(err)) { return #err(err) };
-                                    case (#ok(question)) { return #ok(question) };
+                                    case (#ok(question)) { measure(Time.now(), "end of func"); return #ok(question) };
                                 };
                             };
                         };
@@ -470,45 +508,53 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     };
 
-    // The payout sub-states are a separate state-machine
-    // TODO: return types
+    // ---------------- Payout ----------------
     public func update_payout(question_id:Text) : async Result.Result<Nat64, Types.Error> {
-        func pay (question: Types.Question, id: Principal): async Result.Result<Nat64, Types.Error> {
-            switch(await transfer(id, question.reward)){
-                case(#ok block_height){ 
+        func payout_invoice (question: Types.Question, recipientPrincipal: Principal): async Result.Result<Nat64, Types.Error> {
+            
+            let invoice:Types.Invoice = switch(DB.Invoices.get_invoice(question.invoice_id)){case(null){ Prelude.unreachable()}; case(?invoice){invoice}};
+            let recipientDefaultAccount = A.getDefaultAccountId(recipientPrincipal);
+
+            let transferRes: LedgerTypes.TransferResult = await ledger_canister_.transfer({
+                memo = 0;
+                fee = { e8s = 10000 };
+                amount = { e8s = Nat64.sub(Nat64.fromNat(Nat32.toNat(question.reward)), 10000) };
+                from_subaccount = ?invoice.subAccount;
+                to=recipientDefaultAccount;
+                created_at_time = null;
+            }); 
+
+            switch(transferRes){
+                case(#Ok block_height){ 
                     ignore DB.Questions.ongoing_to_close(question, block_height);
-                    Debug.print("BLOCK HEIGHT: "# debug_show(block_height));
                     return #ok(block_height);
                 };
-                case(#err(error)){ 
+                case(#Err error ){ 
                     ignore DB.Questions.ongoing_to_pay(question); 
-                    Debug.print("PAYMENT ERROR: " # debug_show(error));
-                    // TODO: better error
-                    return #err(#Failed);
+                    return #err(#TransferError(error));
                 };
-            }
+            };
         };
+
         switch(DB.Questions.get_question(question_id)){
             case(null){ return #err(#QuestionNotFound) };
             case(?question){
                 if(question.status != #PAYOUT(#PAY)){ return #err(#WrongStatus) } 
                 else {
                     switch(question.finalWinner){
-                        // we should always have a defined final winner here
                         case(null){Prelude.unreachable()};
                         case(?finalWinner){
                             switch(finalWinner){
                                 case(#QUESTION){ 
                                     ignore DB.Questions.pay_to_ongoing(question);
-                                    return await pay(question, question.author_id);
+                                    return await payout_invoice(question, question.author_id);
                                 };
                                 case(#ANSWER({answer_id})){ 
                                     switch(DB.Answers.get_answer(answer_id)){
-                                        // should always be legitimate answer of question
                                         case(null){ Prelude.unreachable() };
                                         case(?answer){ 
                                             ignore DB.Questions.pay_to_ongoing(question);
-                                            return await pay(question, answer.author_id);
+                                            return await payout_invoice(question, answer.author_id);
                                         };
                                     };
                                 };
@@ -520,27 +566,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     };
 
-    // ---------------- Transfer ----------------
-    private func transfer(to: Principal, amount: Int32) : async Result.Result<Nat64, Types.Error> {
-        let recipientDefaultAccount = A.getDefaultAccountId(to);
-        let transferRes: LedgerTypes.TransferResult = await ledger_canister_.transfer({
-            memo = 0;
-            fee = {
-                e8s = 10000;
-            };
-            amount = {
-                e8s = Nat64.sub(Nat64.fromNat(Nat32.toNat(Int32.toNat32(amount))), 10000);
-            };
-            from_subaccount = null;
-            to=recipientDefaultAccount;
-            created_at_time = null;
-        });   
-        switch(transferRes){
-            case(#Err err){return #err(#TransferError(err))};
-            case(#Ok index){ return #ok(index) };
-        };           
-    }; 
-
+    // ---------------- Update Status ----------------
     public func update_status () : async () {
             // this is rather inefficient as I get the questions only to pass the ids to get them again
             // in the time functions. Benefit is that I can check the status.

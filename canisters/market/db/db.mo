@@ -57,7 +57,7 @@ module {
         // checks if the user exists
         // create invoice -> requires buyer id
         // add the invoice id to the user by replacing the user
-        public func create_invoice(amount:Nat, marketPrincipal:Principal, buyer_id:Principal) : Result.Result<Invoice, Types.Error> {
+        public func create_invoice(amount:Nat32, marketPrincipal:Principal, buyer_id:Principal) : Result.Result<Invoice, Types.Error> {
             switch(users.get_user(buyer_id)){
                 case(null){return #err(#UserNotFound)};
                 case(?user){
@@ -79,18 +79,16 @@ module {
         // TODO: Question should point to invoice to check quickly if invoice has been used for question already
         // TODO: Do I have to pass the reward? Should it be int or nat?
         // TO DO: the switches are independent and can be refactored (readability)
-        public func create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32) : Result.Result<Question, Types.Error> {
+        public func create_question(user_id:Principal, invoice_id:Nat32, duration_minutes:Int32, title:Text, content:Text, reward:Nat32) : Result.Result<Question, Types.Error> {
             switch(invoices.get_invoice(invoice_id)){
                 case(null){ return #err(#InvoiceNotFound) };
                 case(?invoice){
                     switch(users.get_user(user_id)){
                         case(null){ return #err(#UserNotFound) };
                         case(?user){
-                           
-                            let question: Question = questions.create_question(user_id:Principal, invoice_id:Nat, duration_minutes:Int32, title:Text, content:Text, reward:Int32);
+                            let question: Question = questions.create_question(user_id:Principal, invoice_id:Nat32, duration_minutes:Int32, title:Text, content:Text, reward:Nat32);
                             ignore invoices.put_invoice(invoices.replace_question_id(invoice, question.id));
                             ignore users.put_user(users.replace_question_ids(user, question.id));
-                           
                             return #ok(question);
                         };
                     };
