@@ -15,6 +15,8 @@ import Order             "mo:base/Order";
 import Text              "mo:base/Text";
 import Nat32             "mo:base/Nat32";
 
+import State            "../state";
+
 module {
     
     // for convenience
@@ -22,11 +24,13 @@ module {
     type User = Types.User;
     type Invoice = Types.Invoice;
     type Answer = Types.Answer;
+
+    // TODO: delete
     type State = Types.State;
+    type StabelState = State.State;
 
 
-
-    public class DB(){
+    public class DB(_state: StabelState){
         
         // --------------------------- STATE ---------------------------
         public func set_inner_state(state:State) : () {
@@ -36,20 +40,20 @@ module {
             answers.set_state(state.answers_state);
         };
         
-        private var users: UsersModule.Users = UsersModule.Users();
-        private var invoices: InvoicesModule.Invoices = InvoicesModule.Invoices();
-        private var questions: QuestionsModule.Questions = QuestionsModule.Questions();
-        private var answers: AnswersModule.Answers = AnswersModule.Answers();
+        private var users: UsersModule.Users = UsersModule.Users(_state.users.register);
+        private var invoices: InvoicesModule.Invoices = InvoicesModule.Invoices(_state.invoices.register, _state.invoices.index);
+        private var questions: QuestionsModule.Questions = QuestionsModule.Questions(_state.questions.register, _state.questions.index);
+        private var answers: AnswersModule.Answers = AnswersModule.Answers(_state.answers.register, _state.answers.index);
 
         // --------------------------- DB FUNCTIONS ---------------------------
         
         // TODO: rename the func so that not both are called "create_user"
-        public func create_user(id:Principal, name:Text) : Result.Result<User, Types.Error> {
+        public func create_user(id:Principal) : Result.Result<User, Types.Error> {
             // if user does not exist yet and is !ananymous
             if(not users.validate_key(id)){
                 return #err(#UserIsInvalid);
             } else {
-                return #ok(users.create_user(id, name));
+                return #ok(users.create_user(id));
             };
         }; 
         
@@ -104,7 +108,7 @@ module {
         // add to the answer
         // replace question to add id
         // user question to add id
-        public func create_answer(user_id:Principal, question_id:Text, content:Text) : Result.Result<Answer, Types.Error> {
+        public func create_answer(user_id:Principal, question_id:Nat32, content:Text) : Result.Result<Answer, Types.Error> {
             switch(users.get_user(user_id)){
                 case(null){return #err(#UserNotFound)};
                 case(?prevUser){
@@ -112,7 +116,7 @@ module {
                         case(null){ return #err(#AnswerNotFound);};
                         case(?prevQuestion){
                             // Add answer to answers
-                            let answer: Answer = answers.create_answer(user_id:Principal, question_id:Text, content:Text);
+                            let answer: Answer = answers.create_answer(user_id:Principal, question_id:Nat32, content:Text);
                             
                             // replace question
                             ignore questions.put_question(questions.replace_answer_ids(prevQuestion, answer.id));
@@ -128,11 +132,11 @@ module {
 
         // --------- DB helper functions ---------
         // TODO: possibly rebuild this based on other queries
-        public func has_user_answered_question(user_id: Principal, question_id:Text): Bool {
+        public func has_user_answered_question(user_id: Principal, question_id:Nat32): Bool {
             switch(questions.get_question(question_id)){
                 case(null){false};
                 case(?question){
-                    let iter: Iter.Iter<Text> = Iter.fromArray(question.answers);
+                    let iter: Iter.Iter<Nat32> = Iter.fromArray(question.answers);
                     label l for (answer_id in iter){
                         switch(answers.get_answer(answer_id)){
                             case(null){return false};
@@ -154,7 +158,7 @@ module {
         public func get_state(): State {
             {
                 users_state = users.get_all_users();
-                invoices_state = invoices.get_invoices();
+                invoices_state = invoices.get_all_invoices();
                 questions_state = questions.get_all_questions();
                 answers_state = answers.get_all_answers();
             };
@@ -162,7 +166,7 @@ module {
 
         // TODO: improve this function massively and test it
         // TODO: potentially replace with several specific queries
-        public func get_question_data(question_id:Text): ?{question:Question; users:[User]; answers:[Answer]} {
+        public func get_question_data(question_id:Nat32): ?{question:Question; users:[User]; answers:[Answer]} {
             switch(questions.get_question(question_id)){
                 case(null){return null};
                 case(?question){
@@ -219,7 +223,7 @@ module {
             func compare_by_reward_asc (a:Question, b:Question) : Order.Order {
                 if(a.reward == b.reward){ 
                     // TODO: does not work for text
-                    return Text.compare(a.id, b.id);
+                    return Nat32.compare(a.id, b.id);
                 } else if(a.reward > b.reward){
                     return #greater
                 } else {
@@ -230,7 +234,7 @@ module {
             func compare_by_reward_desc (a:Question, b:Question) : Order.Order {
                 if(a.reward == b.reward){ 
                     // TODO: does not work for text
-                    return Text.compare(a.id, b.id);
+                    return Nat32.compare(a.id, b.id);
                 } else if(a.reward < b.reward){
                     return #greater
                 } else {
@@ -308,9 +312,6 @@ module {
             public let { get_user } = users;
             public let { get_all_users } = users;
             public let { get_users } = users;   
-            public let { get_profile } = users; 
-            public let { update_user } = users;  
-            public let { update_profile } = users;  
         };
 
         public let Invoices = object {

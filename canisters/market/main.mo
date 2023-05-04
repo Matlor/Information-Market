@@ -24,9 +24,11 @@ import Types        "types";
 import DBModule    "./db/db";
 import LedgerTypes  "../ledger/ledgerTypes";
 import A            "invoice/Account";
+import State        "state";
 
 
 shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) = this {
+
 
     // ---------------- Actors  ----------------
     stable let ledger_principal: Principal = arguments.ledger_canister;
@@ -53,7 +55,6 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Settings ----------------
-    private stable var coin_symbol_ : Text = arguments.coin_symbol;
     private stable var min_reward_ : Nat32 = arguments.min_reward_e8s;
     private stable var fee_ : Nat32 = arguments.transfer_fee_e8s;
     private stable var duration_pick_answer_ : Int32 = arguments.pick_answer_duration_minutes;
@@ -71,10 +72,6 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // --- get settings ---
-    public query func get_coin_symbol() : async Text {
-        return coin_symbol_;
-    };
-
     public query func get_min_reward() : async Nat32 {
         return min_reward_;
     };
@@ -95,9 +92,18 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         return update_status_on_heartbeat_;
     };
 
+
+    public func get() : async Nat64 {
+        Prim.stableMemorySize();
+    };
+
     // ---------------- DB ----------------
+
+    let _start_date = Time.now();
+    stable var _state = State.initState(_start_date, arguments);
+
     // TODO: I could think if I should pass around Buffers internally and only for async actor turn it into array
-    private var DB: DBModule.DB = DBModule.DB();
+    private var DB: DBModule.DB = DBModule.DB(_state);
 
     public shared({caller}) func set_db(initial_state:Types.State): async Result.Result<Types.State, Types.Error>{
         // TODO: (test_runner needs to deploy market) await callerIsController(caller)
@@ -128,54 +134,18 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         DB.Users.get_users(user_ids);
     };
 
-    public query func get_question_data(question_id:Text): async ?{question:Types.Question; users:[Types.User]; answers:[Types.Answer]} {
+    public query func get_question_data(question_id:Nat32): async ?{question:Types.Question; users:[Types.User]; answers:[Types.Answer]} {
         DB.get_question_data(question_id);
     };
 
     // ---------------- User Managment ----------------
-    // TODO: Delete everything around it for now
     public query func get_user(user_id:Principal): async ?Types.User {
         return DB.Users.get_user(user_id);
     };
    
-    // TODO: Delete everything around it for now
-    public shared({caller}) func create_user(name:Text): async Result.Result<Types.User, Types.Error> {
-        Debug.print(debug_show(caller));
-        return DB.create_user(caller, name);
+    public shared({caller}) func create_user(): async Result.Result<Types.User, Types.Error> {
+        return DB.create_user(caller);
     };
-
-    // TODO: Delete everything around it for now
-    public shared({caller}) func update_user(name:Text): async Result.Result<Types.User, Types.Error> {
-        DB.Users.update_user(caller, name);
-        switch(DB.Users.get_user(caller)){
-            case (null){ return #err(#UserNotFound)};
-            case (?user){ return #ok(user)};
-        };
-    };
-
-    // ---- Profile ----
-    // TODO: Delete everything around it for now
-    public query func get_profile(user_id:Principal): async ?Types.Profile {
-        DB.Users.get_profile(user_id);
-    };
-
-    // TODO: Delete everything around it for now
-    public shared({caller}) func update_profile(avatar:Blob): async Result.Result<?Blob, Types.Error> {
-        DB.Users.update_profile(caller, avatar);
-        switch(DB.Users.get_profile(caller)){
-            case (null){ return #err(#UserNotFound)};
-            case (?user){ return #ok(user)};
-        };
-    };
-    
-    // TODO: Delete everything around it for now
-    // TODO: Update user
-    // check if user exists already
-    // check that caller is user
-    // check if blob, username or both should be replaced
-    // return User probably
-    // public func update_user();
-
 
     // ---------------- Invoice ----------------
     public shared ({caller}) func get_invoice(invoice_id: Nat32) : async Result.Result<Types.Invoice, Types.Error>  {
@@ -204,14 +174,13 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     };
 
-    public query func get_balance() : async LedgerTypes.Token {
+    public func get_balance() : async LedgerTypes.Token {
         measure(Time.now(), "before account balance check");
         let res = await ledger_canister_.account_balance({account = A.getDefaultAccountId(Principal.fromActor(this)) });
         measure(Time.now(), "before account balance check");
         return res;
     };
 
-    
     public func verify_invoice(id : Nat32) : async Result.Result<Types.Invoice, Types.Error> {
         // 1) check if exists
         switch (DB.Invoices.get_invoice(id)) {
@@ -224,47 +193,14 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
                     // 3) check if paid (inter-canister queries don't work yet)
                     let res = await ledger_canister_.account_balance({account = invoice.destination});
                     let balance = Nat32.fromNat(Nat64.toNat(res.e8s));
-
                     if (balance >= invoice.amount) {
                         let verifiedAtTime = Time.now();
                         let marketDefaultAccount = A.getAccountId(Nat64.fromNat(0), Principal.toText(Principal.fromActor(this)));
                         Debug.print("marketDefaultAccount: " # debug_show(marketDefaultAccount));
-
                         // 3.5) verify already to avoid async problems
                         let verifiedInvoice = DB.Invoices.verify_invoice(invoice);
                         return #ok(verifiedInvoice);
-
-
-                        /* // 4) attempt to do the transfer
-                        measure(Time.now(), "before transfer");
-                        let transferRes: LedgerTypes.TransferResult = await ledger_canister_.transfer({
-                            memo = 0;
-                            fee = {
-                                e8s = 10000;
-                            };
-                            amount = {
-                                e8s = Nat64.sub(Nat64.fromNat(balance), 10000);
-                            };
-                            from_subaccount = ?invoice.subAccount;
-                            to = marketDefaultAccount;
-                            created_at_time = null;
-                        });
-                        measure(Time.now(), "after transfer");
-                        switch transferRes {
-                            case (#Ok index) {
-                                // 5) if success: return the verified invoice
-                                return #ok(verifiedInvoice);
-                            };
-                            // 6) if failed: return error
-                            case(#Err err){
-                                // revert to unverified state if the transfer failed
-                                ignore DB.Invoices.un_verify_invoice(verifiedInvoice);
-                                return #err(#TransferError(err));
-                            };        
-                        }; */
-
-
-                    // 7) if not paid return error
+                    // 4) if not paid return error
                     } else {
                         return #err(#InvoiceNotPaid)
                     };
@@ -338,7 +274,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Answer Question ----------------
-    public shared ({caller}) func answer_question(question_id: Text, content: Text): async Result.Result<Types.Answer, Types.Error> {
+    public shared ({caller}) func answer_question(question_id: Nat32, content: Text): async Result.Result<Types.Answer, Types.Error> {
         // ----- time_trigger -----
         await update_open(question_id);
  
@@ -369,7 +305,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Pick Answer ----------------
-    public shared ({caller}) func pick_answer(question_id: Text, answer_id: Text) : async Result.Result<(), Types.Error> {
+    public shared ({caller}) func pick_answer(question_id: Nat32, answer_id: Nat32) : async Result.Result<(), Types.Error> {
         // ----- time_trigger -----
         await update_pick_answer(question_id);
         
@@ -404,7 +340,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     // ---------------- Trigger Dispute ----------------
     // TODO: is order of guards coherent?
     // TODO: maybe this should trap if the potentialWinner was never defined? -> rather replace with sensible types
-    public shared ({caller}) func dispute(question_id: Text): async Result.Result<(), Types.Error> {
+    public shared ({caller}) func dispute(question_id: Nat32): async Result.Result<(), Types.Error> {
         // ----- time_trigger -----
         await update_disputable(question_id);
 
@@ -425,7 +361,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Arbitrate ----------------
-    public shared ({caller}) func arbitrate (question_id: Text, finalWinner: Types.FinalWinner): async Result.Result<(), Types.Error> {
+    public shared ({caller}) func arbitrate (question_id: Nat32, finalWinner: Types.FinalWinner): async Result.Result<(), Types.Error> {
         // ----- action_trigger -----
         if (not (await callerIsController(caller))){ return #err(#NotAllowed) }
         else {
@@ -462,7 +398,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     // ---------------- Time Updates ----------------
     // TODO decide if I want to have return values from these functions or not
     // TODO: they should return a Result, would be way cleaner, then it's clear what happend for debugging
-    public func update_open(question_id:Text) : async () {
+    public func update_open(question_id:Nat32) : async () {
         switch(DB.Questions.get_question(question_id)){
             case(null){ return };
             case(?question){
@@ -479,7 +415,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     };
 
-    public func update_pick_answer(question_id:Text) : async () {
+    public func update_pick_answer(question_id:Nat32) : async () {
         switch(DB.Questions.get_question(question_id)){
             case(null){ return };
             case(?question){
@@ -492,14 +428,14 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
         };
     };
    
-    public func update_disputable(question_id:Text) : async () {
+    public func update_disputable(question_id:Nat32) : async () {
         switch(DB.Questions.get_question(question_id)){
             case(null){ return };
             case(?question){
                 if(question.status != #DISPUTABLE){ return } else {
                     if(Utils.time_minutes_now() > question.status_end_date){
                         // TODO: check it Option.iterate is adequate here. Should never be null.
-                        Option.iterate(question.potentialWinner, func (potentialWinner: Text) : () {
+                        Option.iterate(question.potentialWinner, func (potentialWinner: Nat32) : () {
                             ignore DB.Questions.to_payout(question, #ANSWER({answer_id = potentialWinner}) );
                         });
                     };
@@ -509,7 +445,7 @@ shared({ caller }) actor class Market(arguments: Types.InstallMarketArguments) =
     };
 
     // ---------------- Payout ----------------
-    public func update_payout(question_id:Text) : async Result.Result<Nat64, Types.Error> {
+    public func update_payout(question_id:Nat32) : async Result.Result<Nat64, Types.Error> {
         func payout_invoice (question: Types.Question, recipientPrincipal: Principal): async Result.Result<Nat64, Types.Error> {
             
             let invoice:Types.Invoice = switch(DB.Invoices.get_invoice(question.invoice_id)){case(null){ Prelude.unreachable()}; case(?invoice){invoice}};

@@ -31,8 +31,8 @@ export interface UIQuestionProps {
 	users: IUser[];
 	answer: { answerInput: string; setAnswerInput: (input: string) => void };
 	select: {
-		selected: string | null;
-		setSelected: (id: string) => void;
+		selected: number | null;
+		setSelected: (id: number) => void;
 	};
 	viewCase: string;
 	user: ICurrentUser;

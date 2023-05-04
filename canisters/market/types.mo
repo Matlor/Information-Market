@@ -30,20 +30,17 @@ module {
     // experiment: I took this out from the user: avatar: ?Blob;
     public type User = {
         id: Principal;
-        name: Text;
         joined_date: Int32;
         invoices: [Nat32];  // relation to invoice
-        questions: [Text]; // relation to user
-        answers: [Text];   // relation to answer
+        questions: [Nat32]; // relation to user
+        answers: [Nat32];   // relation to answer
     };
-
-    public type Profile = ?Blob;
 
     // -------------- Main Entities --------------
     public type Invoice = {
         id: Nat32;
         buyer_id: Principal; 
-        question_id: ?Text;
+        question_id: ?Nat32;
         amount: Nat32;
         verifiedAtTime: ?Time.Time;
         paid: Bool;
@@ -60,7 +57,7 @@ module {
     // could open_duration be replaced by status_end_date?
     // TODO: should potentialWinner be answer or to user?
     public type Question = {
-        id: Text;
+        id: Nat32;
         author_id: Principal; // relation to user
         invoice_id: Nat32; 
         creation_date: Int32;
@@ -71,8 +68,8 @@ module {
         status_end_date: Int32;
         open_duration: Int32; 
         status: QuestionStatus;
-        answers: [Text]; 
-        potentialWinner: ?Text; 
+        answers: [Nat32]; 
+        potentialWinner: ?Nat32; 
         finalWinner: ?FinalWinner;
         close_transaction_block_height: ?Nat64;
     };
@@ -88,15 +85,15 @@ module {
     };
 
     public type FinalWinner = {
-        #ANSWER: {answer_id: Text};
+        #ANSWER: {answer_id: Nat32};
         #QUESTION;
     };
 
     // TODO: always refer to as answer_id instead of id across the app
     public type Answer = {
-        id: Text;
+        id: Nat32;
         author_id: Principal; 
-        question_id: Text; 
+        question_id: Nat32; 
         creation_date: Int32;
         content: Text;
     };
@@ -126,7 +123,6 @@ module {
     // ---------------------------------------
     public type InstallMarketArguments = {
         ledger_canister: Principal;
-        coin_symbol: Text;
         min_reward_e8s: Nat32;
         transfer_fee_e8s: Nat32;
         pick_answer_duration_minutes: Int32;
@@ -152,6 +148,9 @@ module {
     // --------------- TODO: IMPROVE THIS------------------------   
     // TODO: this needs to be manually changed atm
     public type Interface = actor {
+        set_db: (State) -> async (Result.Result<State, Error>);
+        get_db: query() -> async (Result.Result<State, Error>);
+
         answer_question: (Text, Text) -> async (Result.Result<Answer, Error>);
         arbitrate: (Text, FinalWinner) -> async (Result.Result<(), Error>);
         ask_question: (Nat32, Int32, Text, Text) -> async (Result.Result<Question, Error>);
@@ -166,11 +165,8 @@ module {
         update_open: (Text) -> async ();
         update_payout: (Text) -> async (Result.Result<Nat64, Error>);
         update_pick_answer: (Text) -> async ();
-        set_db: (State) -> async (Result.Result<State, Error>);
 
         get_invoice: (Nat32) -> async (Result.Result<Invoice, Error>);
-        get_db: query() -> async (Result.Result<State, Error>);
-        get_coin_symbol: query() ->  async (Text);
         get_duration_disputable: query() -> async (Int32);
         get_duration_pick_answer: query() -> async (Int32);
         get_fee: query() -> async (Nat32);
@@ -183,13 +179,12 @@ module {
         get_conditional_questions: query(Filter_Options, Text, Sort_Options, Nat32, Nat32) -> async ([Question]);
         get_conditional_questions_with_authors: query(Filter_Options, Text, ?Principal, Sort_Options, Nat32, Nat32) -> async ({data:[{question:Question; author:User}]; num_questions:Nat32});
 
-        get_profile: query(Principal) -> async (?Profile);
         update_user: (Text) -> async (Result.Result<User, Error>);
-        update_profile:(Blob) -> async (Result.Result<?Blob, Error>);
 
         update_status: () -> async ();      
 
         get_measurements:() -> async ([Measurment]);
+        get:() -> async (Nat64);
 
     };
 };

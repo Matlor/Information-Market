@@ -15,5 +15,4 @@ canisters/frontend/src/components/old/*
 
 helpers/
 helpers/get_blob.sh
-
-
+.mops/

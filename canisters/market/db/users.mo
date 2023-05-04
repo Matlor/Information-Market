@@ -8,33 +8,27 @@ import Result       "mo:base/Result";
 import Utils        "../utils";
 import Buffer       "mo:base/Buffer";
 import Array       "mo:base/Array";
-import Iter       "mo:base/Iter";
-import Debug       "mo:base/Debug";
+import Iter             "mo:base/Iter";
+import Debug           "mo:base/Debug";
 
-
+import Map             "mo:map/Map";
+import Ref             "../Ref";
 
 module {
 
     // for convenience
     type User = Types.User;
+    type Map<K, V>           = Map.Map<K, V>;
+    type Ref<V>              = Ref.Ref<V>;
 
-    public class Users() {
+    public class Users(_register:Map<Principal, Types.User>) {
 
-        // TODO: test profiles
-        var profiles: Trie.Trie<Principal, ?Blob> = Trie.empty<Principal, ?Blob>();
-        var users: Trie.Trie<Principal, User> = Trie.empty<Principal, User>();
-
-        // overwrites the users var
         public func set_state(initial_users:[User]) : () {
-            var newUsers: Trie.Trie<Principal, User> = Trie.empty<Principal, User>();
-
+            Map.clear(_register);
             let initial_user_iter: Iter.Iter<User> = Iter.fromArray<User>(initial_users);
             for (initial_user in initial_user_iter) {
-                let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(newUsers, {key=initial_user.id; hash=Principal.hash(initial_user.id)}, Principal.equal, initial_user);
-                newUsers:= newTrie;
+                set_user(initial_user);
             };
-            users:= newUsers;
-        
         };
         
         // --------------------- HELPER ---------------------
@@ -51,16 +45,16 @@ module {
             return newUser;
         };
 
-        public func replace_answer_ids(prevUser: User, id:Text) : User {
-            let prev_ids: Buffer.Buffer<Text> = Buffer.fromArray(prevUser.answers);
+        public func replace_answer_ids(prevUser: User, id:Nat32) : User {
+            let prev_ids: Buffer.Buffer<Nat32> = Buffer.fromArray(prevUser.answers);
             prev_ids.add(id);
             let new_ids = Buffer.toArray(prev_ids);
             let newUser: User = { prevUser with answers = new_ids };
             return newUser;
         };
 
-         public func replace_question_ids(prevUser: User, id:Text) : User {
-            let prev_ids: Buffer.Buffer<Text> = Buffer.fromArray(prevUser.questions);
+         public func replace_question_ids(prevUser: User, id:Nat32) : User {
+            let prev_ids: Buffer.Buffer<Nat32> = Buffer.fromArray(prevUser.questions);
             prev_ids.add(id);
             let new_ids = Buffer.toArray(prev_ids);
             let newUser: User = { prevUser with questions = new_ids };
@@ -72,79 +66,40 @@ module {
         // create
         // update
 
-        public func get_user(id:Principal) : ?User{
-            Trie.get(users, {key=id; hash=Principal.hash(id)}, Principal.equal);
-        };
-
-        // TODO: test everything related to profiles
-        public func put_user(user:User) : User {
-            let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(users, {key=user.id; hash=Principal.hash(user.id)}, Principal.equal, user);
-            users:= newTrie;
-            return user;
-        };
-
-        // TODO: I could use the put_user func instead
-        // TODO: test this
-        public func create_user(id:Principal, name:Text) : User {
+        public func create_user(id:Principal) : User {
             let newUser: User = {
                 id; 
-                name; 
                 joined_date = Utils.time_minutes_now();
                 invoices = []; 
                 questions = [];
                 answers = [];
             };
-            let (newTrie, prevValue) : (Trie.Trie<Principal, User>, ?User) = Trie.put(users, {key=newUser.id; hash=Principal.hash(newUser.id)}, Principal.equal, newUser);
-            users:= newTrie;
-            let (newProfileTrue, prevProfile) : (Trie.Trie<Principal, ?Blob>, ??Blob) = Trie.put(profiles, {key=newUser.id; hash=Principal.hash(newUser.id)}, Principal.equal, null);
-            profiles:= newProfileTrue;
-            return newUser;            
+            set_user(newUser);
+            return newUser;
         };
 
-        // TODO: could be improved
-        // TODO: test this
-        public func update_user(id:Principal, name:Text): () {
-            switch(get_user(id)){
-                case(null){return};
-                case(?user){
-                    let newUser: User = {user with name = name};
-                    ignore put_user(newUser);
-                    return;                    
-                };
-            }
+        public func set_user(user:User) : () {
+            Map.set(_register, Map.phash, user.id, user);
         };
-       
-        // ------------- Profiles -------------
-        // TODO: test this
-        public func put_profile(id:Principal, profile:Blob) : Blob {
-            let (newTrie, prevValue) : (Trie.Trie<Principal, ?Blob>, ??Blob) = Trie.put(profiles, {key=id; hash=Principal.hash(id)}, Principal.equal, ?profile);
-            profiles:= newTrie;
-            return profile;
+
+        public func put_user(user:User) : ?User {
+            Map.put(_register, Map.phash, user.id, user);
         };
-        
-        // TODO: test this
-        public func update_profile(id:Principal, profile:Blob): () {
-            switch(get_user(id)){
-                case(null){return};
-                case(?user){
-                    ignore put_profile(id, profile);
-                    return;                    
-                };
-            }
-        };
+
 
         // --------------------- QUERIES ---------------------
-        // TODO: maybe delete
-        // TODO: test this
-        public func get_all_users() : [User] {
-            Trie.toArray<Principal, User, User>(users, func(pair:(Principal, User)): User { return pair.1 });
+        public func get_user(id:Principal) : ?User{
+            Map.get(_register, Map.phash, id);
         };
 
-        // TODO: test this
+        public func get_all_users() : [User] {
+            let iter = Map.vals(_register);
+            return Iter.toArray<User>(iter);
+        };
+
         public func get_users(user_ids:[Principal]) : [User] {
             let selected_users = Buffer.Buffer<User>(user_ids.size());               
             let user_ids_iter = Iter.fromArray(user_ids);
-            
             for (user_id in user_ids_iter) {
                 let user = get_user(user_id);
                 switch(user){
@@ -155,21 +110,7 @@ module {
                     };
                 };
             };
-
             return Buffer.toArray(selected_users);
-        };
-
-        // TODO: I want to differentiate between empty profile and non existing user
-        // I get an optional value of an optional value back right now
-        // I'd need to add an empty blob basically 
-        public func get_profile(id: Principal) : ??Blob {
-            Trie.get<Principal, ?Blob>(profiles, {key=id; hash=Principal.hash(id)}, Principal.equal);
-        }; 
-        
-        // --------------------- UPGRADE ---------------------
-        // TODO:
-        public func share() : Trie.Trie<Principal, User> {
-            users;
         };
     };
 };

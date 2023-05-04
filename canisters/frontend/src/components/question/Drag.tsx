@@ -55,14 +55,6 @@ const Draggable = ({ children, className = "" }) => {
 		<div
 			className={`rounded-t-2  drop-shadow-[0_-1px_4px_rgba(0,0,0,0.1)] ${className}`}
 			style={{
-				/* position: "fixed",
-				maxWidth: "800px",
-				width: "100%",
-				bottom: 0,
-				left: "50%",
-				backgroundColor: "#FFFFFF",
-				transform: "translateX(-50%)", */
-
 				height: `${thing.height}px`,
 			}}
 		>
@@ -83,3 +75,11 @@ const Drag = ({ children, handleMouseDown, className = "" }) => {
 };
 
 export { Draggable, Drag };
+
+/* position: "fixed",
+				maxWidth: "800px",
+				width: "100%",
+				bottom: 0,
+				left: "50%",
+				backgroundColor: "#FFFFFF",
+				transform: "translateX(-50%)", */

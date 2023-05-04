@@ -55,7 +55,8 @@
 			"subnet_type": "system"
 		},
 		"build": {
-			"packtool": "vessel sources"
+			"args": "",
+			"packtool": "mops sources"
 		}
 	},
 	"version": 1

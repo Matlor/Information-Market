@@ -174,7 +174,7 @@ const Form = ({
 						{inputs?.title?.length ? inputs.title.length : 0} /{" "}
 						{specifications.title.max}
 					</div>
-					{!validTitle > 0 && inputs.title.length > 0 ? (
+					{!validTitle && inputs.title.length > 0 ? (
 						<div className="px-2 py-1 bg-gray-100 text-extra-small">
 							{"  20 or more "}
 						</div>

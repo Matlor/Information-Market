@@ -93,3 +93,9 @@ t_fundPlug(){
 #dfx canister call ledger transfer '( record { memo = 0; amount = record { e8s = 100_000_000_000 }; fee = record { e8s = 0 }; to = blob "|#92\ae\e8\f5\cam\e6\cf\9c\ce\fc-\93\f0?Iu\e9\bd\0b\dc\cf0\b7X\ff2\81\a7" } )'
 # classic issues:
 # minter is the default -> then I get "left = right"
+
+
+interface (){
+    dfx generate market
+    didc bind canisters/frontend/declarations/market/market.did --target mo > canisters/market/Interface.mo
+}

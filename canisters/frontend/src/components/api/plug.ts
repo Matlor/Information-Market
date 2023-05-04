@@ -12,7 +12,6 @@ export interface IDefaultActor {
 	get_duration_pick_answer: IMarketActor["get_duration_pick_answer"];
 	get_fee: IMarketActor["get_fee"];
 	get_min_reward: IMarketActor["get_min_reward"];
-	get_profile: IMarketActor["get_profile"];
 	get_question_data: IMarketActor["get_question_data"];
 	get_update_status_on_heartbeat: IMarketActor["get_update_status_on_heartbeat"];
 	get_user: IMarketActor["get_user"];
@@ -29,7 +28,6 @@ export const defaultActor: IDefaultActor = {
 	get_duration_pick_answer: market.get_duration_pick_answer,
 	get_fee: market.get_fee,
 	get_min_reward: market.get_min_reward,
-	get_profile: market.get_profile,
 	get_question_data: market.get_question_data,
 	get_update_status_on_heartbeat: market.get_update_status_on_heartbeat,
 	get_user: market.get_user,
@@ -93,7 +91,7 @@ export const checkConnection = async () => {
 	return window.ic.plug.isConnected();
 };
 
-export const verifyConnection = async () => {
+/* export const verifyConnection = async () => {
 	try {
 		const connected = await checkConnection();
 		if (!connected)
@@ -106,10 +104,4 @@ export const verifyConnection = async () => {
 		console.error("Failed to verify connection: " + e);
 		return false;
 	}
-};
-
-// MAYBE NOT USED
-export const batchTransaction = async (array: Array<any>) => {
-	var result = await window.ic.plug.batchTransactions(array);
-	return result;
-};
+}; */

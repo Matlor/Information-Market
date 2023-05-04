@@ -30,7 +30,7 @@ import { ShapeGrid } from "../core/TestPicture";
 const Header = () => {
 	const { login, user } = useContext(ActorContext);
 
-	const gaps = "gap-5 lg:gap-7";
+	const gaps = "gap-4 lg:gap-6";
 
 	return (
 		<div className="flex justify-between w-full bg-white lg:px-5 xl:px-7">
@@ -39,7 +39,7 @@ const Header = () => {
 			</Link>
 
 			{!user?.principal ? (
-				<div className="flex items-center gap-5 lg:gap-7 ">
+				<div className={`flex items-center ${gaps}`}>
 					<Link to="/add-question">
 						{/* <Button
 							size={"lg"}

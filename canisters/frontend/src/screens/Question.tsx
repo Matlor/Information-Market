@@ -54,19 +54,19 @@ interface IState {
 
 interface IProps {
 	user: ICurrentUser;
-	login: LoginFunction;
 }
 
 // for profile etc. I have to solve the issue of getting the author on the backend
 // for pick and dispute: manage ongoing confirmation call to backend
-const Question = ({ user, login }: IProps) => {
+const Question = ({ user }: IProps) => {
 	// --------------------  Context --------------------
 	//const { user } = useContext(ActorContext);
 
 	//const role = defineRole(user.principal);
 
 	// --------------------  URL --------------------
-	let { id } = useParams();
+	let params = useParams();
+	let id = Number(params);
 
 	// ------------------------ Question State ------------------------
 	// TODO: PUT ALL OF THIS UP UNTIL UI IN A PARENT COMPONENT OR IN A HOOK
@@ -128,7 +128,7 @@ const Question = ({ user, login }: IProps) => {
 	console.log("state", state.question);
 
 	// ------------------------------------------------ UI ------------------------------------------------
-	const [selected, setSelected] = useState(null);
+	const [selected, setSelected] = useState<number | null>(null);
 	const [answerInput, setAnswerInput] = useState<string>("");
 
 	// TODO: Destructuring of question and answers should happen here and then they should be passed to the components

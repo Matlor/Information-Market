@@ -17,7 +17,7 @@ import M            "mo:matchers/Matchers";
 import T            "mo:matchers/Testable";
 import S            "mo:matchers/Suite";
 
-import MarketTypes  "../market/types";
+import MarketTypes  "../market/Interface";
 import LedgerTypes  "../ledger/ledgerTypes";
 import LedgerTypes2 "../ledger/ledgerTypes2"; // needed for block archive
 
@@ -36,7 +36,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
     type FinalWinner = MarketTypes.FinalWinner;
     type State = MarketTypes.State;
 
-    let market_canister : MarketTypes.Interface = actor(Principal.toText(market));
+    let market_canister : MarketTypes.Market = actor(Principal.toText(market));
     let ledger_canister : LedgerTypes2.Interface = actor(Principal.toText(ledger));
     
     // ----------- Fund Entities ---------
@@ -128,53 +128,45 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
 
     // ---------------------- State ----------------------
-   /*  ignore  await set_db_unwrapped({
-        answers_state = [];
-        invoices_state = [];
-        questions_state = [];
-        users_state = [];
-    }: State); */
-
-    // ignore await set_db_unwrapped(base_state:State);
 
     public func get_base_state(a_user:Test_User.test_user, b_user:Test_User.test_user, c_user:Test_User.test_user) :async State {
        return {
             answers_state = [{
-                id = "0";
+                id = 0;
                 author_id = Principal.fromActor(b_user);
-                question_id = "0";
+                question_id = 0;
                 creation_date:Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
             },  
             {
-                id = "1";
+                id = 1;
                 author_id = Principal.fromActor(c_user);
-                question_id = "0";
+                question_id = 0;
                 creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
             }];
             invoices_state = [{
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"0";
+                question_id = ?0;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination =Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             },
             {
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"1";
+                question_id = ?1;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
             questions_state = [{
-                id= "0";
+                id= 0;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 0; 
                 creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
@@ -188,10 +180,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
-                answers = ["0", "1"]; 
+                answers = [0, 1]; 
             },
             {
-                id= "1";
+                id= 1;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 1; 
                 creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
@@ -213,16 +205,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = [0, 1]; 
                 joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "John"; 
-                questions = ["0", "1"]
+
+                questions = [0, 1]
             },
             {
                 id = Principal.fromActor(b_user); 
-                answers = ["0"]; 
+                answers = [0]; 
                 avatar = null; 
                 invoices = []; 
                 joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "Tim"; 
+ 
                 questions = []
             }];
         };
@@ -275,27 +267,25 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let a_user = await Test_User.test_user(market_canister, ledger_canister);
         let b_user = await Test_User.test_user(market_canister, ledger_canister);
 
-        let res_first_user: Result.Result<User, MarketTypes.Error> = await a_user.create_user("John");
+        let res_first_user: Result.Result<User, MarketTypes.Error> = await a_user.create_user();
         let first_user_expectation: User =  {
             id = Principal.fromText("rdmx6-jaaaa-aaaaa-aaadq-cai") ; 
             answers = []; 
             avatar = null; 
             invoices = []; 
             joined_date = +27_848_921; 
-            name = "John"; 
             questions = []
         };
 
-        let res_second_user: Result.Result<User, MarketTypes.Error> = await market_canister.create_user("John");
+        let res_second_user: Result.Result<User, MarketTypes.Error> = await market_canister.create_user();
 
-        let res_third_user: Result.Result<User, MarketTypes.Error> = await b_user.create_user("Tim");
+        let res_third_user: Result.Result<User, MarketTypes.Error> = await b_user.create_user();
         let third_user_expectation: User =  {
             id = Principal.fromActor(b_user); 
             answers = []; 
             avatar = null; 
             invoices = []; 
-            joined_date = +27_848_921; 
-            name = "Tim"; 
+            joined_date = +27_848_921;  
             questions = []
         };
        
@@ -308,7 +298,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         if( user.id == first_user_expectation.id and
                             user.answers == first_user_expectation.answers and
                             user.invoices == first_user_expectation.invoices and
-                            user.name == first_user_expectation.name and
                             user.questions == first_user_expectation.questions  
                         ){ "success" } else { "error" };
                     };
@@ -337,7 +326,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         if( user.id == third_user_expectation.id and
                             user.answers == third_user_expectation.answers and
                             user.invoices == third_user_expectation.invoices and
-                            user.name == third_user_expectation.name and
                             user.questions == third_user_expectation.questions 
                         ){ "success" } else { "error" };
                     };
@@ -350,7 +338,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         // TODO: testing if state has correct structure
         // TODO: testing blob and user update
         // TODO: testing anonymous caller -> not possible
-        // TODO: testing if unique user name is enforced
         S.run(suite);
         return #success;
     };
@@ -373,7 +360,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = []; 
                     joined_date = Int32.fromInt(Time.now() / 60000000000);
-                    name = "John"; 
+    
                     questions = []
                 },
             ];
@@ -456,7 +443,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = []; 
                 joined_date = Int32.fromInt(Time.now() / 60000000000);
-                name = "John"; 
+
                 questions = []
             }];
         }: State);
@@ -470,7 +457,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             Debug.print("create_invoice failed");
             Prelude.unreachable() 
         }};
-        let invoic_account_blob: Blob = invoice.destination;
+        let invoic_account_blob = invoice.destination;
 
         let ask_unpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_0 = await ledger_state(null);
@@ -482,7 +469,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             fee = { e8s = 10_000 };
             from_subaccount = null;
             memo = 42;
-            to = invoic_account_blob;
+            to = Blob.fromArray(invoic_account_blob);
         });
         let ask_underpaid_invoice = await a_user.ask_question(100, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_1 = await ledger_state(null);
@@ -495,7 +482,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             fee = { e8s = 10_000 };
             from_subaccount = null;
             memo = 42;
-            to = invoic_account_blob;
+            to = Blob.fromArray(invoic_account_blob);
         });
         let ask_paid_invoice =  await a_user.ask_question(invoice.id, 2, "test question", "Predictable state updates: Reducer functions are pure, meaning they don't have side effects and only depend on their input arguments. This makes state updates more predictable and easier to reason about. You can easily understand how the state will change based on the dispatched action without worrying about unintended consequences.");
         let ledger_state_2 = await ledger_state(null);
@@ -607,7 +594,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         let a_user: Test_User.test_user = await  create_test_user();
 
-        let answer_no_user = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_no_user = await a_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         ignore await set_db_unwrapped({
             answers_state = [];
@@ -619,26 +606,26 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = []; 
                 joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "John"; 
+
                 questions = []
             }];
         }: State);
-        let answer_no_question = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_no_question = await a_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         var single_question_no_answer = {
             answers_state = [];
             invoices_state = [{
                 id:Nat32 = 0;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"0";
+                question_id = ?0;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
             questions_state = [{
-                id= "0";
+                id= 0;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 0; 
                 creation_date :Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
@@ -660,14 +647,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = []; 
                 joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "John"; 
+
                 questions = []
             }];
 
         };
        
         Debug.print(debug_show(await set_db_unwrapped(single_question_no_answer: State)));
-        let answer_is_author = await a_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_is_author = await a_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // add user to state
         let b_user: Test_User.test_user = await create_test_user();
@@ -679,7 +666,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = []; 
                 joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "Tim"; 
+ 
                 questions = []
             }
         ];
@@ -690,38 +677,38 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         Debug.print(debug_show(await set_db_unwrapped(state_two_users: State)));
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PICKANSWER}] }: State)));
-        let answer_wrong_status_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_pickanswer = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #DISPUTABLE}] }: State)));
-        let answer_wrong_status_disputable = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_disputable = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #ARBITRATION}] }: State)));
-        let answer_wrong_status_arbitration = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_arbitration = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#PAY)}] }: State)));
-        let answer_wrong_status_payout_pay = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_payout_pay = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #PAYOUT(#ONGOING)}] }: State)));
-        let answer_wrong_status_payout_ongoing = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_payout_ongoing = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #CLOSED}] }: State)));
-        let answer_wrong_status_closed = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_wrong_status_closed = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         // finally works
         Debug.print(debug_show(await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status = #OPEN}] }: State)));
-        let answer_submitted = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let answer_submitted = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         
         let answer_submitted_state = await get_db_unwrapped();
 
         // correct state transition to pickanswer
         ignore await set_db_unwrapped({answer_submitted_state with questions_state = [{answer_submitted_state.questions_state[0] with status_end_date:Int32 = Int32.fromInt(Time.now() / 60000000000) - 10 }]}: State);
-        let time_transition_to_pickanswer = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let time_transition_to_pickanswer = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         let time_transition_to_pickanswer_state = await get_db_unwrapped();
         Debug.print("time_transition_to_pickanswer_state" # debug_show(time_transition_to_pickanswer_state));
         
         // correct state transition to payout
         ignore await set_db_unwrapped({ state_two_users with questions_state = [{single_question_no_answer.questions_state[0] with status_end_date = Int32.fromInt(Time.now() / 60000000000) - 10 }] }: State);
-        let time_transition_to_payout = await b_user.answer_question("0", "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
+        let time_transition_to_payout = await b_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
         let time_transition_to_payout_state = await get_db_unwrapped(); 
 
         let suite = S.suite("Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.ing question", [
@@ -796,10 +783,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         let answer_in_state = answer_submitted_state.answers_state[0];
                         if(
                             // TODO: should be resetable
-                            //answer_in_state.id == "0" and
+                            //answer_in_state.id == 0 and
                             answer_in_state.author_id == Principal.fromActor(b_user)  and
                             answer_in_state.content == "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern." and
-                            answer_in_state.question_id == "0" 
+                            answer_in_state.question_id == 0 
                         ){ "success" } else {"unexpected state"};
                     };
                 },
@@ -866,34 +853,34 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
     let base_state:State = {
             answers_state = [{
-                id = "0";
+                id = 0;
                 author_id = Principal.fromActor(b_user);
-                question_id = "0";
+                question_id = 0;
                 creation_date:Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                 content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
             }];
             invoices_state = [{
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"0";
+                question_id = ?0;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             },
             {
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"1";
+                question_id = ?1;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
             questions_state = [{
-                id= "0";
+                id= 0;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 0; 
                 creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
@@ -907,10 +894,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 potentialWinner = null;
                 finalWinner = null;
                 close_transaction_block_height= null;
-                answers = ["0"]; 
+                answers = [0]; 
             },
             {
-                id= "1";
+                id= 1;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 1; 
                 creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
@@ -932,16 +919,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 avatar = null; 
                 invoices = [0, 1]; 
                 joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "John"; 
-                questions = ["0", "1"]
+
+                questions = [0, 1]
             },
             {
                 id = Principal.fromActor(b_user); 
-                answers = ["0"]; 
+                answers = [0]; 
                 avatar = null; 
                 invoices = []; 
                 joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                name = "Tim"; 
+ 
                 questions = []
             }];
         };
@@ -949,25 +936,24 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         ignore await set_db_unwrapped(base_state:State);
 
         // user does not exists
-        let uknown_user = await c_user.pick_answer("0", "0");
+        let uknown_user = await c_user.pick_answer(0, 0);
         let uknown_user_state = await get_db_unwrapped();
 
         // question does not exist
-        let unknown_question = await a_user.pick_answer("10", "0");
+        let unknown_question = await a_user.pick_answer(10, 0);      
         let unknown_question_state = await get_db_unwrapped();
 
         // answer does not exist
-        let unknown_answer = await a_user.pick_answer("0", "3");
+        let unknown_answer = await a_user.pick_answer(0, 3);
         let unknown_answer_state = await get_db_unwrapped();
         
         // is not author
-        let not_author = await b_user.pick_answer("0", "0");
+        let not_author = await b_user.pick_answer(0, 0);
         let not_author_state = await get_db_unwrapped();
     
         // answer is not in question
-        let answer_not_in_question = await a_user.pick_answer("1", "0");
+        let answer_not_in_question = await a_user.pick_answer(1, 0);
         let answer_not_in_question_state = await get_db_unwrapped();
-        Debug.print("random print 2");
 
         // status is not pickanswer
         // --> state change
@@ -975,42 +961,42 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status = #OPEN },
             {base_state.questions_state[1] with status = #OPEN }
         ]}: State);
-        let pickanswer_wrong_status_open = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_open = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_open_state_after = await get_db_unwrapped();
 
         let pickanswer_wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
             {base_state.questions_state[1] with status = #DISPUTABLE }
         ]}: State);
-        let pickanswer_wrong_status_disputable = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_disputable = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_disputable_state_after = await get_db_unwrapped();
 
         let pickanswer_wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
             {base_state.questions_state[1] with status = #ARBITRATION }
         ]}: State);
-        let pickanswer_wrong_status_arbitration = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_arbitration = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_arbitration_state_after = await get_db_unwrapped();
        
         let pickanswer_wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
             {base_state.questions_state[1] with status = #PAYOUT(#PAY) }
         ]}: State);
-        let pickanswer_wrong_status_payout_pay = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_payout_pay = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
         let pickanswer_wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
             {base_state.questions_state[1] with status = #PAYOUT(#ONGOING) }
         ]}: State);
-        let pickanswer_wrong_status_payout_ongoing = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_payout_ongoing = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
         let pickanswer_wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
             {base_state.questions_state[1] with status = #CLOSED }
         ]}: State);
-        let pickanswer_wrong_status_payout_closed = await a_user.pick_answer("0", "0");
+        let pickanswer_wrong_status_payout_closed = await a_user.pick_answer(0, 0);
         let pickanswer_wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // time is not up -> success
@@ -1018,7 +1004,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status = #PICKANSWER },
             {base_state.questions_state[1] with status = #PICKANSWER }
         ]}: State);
-        let pickanswer_right_status = await a_user.pick_answer("0", "0");
+        let pickanswer_right_status = await a_user.pick_answer(0, 0);
         let pickanswer_right_status_state_after = await get_db_unwrapped();
 
         // time is up -> update
@@ -1026,7 +1012,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status_end_date = base_state.questions_state[0].status_end_date - 10 },
             {base_state.questions_state[1] with status_end_date = base_state.questions_state[1].status_end_date - 10 }
         ]}: State);
-        let pickanswer_time = await a_user.pick_answer("0", "0");
+        let pickanswer_time = await a_user.pick_answer(0, 0);
         let pickanswer_time_state_after = await get_db_unwrapped();
 
         let suite = S.suite("test pick answer", [
@@ -1150,16 +1136,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = [0, 1]; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "John"; 
-                    questions = ["0", "1"]
+    
+                    questions = [0, 1]
                 },
                 {
                     id = Principal.fromActor(b_user); 
-                    answers = ["0"]; 
+                    answers = [0]; 
                     avatar = null; 
                     invoices = []; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Tim"; 
+     
                     questions = []
                 },
                 {
@@ -1167,8 +1153,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Steve"; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000); 
                     questions = []
                 },
                 {
@@ -1177,33 +1162,32 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = []; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Mark"; 
                     questions = []
                 }
             ];
             invoices_state = [{
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"0";
+                question_id = ?0;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             },
             {
                 id = 1;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"1";
+                question_id = ?1;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
             questions_state = [
                 {
-                    id= "0";
+                    id= 0;
                     invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
@@ -1217,15 +1201,15 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["0", "1"]; 
-                    potentialWinner = ?"1";
+                    answers = [0, 1]; 
+                    potentialWinner = ?1;
                     finalWinner = null;
                     close_transaction_block_height= null;
                 },
 
                 // TODO: this is incorrect cannot have no potential winner in that state
                 {
-                    id= "1";
+                    id= 1;
                     author_id= Principal.fromActor(a_user);
                     invoice_id:Nat32= 1; 
                     
@@ -1247,16 +1231,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
             answers_state = [
                 {
-                    id = "0";
+                    id = 0;
                     author_id = Principal.fromActor(b_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "1";
+                    id = 1;
                     author_id = Principal.fromActor(c_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date : Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
@@ -1266,19 +1250,19 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         ignore await set_db_unwrapped(base_state:State);
 
         // user does not exist 
-        let uknown_user = await d_user.dispute("0");
+        let uknown_user = await d_user.dispute(0);
         let uknown_user_state = await get_db_unwrapped();
 
         // question does not exist
-        let unknown_question = await b_user.dispute("10");
-        let unknown_question_state = await get_db_unwrapped();
+        let unknown_question = await b_user.dispute(10);
+        let unnown_question_state = await get_db_unwrapped();
 
         // user did not answer
-        let user_did_not_answer = await d_user.dispute("0");
+        let user_did_not_answer = await d_user.dispute(0);
         let user_did_not_answer_state = await get_db_unwrapped();
         
         // user is author
-        let is_author = await a_user.dispute("0");
+        let is_author = await a_user.dispute(0);
         let is_author_state = await get_db_unwrapped();
         
         // wrong status
@@ -1286,42 +1270,42 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status = #OPEN },
             {base_state.questions_state[1] with status = #OPEN }
         ]}: State);
-        let disputable_wrong_status_open = await b_user.dispute("0");
+        let disputable_wrong_status_open = await b_user.dispute(0);
         let disputable_wrong_status_open_state_after = await get_db_unwrapped();
 
         let disputable_wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
             {base_state.questions_state[1] with status = #PICKANSWER }
         ]}: State);
-        let disputable_wrong_status_pickanswer = await b_user.dispute("0");
+        let disputable_wrong_status_pickanswer = await b_user.dispute(0);
         let disputable_wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
         let disputable_wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
             {base_state.questions_state[1] with status = #ARBITRATION }
         ]}: State);
-        let disputable_wrong_status_arbitration = await b_user.dispute("0");
+        let disputable_wrong_status_arbitration = await b_user.dispute(0);
         let disputable_wrong_status_arbitration_state_after = await get_db_unwrapped();
        
         let disputable_wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
             {base_state.questions_state[1] with status = #PAYOUT(#PAY) }
         ]}: State);
-        let disputable_wrong_status_payout_pay = await b_user.dispute("0");
+        let disputable_wrong_status_payout_pay = await b_user.dispute(0);
         let disputable_wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
         let disputable_wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
             {base_state.questions_state[1] with status = #PAYOUT(#ONGOING) }
         ]}: State);
-        let disputable_wrong_status_payout_ongoing = await b_user.dispute("0");
+        let disputable_wrong_status_payout_ongoing = await b_user.dispute(0);
         let disputable_wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
         let disputable_wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
             {base_state.questions_state[1] with status = #CLOSED }
         ]}: State);
-        let disputable_wrong_status_payout_closed = await b_user.dispute("0");
+        let disputable_wrong_status_payout_closed = await b_user.dispute(0);
         let disputable_wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // action based state transition
@@ -1329,7 +1313,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status = #DISPUTABLE },
             {base_state.questions_state[1] with status = #DISPUTABLE }
         ]}: State);
-        let disputable_right_status = await b_user.dispute("0");
+        let disputable_right_status = await b_user.dispute(0);
         let disputable_right_status_state_after = await get_db_unwrapped();
 
         // time base state transition
@@ -1337,7 +1321,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {base_state.questions_state[0] with status_end_date = base_state.questions_state[0].status_end_date - 10 },
             {base_state.questions_state[1] with status_end_date = base_state.questions_state[1].status_end_date - 10 }
         ]}: State);
-        let disputable_time = await b_user.dispute("0");
+        let disputable_time = await b_user.dispute(0);
         let disputable_time_state_after = await get_db_unwrapped();
 
 
@@ -1481,16 +1465,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = [0, 1]; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "John"; 
-                    questions = ["0", "1"]
+    
+                    questions = [0, 1]
                 },
                 {
                     id = Principal.fromActor(b_user); 
-                    answers = ["0"]; 
+                    answers = [0]; 
                     avatar = null; 
                     invoices = []; 
                     joined_date : Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Tim"; 
+     
                     questions = []
                 },
                 {
@@ -1498,8 +1482,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Steve"; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000); 
                     questions = []
                 },
             ];
@@ -1507,16 +1490,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             {
                 id = 0;
                 buyer_id = Principal.fromActor(a_user);
-                question_id = ?"0";
+                question_id = ?0;
                 amount:Nat32 = 1_300_000;
                 verifiedAtTime = ?Time.now(); 
                 paid = true;
-                destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                subAccount = A.getSubaccount(Nat64.fromNat(1));
+                destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
             questions_state = [
                 {
-                    id= "0";
+                    id= 0;
                     invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
@@ -1530,24 +1513,24 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date : Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["0", "1"]; 
-                    potentialWinner = ?"1";
+                    answers = [0, 1]; 
+                    potentialWinner = ?1;
                     finalWinner = null;
                     close_transaction_block_height= null;
                 },
             ];
             answers_state = [
                 {
-                    id = "0";
+                    id = 0;
                     author_id = Principal.fromActor(b_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "1";
+                    id = 1;
                     author_id = Principal.fromActor(c_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
@@ -1557,69 +1540,69 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         ignore await set_db_unwrapped(base_state:State);
 
         // not admin
-        let not_admin = await a_user.arbitrate("0", #ANSWER({answer_id="0"}));
+        let not_admin = await a_user.arbitrate(0, #ANSWER({answer_id=0}));
         let not_admin_state = await get_db_unwrapped();
 
         // no question
-        let unknown_question = await market_canister.arbitrate("10", #QUESTION);
+        let unknown_question = await market_canister.arbitrate(10, #QUESTION);
         let unknown_question_state = await get_db_unwrapped();
 
         // wrong status
         let wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
         ]}: State);
-        let wrong_status_open = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_open = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_open_state_after = await get_db_unwrapped();
 
         let wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
         ]}: State);
-        let wrong_status_pickanswer = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_pickanswer = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
         let wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
         ]}: State);
-        let wrong_status_disputable = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_disputable = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_disputable_state_after = await get_db_unwrapped();
 
         let wrong_status_payout_pay_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#PAY) },
         ]}: State);
-        let wrong_status_payout_pay = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_payout_pay = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_payout_pay_state_after = await get_db_unwrapped();
 
         let wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
         ]}: State);
-        let wrong_status_payout_ongoing = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_payout_ongoing = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
         let wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
         ]}: State);
-        let wrong_status_payout_closed = await market_canister.arbitrate("0", #QUESTION);
+        let wrong_status_payout_closed = await market_canister.arbitrate(0, #QUESTION);
         let wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // incorrect answer id
         let incorrect_answer_id_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
-        let incorrect_answer_id = await market_canister.arbitrate("0", #ANSWER({answer_id="10"}));
+        let incorrect_answer_id = await market_canister.arbitrate(0, #ANSWER({answer_id=10}));
         let incorrect_answer_id_state_after = await get_db_unwrapped();
 
         // should work for correct "Answer" id
         let correct_answer_id_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
-        let correct_answer_id = await market_canister.arbitrate("0", #ANSWER({answer_id="0"}));
+        let correct_answer_id = await market_canister.arbitrate(0, #ANSWER({answer_id=0}));
         let correct_answer_id_state_after = await get_db_unwrapped();
 
         // has to work if I pass "Question" for final winner
         let right_status_question_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
-        let right_status_question = await market_canister.arbitrate("0", #QUESTION);
+        let right_status_question = await market_canister.arbitrate(0, #QUESTION);
         let right_status_question_state_after = await get_db_unwrapped();
 
 
@@ -1687,7 +1670,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                         if( 
                             // TODO: more checks
                             correct_answer_id_state_after.questions_state[0].status == #PAYOUT(#PAY) and
-                            correct_answer_id_state_after.questions_state[0].finalWinner == ?(#ANSWER({answer_id="0"}))
+                            correct_answer_id_state_after.questions_state[0].finalWinner == ?(#ANSWER({answer_id=0}))
                         ){ "success"} else {"unexpected state"};
                     };
                 },
@@ -1726,16 +1709,16 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = [0, 1]; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "John"; 
-                    questions = ["0", "1"]
+    
+                    questions = [0, 1]
                 },
                 {
                     id = Principal.fromActor(b_user); 
-                    answers = ["0"]; 
+                    answers = [0]; 
                     avatar = null; 
                     invoices = []; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Tim"; 
+     
                     questions = []
                 },
                 {
@@ -1743,8 +1726,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     answers = []; 
                     avatar = null; 
                     invoices = []; 
-                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Steve"; 
+                    joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000); 
                     questions = []
                 },
             ];
@@ -1752,17 +1734,17 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 {
                     id = 0;
                     buyer_id = Principal.fromActor(a_user);
-                    question_id = ?"0";
+                    question_id = ?0;
                     amount:Nat32 = 1_300_000;
                     verifiedAtTime = ?Time.now(); 
                     paid = true;
-                    destination = A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user)));
-                    subAccount = A.getSubaccount(Nat64.fromNat(1));
+                    destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
+                    subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
                 }
             ];
             questions_state = [
                 {
-                    id= "0";
+                    id= 0;
                     invoice_id:Nat32= 0; 
                     author_id= Principal.fromActor(a_user);
 
@@ -1776,24 +1758,24 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["0", "1"]; 
-                    potentialWinner = ?"0";
-                    finalWinner = ?(#ANSWER({answer_id="0"}));
+                    answers = [0, 1]; 
+                    potentialWinner = ?0;
+                    finalWinner = ?(#ANSWER({answer_id=0}));
                     close_transaction_block_height= null;
                 },
             ];
             answers_state = [
                 {
-                    id = "0";
+                    id = 0;
                     author_id = Principal.fromActor(b_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "1";
+                    id = 1;
                     author_id = Principal.fromActor(c_user);
-                    question_id = "0";
+                    question_id = 0;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000) +1;
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }
@@ -1803,44 +1785,44 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         ignore await set_db_unwrapped(base_state:State);
 
         // no question
-        let unknown_question = await market_canister.update_payout("10");
-        let unknown_question_state = await get_db_unwrapped();
+        let unknown_question = await market_canister.update_payout(10);
+        let unnown_question_state = await get_db_unwrapped();
 
         // wrong status synchronous
         let wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #OPEN },
         ]}: State);
-        let wrong_status_open = await market_canister.update_payout("0");
+        let wrong_status_open = await market_canister.update_payout(0);
         let wrong_status_open_state_after = await get_db_unwrapped();
 
         let wrong_status_pickanswer_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PICKANSWER },
         ]}: State);
-        let wrong_status_pickanswer = await market_canister.update_payout("0");
+        let wrong_status_pickanswer = await market_canister.update_payout(0);
         let wrong_status_pickanswer_state_after = await get_db_unwrapped();
 
         let wrong_status_disputable_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #DISPUTABLE },
         ]}: State);
-        let wrong_status_disputable = await market_canister.update_payout("0");
+        let wrong_status_disputable = await market_canister.update_payout(0);
         let wrong_status_disputable_state_after = await get_db_unwrapped();
 
         let wrong_status_arbitration_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #ARBITRATION },
         ]}: State);
-        let wrong_status_arbitration = await market_canister.update_payout("0");
+        let wrong_status_arbitration = await market_canister.update_payout(0);
         let wrong_status_arbitration_state_after = await get_db_unwrapped();
 
         let wrong_status_payout_ongoing_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #PAYOUT(#ONGOING) },
         ]}: State);
-        let wrong_status_payout_ongoing = await market_canister.update_payout("0");
+        let wrong_status_payout_ongoing = await market_canister.update_payout(0);
         let wrong_status_payout_ongoing_state_after = await get_db_unwrapped();
 
         let wrong_status_payout_closed_state_before = await set_db_unwrapped({ base_state with questions_state = [
             {base_state.questions_state[0] with status = #CLOSED },
         ]}: State);
-        let wrong_status_payout_closed = await market_canister.update_payout("0");
+        let wrong_status_payout_closed = await market_canister.update_payout(0);
         let wrong_status_payout_closed_state_after = await get_db_unwrapped();
 
         // TODO: for both #answer and #question
@@ -1857,10 +1839,10 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         //  ------- async blocker tests (failure) -------
         ignore await set_db_unwrapped(base_state:State);
 
-        let a = market_canister.update_payout("0");
+        let a = market_canister.update_payout(0);
         let db_ongoing = await get_db_unwrapped();
-        let b_blocked = market_canister.update_payout("0");
-        let c_blocked = market_canister.update_payout("0");
+        let b_blocked = market_canister.update_payout(0);
+        let c_blocked = market_canister.update_payout(0);
 
         let db_ongoing_awaited = db_ongoing.questions_state[0];
         let a_awaited =  await a;
@@ -1875,11 +1857,11 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         // TODO: allow to pass amount
         ignore await set_db_unwrapped(base_state:State);
 
-        let x = market_canister.update_payout("0");
+        let x = market_canister.update_payout(0);
         let db_ongoing_success = await get_db_unwrapped();
 
-        let y_blocked = market_canister.update_payout("0");
-        let z_blocked = market_canister.update_payout("0");
+        let y_blocked = market_canister.update_payout(0);
+        let z_blocked = market_canister.update_payout(0);
 
         let db_ongoing_awaited_success =  db_ongoing_success.questions_state[0];
         let x_awaited_success =  await x;
@@ -1980,8 +1962,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = []; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Author"; 
-                    questions = ["10", "20", "30", "40"]
+                    questions = [10, 20, 30, 40]
                 },
                 {
                     id =  Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
@@ -1989,7 +1970,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = []; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Answerer"; 
                     questions = [];
                 },
                 {
@@ -1998,7 +1978,6 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     avatar = null; 
                     invoices = [0, 1]; 
                     joined_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
-                    name = "Ohter User"; 
                     questions = []
                 },        
             ];
@@ -2006,7 +1985,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             invoices_state = [];
             questions_state = [
                 {
-                    id= "10";
+                    id= 10;
                     invoice_id:Nat32= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2020,14 +1999,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+20;
                     
-                    answers = ["11", "12"]; 
+                    answers = [11, 12]; 
                     potentialWinner = null;
                     finalWinner = null;
                     close_transaction_block_height = null;
-                    // (#ANSWER({answer_id="0"}));
+                    // (#ANSWER({answer_id=0}));
                 },
                  {
-                    id= "20";
+                    id= 20;
                     invoice_id:Nat32= 10; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2041,13 +2020,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+102;
                     
-                    answers = ["21", "22"]; 
+                    answers = [21, 22]; 
                     potentialWinner = null;
                     finalWinner = null;
                     close_transaction_block_height= null;
                 }, 
                 {
-                    id= "30";
+                    id= 30;
                     invoice_id:Nat32 = 20; 
                     author_id = Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2061,13 +2040,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["31","32"]; 
-                    potentialWinner = ?"31";
+                    answers = [31,32]; 
+                    potentialWinner = ?31;
                     finalWinner = null;
                     close_transaction_block_height= null;
                 },
                  {
-                    id= "40";
+                    id= 40;
                     invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2081,14 +2060,14 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     status_update_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+1;
                     status_end_date: Int32 = Int32.fromInt(Time.now() / 60000000000)+2;
                     
-                    answers = ["41","42"]; 
-                    potentialWinner = ?"41";
-                    finalWinner = ?(#ANSWER({answer_id="41"}));
+                    answers = [41, 42]; 
+                    potentialWinner = ?41;
+                    finalWinner = ?(#ANSWER({answer_id=41}));
                     close_transaction_block_height= null;
                 }, 
                 /* Further */
                   {
-                    id= "50";
+                    id= 50;
                     invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2108,7 +2087,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     close_transaction_block_height= null;
                 }, 
                   {
-                    id= "60";
+                    id= 60;
                     invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2128,7 +2107,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     close_transaction_block_height= null;
                 }, 
                   {
-                    id= "70";
+                    id= 70;
                     invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2148,7 +2127,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                     close_transaction_block_height= null;
                 }, 
                   {
-                    id= "80";
+                    id= 80;
                     invoice_id:Nat32= 30; 
                     author_id= Principal.fromText("tsm3f-vuuza-xfy3b-wcbrx-r4nzg-jy6o2-ydpbq-67lqa-rgq6j-ijkaa-aqe");
 
@@ -2171,61 +2150,61 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
             ];
             answers_state = [
                 {
-                    id = "11";
+                    id = 11;
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
-                    question_id = "10";
+                    question_id = 10;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "12";
+                    id = 12;
                     author_id =  Principal.fromActor(c_user);
-                    question_id = "10";
+                    question_id = 10;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
-                    id = "21";
+                    id = 21;
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
-                    question_id = "20";
+                    question_id = 20;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "22";
+                    id = 22;
                     author_id =  Principal.fromActor(c_user);
-                    question_id = "20";
+                    question_id = 20;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
-                    id = "31";
+                    id = 31;
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
-                    question_id = "30";
+                    question_id = 30;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "32";
+                    id = 32;
                     author_id =  Principal.fromActor(c_user);
-                    question_id = "30";
+                    question_id = 30;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
 
                 {
-                    id = "41";
+                    id = 41;
                     author_id = Principal.fromText("4x6qx-tmjtk-uzyzt-ihfyt-3xeeg-aml4y-5v64i-v6u3x-scyy2-mobv5-pae"); 
-                    question_id = "40";
+                    question_id = 40;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 },
                 {
-                    id = "42";
+                    id = 42;
                     author_id =  Principal.fromActor(c_user);
-                    question_id = "40";
+                    question_id = 40;
                     creation_date: Int32 = Int32.fromInt(Time.now() / 60000000000);
                     content = "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.";
                 }

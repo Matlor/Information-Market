@@ -182,10 +182,10 @@ export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
 	};
 	const shapeStyles = {
 		square: {
-			backgroundColor: "#426E86",
+			backgroundColor: "#2F3131",
 		},
 		circle: {
-			backgroundColor: "#426E86",
+			backgroundColor: "#2F3131",
 			borderRadius: "50%",
 		},
 		"quarter-circle": {
@@ -197,7 +197,7 @@ export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
 			borderTopRightRadius: "100%",
 		},
 		"quarter-circle-3": {
-			backgroundColor: "#F0810F",
+			backgroundColor: "#FBF2E3",
 			borderBottomLeftRadius: "100%",
 		},
 		"quarter-circle-4": {
@@ -212,7 +212,7 @@ export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
 		triangle: {
 			width: 0,
 			height: 0,
-			borderBottom: `${gridCellSize}px solid #244E75`,
+			borderBottom: `${gridCellSize}px solid #F8F1E5`,
 			borderLeft: `${gridCellSize / 2}px solid transparent`,
 			borderRight: `${gridCellSize / 2}px solid transparent`,
 		},
