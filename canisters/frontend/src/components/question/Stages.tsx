@@ -1,61 +1,113 @@
 import React from "react";
-import { OnIcon, OngoingIcon, ClosedIcon } from "../core/Icons";
+import { OngoingIcon, ClosedIcon } from "../core/Icons";
 
-const tailwind = ["bg-gray-100"];
+/* 
+These would be the desired colors
+	/* const stageColorMapping = {
+		before: "#DCDCDC",
+		active: "#F42C00",
+		after: "#EEEEEC",
+	}; 
+*/
+const stageColorMapping = {
+	before: "gray-300",
+	active: "red",
+	after: "black",
+};
 
-// bg-[#426E86]
-const onColor = "bg-[#426E86]";
-const offColor = "bg-white";
-
-const onBorderColor = "white";
-const offBorderColor = "gray-500";
 const Stages = ({ stage }) => {
+	let stageNumber;
+	if (stage === "open") {
+		stageNumber = 0;
+	} else if (stage === "ongoing") {
+		stageNumber = 1;
+	} else {
+		stageNumber = 2;
+	}
+
 	return (
-		<div className="flex items-center gap-3 rounded-full w-max">
-			<OnStage isActive={stage === "open"} />
-			<OngoingStage isActive={stage === "ongoing"} />
-			<ClosedStage isActive={stage === "closed"} />
+		<div className="flex items-center gap-2 rounded-full w-max">
+			<div className=" border-1 border-gray-500 border-dotted h-[32px] w-[32px] flex justify-center items-center">
+				<OnStage isActive={stageNumber === 0} />
+			</div>
+			<div className=" border-1 border-gray-500 border-dotted h-[32px] w-[32px] flex justify-center items-center">
+				<OngoingStage stage={stageNumber} />
+			</div>
+			<div className=" border-1 border-gray-500 border-dotted h-[32px] w-[32px] flex justify-center items-center">
+				<ClosedStage stage={stageNumber} />
+			</div>
 		</div>
 	);
 };
 
-const OnStage = ({ isActive }) => {
+const OnStage = ({ isActive, size = 24 }) => {
 	return (
 		<div
-			className={`p-1 shadow-xl rounded-full ${isActive ? onColor : offColor} `}
+			style={{
+				position: "relative",
+				width: `${size}px`,
+				height: `${size}px`,
+				zIndex: "1",
+			}}
 		>
-			<OnIcon
-				borderColor={`${isActive ? onBorderColor : offBorderColor}`}
-				size={12}
-			/>
+			{isActive && (
+				<div
+					style={{
+						position: "absolute",
+						width: "100%",
+						height: "100%",
+						borderRadius: "50%",
+						backgroundColor: "#F3D6D1",
+						animation: "pulse 2s infinite",
+						top: "0",
+						left: "0",
+					}}
+				></div>
+			)}
+
+			<div
+				style={{
+					position: "absolute",
+					top: "50%",
+					left: "50%",
+					width: "50%",
+					height: "50%",
+					backgroundColor: isActive ? "#EB5C42" : "black",
+					borderRadius: "50%",
+					transform: "translate(-50%, -50%)",
+				}}
+			></div>
 		</div>
 	);
 };
 
-const OngoingStage = ({ isActive }) => {
-	return (
-		<div
-			className={`p-1 shadow-xl rounded-full ${isActive ? onColor : offColor} `}
-		>
-			<OngoingIcon
-				borderColor={`${isActive ? onBorderColor : offBorderColor}`}
-				strokeWidth={1}
-				size={12}
-			/>
-		</div>
-	);
+const OngoingStage = ({ stage }) => {
+	let activeStage = 1;
+
+	let color;
+	if (stage === activeStage) {
+		color = stageColorMapping.active;
+	} else if (stage < activeStage) {
+		color = stageColorMapping.before;
+	} else {
+		color = stageColorMapping.after;
+	}
+	return <OngoingIcon borderColor={`${color}`} strokeWidth={1.5} size={14} />;
 };
 
-const ClosedStage = ({ isActive }) => {
+const ClosedStage = ({ stage }) => {
+	let activeStage = 2;
+
+	let color = "white";
+	if (stage < activeStage) {
+		color = stageColorMapping.before;
+	} else {
+		color = stageColorMapping.after;
+	}
+
 	return (
-		<div
-			className={`p-1 shadow-xl rounded-full ${isActive ? onColor : offColor} `}
-		>
-			<ClosedIcon
-				borderColor={`${isActive ? onBorderColor : offBorderColor}`}
-				strokeWidth={1}
-				size={12}
-			/>
+		<div className={`rounded-full border-[1px] border-${color}`}>
+			<ClosedIcon borderColor={`${color}`} strokeWidth={1.5} size={14} />
 		</div>
 	);
 };

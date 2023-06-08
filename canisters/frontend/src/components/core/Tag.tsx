@@ -5,7 +5,7 @@ import { e8sToIcp } from "../core/utils/conversions";
 const Tag = ({ children, className = "" }) => {
 	return (
 		<div
-			className={`text-small font-600 text-gray-500 flex items-center gap-1 px-4  border-gray-200  rounded-1 bg-gray-100 font-400 w-max h-[36px] ${className}`}
+			className={`text-small text-black border-1 border-dotted border-gray-500 flex justify-center tracking-[.05em] items-center gap-1 px-2    font-500 w-max h-[32px] ${className}`}
 		>
 			{children}
 		</div>
@@ -15,8 +15,7 @@ const Tag = ({ children, className = "" }) => {
 export const RewardTag = ({ reward }) => {
 	return (
 		<Tag>
-			<div className="">{e8sToIcp(Number(reward)).toFixed(2)}</div>{" "}
-			<div>ICP</div>{" "}
+			<div>{e8sToIcp(Number(reward)).toFixed(2)}</div> <div>ICP</div>{" "}
 		</Tag>
 	);
 };

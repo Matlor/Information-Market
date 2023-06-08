@@ -1,13 +1,12 @@
 import React, { useState, useRef } from "react";
-import Loading from "../core/Loading";
 import { SearchIcon, CrossIcon } from "../core/Icons";
 
 interface ISearch {
-	searchLoading: boolean;
 	setSearchedText: (text: any) => void;
+	className?: string;
 }
 
-const Search = ({ searchLoading, setSearchedText }: ISearch) => {
+const Search = ({ setSearchedText, className = "" }: ISearch) => {
 	const [input, setInput] = useState<string>("");
 	const inputRef = useRef(null);
 	const [show, setShow] = useState<boolean>(false);
@@ -38,7 +37,7 @@ const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 	};
 
 	return (
-		<div className={`flex gap-3 items-center relative  w-max ${show && ""} `}>
+		<div className={`cursor-pointer relative  ${show && ""} ${className}`}>
 			<div
 				className={`items-center rounded-full cursor-pointer`}
 				onClick={(e) => {
@@ -50,10 +49,12 @@ const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 			</div>
 			<input
 				ref={inputRef}
-				className="outline-none w-9 md:w-full text-large placeholder:text-gray-500 !font-300 "
+				className={`outline-none w-0 text-large placeholder:text-gray-500 !font-300 ${
+					show ? "w-10" : "w-0"
+				}`}
 				type="text"
 				value={input}
-				placeholder="Search"
+				placeholder=""
 				onChange={handler}
 				onClick={(e) => {
 					handleIconClick();
@@ -66,14 +67,6 @@ const Search = ({ searchLoading, setSearchedText }: ISearch) => {
 					<CrossIcon size={15} />
 				</div>
 			)}
-
-			{/* {searchLoading ? (
-				<div className="absolute left-[100%] ml-5">
-					<Loading />
-				</div>
-			) : (
-				<></>
-			)} */}
 		</div>
 	);
 };

@@ -613,8 +613,8 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
         let answer_no_question = await a_user.answer_question(0, "Integration with popular libraries: Reducer pattern is popularized by libraries like Redux, which provide additional benefits such as middleware support, devtools integration, and the ability to manage your application's entire state in a single store. This further enhances the advantages of the reducer pattern.");
 
         var single_question_no_answer = {
-            answers_state = [];
-            invoices_state = [{
+            answers_state:[Answer] = [];
+            invoices_state:[Invoice] = [{
                 id:Nat32 = 0;
                 buyer_id = Principal.fromActor(a_user);
                 question_id = ?0;
@@ -624,7 +624,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 destination = Blob.toArray( A.getAccountId(Nat64.fromNat(1), Principal.toText(Principal.fromActor(a_user))) );
                 subAccount = Blob.toArray(A.getSubaccount(Nat64.fromNat(1)));
             }];
-            questions_state = [{
+            questions_state:[Question] = [{
                 id= 0;
                 author_id= Principal.fromActor(a_user);
                 invoice_id:Nat32= 0; 
@@ -641,14 +641,13 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
                 close_transaction_block_height= null;
                 answers = []; // relation to answer
             }];
-            users_state = [{
+            users_state:[User] = [{
                 id = Principal.fromActor(a_user); 
                 answers = []; 
                 avatar = null; 
                 invoices = []; 
                 joined_date:Int32 = Int32.fromInt(Time.now() / 60000000000);
-
-                questions = []
+                questions = [0]
             }];
 
         };
@@ -1255,7 +1254,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         // question does not exist
         let unknown_question = await b_user.dispute(10);
-        let unnown_question_state = await get_db_unwrapped();
+        let unknown_question_state = await get_db_unwrapped();
 
         // user did not answer
         let user_did_not_answer = await d_user.dispute(0);
@@ -1786,7 +1785,7 @@ shared ({ caller = admin }) actor class test_runner(market:Principal, ledger:Pri
 
         // no question
         let unknown_question = await market_canister.update_payout(10);
-        let unnown_question_state = await get_db_unwrapped();
+        let unknown_question_state = await get_db_unwrapped();
 
         // wrong status synchronous
         let wrong_status_open_state_before = await set_db_unwrapped({ base_state with questions_state = [

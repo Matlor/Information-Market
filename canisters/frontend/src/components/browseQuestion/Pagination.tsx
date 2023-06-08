@@ -21,7 +21,7 @@ const Pagination = ({
 	totalQuestions,
 	setPageIndex,
 }: IPagination) => {
-	var previousOpacity = pageIndex == 0 ? "opacity-[0.5]" : "";
+	var previousOpacity = pageIndex == 0 ? "opacity-[0.2]" : "";
 
 	const decreaseIndex = () => {
 		if (pageIndex == 0) {
@@ -36,7 +36,7 @@ const Pagination = ({
 			? Math.ceil(totalQuestions / questionsPerPage) - 1
 			: 0;
 
-	var nextOpacity = pageIndex == lastPage ? "opacity-[0.5]" : "";
+	var nextOpacity = pageIndex == lastPage ? "opacity-[0.2]" : "";
 
 	const increaseIndex = () => {
 		if (pageIndex == lastPage) {
@@ -46,16 +46,16 @@ const Pagination = ({
 		}
 	};
 
+	if (totalQuestions == 0) return <></>;
+
 	// could be more elegant with the nested flex boxes
 	return (
-		<div className="flex items-center gap-6 w-max">
+		<div className="flex items-center gap-5 w-max">
 			<button onClick={decreaseIndex}>
 				<div className={`flex gap-4 items-center ${previousOpacity} `}>
 					<div className="rotate-180">
 						<ArrowIcon strokeWidth={2} size={14} />
 					</div>
-
-					{/* <div className="text-normal">Next</div> */}
 				</div>
 			</button>
 
@@ -65,7 +65,6 @@ const Pagination = ({
 
 			<button onClick={increaseIndex}>
 				<div className={`flex gap-4  ${nextOpacity} items-center`}>
-					{/* <div className="">Prev</div> */}
 					<ArrowIcon strokeWidth={2} size={14} />
 				</div>
 			</button>
@@ -74,5 +73,3 @@ const Pagination = ({
 };
 
 export default Pagination;
-
-//if (questionsPerPage >= totalQuestions) return <></>;

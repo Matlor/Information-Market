@@ -1,6 +1,5 @@
 import React from "react";
 import { SortIcon } from "../core/Icons";
-import Button from "../core/Button";
 import Loading from "../core/Loading";
 import Modal from "../core/Modal";
 
@@ -61,7 +60,7 @@ const SortOptions = ({ setSortOrder, order }) => {
 	);
 };
 
-export const Sort = ({ isLoading, setSortOrder, order }) => {
+export const Sort = ({ isLoading, setSortOrder, order, className = "" }) => {
 	return (
 		<>
 			{/* Loading */}
@@ -74,48 +73,21 @@ export const Sort = ({ isLoading, setSortOrder, order }) => {
 			{/* Modal */}
 			<Modal
 				view={
-					<div className="flex items-center gap-3 text-gray-500 font-300 text-large">
-						<div className="flex flex-col w-max">
-							<SortIcon
-								fillColor1={"black"}
-								fillColor2={"black"}
-								borderColor="black"
-								size={16}
-							/>
-						</div>
-						Sort
+					<div
+						className={`cursor-pointer w-full h-full flex justify-center items-center ${className}`}
+					>
+						<SortIcon
+							fillColor1={"black"}
+							fillColor2={"black"}
+							borderColor="black"
+							size={16}
+						/>
 					</div>
 				}
-				className="rounded-2"
+				className="bg-white shadow-lg rounded-2"
 			>
 				<SortOptions setSortOrder={setSortOrder} order={order} />
 			</Modal>
 		</>
 	);
 };
-/* 
-
-
-<div className="rotate-180">
-							<TriangleIcon
-								fillColor={
-									order.orderBy === type && order.orderDirection === "ASCD"
-										? "black"
-										: "#F6F6F6"
-								}
-								borderColor=""
-							/>
-						</div>
-						<TriangleIcon
-							fillColor={
-								order.orderBy === type && order.orderDirection !== "ASCD"
-									? "black"
-									: "#F6F6F6"
-							}
-							borderColor=""
-						/>
-
-
-
-
-*/

@@ -3,6 +3,7 @@ import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import * as THREE from "three";
 import seedrandom from "seedrandom";
+import { RoundIconWrapper } from "./Icons";
 
 const generateColorPalette = (baseColor) => {
 	// Implement a color harmony function based on baseColor
@@ -147,7 +148,31 @@ export const CubeScene = () => {
 	return <div ref={containerRef} />;
 }; */
 
-export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
+{
+	/* <div className="px-3 py-1 bg-gray-100 rounded-full">
+				{uniqueString.toString().slice(0, 1).toUpperCase()}
+			</div> */
+}
+
+const CircleLetter = ({ letter = "f" }) => (
+	<div className="relative flex items-center justify-center w-[36px] h-[36px] bg-gray-100 rounded-full">
+		<span className="text-small font-500">{letter}</span>
+	</div>
+);
+
+export const ShapeGrid = ({
+	uniqueString,
+	gridSize = 2,
+	totalSize = 32,
+	padding = 4,
+	margin = 2,
+}) => {
+	const letter = uniqueString.toString().slice(0, 1).toUpperCase();
+	return <CircleLetter letter={letter} />;
+	// Calculate the size of a cell based on totalSize, gridSize, padding, and margin
+	const cellSize =
+		(totalSize - 2 * padding - (gridSize - 1) * margin) / gridSize;
+
 	const shapes = [
 		"square",
 		"circle",
@@ -168,86 +193,51 @@ export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
 		return shapes[index];
 	};
 
-	const gridCellSize = 8; // Adjust this value as needed
-	const blendModes = {
-		darken: {
-			mixBlendMode: "darken",
-		},
-		lighten: {
-			mixBlendMode: "lighten",
-		},
-		difference: {
-			mixBlendMode: "difference",
-		},
-	};
 	const shapeStyles = {
 		square: {
-			backgroundColor: "#2F3131",
+			backgroundColor: "#000000",
 		},
 		circle: {
-			backgroundColor: "#2F3131",
+			backgroundColor: "#000000",
 			borderRadius: "50%",
 		},
 		"quarter-circle": {
-			backgroundColor: "#F8F1E5",
+			backgroundColor: "#000000",
 			borderTopLeftRadius: "100%",
 		},
 		"quarter-circle-2": {
-			backgroundColor: "#2F3131",
+			backgroundColor: "#000000",
 			borderTopRightRadius: "100%",
 		},
 		"quarter-circle-3": {
-			backgroundColor: "#FBF2E3",
+			backgroundColor: "#CC5500",
 			borderBottomLeftRadius: "100%",
 		},
 		"quarter-circle-4": {
-			backgroundColor: "#F9BA32",
+			backgroundColor: "#CC5500",
 			borderBottomRightRadius: "100%",
 		},
 		"half-circle": {
-			backgroundColor: "#F8F1E5",
+			backgroundColor: "#CC5500",
 			borderTopLeftRadius: "100%",
 			borderTopRightRadius: "100%",
 		},
 		triangle: {
-			width: 0,
-			height: 0,
-			borderBottom: `${gridCellSize}px solid #F8F1E5`,
-			borderLeft: `${gridCellSize / 2}px solid transparent`,
-			borderRight: `${gridCellSize / 2}px solid transparent`,
+			backgroundColor: "#CC5500",
+			clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)", // top left triangle
 		},
 		"triangle-2": {
-			width: 0,
-			height: 0,
-			borderTop: `${gridCellSize}px solid #DDE4ED`,
-			borderLeft: `${gridCellSize / 2}px solid transparent`,
-			borderRight: `${gridCellSize / 2}px solid transparent`,
+			backgroundColor: "#000000",
+			clipPath: "polygon(100% 0%, 100% 100%, 0% 0%)", // top right triangle
 		},
 		"triangle-3": {
-			width: 0,
-			height: 0,
-			borderLeft: `${gridCellSize}px solid #F9F051`,
-			borderTop: `${gridCellSize / 2}px solid transparent`,
-			borderBottom: `${gridCellSize / 2}px solid transparent`,
+			backgroundColor: "#000000",
+			clipPath: "polygon(0% 100%, 100% 100%, 0% 0%)", // bottom left triangle
 		},
 		"triangle-4": {
-			width: 0,
-			height: 0,
-			borderRight: `${gridCellSize}px solid #EABC41`,
-			borderTop: `${gridCellSize / 2}px solid transparent`,
-			borderBottom: `${gridCellSize / 2}px solid transparent`,
+			backgroundColor: "#000000",
+			clipPath: "polygon(100% 100%, 0% 100%, 100% 0%)", // bottom right triangle
 		},
-	};
-
-	const applyRandomBlendMode = (shapeType) => {
-		const blendModeKeys = Object.keys(blendModes);
-		const blendModeIndex = Math.floor(rng() * blendModeKeys.length);
-		const blendMode = blendModes[blendModeKeys[blendModeIndex]];
-
-		return {
-			...shapeStyles[shapeType],
-			...blendMode,
-		};
 	};
 
 	const grid = [];
@@ -260,20 +250,29 @@ export const ShapeGrid = ({ uniqueString, gridSize = 4 }) => {
 	}
 
 	return (
-		<div className="p-[3px] border-gray-200 rounded-full border-[1px]">
-			<div className="flex flex-col overflow-hidden rounded-full w-max">
-				{grid.map((row, rowIndex) => (
-					<div key={`row-${rowIndex}`} className="flex">
-						{row.map((shape, colIndex) => (
-							<div
-								key={`cell-${rowIndex}-${colIndex}`}
-								className={`w-2 h-2 border border-gray-300`}
-								style={applyRandomBlendMode(shape)}
-							/>
-						))}
-					</div>
-				))}
-			</div>
+		<div
+			className="flex flex-col overflow-hidden bg-gray-200 rounded-full"
+			style={{ width: totalSize, height: totalSize, padding }}
+		>
+			{grid.map((row, rowIndex) => (
+				<div key={`row-${rowIndex}`} className="flex">
+					{row.map((shape, colIndex) => (
+						<div
+							key={`cell-${rowIndex}-${colIndex}`}
+							className={`border border-gray-300`}
+							style={{
+								...shapeStyles[shape],
+								width: cellSize,
+								height: cellSize,
+								margin:
+									rowIndex < gridSize - 1 || colIndex < gridSize - 1
+										? margin / 2
+										: 0, // Apply margin only if it's not the last cell in a row or column
+							}}
+						/>
+					))}
+				</div>
+			))}
 		</div>
 	);
 };

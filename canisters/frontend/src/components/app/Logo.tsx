@@ -1,10 +1,10 @@
 import React from "react";
 
 const Logo = () => {
-	// text-[36px] lg:text-[42px]
+	// alternative colors: 404038, 262626
 	return (
-		<div className="text-[28px] lg:text-[35px] text-[#1E1C1A] font-poppins font-500 tracking-[.03em] -ml-[3px]">
-			leap
+		<div className="text-[24px] lg:text-[24px]  text-[#504F61] font-poppins font-500 tracking-[.08em] -ml-[3px]">
+			leap.
 		</div>
 	);
 };

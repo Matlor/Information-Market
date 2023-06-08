@@ -1,7 +1,4 @@
-import React, { useRef, useEffect, useContext, useState } from "react";
-import { ActorContext } from "../api/Context";
-import Footer from "./Footer";
-import PageWidthContext from "./PageContext";
+import React, { useRef, useEffect, useState } from "react";
 
 const Page = ({ children, Header }) => {
 	const pageRef = useRef(null);
@@ -29,28 +26,26 @@ const Page = ({ children, Header }) => {
 		}
 	}, [pageWidth]);
 
+	const pagePadding = "px-4 md:px-5";
+
 	return (
-		<div
-			className={`min-h-screen flex flex-col items-center overflow-y-visible w-full p-4 md:p-5 xl:py-7`}
-		>
-			{Header}
+		<>
+			<Header pagePadding={pagePadding} />
+
 			<div
-				className="max-w-[900px] w-full flex flex-col justify-between gap-9 my-9 flex-grow"
+				className={`max-w-[750px] min-h-screen w-full flex flex-col mb-9 ${pagePadding}`}
 				ref={pageRef}
-				style={{ "--page-width": "100%" }} //
+				style={{ "--page-width": "100%" }}
 			>
 				{children}
 			</div>
-		</div>
+		</>
 	);
 };
 
 const List = ({ children }) => {
 	return (
-		/* with and below sort menu */
-		<div className="flex flex-col justify-center gap-9 sm:gap-9">
-			{children}
-		</div>
+		<div className="flex flex-col justify-center gap-[80px]">{children}</div>
 	);
 };
 

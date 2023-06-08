@@ -2,14 +2,13 @@ import React, { useContext } from "react";
 import TitleInput from "./TitleInput";
 import { SlateEditor, TollbarInstance, EditableInstance } from "./SlateEditor";
 import { IInputs, ISpecifications } from "../../screens/AddQuestion";
-import Button, { LoadingWrapper } from "../core/Button";
+import { LoadingWrapper } from "../core/Button";
 import { ActorContext } from "../api/Context";
 import { Slider } from "./Slider";
 import { FormatDuration } from "../core/Time";
 import { SubmitStages } from "../../screens/AddQuestion";
 import { ShowStages } from "./Stages";
-import { SubmitStagesText } from "./Stages";
-import { initialInput } from "../../screens/AddQuestion";
+
 import { List } from "../app/Layout";
 import { ArrowIcon } from "../core/Icons";
 
@@ -46,8 +45,6 @@ const Form = ({
 		return (
 			<LoadingWrapper onClick={submit} isLoading={isSubmitting}>
 				<div className="flex items-center gap-3 cursor-pointer">
-					{/* <div className="text-large">submit</div> */}
-
 					<div className="flex items-center  px-[25px] py-[8px] bg-gray-100 rounded-full w-max">
 						<div
 							className={`w-3 h-[1px] my-3 -mr-1  ${
@@ -67,7 +64,7 @@ const Form = ({
 
 	const ErrorTag = ({ children }) => {
 		return (
-			<div className="flex gap-4 px-4 py-2 text-gray-500 bg-gray-100 rounded-1 text-small">
+			<div className="flex gap-4 px-4 py-2 text-gray-500 bg-gray-100 w-max rounded-1 text-small">
 				{children}
 			</div>
 		);
@@ -82,12 +79,6 @@ const Form = ({
 	console.log(validInputs, "validInputs");
 
 	const Action = () => {
-		/* if (
-			inputs.title === initialInput.title &&
-			inputs.content === initialInput.content
-		) {
-			return <></>; */
-
 		if (!validInputs) {
 			return <></>;
 		} else if (!loggedIn) {
@@ -107,7 +98,6 @@ const Form = ({
 							{/* <ErrorTag>
 									<SubmitStagesText stages={submitStages} />
 								</ErrorTag> */}
-
 							<ShowStages stages={submitStages} />
 						</div>
 					</div>
@@ -120,59 +110,79 @@ const Form = ({
 
 	const { days, hours } = FormatDuration(inputs.duration);
 
+	const NumberComponent = ({ number }) => {
+		const digits = number.split("");
+		return (
+			<>
+				{digits.map((digit, index) => (
+					<div
+						key={index}
+						className="w-[10px] h-full flex justify-center text-small text-black "
+					>
+						{digit}
+					</div>
+				))}
+			</>
+		);
+	};
+
 	return (
 		<List>
-			<div className="flex flex-col items-start w-full gap-6 md:gap-10 md:flex-row">
-				<div className="flex flex-col w-full gap-2">
-					<div className="flex text-small ">
-						{/* <div>{"Reward : "}</div> */}
+			<div className="flex flex-col w-[350px] mt-[80px] self-center p-2 items-center gap-5  ">
+				<div className="space-y-[20px] w-full">
+					<div className="flex w-full gap-2 text-black text-small">
+						<div className="flex justify-end w-1/2">
+							<NumberComponent number={inputs?.reward?.toFixed(2)} />
+						</div>
+						<div className="w-1/2">ICP</div>
+					</div>
 
-						<div className="text-left w-7 font-600">
-							{inputs?.reward?.toFixed(2)}{" "}
-						</div>
-						<div className="">ICP</div>
-					</div>
-					<div className="w-full">
-						<Slider
-							value={inputs.reward}
-							onChange={dispatch.reward}
-							min={specifications.reward.min}
-							max={specifications.reward.max}
-							step={0.01}
-							disabled={isSubmitting}
-						/>
-					</div>
+					<Slider
+						value={inputs.reward}
+						onChange={dispatch.reward}
+						min={specifications.reward.min}
+						max={specifications.reward.max}
+						step={0.05}
+						disabled={isSubmitting}
+					/>
 				</div>
-				<div className="flex flex-col w-full gap-2">
-					<div className="flex gap-6 text-small">
-						<div className="flex">
-							<div className="w-5 text-left font-600">{days}</div>
-							<div className="ml-1">Days</div>
+
+				<div className="space-y-[20px] w-full">
+					<div className="flex w-full gap-5 text-black text-small">
+						<div className="w-1/2 ">
+							<div className="flex float-right ">
+								<div className="w-[20px text-left text-black">{days}</div>
+								<div className="ml-1">Days</div>
+							</div>
 						</div>
-						<div className="flex">
-							<div className="w-5 text-left font-600">{hours}</div>
-							<div className="ml-1">Hours</div>
+
+						<div className="w-1/2">
+							<div className="flex float-left">
+								<div className="w-[18px] text-left text-black">
+									{String(hours).padStart(2, "0")}
+								</div>
+								<div className="ml-1">Hours</div>
+							</div>
 						</div>
 					</div>
-					<div className="w-full">
-						<Slider
-							value={inputs.duration}
-							min={specifications.duration.min}
-							max={specifications.duration.max}
-							step={1}
-							onChange={dispatch.duration}
-							disabled={isSubmitting}
-						/>
-					</div>
+
+					<Slider
+						value={inputs.duration}
+						min={specifications.duration.min}
+						max={specifications.duration.max}
+						step={1}
+						onChange={dispatch.duration}
+						disabled={isSubmitting}
+					/>
 				</div>
 			</div>
 
-			{/* <div className="w-full h-[0.5px] bg-gray-800"></div> */}
-			<div className="space-y-1 ">
+			<div className="space-y-1">
 				<div className="flex items-center h-6 rounded-1 text-small">
-					<div className="w-9">
-						{inputs?.title?.length ? inputs.title.length : 0} /{" "}
-						{specifications.title.max}
+					<div className="w-9 text-[#8B8B8B] flex gap-2">
+						<div>{inputs?.title?.length ? inputs.title.length : 0} </div>{" "}
+						<div>/</div>
+						<div>{specifications.title.max}</div>
 					</div>
 					{!validTitle && inputs.title.length > 0 ? (
 						<div className="px-2 py-1 bg-gray-100 text-extra-small">
@@ -181,34 +191,31 @@ const Form = ({
 					) : (
 						<></>
 					)}
-					{/* check for invaliud title */}
 				</div>
 
 				<TitleInput
 					value={inputs.title}
 					setValue={dispatch.title}
-					placeholder={
-						"How can one learn to build on the ICP, it seems rather diffult? "
-					}
+					placeholder={"How does the Internet Computer Protocol work?"}
 					maxLength={specifications.title.max}
 					disabled={isSubmitting}
-					className="min-h-[60px]"
+					className="min-h-[27.5px]"
 				/>
 			</div>
-			<div>
+			<div className="">
 				<SlateEditor
 					inputValue={inputs.content}
 					setInputValue={dispatch.content}
 					className="min-h-[125px]  "
 				>
 					<div className="flex items-center justify-between mb-3">
-						<TollbarInstance className="gap-5" />
+						<TollbarInstance className="gap-4" />
 					</div>
 
 					<EditableInstance
-						placeholder="What if you could anyone anything quickly? What if the global information exchange would not suck? And what if it was built on the ICP? ﻿What if you could anyone anything quickly? "
+						placeholder="I would like to understand what makes the ICP more scalable than other blockchains."
 						disabled={isSubmitting}
-						className="h-full "
+						className="h-full text-[#484B57]"
 					/>
 				</SlateEditor>
 
@@ -226,93 +233,4 @@ const Form = ({
 		</List>
 	);
 };
-/* 
-else {
-	if (isError) {
-		return (
-			<div className="flex items-center justify-between w-full gap-5 ">
-				<div className="">
-					{submitStages === "error" && (
-						<ErrorTag>
-			
-							<div> Insufficient funds </div>
-						</ErrorTag>
-					)}
-				</div>
-				<SubmitButton isActive={true} />
-			</div>
-		); */
-
 export default Form;
-
-/* placeholder="Add your question here..."
-					disabled={isSubmitting} */
-
-{
-	/* 					<div className="flex italic text-small ">Login to Submit</div>
-	 */
-}
-
-// p-3 px-5 bg-gray-100 rounded-full opacity-50
-/* 
-			<div className="flex items-center justify-end w-full gap-5 text-small-large">
-					<ErrorTag>Login to Submit </ErrorTag>{" "}
-					<SubmitButton isActive={false} />
-				</div>
-			
-			*/
-
-{
-	/* <Button
-							onClick={submit}
-							text="Submit"
-							color={"none"}
-							arrow={true}
-							size={"lg"}
-						/> */
-}
-{
-	/* <LoadingWrapper onClick={submit} isLoading={isSubmitting}>
-							<div className="flex items-center gap-3 cursor-pointer">
-								<div className="flex items-center gap-4 px-[16px] py-[8px] bg-gray-100 rounded-full w-max">
-									<div>Submit</div>
-
-									<div className="w-6 h-[1px] my-3 bg-black"></div>
-									<ArrowIcon size={14} />
-								</div>
-							</div>
-						</LoadingWrapper> */
-}
-{
-	/* <Button
-							onClick={submit}
-							text="Submit"
-							color={"none"}
-							arrow={true}
-							size={"lg"}
-						/> */
-}
-{
-	/* <LoadingWrapper onClick={submit} isLoading={isSubmitting}>
-							<div className="flex items-center gap-3 cursor-pointer">
-								px-[12px] bg-gray-100
-								<div className="flex items-center gap-4 px-[16px] bg-gray-100  py-[6px]  rounded-full w-max">
-									<div>Submit</div>
-									<div className="w-6 h-[1px] my-3 bg-black"></div>
-									<ArrowIcon size={14} />
-								</div>
-							</div>
-						</LoadingWrapper> */
-}
-
-{
-	/* <div>
-					{!inputs?.validation?.validTitle && inputs?.title ? (
-						<div className="flex justify-center items-center italic w-max text-[#F0810F] text-extra-small -top-1">
-							{` ${specifications.title.min}-${specifications.title.max} characters`}
-						</div>
-					) : (
-						<></>
-					)}
-				</div> */
-}

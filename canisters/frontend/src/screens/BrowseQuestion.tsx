@@ -188,7 +188,7 @@ const BrowseQuestion = () => {
 				});
 				setLoading({ main: false, search: false, filter: false });
 			}
-		}, 50000);
+		}, 5000);
 		return () => {
 			isCancelled = true;
 			clearInterval(interval);

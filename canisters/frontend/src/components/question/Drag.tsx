@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const Draggable = ({ children, className = "" }) => {
 	const [thing, setThing] = useState({
-		height: 100,
+		height: 150,
 		startY: null,
 		dragging: false,
 	});

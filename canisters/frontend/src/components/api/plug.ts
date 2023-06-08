@@ -1,6 +1,7 @@
 import { idlFactory as idlMarket, market } from "../../../declarations/market";
 import { idlFactory as idlledger } from "../../../declarations/ledger";
 import { _SERVICE as IMarketActor } from "../../../declarations/market/market.did.d";
+import { plug } from "./PlugMobile";
 
 // TODO: could make same type as plug but excluding all the update functions
 export interface IDefaultActor {
@@ -40,11 +41,11 @@ const ledgerCanisterId = process.env.LEDGER_CANISTER_ID;
 const whitelist = [marketCanisterId, ledgerCanisterId];
 const host = window.location.origin;
 
-console.log(whitelist, host);
 export const establishConnection = async (logout, login) => {
+	console.log(whitelist, host);
 	console.log("establishing connection");
 	const onConnectionUpdate = () => {
-		console.log(window.ic.plug.sessionManager.sessionData);
+		console.log(plug.sessionManager.sessionData);
 		logout();
 		login();
 	};
@@ -53,7 +54,7 @@ export const establishConnection = async (logout, login) => {
 
 	try {
 		console.log(
-			await window.ic.plug.requestConnect({
+			await plug.requestConnect({
 				whitelist,
 				host,
 				onConnectionUpdate,
@@ -64,16 +65,16 @@ export const establishConnection = async (logout, login) => {
 		console.log("requested connection");
 
 		if (process.env.NODE_ENV !== "production") {
-			await window.ic?.plug?.agent?.fetchRootKey();
-			console.log(await window.ic?.plug?.agent?.fetchRootKey(), "rootkey");
+			await plug?.agent?.fetchRootKey();
+			console.log(await plug?.agent?.fetchRootKey(), "rootkey");
 		}
 
-		var marketActor = await window.ic.plug.createActor({
+		var marketActor = await plug.createActor({
 			canisterId: marketCanisterId,
 			interfaceFactory: idlMarket,
 		});
 
-		var ledgerActor = await window.ic.plug.createActor({
+		var ledgerActor = await plug.createActor({
 			canisterId: ledgerCanisterId,
 			interfaceFactory: idlledger,
 		});
@@ -88,20 +89,5 @@ export const establishConnection = async (logout, login) => {
 };
 
 export const checkConnection = async () => {
-	return window.ic.plug.isConnected();
+	return plug.isConnected();
 };
-
-/* export const verifyConnection = async () => {
-	try {
-		const connected = await checkConnection();
-		if (!connected)
-			await window.ic.plug.requestConnect({ whitelist, host, requestConnect });
-		if (connected && !window.ic.plug.agent) {
-			await window.ic.plug.createAgent({ whitelist, host });
-		}
-		return true;
-	} catch (e) {
-		console.error("Failed to verify connection: " + e);
-		return false;
-	}
-}; */

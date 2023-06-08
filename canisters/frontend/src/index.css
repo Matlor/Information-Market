@@ -16,17 +16,35 @@
 	}
 }
 
+.noisy {
+	background: url(Random.png), #ffffff;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+		opacity: 1;
+	}
+	70% {
+		transform: scale(1.25); /* Increased scale for a more noticeable effect */
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
 .slider {
-	@apply w-full rounded-full h-[3px]  appearance-none cursor-pointer;
+	@apply w-full !h-[3.5px]  appearance-none cursor-pointer;
 }
 
 .slider::-webkit-slider-thumb {
-	@apply w-[25px] h-[25px] bg-white   rounded-full shadow-lg appearance-none cursor-pointer;
+	@apply w-[20px] h-[20px] bg-[#1F3350] rounded-full shadow-lg appearance-none cursor-pointer;
 	-webkit-appearance: none;
 }
 
 .slider::-moz-range-thumb {
-	@apply w-[25px] h-[25px] bg-white rounded-full shadow-lg cursor-pointer;
+	@apply w-[20px] h-[20px] bg-[#1F3350] rounded-full  shadow-lg cursor-pointer;
 }
 
 @layer components {
@@ -37,11 +55,11 @@
 
 @layer base {
 	.h1 {
-		@apply text-lg antialiased tracking-widest text-gray-800 font-400 font-inter leading-lg;
+		@apply antialiased tracking-widest text-black text-md font-400 font-inter leading-md;
 	}
 
 	.text-large {
-		@apply antialiased tracking-widest text-gray-800 text-md font-400 font-inter leading-md;
+		@apply text-md antialiased tracking-widest text-[#404038]  font-400 font-inter leading-md;
 	}
 
 	.text-small {
@@ -68,116 +86,3 @@
 		@apply ml-6 list-decimal;
 	}
 }
-
-/* 
-@layer base {
-	html {
-		@apply inter;
-	}
-}
- */
-/* @layer components {
-	
-} */
-
-/* 
-	.editor-content {
-		@apply text-normal;
-	}
-
-	.editor-content blockquote {
-		@apply pt-1 pl-3 border-l-[6px] border-colorIcon  bg-colorLines;
-	}
-
-	.editor-content ul {
-		@apply ml-6 list-disc;
-	}
-
-	.editor-content ol {
-		@apply ml-6 list-decimal;
-	}
-
-	.editor-content h2 {
-		@apply ;
-	} 
-*/
-
-/* 
-
-
-.editor-content h2 {
-		@apply;
-	}
-	
-// -------------------------------------------
-// -------------------------------------------
-// -------------------------------------------
-
-
-/* 
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap");
-
-
-*/
-
-/* 
-.title {
-		@apply text-colorDark font-Inter text-22 font-450 leading-32;
-	}
-
-	.text-normal {
-		@apply tracking-wide text-colorText font-Inter text-19 font-400 leading-28;
-	}
-
-	.text-small {
-		@apply tracking-wide text-colorText font-Inter text-14;
-	}
-
-	.text-normal-number {
-		@apply leading-none tracking-wide text-colorText font-Inter text-19 font-400;
-	}
-
-	.text-small-number {
-		@apply leading-none tracking-wide text-colorText font-Inter text-14 font-400;
-	}
-
-	.text-extrasmall-number {
-		@apply leading-none tracking-wide text-colorText font-Inter text-12 font-400;
-	} 
-
-
-*/
-
-/* 
-
-.px-field {
-	@apply px-10 md:px-10;
-}
-
-.p-content {
-	@apply py-10 px-field;
-}
-
-.gap-small {
-	@apply gap-2;
-}
-
-.gap-normal {
-	@apply gap-4;
-}
-
-.small-ball-dimension {
-	@apply w-4 h-4;
-}
-.ball-dimension {
-	@apply w-5 h-5;
-}
-
-.height-menu {
-	@apply h-11;
-}
-
-.center {
-	@apply absolute transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2;
-} */

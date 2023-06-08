@@ -19,7 +19,7 @@ const TitleInput = ({
 	return (
 		<textarea
 			rows={1}
-			className={`w-full overflow-hidden outline-none resize-none placeholder:h1 placeholder:opacity-20 h1 disabled:bg-transparent ${className}`}
+			className={`w-full overflow-hidden outline-none resize-none placeholder:h1 placeholder:opacity-20 h1 bg-transparent  ${className}`}
 			onInput={onInput}
 			value={value}
 			placeholder={placeholder}

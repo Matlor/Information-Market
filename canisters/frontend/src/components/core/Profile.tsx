@@ -85,19 +85,19 @@ interface IProfile {
 
 export const Profile = ({ principal, minutes }: IProfile) => {
 	return (
-		<div data-cy="profile" className="flex items-center gap-2 -ml-1">
+		<div data-cy="profile" className="flex items-center gap-2">
 			{/* 37 before */}
 			{/* <ProfilePicture principal={principal} size={32} /> */}
 			<div className="">
 				<ShapeGrid uniqueString={principal.toString()} />
 			</div>
-			<div className="">
-				<p className="text-gray-800 text-extra-small font-600 max-w-[100px] text-ellipsis overflow-hidden whitespace-nowrap">
+			<div className="flex gap-2">
+				<div className=" text-gray-800 text-extra-small font-500 max-w-[100px] text-ellipsis overflow-hidden whitespace-nowrap">
 					{principal.toString().slice(0, 1).toUpperCase() +
-						principal.toString().slice(1, 5)}{" "}
+						principal.toString().slice(1, 5)}
 					{/* .toUpperCase() */}
-				</p>
-				{minutes && <TimeStamp minutes={minutes} />}
+				</div>
+				{/* <div>{minutes && <TimeStamp minutes={minutes} />}</div> */}
 			</div>
 		</div>
 	);

@@ -17,11 +17,6 @@ export const createInvoice = async (loggedInUser, inputs) => {
 };
 
 export const transfer = async (loggedInUser, invoice) => {
-	/* const destination = Principal.fromHex(
-		invoice.destination.text
-	).toUint8Array(); */
-
-	// Array.from(destination),
 	const res = await loggedInUser.ledger.transfer({
 		to: invoice.destination,
 		fee: { e8s: BigInt(10000) },
@@ -56,17 +51,3 @@ export const createQuestion = async (loggedInUser, invoiceId, inputs) => {
 		return res;
 	}
 };
-
-/* const guard = async (run) => {
-	try {
-		const res = await run();
-		if ("err" in res) {
-			throw new Error(`Error: ${res}`);
-		} else {
-			return res;
-		}
-	} catch (err) {
-		console.log(err, "try catch hit");
-		return err;
-	}
-}; */

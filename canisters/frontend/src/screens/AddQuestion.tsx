@@ -16,7 +16,6 @@ import {
 Whole thing is 2 machines. Logged in or not, valid or not. 
 If both true, then the UI can trigger the submit function.
 But it should only have it in the first place if both are true.
-
 */
 
 export type SubmitStages =
@@ -114,7 +113,7 @@ const specifications: ISpecifications = {
 		min: 1,
 	},
 	reward: {
-		max: 10,
+		max: 9.99,
 		min: 0.25,
 	},
 };

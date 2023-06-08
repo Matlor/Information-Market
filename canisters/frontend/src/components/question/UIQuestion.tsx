@@ -4,7 +4,7 @@ import { Profile } from "../core/Profile";
 import Stages from "../question/Stages";
 import Answer from "../question/Answer";
 import { SelectedTag, RewardTag, RewardIconTag } from "../core/Tag";
-import Button from "../core/Button";
+import Button, { LoadingWrapper } from "../core/Button";
 import Menu from "../question/Menu";
 import { TimeLeft } from "../core/Time";
 import { Draggable, Drag } from "../question/Drag";
@@ -24,12 +24,15 @@ import { TimeStamp } from "../core/Time";
 import Mail from "../core/Mail";
 import parse from "html-react-parser";
 import { List } from "../app/Layout";
+import { ArrowIcon, CrossIcon, ReplyIcon } from "../core/Icons";
 
 export interface UIQuestionProps {
 	question: FQuestion;
 	answers: IAnswer[];
 	users: IUser[];
 	answer: { answerInput: string; setAnswerInput: (input: string) => void };
+	editorIsOpen: boolean;
+	setEditorIsOpen: (isOpen: boolean) => void;
 	select: {
 		selected: number | null;
 		setSelected: (id: number) => void;
@@ -43,6 +46,8 @@ const UIQuestion = ({
 	answers,
 	users,
 	answer,
+	editorIsOpen,
+	setEditorIsOpen,
 	select,
 	viewCase,
 	user,
@@ -54,6 +59,19 @@ const UIQuestion = ({
 		answer: {
 			stages: "open",
 			footer: "editor",
+			reply: () => {
+				return (
+					<div
+						onClick={() => setEditorIsOpen(true)}
+						className="flex items-center self-end gap-2 mt-4 cursor-pointer rounded-1"
+					>
+						<div className="mt-[1px]">
+							<ReplyIcon size={12} borderColor="gray-400" />{" "}
+						</div>
+						<div className="text-small">Reply</div>
+					</div>
+				);
+			},
 		},
 		connectToAnswer: {
 			stages: "open",
@@ -124,97 +142,126 @@ const UIQuestion = ({
 	console.log(viewCase);
 
 	return (
-		<List>
-			<div className="flex flex-col">
-				<div className="flex items-center justify-between mb-6">
-					<Profile
-						principal={question.author_id}
-						minutes={question.creation_date}
-					/>
-					<div className="flex gap-4 lg:gap-6">
-						<Stages stage={view.stages} />
-						<RewardTag reward={question.reward} />
+		<div className="mt-6 md:mt-[80px] ">
+			<List>
+				<div className="flex flex-col">
+					<div className="flex items-center justify-between mb-4">
+						<Profile
+							principal={question.author_id}
+							/* minutes={question.creation_date} */
+						/>
+						<div className="flex gap-2">
+							<Stages stage={view.stages} />
+							<div className="h-[36px]  flex justify-center items-center">
+								<RewardTag reward={question.reward} />
+							</div>
+						</div>
 					</div>
-				</div>
-
-				<div data-cy="title" className="mb-5 text-lg h1">
-					{question.title}
-					{/* <div className="mt-3 mb-6">
+					<div data-cy="title" className="mb-5 h1">
+						{question.title}
+						{/* <div className="mt-3 mb-6">
 						{<TimeStamp minutes={question.creation_date} />}{" "}
 						<div className="h-[2px] mt-3 bg-gray-800 w-10"></div>
 					</div> */}
+					</div>{" "}
+					<div data-cy="text" className="editor-content text-[#484B57]">
+						{parse(question.content)}
+					</div>
+					{view?.reply ? view.reply() : null}
 				</div>
 
-				<div data-cy="text" className="editor-content">
-					{parse(question.content)}
-				</div>
-			</div>
-
-			{answers.map((answer) => (
-				<div key={answer.id} data-cy="answer">
-					<Answer
-						author_id={answer.author_id}
-						content={answer.content}
-						tag={view?.tag ? view.tag(answer.id) : null}
-						action={view?.answerButton ? view.answerButton(answer.id) : null}
-						timeStamp={answer.creation_date}
-					/>
-				</div>
-			))}
-
+				{answers.map((answer) => (
+					<div key={answer.id} data-cy="answer">
+						<Answer
+							author_id={answer.author_id}
+							content={answer.content}
+							tag={view?.tag ? view.tag(answer.id) : null}
+							action={view?.answerButton ? view.answerButton(answer.id) : null}
+							timeStamp={answer.creation_date}
+						/>
+					</div>
+				))}
+			</List>
 			<div className="flex justify-center">
 				{(() => {
 					switch (view.footer) {
 						case "editor":
 							return (
-								/* TODO: I could make this an instance and as such a separate component */
-								<Draggable
-									className={`w-full md:page-width fixed bottom-0 bg-white`}
-								>
-									{({ handleMouseDown }) => (
-										<SlateEditor
-											inputValue={answer.answerInput}
-											setInputValue={answer.setAnswerInput}
-											className={
-												"flex flex-col gap-4 px-6 py-4 h-full  overflow-hidden"
-											}
-										>
-											<Drag handleMouseDown={handleMouseDown}>
-												<div className="flex">
-													<div className="flex flex-1">
-														<TollbarInstance className="flex gap-3 lg:gap-5" />
-													</div>
-													<div className="flex h-[6px] self-center w-8 rounded-md bg-gray-500 rounded-full"></div>
-													<div className="flex justify-end flex-1">
-														<TimeLeft minutes={question.status_end_date} />
-													</div>
-												</div>
-											</Drag>
+								/* TODO: I could make this an instance and as such a
+											separate component */
+								<>
+									{editorIsOpen && (
+										<>
+											<Draggable
+												className={`w-full md:page-width fixed bottom-0 bg-white`}
+											>
+												{({ handleMouseDown }) => (
+													<>
+														<div className="flex items-center px-2">
+															<Drag
+																handleMouseDown={handleMouseDown}
+																className="w-full"
+															>
+																<div className="flex flex-col w-full h-full gap-1 p-3">
+																	<div className="h-[2px] mx-auto w-6 bg-gray-800 rounded-full"></div>
+																	<div className="h-[2px] mx-auto w-6 bg-gray-800 rounded-full"></div>
+																</div>
+															</Drag>
 
-											<EditableInstance
-												placeholder="Answer..."
-												className="w-full overflow-auto !min-h-[80px] h-full"
-											/>
-											<div className="flex justify-end">
-												<Button
-													onClick={async () => {
-														await user.market.answer_question(
-															question.id,
-															answer.answerInput
-														);
-														answer.setAnswerInput("");
-														Mail("new answer");
-													}}
-													arrow={true}
-													size="sm"
-													color="gray"
-													text={"Submit"}
-												/>
-											</div>
-										</SlateEditor>
+															<div
+																className="cursor-pointer"
+																onClick={() => setEditorIsOpen(false)}
+															>
+																<CrossIcon size={12} strokeWidth={2} />
+															</div>
+														</div>
+
+														<SlateEditor
+															inputValue={answer.answerInput}
+															setInputValue={answer.setAnswerInput}
+															className={
+																"flex flex-col gap-4 px-6  pb-6 pt-4 h-full  overflow-hidden"
+															}
+														>
+															<div className="flex items-center ">
+																<TollbarInstance className="flex w-full gap-4" />
+															</div>
+
+															<EditableInstance
+																placeholder="Answer..."
+																className="w-full overflow-auto !min-h-[80px] h-full"
+															/>
+
+															<div className="flex justify-end flex-1 gap-3">
+																<TimeLeft
+																	minutes={question.status_end_date}
+																	icon={false}
+																/>
+																<LoadingWrapper
+																	onClick={async () => {
+																		await user.market.answer_question(
+																			question.id,
+																			answer.answerInput
+																		);
+																		answer.setAnswerInput("");
+																		Mail("new answer");
+																	}}
+																>
+																	<div className="px-[18px] py-[10px] bg-gray-100 rounded-full">
+																		<ArrowIcon size={10} strokeWidth={3} />
+																	</div>
+																</LoadingWrapper>
+															</div>
+															<div className="flex justify-end"></div>
+														</SlateEditor>
+													</>
+												)}
+											</Draggable>
+										</>
 									)}
-								</Draggable>
+								</>
 							);
+
 						case "menu":
 							return (
 								<>
@@ -244,7 +291,7 @@ const UIQuestion = ({
 					}
 				})()}
 			</div>
-		</List>
+		</div>
 	);
 };
 

@@ -147,7 +147,7 @@ module {
 
     // --------------- TODO: IMPROVE THIS------------------------   
     // TODO: this needs to be manually changed atm
-    public type Interface = actor {
+    /* public type Interface = actor {
         set_db: (State) -> async (Result.Result<State, Error>);
         get_db: query() -> async (Result.Result<State, Error>);
 
@@ -186,5 +186,5 @@ module {
         get_measurements:() -> async ([Measurment]);
         get:() -> async (Nat64);
 
-    };
+    }; */
 };

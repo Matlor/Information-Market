@@ -25,40 +25,41 @@ const UIBrowseQuestion = ({
 				</div>
 			);
 		} else if (questionData.totalQuestions === 0) {
-			return (
-				<div className="flex items-center justify-center w-full h-40 text-large font-300"></div>
-			);
+			return <div className="flex justify-center text-large">No Questions</div>;
 		} else {
 			return <>{children}</>;
 		}
 	};
 
 	return (
-		<>
-			<div>
-				<div className="flex justify-between pb-5 mb-8 border-gray-200 md:mt-6 md:mb-8 border-b-1">
-					<Search
+		<div className="flex flex-col justify-between h-full">
+			<div className="">
+				<div className="flex justify-end gap-2 mt-6 mb-6 md:mt-8 md:mb-8">
+					{/* <Search
 						searchLoading={loading.search}
 						setSearchedText={setSearchedText}
+						className="border-1 px-2 h-[36px] w-[40px] flex justify-center items-center"
+					/> */}
+
+					<Sort
+						isLoading={loading.filter}
+						setSortOrder={setSortOrder}
+						order={conditions.order}
+						className="h-[36px] w-[40px] flex justify-center items-center"
 					/>
-					<div className="flex gap-5 lg:gap-7">
-						<OpenToggle
-							isOn={
-								!conditions?.status?.pickanswer &&
-								!conditions?.status?.disputable &&
-								!conditions?.status?.arbitration &&
-								!conditions?.status?.payout &&
-								!conditions?.status?.closed
-							}
-							onClick={toggleStatus}
-						/>
-						<Sort
-							isLoading={loading.filter}
-							setSortOrder={setSortOrder}
-							order={conditions.order}
-						/>
-					</div>
+					<OpenToggle
+						isOn={
+							!conditions?.status?.pickanswer &&
+							!conditions?.status?.disputable &&
+							!conditions?.status?.arbitration &&
+							!conditions?.status?.payout &&
+							!conditions?.status?.closed
+						}
+						onClick={toggleStatus}
+						className="h-[36px] w-[40px] flex justify-center items-center"
+					/>
 				</div>
+
 				<List>
 					<ViewState>
 						{questionData.questions.map((questionAndAuthor: any, index) => {
@@ -77,7 +78,7 @@ const UIBrowseQuestion = ({
 					</ViewState>
 				</List>
 			</div>
-			<div className="flex justify-center">
+			<div className="flex justify-center mt-7 md:mt-8">
 				<Pagination
 					pageIndex={conditions.pagination.pageIndex}
 					questionsPerPage={conditions.pagination.questionsPerPage}
@@ -85,7 +86,7 @@ const UIBrowseQuestion = ({
 					setPageIndex={setPageIndex}
 				/>
 			</div>
-		</>
+		</div>
 	);
 };
 

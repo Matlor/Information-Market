@@ -37,7 +37,7 @@ export const LoadingWrapper = ({
 	});
 
 	return (
-		<div onClick={handleClick}>
+		<div onClick={handleClick} className="cursor-pointer">
 			{loading ? showLoader() : <>{childrenWithLoading}</>}
 		</div>
 	);

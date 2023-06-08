@@ -12,13 +12,13 @@ const calcTime = (deadlineMinutes) => {
 
 	const { value, unit } = (() => {
 		return years > 0
-			? { value: years, unit: years === 1 ? "year" : "years" }
+			? { value: years, unit: years === 1 ? "y" : "y" }
 			: days > 0
-			? { value: days, unit: days === 1 ? "day" : "days" }
+			? { value: days, unit: days === 1 ? "d" : "d" }
 			: hours > 0
-			? { value: hours, unit: hours === 1 ? "hour" : "hours" }
+			? { value: hours, unit: hours === 1 ? "h" : "h" }
 			: minutes > 0
-			? { value: minutes, unit: minutes === 1 ? "min" : "mins" }
+			? { value: minutes, unit: minutes === 1 ? "m" : "m" }
 			: { value: "", unit: "" };
 	})();
 
@@ -27,18 +27,19 @@ const calcTime = (deadlineMinutes) => {
 
 const showTimeClass = "flex items-center gap-1 whitespace-nowrap";
 
-const TimeWrapper = ({ children }) => {
+const TimeWrapper = ({ children, className }) => {
 	return (
-		<div
-			data-cy="timeStamp"
-			className="flex gap-2 text-gray-500 font-300 w-max text-extra-small "
-		>
+		<div data-cy="timeStamp" className={`flex gap-2 w-max ${className}`}>
 			{children}
 		</div>
 	);
 };
 
-export const TimeLeft = ({ minutes, icon = true }) => {
+export const TimeLeft = ({
+	minutes,
+	icon = true,
+	className = "text-extra-small",
+}) => {
 	let { value, unit } = calcTime(minutes);
 
 	// todo: hack, improve this
@@ -47,41 +48,38 @@ export const TimeLeft = ({ minutes, icon = true }) => {
 	}
 
 	return (
-		<TimeWrapper>
+		<TimeWrapper className={`${className} gap-1 text-[#B71E02]`}>
 			<div className="self-center">
 				{icon ? <ClockIcon borderColor="white" fillColor="black" /> : <></>}
 			</div>
 			<div className={`${showTimeClass}`}>
 				{!value ? (
-					/* or closing */
 					<div>{"closing soon"}</div>
 				) : (
-					<>
-						<div>{value}</div>
-						<div>{unit}</div>
-						<div>{"left"}</div>
-					</>
+					<div>
+						{value}
+						{unit} {"left"}
+					</div>
 				)}
 			</div>
 		</TimeWrapper>
 	);
 };
 
-export const TimeStamp = ({ minutes }) => {
+export const TimeStamp = ({ minutes, className = "text-extra-small" }) => {
 	const { value, unit } = calcTime(minutes);
 	if (minutes * 60 > Math.floor(Date.now() / 1000)) return <></>;
 	return (
-		<TimeWrapper>
+		<TimeWrapper className={className}>
 			<div className="flex">
 				<div className={`${showTimeClass}`}>
 					{!value ? (
 						<div>{"Just Now"}</div>
 					) : (
-						<>
-							<div>{value}</div>
-							<div>{unit}</div>
-							<div>{"ago"}</div>
-						</>
+						<div>
+							{value}
+							{unit}
+						</div>
 					)}
 				</div>
 			</div>

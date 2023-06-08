@@ -33,8 +33,6 @@ module {
             };
         };
 
-        
-
         // --------------------- HELPERS ---------------------
         public func replace_answer_ids(prevQuestion: Question, answer_id:Nat32) : Question {
             let prev_ids: Buffer.Buffer<Nat32> = Buffer.fromArray(prevQuestion.answers);

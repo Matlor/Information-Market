@@ -75,12 +75,12 @@ export const SlateEditor = ({
 	);
 };
 
-export const TollbarInstance = ({ className = "" }) => {
+export const TollbarInstance = ({ className = "", color = "#8B8B8B" }) => {
 	const editor = useSlate();
 	return (
 		<IconContext.Provider
 			value={{
-				color: "#0E1217",
+				color: color,
 				size: "1.1em",
 			}}
 		>
@@ -206,44 +206,3 @@ export const EditableInstance = ({
 		/>
 	);
 };
-
-// previously: className="h-[400px] flex flex-col gap-[37px] p-content items-start  shadow-md rounded-lg"
-// to stretch they just all need h-full (including parent div, not necessarily anything about min-h)
-
-/* 
-if (isAstChange) {
-					// Save the value to Local Storage.
-					// const content = JSON.stringify(value);
-					setInputValue(serialize(editor));
-					// localStorage.setItem("content", content);
-				}
-
-
-*/
-
-/* export const resetEditor = (parentStateSetter) => {
-	const editor = useSlate();
-	Editor.withoutNormalizing(editor, () => {
-		editor.children = initialValue;
-		const point = { path: [0, 0], offset: 0 };
-		editor.selection = { anchor: point, focus: point };
-		editor.history = { redos: [], undos: [] };
-		parentStateSetter(serialize(editor));
-	});
-};
- */
-/* 
-<button
-	onClick={() => {
-		console.log("hit", editor.children);
-		editor.children = initialValue;
-		const point = { path: [0, 0], offset: 0 };
-		editor.selection = { anchor: point, focus: point };
-		editor.history = { redos: [], undos: [] };
-		setInputValue(serialize(editor));
-	}}
->
-	reset
-</button>
-
-*/

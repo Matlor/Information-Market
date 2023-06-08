@@ -56,18 +56,10 @@ interface IProps {
 	user: ICurrentUser;
 }
 
-// for profile etc. I have to solve the issue of getting the author on the backend
-// for pick and dispute: manage ongoing confirmation call to backend
 const Question = ({ user }: IProps) => {
-	// --------------------  Context --------------------
-	//const { user } = useContext(ActorContext);
-
-	//const role = defineRole(user.principal);
-
 	// --------------------  URL --------------------
 	let params = useParams();
-	let id = Number(params);
-
+	let id = Number(params.id);
 	// ------------------------ Question State ------------------------
 	// TODO: PUT ALL OF THIS UP UNTIL UI IN A PARENT COMPONENT OR IN A HOOK
 	// TODO: combine with loading
@@ -79,20 +71,21 @@ const Question = ({ user }: IProps) => {
 	const [loading, setLoading] = useState<boolean>(true);
 
 	const fetch_data = async () => {
-		if (!id) {
-			console.debug("id is undefined or null");
+		if (id === undefined || id === null) {
 			return undefined;
-		}
-		try {
-			return fromNullable(await user.market.get_question_data(id));
-		} catch (err) {
-			console.debug(err);
-			return undefined;
+		} else {
+			try {
+				return fromNullable(await user.market.get_question_data(id));
+			} catch (err) {
+				console.debug(err);
+				return undefined;
+			}
 		}
 	};
 
 	const fetchDataAndUpdateState = async () => {
 		const data = await fetch_data();
+		console.log(data, "data");
 		setLoading(false);
 		if (data) {
 			setState({
@@ -125,14 +118,14 @@ const Question = ({ user }: IProps) => {
 		};
 	}, []);
 
-	console.log("state", state.question);
+	console.log("state", state);
 
 	// ------------------------------------------------ UI ------------------------------------------------
 	const [selected, setSelected] = useState<number | null>(null);
 	const [answerInput, setAnswerInput] = useState<string>("");
+	const [editorIsOpen, setEditorIsOpen] = useState<boolean>(false);
 
 	// TODO: Destructuring of question and answers should happen here and then they should be passed to the components
-
 	if (loading) {
 		return (
 			<div className="mt-[78px] flex justify-center">
@@ -155,6 +148,8 @@ const Question = ({ user }: IProps) => {
 		const role = defineRole(user.principal, question, answers);
 		const viewCase = ConditionToViews(role, moStatusToString(question.status));
 
+		// setEditorIsOpen to improve
+		console.log("editorIsOpen", editorIsOpen);
 		return (
 			<UIQuestion
 				question={question}
@@ -164,6 +159,8 @@ const Question = ({ user }: IProps) => {
 				select={{ selected, setSelected }}
 				viewCase={viewCase}
 				user={user}
+				editorIsOpen={editorIsOpen}
+				setEditorIsOpen={setEditorIsOpen}
 			/>
 		);
 	}

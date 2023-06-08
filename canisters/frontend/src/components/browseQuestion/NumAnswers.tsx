@@ -3,11 +3,16 @@ import { AnswerIcon } from "../core/Icons";
 
 const NumAnswers = ({ number }: { number: number }) => {
 	return (
-		<div className="flex items-center gap-1">
-			<div className="-mb-[0.5px]">
-				<AnswerIcon size={12} fillColor="transparent" borderColor="gray-500" />
+		<div className="flex items-center gap-[2px]">
+			<div className="text-gray-400  text-extra-small font-400">{number}</div>
+			<div className="-mb-[0.5px] ">
+				<AnswerIcon
+					size={11}
+					fillColor="white"
+					strokeWidth={1.5}
+					borderColor="gray-400"
+				/>
 			</div>
-			<div className="ml-1 text-extra-small font-300"> {number} Answers</div>
 		</div>
 	);
 };

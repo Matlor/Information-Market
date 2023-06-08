@@ -31,6 +31,9 @@ const fillNames = [
 	"fill-black",
 	"fill-white",
 	"fill-gray-100",
+	"fill-gray-200",
+	"fill-gray-300",
+	"fill-gray-400",
 	"fill-gray-500",
 	"fill-gray-800",
 	"fill-red",
@@ -44,6 +47,10 @@ const borderNames = [
 	"stroke-black",
 	"stroke-white",
 	"stroke-gray-100",
+	"stroke-gray-200",
+	"stroke-gray-300",
+	"stroke-gray-400",
+
 	"stroke-gray-500",
 	"stroke-gray-800",
 	"stroke-red",
@@ -522,6 +529,32 @@ export const LoginIcon = ({
 		</svg>
 	);
 };
+
+export const ReplyIcon = ({
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
+}: IconProps) => {
+	const aspectRatio = 1;
+	const width = size * aspectRatio;
+	return (
+		<svg
+			width={width}
+			height={size}
+			viewBox="0 0 18 14"
+			className={`fill-${fillColor} stroke-${borderColor}  `}
+			strokeWidth={strokeWidth}
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M17 14C16.7167 14 16.479 13.904 16.287 13.712C16.095 13.52 15.9993 13.2827 16 13V10C16 9.16669 15.7083 8.45836 15.125 7.87502C14.5417 7.29169 13.8333 7.00002 13 7.00002H3.8L6.725 9.92502C6.90833 10.1084 7 10.3334 7 10.6C7 10.8667 6.9 11.1 6.7 11.3C6.51666 11.4834 6.28333 11.575 6 11.575C5.71666 11.575 5.48333 11.4834 5.3 11.3L0.699995 6.70002C0.599995 6.60002 0.528995 6.49169 0.486995 6.37502C0.444995 6.25836 0.424662 6.13336 0.425995 6.00002C0.425995 5.86669 0.446995 5.74169 0.488995 5.62502C0.530995 5.50836 0.601329 5.40002 0.699995 5.30002L5.325 0.675025C5.50833 0.491691 5.73333 0.400024 6 0.400024C6.26666 0.400024 6.5 0.500024 6.7 0.700024C6.88333 0.883357 6.975 1.11669 6.975 1.40002C6.975 1.68336 6.88333 1.91669 6.7 2.10002L3.8 5.00002H13C14.3833 5.00002 15.5627 5.48769 16.538 6.46302C17.5133 7.43836 18.0007 8.61736 18 10V13C18 13.2834 17.904 13.521 17.712 13.713C17.52 13.905 17.2827 14.0007 17 14Z"
+				fill="black"
+			/>
+		</svg>
+	);
+};
+
 const getSizeClass = (size) => {
 	// Replace these values with the size classes you want to use.
 	const sizeMap = {
@@ -536,25 +569,21 @@ const getSizeClass = (size) => {
 	return sizeMap[size] || sizeMap[32]; // Default to 'w-8 h-8' if the provided size is not found in the map.
 };
 
+// border-[1px]
+// bg-${backgroundColor}
 export const RoundIconWrapper = ({
-	size,
-	fillColor,
-	borderColor,
-	strokeWidth,
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
 	children,
 }) => {
 	const wrapperSizeClass = getSizeClass(size);
 	const iconSize = size / 2;
 	return (
 		<div
-			className={`flex justify-center items-center rounded-full border-[1px] border-gray-200  ${wrapperSizeClass}`}
+			className={`flex justify-center items-center rounded-full bg-zinc-100 border-zinc-100  border-1 ${wrapperSizeClass}`}
 		>
-			{/* <CrossIcon
-				size={iconSize}
-				fillColor={fillColor}
-				borderColor={borderColor}
-				strokeWidth={strokeWidth}
-			/> */}
 			{children({
 				iconSize,
 				fillColor,
@@ -566,10 +595,10 @@ export const RoundIconWrapper = ({
 };
 
 export const WrappedBellIcon = ({
-	size,
-	fillColor,
-	borderColor,
-	strokeWidth,
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
 }) => {
 	return (
 		<RoundIconWrapper
@@ -591,10 +620,10 @@ export const WrappedBellIcon = ({
 };
 
 export const WrappedLoginIcon = ({
-	size,
-	fillColor,
-	borderColor,
-	strokeWidth,
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
 }) => {
 	return (
 		<RoundIconWrapper
@@ -618,10 +647,10 @@ export const WrappedLoginIcon = ({
 };
 
 export const WrappedCrossIcon = ({
-	size,
-	fillColor,
-	borderColor,
-	strokeWidth,
+	size = defaultSize,
+	fillColor = defaultFillColor,
+	borderColor = defaultBorderColor,
+	strokeWidth = defaultStrokeWidth,
 }) => {
 	return (
 		<RoundIconWrapper
